@@ -62,13 +62,25 @@ public class BasicTriangle implements AbstractTriangle {
         orientations[i] = arrow;
     }
 
-    // Tests for incidence.  
-    public boolean incidentPoint(BasicPoint point) {
+    /** 
+    * Return the index of a point on the triangle.  
+    * If the point is not on the triangle, return -1.
+    */
+    private int indexOf(BasicPoint point) {
         for (int i = 0; i < 3; i++) {
             if (vertices[i].equals(point))
-                return true;
+                return i;
         }
-        return false;
+        return -1;
+    }
+
+    // Tests for incidence.  
+    public boolean incidentPoint(BasicPoint point) {
+        if (indexOf(point) == -1) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /** 
@@ -81,9 +93,14 @@ public class BasicTriangle implements AbstractTriangle {
     * (cyclic) order, then the orientation has to match arrow.opposite().
     */
     public boolean incidentEdge(BasicPoint point1, BasicPoint point2, BasicOrientation arrow) {
-        if (point1.equals(point2)) {
+        int i = indexOf(point1);
+        int j = indexOf(point2);
+        if (i == -1 || j == -1) {
+            return false;
+        }
+        if (i == j) {
             throw new IllegalArgumentException("The two points in the edge incidence test must be different.");
         }
-        return true;
+
     }
 } // end of class BasicTriangle
