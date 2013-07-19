@@ -81,7 +81,7 @@ public class BasicTriangle implements AbstractTriangle {
     * (cyclic) order, then the orientation has to match arrow.opposite().
     */
     public boolean incidentEdge(BasicPoint point1, BasicPoint point2, BasicOrientation arrow) {
-        If (point1.equals(point2)) {
+        if (point1.equals(point2)) {
             throw new IllegalArgumentException("The two points in the edge incidence test must be different.");
         }
         return true;
