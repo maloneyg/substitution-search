@@ -22,11 +22,11 @@ public interface AbstractTriangle {
     */
 //    public <T extends AbstractPoint> T getOtherVertex(T vertex1, T vertex2);
 
-//    public <T extends AbstractAngle> T[] getAngles();
+    public <T extends AbstractAngle> T[] getAngles();
 
-//    public <T extends AbstractOrientation> T[] getOrientations();
+    public <T extends AbstractOrientation> T[] getOrientations();
 
-//    public <T extends AbstractEdgeLength> T[] getEdgeLengths();
+    public <T extends AbstractEdgeLength> T[] getEdgeLengths();
 
     /**
     * setter method for orientations.

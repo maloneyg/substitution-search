@@ -12,13 +12,17 @@ public final class BasicOrientation implements AbstractOrientation {
         return opposite;
     }
 
-    public BasicOrientation(BasicOrientation theOpposite) {
+    private BasicOrientation(BasicOrientation theOpposite) {
         this.opposite = theOpposite;
     }
 
-    public BasicOrientation() {
+    private BasicOrientation() {
         BasicOrientation theOpposite = new BasicOrientation(this);
         this.opposite = theOpposite;
+    }
+
+    public BasicOrientation createBasicOrientation() {
+        return new BasicOrientation();
     }
 
 } // end of class BasicOrientation
