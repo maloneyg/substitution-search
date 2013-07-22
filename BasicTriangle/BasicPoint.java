@@ -4,7 +4,7 @@
 */
 
 
-public class BasicPoint implements AbstractPoint<BasicPoint> {
+final public class BasicPoint implements AbstractPoint<BasicPoint> {
 
     // Static variables for all points.
     private static final int length = 6;
@@ -25,6 +25,25 @@ public class BasicPoint implements AbstractPoint<BasicPoint> {
     private BasicPoint() {
         int[] vector = new int[length];
         point = vector;
+    }
+
+    // toString method.
+    public String toString() {
+        String outString = "(";
+        for (int i = 0; i < length - 1; i++) {
+            outString = outString + point[i] + ",";
+        }
+        outString = outString + point[length] + ")";
+        return outString;
+    }
+
+    // equals method.
+    public boolean equals(BasicPoint p) {
+        for (int i = 0; i < length; i++) {
+            if (p.point[i] != this.point[i])
+                return false;
+        }
+        return true;
     }
 
     // Manipulation methods.  
