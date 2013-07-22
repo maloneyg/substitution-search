@@ -4,8 +4,8 @@
 */
 
 
-public interface AbstractOrientation {
+public interface AbstractOrientation<T extends AbstractOrientation> {
 
-    public <T extends AbstractOrientation> T getOpposite();
+    public T getOpposite();
 
 } // end of interface AbstractOrientation

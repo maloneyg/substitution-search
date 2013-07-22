@@ -3,7 +3,7 @@
 */
 
 
-public class BasicEdgeLength implements AbstractEdgeLength {
+public class BasicEdgeLength implements AbstractEdgeLength<BasicEdgeLength> {
 
 
 

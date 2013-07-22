@@ -6,7 +6,7 @@
 */
 
 
-public interface AbstractTriangle {
+public interface AbstractTriangle<P extends AbstractPoint<P>, A extends AbstractAngle<A>, O extends AbstractOrientation<O>, E extends AbstractEdgeLength<E>, T extends AbstractTriangle> {
 
     /**
     * getter methods that return the points, angles, 
@@ -14,19 +14,19 @@ public interface AbstractTriangle {
     * These things must implement various interfaces
     * representing their abstract idealizations.  
     */
-//    public <T extends AbstractPoint> T[] getVertices();
+    public P[] getVertices();
 
     /**
     * Given two vertices that (presumably) lie on the triangle,
     * return the third vertex.
     */
-//    public <T extends AbstractPoint> T getOtherVertex(T vertex1, T vertex2);
+    public P getOtherVertex(P vertex1, P vertex2);
 
-//    public <T extends AbstractAngle> T[] getAngles();
+    public A[] getAngles();
 
-//    public <T extends AbstractOrientation> T[] getOrientations();
+    public O[] getOrientations();
 
-//    public <T extends AbstractEdgeLength> T[] getEdgeLengths();
+    public E[] getEdgeLengths();
 
     /**
     * setter method for orientations.
@@ -34,14 +34,14 @@ public interface AbstractTriangle {
     * probably shouldn't even exist.  
     */
 
-//    public <T extends AbstractOrientation> void setOrientation(T arrow, int i);
+    public void setOrientation(O arrow, int i);
 
     /**
     * Incidence test methods.  
     */
 
-//    public <T extends AbstractPoint> boolean incidentPoint(T point);
+    public boolean incidentPoint(P point);
 
-//    public <T extends AbstractPoint, S extends AbstractOrientation> boolean incidentEdge(T point1, T point2, S arrow);
+    public boolean incidentEdge(P point1, P point2, O arrow);
 
 } // end of interface AbstractTriangle

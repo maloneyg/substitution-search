@@ -3,7 +3,7 @@
 */
 
 
-public interface AbstractEdgeLength {
+public interface AbstractEdgeLength<T extends AbstractEdgeLength> {
 
 
 } // end of interface AbstractEdgeLength

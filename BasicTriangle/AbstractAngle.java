@@ -3,7 +3,7 @@
 */
 
 
-public interface AbstractAngle {
+public interface AbstractAngle<T extends AbstractAngle> {
 
 
 } // end of interface AbstractAngle

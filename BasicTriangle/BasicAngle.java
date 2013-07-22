@@ -3,7 +3,7 @@
 */
 
 
-public class BasicAngle implements AbstractAngle {
+public class BasicAngle implements AbstractAngle<BasicAngle> {
 
 
 } // end of class BasicAngle

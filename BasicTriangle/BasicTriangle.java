@@ -7,7 +7,7 @@
 *    Every triangle has a type.  
 */
 
-public class BasicTriangle implements AbstractTriangle {
+public class BasicTriangle implements AbstractTriangle<BasicPoint, BasicAngle, BasicOrientation, BasicEdgeLength, BasicTriangle> {
 
     private final BasicAngle[] angles;
     private final BasicPoint[] vertices;
@@ -95,6 +95,7 @@ public class BasicTriangle implements AbstractTriangle {
     public boolean incidentEdge(BasicPoint point1, BasicPoint point2, BasicOrientation arrow) {
         int i = indexOf(point1);
         int j = indexOf(point2);
+        int other = -1;
         if (i == -1 || j == -1) {
             return false;
         }
@@ -102,5 +103,25 @@ public class BasicTriangle implements AbstractTriangle {
             throw new IllegalArgumentException("The two points in the edge incidence test must be different.");
         }
 
+        for (int k = 0; k < 3; k++) {
+           if (k != i && k != j) {
+                other = k;
+                break; 
+            }
+        }
+
+        if (j - i == 1 || j - i == -2) {
+            if (orientations[other].equals(arrow)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (orientations[other].getOpposite().equals(arrow)) {
+                return true;
+            } else {
+                return false;
+            }
+        } 
     }
 } // end of class BasicTriangle
