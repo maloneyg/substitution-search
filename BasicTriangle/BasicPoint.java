@@ -105,7 +105,13 @@ final public class BasicPoint implements AbstractPoint<BasicPoint> {
     }
 
     public BasicPoint rotate(int i) {
-        return new BasicPoint(rot.rowTimes(this.point));
+        if (i < 0)
+            throw new RuntimeException("You must perform a positive number of rotations.");
+
+        int[] result  = new int[length];
+        for (int j = 0; j < i; j++)
+            result = rot.rowTimes(result);
+        return new BasicPoint(result);
     }
 
     public BasicPoint reflect() {
