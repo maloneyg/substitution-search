@@ -6,9 +6,46 @@
 
 final public class BasicPoint implements AbstractPoint<BasicPoint> {
 
-    // Static variables for all points.
+    // static variables for all points.
     private static final int length = 6;
 
+    /*
+    * We're going to replace these later with 
+    * things calculated in other classes.
+    * For now, it's all hard-coded.
+    */
+    private static final int[][] preRot = {
+                       {0, 1, 0, 0, 0, 0}, 
+                       {0, 0, 1, 0, 0, 0}, 
+                       {0, 0, 0, 1, 0, 0}, 
+                       {0, 0, 0, 0, 1, 0}, 
+                       {0, 0, 0, 0, 0, 1}, 
+                       {-1, 1, -1, 1, -1, 1}
+                     };
+
+    private static final IntMatrix rot = IntMatrix.createIntMatrix(preRot);
+
+    private static final int[][] preRef = {
+                       {-1, 0, 0, 0, 0, 0}, 
+                       {-1, 1, -1, 1, -1, 1},
+                       {0, 0, 0, 0, 1, 0}, 
+                       {0, 0, 0, 1, 0, 0}, 
+                       {0, 0, 1, 0, 0, 0}, 
+                       {0, 1, 0, 0, 0, 0} 
+                     };
+
+    private static final IntMatrix ref = IntMatrix.createIntMatrix(preRef);
+
+    private static final int[][] preInfl = {
+                       {2, 0, 1, -1, 1, -1},
+                       {1, 1, 1, 0, 0, 0},
+                       {0, 1, 1, 1, 0, 0}, 
+                       {0, 0, 1, 1, 1, 0}, 
+                       {0, 0, 0, 1, 1, 1}, 
+                       {-1, 1, -1, 1, 0, 2}
+                     };
+
+    private static final IntMatrix infl = IntMatrix.createIntMatrix(preInfl);
 
     // A vector identifying the point.  
     private final int[] point;
@@ -68,15 +105,15 @@ final public class BasicPoint implements AbstractPoint<BasicPoint> {
     }
 
     public BasicPoint rotate(int i) {
-        return this;
+        return new BasicPoint(rot.rowTimes(this.point));
     }
 
     public BasicPoint reflect() {
-        return this;
+        return new BasicPoint(ref.rowTimes(this.point));
     }
 
     public BasicPoint inflate() {
-        return this;
+        return new BasicPoint(infl.rowTimes(this.point));
     }
 
 } // end of class BasicPoint
