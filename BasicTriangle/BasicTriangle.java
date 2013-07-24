@@ -4,10 +4,10 @@
 *    It has three angles, three vertices, and 
 *    three edge orientations.  
 *    Oh yeah, it also has edge lengths.  
-*    Every triangle has a type.  
+*    Every triangle has a type.  Are you sure about that?
 */
 
-public class BasicTriangle implements AbstractTriangle<BasicPoint, BasicAngle, BasicOrientation, BasicEdgeLength, BasicTriangle> {
+public class BasicTriangle implements AbstractTriangle<BasicAngle, BasicOrientation, BasicPoint, BasicEdgeLength, BasicEdge, BasicTriangle> {
 
     private final BasicAngle[] angles;
     private final BasicPoint[] vertices;
@@ -33,8 +33,16 @@ public class BasicTriangle implements AbstractTriangle<BasicPoint, BasicAngle, B
         return orientations;
     }
 
-    public BasicEdgeLength[] getEdgeLengths() {
-        return edgeLengths;
+    // Don't call this method too often; it's time-consuming.
+    public BasicEdge[] getEdges() {
+        BasicPoint[] vertexPair0 = {vertices[0],vertices[1]};
+        BasicPoint[] vertexPair1 = {vertices[1],vertices[2]};
+        BasicPoint[] vertexPair2 = {vertices[2],vertices[0]};
+        BasicEdge e0 = BasicEdge.createBasicEdge(edgeLengths[0],orientations[0],vertexPair0);
+        BasicEdge e1 = BasicEdge.createBasicEdge(edgeLengths[1],orientations[1],vertexPair1);
+        BasicEdge e2 = BasicEdge.createBasicEdge(edgeLengths[2],orientations[2],vertexPair2);
+        BasicEdge[] output = {e0,e1,e2};
+        return output;
     }
 
     // Given two points on the triangle, return the third.  

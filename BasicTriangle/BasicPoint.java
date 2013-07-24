@@ -4,7 +4,7 @@
 */
 
 
-final public class BasicPoint implements AbstractPoint<BasicPoint> {
+final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
 
     // static variables for all points.
     private static final int length = 6;
@@ -104,7 +104,8 @@ final public class BasicPoint implements AbstractPoint<BasicPoint> {
         return this.add(p.scalarMultiple(-1));
     }
 
-    public BasicPoint rotate(int i) {
+    public BasicPoint rotate(BasicAngle a) {
+        int i = a.getAsInt();
         if (i < 0)
             throw new RuntimeException("You must perform a positive number of rotations.");
 

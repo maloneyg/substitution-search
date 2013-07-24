@@ -6,7 +6,7 @@
 */
 
 
-public interface AbstractTriangle<P extends AbstractPoint<P>, A extends AbstractAngle<A>, O extends AbstractOrientation<O>, E extends AbstractEdgeLength<E>, T extends AbstractTriangle> {
+public interface AbstractTriangle<A extends AbstractAngle<A>, O extends AbstractOrientation<O>, P extends AbstractPoint<P,A>, L extends AbstractEdgeLength<L>, E extends AbstractEdge<P,L,O,E>, T extends AbstractTriangle> {
 
     /**
     * getter methods that return the points, angles, 
@@ -26,7 +26,7 @@ public interface AbstractTriangle<P extends AbstractPoint<P>, A extends Abstract
 
     public O[] getOrientations();
 
-    public E[] getEdgeLengths();
+    public E[] getEdges();
 
     /**
     * setter method for orientations.

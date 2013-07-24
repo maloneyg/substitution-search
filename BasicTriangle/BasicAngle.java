@@ -31,6 +31,10 @@ final public class BasicAngle implements AbstractAngle<BasicAngle> {
         return (this.a == angle.a);
     }
 
+    // equals method.  
+    protected int getAsInt() {
+        return this.a;
+    }
 
 
 } // end of class BasicAngle
