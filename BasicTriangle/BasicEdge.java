@@ -2,7 +2,7 @@
 *    This class implements an edge.
 */
 
-public class BasicEdge implements AbstractEdge<BasicPoint, BasicEdgeLength, BasicOrientation, BasicEdge> {
+public class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdgeLength, BasicOrientation, BasicEdge> {
 
     // Member variables. 
     private final BasicEdgeLength length;
@@ -13,6 +13,10 @@ public class BasicEdge implements AbstractEdge<BasicPoint, BasicEdgeLength, Basi
 
     // Constructor methods.  
     private BasicEdge(BasicEdgeLength length, BasicOrientation orientation, BasicPoint[] ends) {
+        if (ends.length != 2)
+            throw new IllegalArgumentException("A BasicEdge must be initialized with two BasicPoints.");
+        if (ends[0].equals(ends[1]))
+            throw new IllegalArgumentException("A BasicEdge must be initialized with two different BasicPoints.");
         this.length = length;
         this.orientation = orientation;
         this.ends = ends;
@@ -29,6 +33,11 @@ public class BasicEdge implements AbstractEdge<BasicPoint, BasicEdgeLength, Basi
 
     public BasicPoint[] getEnds() {
         return ends;
+    }
+
+    public BasicEdge transform(BasicAngle a, BasicPoint v) {
+        BasicPoint[] newEnds = { ends[0].rotate(a).add(v), ends[1].rotate(a).add(v) };
+        return new BasicEdge(length, orientation, newEnds);
     }
 
     /* 
@@ -59,7 +68,10 @@ public class BasicEdge implements AbstractEdge<BasicPoint, BasicEdgeLength, Basi
     }
 
     // Check if two edges are the same, with identical orientations. 
-    public boolean equals(BasicEdge e) {
+    public boolean equals(Object obj) {
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        BasicEdge e = (BasicEdge) obj;
         if (!(this.length.equals(e.length)))
             return false;
         BasicPoint[] u = this.ends;

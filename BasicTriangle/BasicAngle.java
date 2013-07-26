@@ -2,8 +2,7 @@
 *    This class implements an angle.
 */
 
-
-final public class BasicAngle implements AbstractAngle<BasicAngle> {
+final public class BasicAngle implements AbstractAngle {
 
     // Every angle is implemented as an integer.
     private final int a;
@@ -26,15 +25,25 @@ final public class BasicAngle implements AbstractAngle<BasicAngle> {
         return "" + a;
     }
 
-    // equals method.  
-    public boolean equals(BasicAngle angle) {
+    // equals override.  
+    public boolean equals(Object obj) {
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        BasicAngle angle = (BasicAngle) obj;
         return (this.a == angle.a);
     }
 
-    // equals method.  
+    // hashCode override.
+    public int hashCode() {
+        int prime = 37;
+        int result = 5;
+        result = prime*result + a;
+        return result;
+    }
+
+    // return the angle as an integer.  
     protected int getAsInt() {
         return this.a;
     }
-
 
 } // end of class BasicAngle

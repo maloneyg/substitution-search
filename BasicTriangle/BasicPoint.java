@@ -75,12 +75,28 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
     }
 
     // equals method.
-    public boolean equals(BasicPoint p) {
+    public boolean equals(Object obj) {
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        BasicPoint p = (BasicPoint) obj;
         for (int i = 0; i < length; i++) {
             if (p.point[i] != this.point[i])
                 return false;
         }
         return true;
+    }
+
+    // hashCode override.
+    public int hashCode() {
+        int prime = 53;
+        int result = 11;
+        result = prime*result + ref.hashCode();
+        result = prime*result + rot.hashCode();
+        result = prime*result + infl.hashCode();
+        for (int i = 0; i < length; i++) {
+            result = prime*result + point[i];
+        }
+        return result;
     }
 
     // Manipulation methods.  

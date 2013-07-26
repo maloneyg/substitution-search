@@ -1,10 +1,12 @@
 /**
-*    This interface implements an angle.
+*    This interface represents the properties of an angle.
 */
 
 
-public interface AbstractAngle<T extends AbstractAngle> {
+public interface AbstractAngle {
 
-    public boolean equals(T angle);
+    public boolean equals(Object obj);
+
+    public int hashCode();
 
 } // end of interface AbstractAngle

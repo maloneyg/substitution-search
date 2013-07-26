@@ -1,5 +1,5 @@
 /**
-*    This interface implements a collection of triangles.
+*    This interface represents the properties of a collection of triangles.
 */
 
 
@@ -29,4 +29,4 @@ public interface AbstractPatch<P extends AbstractPoint<P>, A extends AbstractAng
 
     public boolean incidentEdge(P point1, P point2, O arrow);
 
-} // end of interface AbstractTriangle
+} // end of interface AbstractPatch

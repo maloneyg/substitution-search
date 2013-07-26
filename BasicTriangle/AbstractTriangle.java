@@ -1,12 +1,12 @@
 /**
-*    This interface implements a triangle.
+*    This interface represents the properties of a triangle.
 *    The triangle is located somewhere in space, although we don't 
 *    specify how its points are represented.  
 *    It has three angles, three vertices, and three edge orientations.
 */
 
 
-public interface AbstractTriangle<A extends AbstractAngle<A>, O extends AbstractOrientation<O>, P extends AbstractPoint<P,A>, L extends AbstractEdgeLength<L>, E extends AbstractEdge<P,L,O,E>, T extends AbstractTriangle> {
+public interface AbstractTriangle<A extends AbstractAngle, O extends AbstractOrientation<O>, P extends AbstractPoint<P,A>, L extends AbstractEdgeLength, E extends AbstractEdge<P,L,O,E>, T extends AbstractTriangle> {
 
     /**
     * getter methods that return the points, angles, 

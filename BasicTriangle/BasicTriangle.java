@@ -1,5 +1,7 @@
 /**
 *    This class implements a triangle.
+*    Let's say right now that every triangle has its vertices, etc. 
+*    listed in counterclockwise order.
 *    The triangle is located somewhere in space. 
 *    It has three angles, three vertices, and 
 *    three edge orientations.  

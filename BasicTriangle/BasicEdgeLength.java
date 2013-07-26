@@ -3,9 +3,12 @@
 */
 
 
-public class BasicEdgeLength implements AbstractEdgeLength<BasicEdgeLength> {
+public class BasicEdgeLength implements AbstractEdgeLength {
 
-    public boolean equals(BasicEdgeLength l) {
+    public boolean equals(Object obj) {
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        BasicEdgeLength l = (BasicEdgeLength) obj;
         return this == l;
     }
 

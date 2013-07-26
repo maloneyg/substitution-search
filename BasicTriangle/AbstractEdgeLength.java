@@ -1,10 +1,10 @@
 /**
-*    This interface implements an edge length.
+*    This interface represents the properties of an edge length.
 */
 
 
-public interface AbstractEdgeLength<T extends AbstractEdgeLength> {
+public interface AbstractEdgeLength {
 
-    public boolean equals(T e);
+    public boolean equals(Object obj);
 
 } // end of interface AbstractEdgeLength

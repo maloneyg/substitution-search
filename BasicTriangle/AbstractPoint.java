@@ -1,5 +1,5 @@
 /**
-*    This interface implements a point.
+*    This interface represents the properties of a point.
 *    It contains static methods for manipulating points.
 */
 
@@ -15,6 +15,10 @@ public interface AbstractPoint<T extends AbstractPoint, A extends AbstractAngle>
 
     public T inflate();
 
-    public boolean equals(T p);
+    // it must override equals.
+    public boolean equals(Object obj);
+
+    // it must override hashCode.
+    public int hashCode();
 
 } // end of interface AbstractPoint

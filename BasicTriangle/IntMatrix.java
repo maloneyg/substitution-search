@@ -16,6 +16,11 @@ final public class IntMatrix {
         this.M = M;
         this.N = N;
         data = new int[M][N];
+        for (int i = 0; i < M; i++) {
+            for (int j = 0; j < M; j++) {
+                data[i][j] = 0;
+            }
+        }
     }
 
     // public factory method for the zero matrix.
@@ -37,9 +42,6 @@ final public class IntMatrix {
     static public IntMatrix createIntMatrix(int[][] data) {
         return new IntMatrix(data);
     }
-
-    // copy constructor
-    private IntMatrix(IntMatrix A) { this(A.data); }
 
     // create and return the N-by-N identity matrix
     public static IntMatrix identity(int N) {
@@ -68,7 +70,7 @@ final public class IntMatrix {
     // return C = A + B
     public IntMatrix plus(IntMatrix B) {
         IntMatrix A = this;
-        if (B.M != A.M || B.N != A.N) throw new RuntimeException("Illegal matrix dimensions.");
+        if (B.M != A.M || B.N != A.N) throw new IllegalArgumentException("Illegal matrix dimensions.");
         IntMatrix C = new IntMatrix(M, N);
         for (int i = 0; i < M; i++)
             for (int j = 0; j < N; j++)
@@ -80,7 +82,7 @@ final public class IntMatrix {
     // return C = A - B
     public IntMatrix minus(IntMatrix B) {
         IntMatrix A = this;
-        if (B.M != A.M || B.N != A.N) throw new RuntimeException("Illegal matrix dimensions.");
+        if (B.M != A.M || B.N != A.N) throw new IllegalArgumentException("Illegal matrix dimensions.");
         IntMatrix C = new IntMatrix(M, N);
         for (int i = 0; i < M; i++)
             for (int j = 0; j < N; j++)
@@ -89,19 +91,34 @@ final public class IntMatrix {
     }
 
     // does A = B exactly?
-    public boolean eq(IntMatrix B) {
+    public boolean equals(Object obj) {
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        IntMatrix B = (IntMatrix) obj;
         IntMatrix A = this;
-        if (B.M != A.M || B.N != A.N) throw new RuntimeException("Illegal matrix dimensions.");
+        if (B.M != A.M || B.N != A.N) throw new IllegalArgumentException("Illegal matrix dimensions.");
         for (int i = 0; i < M; i++)
             for (int j = 0; j < N; j++)
                 if (A.data[i][j] != B.data[i][j]) return false;
         return true;
     }
 
+    // hashCode override.
+    public int hashCode() {
+        int prime = 43;
+        int result = 7;
+        for (int i = 0; i < M; i++) {
+            for (int j = 0; j < M; j++) {
+                result = prime*result + data[i][j];
+            }
+        }
+        return result;
+    }
+
     // return C = A * B
     public IntMatrix times(IntMatrix B) {
         IntMatrix A = this;
-        if (A.N != B.M) throw new RuntimeException("Illegal matrix dimensions.");
+        if (A.N != B.M) throw new IllegalArgumentException("Illegal matrix dimensions.");
         IntMatrix C = new IntMatrix(A.M, B.N);
         for (int i = 0; i < C.M; i++)
             for (int j = 0; j < C.N; j++)
@@ -117,7 +134,7 @@ final public class IntMatrix {
     */
     public int[] rowTimes(int[] i) {
         IntMatrix A = this;
-        if (i.length != A.M) throw new RuntimeException("Illegal matrix dimensions.");
+        if (i.length != A.M) throw new IllegalArgumentException("Illegal matrix dimensions.");
         int[][] row = new int[1][i.length];
         for (int j = 0; j < i.length; j++)
             row[0][j] = i[j];
@@ -131,12 +148,14 @@ final public class IntMatrix {
 
 
     // print matrix to standard output
-    public void show() {
+    public String toString() {
+        String output = "";
         for (int i = 0; i < M; i++) {
             for (int j = 0; j < N; j++) 
-                System.out.print("" + data[i][j]);
-            System.out.println();
+                output = output + " " + data[i][j];
+            output = output + "\n";
         }
+        return output;
     }
 
 
@@ -146,41 +165,41 @@ final public class IntMatrix {
         int[][] d = { { 1, 2, 3 }, { 4, 5, 6 }, { 9, 1, 3} };
 
         IntMatrix A = new IntMatrix(d);
-        A.show(); 
+        System.out.println(A.toString()); 
         System.out.println();
 
         A.swap(1, 2);
-        A.show(); 
+        System.out.println(A.toString()); 
         System.out.println();
 
         IntMatrix B = A.transpose();
-        B.show(); 
+        System.out.println(B.toString()); 
         System.out.println();
 
         IntMatrix C = IntMatrix.identity(5);
-        C.show(); 
+        System.out.println(C.toString()); 
         System.out.println();
 
-        A.plus(B).show();
+        System.out.println(A.plus(B).toString());
         System.out.println();
 
         int[] testInt = { 1, 2, 4 };
         for (int k = 0; k < testInt.length; k++) 
             System.out.print(" " + testInt[k]);
         System.out.println();
-        A.show();
+        A.toString();
         System.out.println();
         testInt = A.rowTimes(testInt);
         for (int k = 0; k < testInt.length; k++) 
             System.out.print(" " + testInt[k]);
         System.out.println();
 
-        B.times(A).show();
+        System.out.println(B.times(A).toString());
         System.out.println();
 
         // shouldn't be equal since AB != BA in general    
-        System.out.println(A.times(B).eq(B.times(A)));
+        System.out.println(A.times(B).equals(B.times(A)));
         System.out.println();
 
     }
-}
+} // end of class IntMatrix

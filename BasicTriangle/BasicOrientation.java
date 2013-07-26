@@ -4,9 +4,7 @@
 */
 
 
-public final class BasicOrientation implements AbstractOrientation<BasicOrientation> {
-
-    private final BasicOrientation opposite;
+public final class BasicOrientation extends AbstractOrientation<BasicOrientation> {
 
     // An integer serial number for troubleshooting purposes only.
     private final int code;
@@ -14,32 +12,37 @@ public final class BasicOrientation implements AbstractOrientation<BasicOrientat
     // The next code number.
     private static int nextCode = 1;
 
-    public BasicOrientation getOpposite() {
-        return opposite;
-    }
-
+    // constructor methods.
     private BasicOrientation(BasicOrientation theOpposite) {
         this.opposite = theOpposite;
-        this.code = 0 - theOpposite.code;
-    }
-
-    private BasicOrientation() {
         this.code = nextCode;
-        BasicOrientation theOpposite = new BasicOrientation(this);
-        this.opposite = theOpposite;
         nextCode = nextCode + 1;
     }
 
-    public BasicOrientation createBasicOrientation() {
+    private BasicOrientation() {
+        this.opposite = new BasicOrientation(this);
+        this.code = 1 - nextCode;
+    }
+
+    // public static factory method.
+    static public BasicOrientation createBasicOrientation() {
         return new BasicOrientation();
     }
 
-    public boolean equals(BasicOrientation o) {
+    // implementation of equals method.  
+    public boolean equals(Object obj) {
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        BasicOrientation o = (BasicOrientation) obj;
         return this == o;
     }
 
-    public boolean compatible(BasicOrientation o) {
-        return !(this.equals(o.opposite));
+    // hashCode override.
+    public int hashCode() {
+        int prime = 23;
+        int result = 3;
+        result = prime*result + code;
+        return result;
     }
 
 } // end of class BasicOrientation
