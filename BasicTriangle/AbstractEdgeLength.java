@@ -3,8 +3,15 @@
 */
 
 
-public interface AbstractEdgeLength {
+public interface AbstractEdgeLength<P extends AbstractPoint> {
 
     public boolean equals(Object obj);
+
+    /*
+    * return a vector with length equal to this edge length.
+    * The vector should lie on the positive x-axis, if that
+    * notion makes any sense.
+    */
+    public P getAsVector();
 
 } // end of interface AbstractEdgeLength

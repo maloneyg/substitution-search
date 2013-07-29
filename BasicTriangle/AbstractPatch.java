@@ -1,32 +1,42 @@
 /**
-*    This interface represents the properties of a collection of triangles.
+*    This abstract class represents the properties of a collection of triangles.
 */
 
 
-public interface AbstractPatch<P extends AbstractPoint<P>, A extends AbstractAngle<A>, O extends AbstractOrientation<O>, E extends AbstractEdgeLength<E>, T extends AbstractTriangle, X extends AbstractPatch> {
+public abstract class AbstractPatch<P extends AbstractPoint<P>, A extends AbstractAngle, O extends AbstractOrientation<O>, E extends AbstractEdgeLength<E>, T extends AbstractTriangle, X extends AbstractPatch> {
+
+    // The edges that haven't been covered yet.
+    protected SimpleList<E> openEdges;
+
+    // The triangles that have been placed.
+    protected SimpleList<T> placedTiles;
 
     /**
-    * getter methods that return the points, angles, 
-    * orientations, and edge lengths.  
-    * These things must implement various interfaces
-    * representing their abstract idealizations.  
-    */
-    public P[] getVertices();
-
-    /**
-    * setter method for orientations.
-    * setter methods for vertices, angles, and edge lengths 
-    * probably shouldn't even exist.  
+    * methods for adding triangles and edges.
     */
 
-    public void setOrientation(O arrow, int i);
+    // If the edge is open, close it. If it's closed, open it.
+    public void placeEdge(E edge) {
+        openEdges.add(edge);
+    }
 
-    /**
-    * Incidence test methods.  
+    /*
+    * If the triangle is placed already, remove it. 
+    * If it isn't placed, place it.  
     */
+    public void placeTriangle(T triangle) {
+        placedTriangles.add(triangle);
+    }
 
-    public boolean incidentPoint(P point);
+    /*
+    * Get the next edge.
+    * Presumably, the word `next' implies some kind of order,
+    * probably from shortest to longest, although other ideas 
+    * are conceivable.  We really want to return the edge 
+    * that is most difficult to cover, because that will lead
+    * to a quicker rejection of the configuration, if it is
+    * already uncompletable.
+    */
+    public abstract E getNextEdge();
 
-    public boolean incidentEdge(P point1, P point2, O arrow);
-
-} // end of interface AbstractPatch
+} // end of abstract class AbstractPatch

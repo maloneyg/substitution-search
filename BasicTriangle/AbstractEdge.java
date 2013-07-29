@@ -24,6 +24,9 @@ public interface AbstractEdge<A extends AbstractAngle, P extends AbstractPoint, 
     // Check if two edges are the same, with identical orientations. 
     public boolean equals(Object obj);
 
+    // It has to override hashCode.
+    public int hashCode();
+
     // Check if two edges are the same, with non-opposite orientations. 
     public boolean compatible(E e);
 

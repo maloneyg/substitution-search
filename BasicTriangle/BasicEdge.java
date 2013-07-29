@@ -93,6 +93,28 @@ public class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdge
         return false;
     }
 
+    // hashCode override.
+    public int hashCode() {
+        int prime = 17;
+        int result = 19;
+        result = prime*result + length.hashCode();
+        int h0 = ends[0].hashCode();
+        int h1 = ends[1].hashCode();
+        if (h0 < h1) {
+            result = prime*result + h0;
+            result = prime*result + h1;
+            result = prime*result + orientation.hashCode();
+        } else if (h1 < h0) {
+            result = prime*result + h1;
+            result = prime*result + h0;
+            result = prime*result + orientation.getOpposite().hashCode();
+        } else {
+            result = prime*result + h0;
+            result = prime*result + h1;
+        }
+        return result;
+    }
+
     // Check if two edges are the same, with non-opposite orientations. 
     public boolean compatible(BasicEdge e) {
         if (!(this.length.equals(e.length)))
