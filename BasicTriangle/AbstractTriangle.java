@@ -6,7 +6,7 @@
 */
 
 
-public interface AbstractTriangle<A extends AbstractAngle, O extends AbstractOrientation<O>, P extends AbstractPoint<P,A>, L extends AbstractEdgeLength, E extends AbstractEdge<A,P,L,O,E>, T extends AbstractTriangle> {
+public interface AbstractTriangle<A extends AbstractAngle, Orientation, P extends AbstractPoint<P,A>, L extends AbstractEdgeLength, E extends AbstractEdge<A,P,L,O,E>, T extends AbstractTriangle> {
 
     /**
     * getter methods that return the points, angles, 
@@ -24,7 +24,7 @@ public interface AbstractTriangle<A extends AbstractAngle, O extends AbstractOri
 
     public A[] getAngles();
 
-    public O[] getOrientations();
+    public Orientation[] getOrientations();
 
     public E[] getEdges();
 
@@ -34,7 +34,7 @@ public interface AbstractTriangle<A extends AbstractAngle, O extends AbstractOri
     * probably shouldn't even exist.  
     */
 
-    public void setOrientation(O arrow, int i);
+    public void setOrientation(Orientation arrow, int i);
 
     /**
     * Incidence test methods.  
@@ -42,6 +42,6 @@ public interface AbstractTriangle<A extends AbstractAngle, O extends AbstractOri
 
     public boolean incidentPoint(P point);
 
-    public boolean incidentEdge(P point1, P point2, O arrow);
+    public boolean incidentEdge(P point1, P point2, Orientation arrow);
 
 } // end of interface AbstractTriangle

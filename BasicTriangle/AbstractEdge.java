@@ -2,7 +2,7 @@
 *    This interface represents the properties of an edge.
 */
 
-public interface AbstractEdge<A extends AbstractAngle, P extends AbstractPoint, L extends AbstractEdgeLength, O extends AbstractOrientation, E extends AbstractEdge> {
+public interface AbstractEdge<A extends AbstractAngle, P extends AbstractPoint, L extends AbstractEdgeLength, BasicOrientation, E extends AbstractEdge> {
 
     public L getLength();
 
@@ -13,7 +13,7 @@ public interface AbstractEdge<A extends AbstractAngle, P extends AbstractPoint, 
     * get the orientation of this edge, using the direction
     * convention established by the other edge.  
     */ 
-    public O getOrientation(E e);
+    public Orientation getOrientation(E e);
 
     /*
     * return the edge obtained by rotating this one by an angle

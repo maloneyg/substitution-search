@@ -2,17 +2,17 @@
 *    This class implements an edge.
 */
 
-public class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdgeLength, BasicOrientation, BasicEdge> {
+public class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdgeLength, Orientation, BasicEdge> {
 
     // Member variables. 
     private final BasicEdgeLength length;
 
-    private BasicOrientation orientation;
+    private Orientation orientation;
 
     private final BasicPoint[] ends;
 
     // Constructor methods.  
-    private BasicEdge(BasicEdgeLength length, BasicOrientation orientation, BasicPoint[] ends) {
+    private BasicEdge(BasicEdgeLength length, Orientation orientation, BasicPoint[] ends) {
         if (ends.length != 2)
             throw new IllegalArgumentException("A BasicEdge must be initialized with two BasicPoints.");
         if (ends[0].equals(ends[1]))
@@ -23,7 +23,7 @@ public class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdge
     }
 
     // public factory method.
-    static public BasicEdge createBasicEdge(BasicEdgeLength length, BasicOrientation orientation, BasicPoint[] ends) {
+    static public BasicEdge createBasicEdge(BasicEdgeLength length, Orientation orientation, BasicPoint[] ends) {
         return new BasicEdge(length, orientation, ends);
     }
 
@@ -45,7 +45,7 @@ public class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdge
     * get the orientation of this edge, using the direction
     * convention established by the other edge.  
     */ 
-    public BasicOrientation getOrientation(BasicEdge e) {
+    public Orientation getOrientation(BasicEdge e) {
         if (!(this.length.equals(e.length)))
             throw new RuntimeException("You need to match edges of the same length.");
         BasicPoint[] u = this.ends;

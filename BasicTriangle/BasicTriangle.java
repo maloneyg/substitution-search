@@ -9,15 +9,15 @@
 *    Every triangle has a type.  Are you sure about that?
 */
 
-public class BasicTriangle implements AbstractTriangle<BasicAngle, BasicOrientation, BasicPoint, BasicEdgeLength, BasicEdge, BasicTriangle> {
+public class BasicTriangle implements AbstractTriangle<BasicAngle, Orientation.g, BasicPoint, BasicEdgeLength, BasicEdge, BasicTriangle> {
 
     private final BasicAngle[] angles;
     private final BasicPoint[] vertices;
-    private final BasicOrientation[] orientations;
+    private final Orientation.g[] orientations;
     private final BasicEdgeLength[] edgeLengths;
 
     // constructor methods.
-    private BasicTriangle(BasicAngle[] a, BasicPoint[] p, BasicOrientation[] o, BasicEdgeLength[] e) {
+    private BasicTriangle(BasicAngle[] a, BasicPoint[] p, Orientation.g[] o, BasicEdgeLength[] e) {
         angles = a;
         vertices = p;
         orientations = o;
@@ -25,7 +25,7 @@ public class BasicTriangle implements AbstractTriangle<BasicAngle, BasicOrientat
     }
 
     // public static factory methods.
-    public BasicTriangle createBasicTriangle(BasicAngle[] a, BasicPoint[] p, BasicOrientation[] o, BasicEdgeLength[] e) {
+    public BasicTriangle createBasicTriangle(BasicAngle[] a, BasicPoint[] p, Orientation.g[] o, BasicEdgeLength[] e) {
         return new BasicTriangle(a,p,o,e);
     }
 
@@ -37,7 +37,7 @@ public class BasicTriangle implements AbstractTriangle<BasicAngle, BasicOrientat
         return vertices;
     }
 
-    public BasicOrientation[] getOrientations() {
+    public Orientation.g[] getOrientations() {
         return orientations;
     }
 
@@ -74,7 +74,7 @@ public class BasicTriangle implements AbstractTriangle<BasicAngle, BasicOrientat
     }
 
     // Sets the orientation of edge i.
-    public void setOrientation(BasicOrientation arrow, int i) {
+    public void setOrientation(Orientation.g arrow, int i) {
         orientations[i] = arrow;
     }
 
@@ -108,7 +108,7 @@ public class BasicTriangle implements AbstractTriangle<BasicAngle, BasicOrientat
     * this orientation has to match arrow; if they appear in the other 
     * (cyclic) order, then the orientation has to match arrow.opposite().
     */
-    public boolean incidentEdge(BasicPoint point1, BasicPoint point2, BasicOrientation arrow) {
+    public boolean incidentEdge(BasicPoint point1, BasicPoint point2, Orientation.g arrow) {
         int i = indexOf(point1);
         int j = indexOf(point2);
         int other = -1;
