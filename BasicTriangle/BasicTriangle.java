@@ -16,11 +16,17 @@ public class BasicTriangle implements AbstractTriangle<BasicAngle, BasicOrientat
     private final BasicOrientation[] orientations;
     private final BasicEdgeLength[] edgeLengths;
 
-    public BasicTriangle(BasicAngle[] a, BasicPoint[] p, BasicOrientation[] o, BasicEdgeLength[] e) {
+    // constructor methods.
+    private BasicTriangle(BasicAngle[] a, BasicPoint[] p, BasicOrientation[] o, BasicEdgeLength[] e) {
         angles = a;
         vertices = p;
         orientations = o;
         edgeLengths = e;
+    }
+
+    // public static factory methods.
+    public BasicTriangle createBasicTriangle(BasicAngle[] a, BasicPoint[] p, BasicOrientation[] o, BasicEdgeLength[] e) {
+        return new BasicTriangle(a,p,o,e);
     }
 
     public BasicAngle[] getAngles() {

@@ -7,43 +7,36 @@
 */
 
 
-public abstract class AbstractPrototile<A extends AbstractAngle, O extends AbstractOrientation<O>, P extends AbstractPoint<P,A>, L extends AbstractEdgeLength, E extends AbstractEdge<P,L,O,E>, T extends AbstractTriangle> {
+public interface AbstractPrototile<A extends AbstractAngle, O extends AbstractOrientation<O>, P extends AbstractPoint<P,A>, L extends AbstractEdgeLength, E extends AbstractEdge<A,P,L,O,E>, T extends AbstractTriangle> {
 
-    private final A[] angles;
+//    private final A[] angles;
 
     // L[i] is the length of the side opposite A[i].
-    private final L[] lengths;
+//    private final L[] lengths;
 
     // O[i] is the orientation of the side opposite A[i].
-    private final O[] orientations;
+//    private final O[] orientations;
 
     /**
     * getter methods that return the 
     * orientations and edge lengths.  
     */
-    public L[] getEdgeLengths() {
-        return lengths;
-    }
+    public L[] getEdgeLengths();
 
-    public O[] getOrientations() {
-        return orientations;
-    }
+    public O[] getOrientations();
 
     /*
     * Place the prototile in space.
     * p says where to place the root vertex.
     * a says how to orient it.
-    * reflect says whether or not it's reflected.  
+    * There's no reflection allowed.  Reflections are considered
+    * different prototiles.
     */
-    public abstract T place(P p, A a, boolean reflect);
+    public T place(P p, A a);
 
     /**
     * reset method for orientations.
     */
-    public void reset(O from, O to) {
-        for (O o : orientations) {
-            o = o.reset(from, to);
-        }
-    }
+    public void reset(O from, O to);
 
-} // end of abstract class AbstractPrototile
+} // end of interface AbstractPrototile

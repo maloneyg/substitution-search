@@ -7,45 +7,13 @@
 final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
 
     // static variables for all points.
-    private static final int length = 6;
+    private static final int length = Initializer.n - 1;
 
-    /*
-    * We're going to replace these later with 
-    * things calculated in other classes.
-    * For now, it's all hard-coded.
-    */
-    private static final int[][] preRot = {
-                       {0, 1, 0, 0, 0, 0}, 
-                       {0, 0, 1, 0, 0, 0}, 
-                       {0, 0, 0, 1, 0, 0}, 
-                       {0, 0, 0, 0, 1, 0}, 
-                       {0, 0, 0, 0, 0, 1}, 
-                       {-1, 1, -1, 1, -1, 1}
-                     };
+    private static final IntMatrix rot = Initializer.rot;
 
-    private static final IntMatrix rot = IntMatrix.createIntMatrix(preRot);
+    private static final IntMatrix ref = Initializer.ref;
 
-    private static final int[][] preRef = {
-                       {-1, 0, 0, 0, 0, 0}, 
-                       {-1, 1, -1, 1, -1, 1},
-                       {0, 0, 0, 0, 1, 0}, 
-                       {0, 0, 0, 1, 0, 0}, 
-                       {0, 0, 1, 0, 0, 0}, 
-                       {0, 1, 0, 0, 0, 0} 
-                     };
-
-    private static final IntMatrix ref = IntMatrix.createIntMatrix(preRef);
-
-    private static final int[][] preInfl = {
-                       {2, 0, 1, -1, 1, -1},
-                       {1, 1, 1, 0, 0, 0},
-                       {0, 1, 1, 1, 0, 0}, 
-                       {0, 0, 1, 1, 1, 0}, 
-                       {0, 0, 0, 1, 1, 1}, 
-                       {-1, 1, -1, 1, 0, 2}
-                     };
-
-    private static final IntMatrix infl = IntMatrix.createIntMatrix(preInfl);
+    private static final IntMatrix infl = Initializer.infl;
 
     // A vector identifying the point.  
     private final int[] point;
@@ -70,6 +38,10 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
     // public static factory method
     static public BasicPoint createBasicPoint(int[] vector) {
         return new BasicPoint(vector);
+    }
+
+    static public BasicPoint zeroVector() {
+        return new BasicPoint();
     }
 
     // toString method.
