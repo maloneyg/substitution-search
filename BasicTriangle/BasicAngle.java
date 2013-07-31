@@ -2,22 +2,27 @@
 *    This class implements an angle.
 */
 
-final public class BasicAngle implements AbstractAngle {
+final public class BasicAngle implements AbstractAngle, Comparable<BasicAngle> {
 
     // Every angle is implemented as an integer.
     private final int a;
 
     // The angle sum is a constant, shared across all triangles.
-    private final static int angleSum = 7;
+    private final static int angleSum = Initializer.N;
 
     // Constructor method.
     private BasicAngle(int i) {
-        a = i;
+        a = i % (2*angleSum);
     }
 
     // public factory method.
     public BasicAngle createBasicAngle(int i) {
         return new BasicAngle(i);
+    }
+
+    // compareTo
+    public int compareTo(BasicAngle x) {
+        return this.a - x.a;
     }
 
     // toString method.  
@@ -35,10 +40,7 @@ final public class BasicAngle implements AbstractAngle {
 
     // hashCode override.
     public int hashCode() {
-        int prime = 37;
-        int result = 5;
-        result = prime*result + a;
-        return result;
+        return a;
     }
 
     // return the angle as an integer.  

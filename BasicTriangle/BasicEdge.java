@@ -2,6 +2,8 @@
 *    This class implements an edge.
 */
 
+import com.google.common.collect.*;
+
 public class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdgeLength, Orientation, BasicEdge> {
 
     // Member variables. 
@@ -9,7 +11,7 @@ public class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdge
 
     private Orientation orientation;
 
-    private final BasicPoint[] ends;
+    private final ImmutableList<BasicPoint> ends;
 
     // Constructor methods.  
     private BasicEdge(BasicEdgeLength length, Orientation orientation, BasicPoint[] ends) {
@@ -19,7 +21,7 @@ public class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdge
             throw new IllegalArgumentException("A BasicEdge must be initialized with two different BasicPoints.");
         this.length = length;
         this.orientation = orientation;
-        this.ends = ends;
+        this.ends = ImmutableList.of(ends[0],ends[1]);
     }
 
     // public factory method.
@@ -31,12 +33,12 @@ public class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdge
         return length;
     }
 
-    public BasicPoint[] getEnds() {
+    public ImmutableList<BasicPoint> getEnds() {
         return ends;
     }
 
     public BasicEdge transform(BasicAngle a, BasicPoint v) {
-        BasicPoint[] newEnds = { ends[0].rotate(a).add(v), ends[1].rotate(a).add(v) };
+        BasicPoint[] newEnds = { ends.get(0).rotate(a).add(v), ends.get(1).rotate(a).add(v) };
         return new BasicEdge(length, orientation, newEnds);
     }
 
@@ -47,24 +49,26 @@ public class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdge
     */ 
     public Orientation getOrientation(BasicEdge e) {
         if (!(this.length.equals(e.length)))
-            throw new RuntimeException("You need to match edges of the same length.");
-        BasicPoint[] u = this.ends;
-        BasicPoint[] v = e.ends;
+            throw new IllegalArgumentException("You need to match edges of the same length.");
+        BasicPoint u0 = this.ends.get(0);
+        BasicPoint u1 = this.ends.get(1);
+        BasicPoint v0 = e.ends.get(1);
+        BasicPoint v1 = e.ends.get(1);
 
-        if (u[0].equals(v[0])) {
-            if (u[1].equals(v[1])) {
+        if (u0.equals(v0)) {
+            if (u1.equals(v1)) {
                 return this.orientation;
             } else {
-                throw new RuntimeException("You need to match edges in the same position.");
+                throw new IllegalArgumentException("You need to match edges in the same position.");
             }
-        } else if (u[0].equals(v[1])) {
-            if (u[1].equals(v[0])) {
+        } else if (u0.equals(v1)) {
+            if (u1.equals(v0)) {
                 return this.orientation.getOpposite();
             } else {
-                throw new RuntimeException("You need to match edges in the same position.");
+                throw new IllegalArgumentException("You need to match edges in the same position.");
             }
         }
-        throw new RuntimeException("You need to match edges in the same position.");
+        throw new IllegalArgumentException("You need to match edges in the same position.");
     }
 
     // Check if two edges are the same, with identical orientations. 
@@ -74,17 +78,19 @@ public class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdge
         BasicEdge e = (BasicEdge) obj;
         if (!(this.length.equals(e.length)))
             return false;
-        BasicPoint[] u = this.ends;
-        BasicPoint[] v = e.ends;
+        BasicPoint u0 = this.ends.get(0);
+        BasicPoint u1 = this.ends.get(1);
+        BasicPoint v0 = e.ends.get(1);
+        BasicPoint v1 = e.ends.get(1);
 
-        if (u[0].equals(v[0])) {
-            if (u[1].equals(v[1])) {
+        if (u0.equals(v0)) {
+            if (u1.equals(v1)) {
                 return this.orientation.equals(e.orientation);
             } else {
                 return false;
             }
-        } else if (u[0].equals(v[1])) {
-            if (u[1].equals(v[0])) {
+        } else if (u0.equals(v1)) {
+            if (u1.equals(v0)) {
                 return this.orientation.equals(e.orientation.getOpposite());
             } else {
                 return false;
@@ -98,8 +104,8 @@ public class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdge
         int prime = 17;
         int result = 19;
         result = prime*result + length.hashCode();
-        int h0 = ends[0].hashCode();
-        int h1 = ends[1].hashCode();
+        int h0 = ends.get(0).hashCode();
+        int h1 = ends.get(1).hashCode();
         if (h0 < h1) {
             result = prime*result + h0;
             result = prime*result + h1;
@@ -119,17 +125,19 @@ public class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdge
     public boolean compatible(BasicEdge e) {
         if (!(this.length.equals(e.length)))
             return false;
-        BasicPoint[] u = this.ends;
-        BasicPoint[] v = e.ends;
+        BasicPoint u0 = this.ends.get(0);
+        BasicPoint u1 = this.ends.get(1);
+        BasicPoint v0 = e.ends.get(1);
+        BasicPoint v1 = e.ends.get(1);
 
-        if (u[0].equals(v[0])) {
-            if (u[1].equals(v[1])) {
+        if (u0.equals(v0)) {
+            if (u1.equals(v1)) {
                 return !this.orientation.equals(e.orientation.getOpposite());
             } else {
                 return false;
             }
-        } else if (u[0].equals(v[1])) {
-            if (u[1].equals(v[0])) {
+        } else if (u0.equals(v1)) {
+            if (u1.equals(v0)) {
                 return !this.orientation.equals(e.orientation);
             } else {
                 return false;

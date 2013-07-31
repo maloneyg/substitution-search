@@ -3,40 +3,41 @@
 *    It uses a representation as a vector of integers.  
 */
 
+import com.google.common.collect.*;
 
 final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
 
     // static variables for all points.
-    private static final int length = Initializer.n - 1;
+    private static final int length = Initializer.N - 1;
 
-    private static final IntMatrix rot = Initializer.rot;
+    private static final IntMatrix ROT = Initializer.ROT;
 
-    private static final IntMatrix ref = Initializer.ref;
+    private static final IntMatrix REF = Initializer.REF;
 
-    private static final IntMatrix infl = Initializer.infl;
+    private static final IntMatrix INFL = Initializer.INFL;
 
     // A vector identifying the point.  
-    private final int[] point;
+    private final ImmutableList<Integer> point;
 
     // Constructor methods.
 
-    private BasicPoint(int[] vector) {
+    private BasicPoint(Integer[] vector) {
         if (vector.length != length) {
             throw new IllegalArgumentException("Point length is incorrect.");
         }
-        this.point = vector;
+        this.point = ImmutableList.copyOf(vector);
     }
 
     private BasicPoint() {
-        int[] vector = new int[length];
+        Integer[] vector = new Integer[length];
         for (int i = 0; i < length; i++) {
             vector[i] = 0;
         }
-        point = vector;
+        point = ImmutableList.copyOf(vector);
     }
 
     // public static factory method
-    static public BasicPoint createBasicPoint(int[] vector) {
+    static public BasicPoint createBasicPoint(Integer[] vector) {
         return new BasicPoint(vector);
     }
 
@@ -47,10 +48,10 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
     // toString method.
     public String toString() {
         String outString = "(";
-        for (int i = 0; i < length - 1; i++) {
-            outString = outString + point[i] + ",";
+        for (int i = 0; i < point.size() - 1; i++) {
+            outString = outString + point.get(i) + ",";
         }
-        outString = outString + point[length] + ")";
+        outString = outString + point.get(length) + ")";
         return outString;
     }
 
@@ -60,7 +61,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
             return false;
         BasicPoint p = (BasicPoint) obj;
         for (int i = 0; i < length; i++) {
-            if (p.point[i] != this.point[i])
+            if (p.point.get(i) != this.point.get(i))
                 return false;
         }
         return true;
@@ -70,28 +71,33 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
     public int hashCode() {
         int prime = 53;
         int result = 11;
-        result = prime*result + ref.hashCode();
-        result = prime*result + rot.hashCode();
-        result = prime*result + infl.hashCode();
         for (int i = 0; i < length; i++) {
-            result = prime*result + point[i];
+            result = prime*result + point.get(i);
         }
         return result;
     }
 
+    // a private helper method to turn point into an array of Integers.
+    private Integer[] pointAsArray() {
+        Integer[] output = new Integer[length];
+        for (int i = 0; i < length; i++)
+            output[i] = point.get(i);
+        return output;
+    }
+
     // Manipulation methods.  
     public BasicPoint add(BasicPoint p) {
-        int[] q = new int[length];
+        Integer[] q = new Integer[length];
         for (int i = 0; i < length; i++) {
-            q[i] = this.point[i] + p.point[i];
+            q[i] = this.point.get(i) + p.point.get(i);
         }
         return new BasicPoint(q);
     }
 
     public BasicPoint scalarMultiple(int c) {
-        int[] q = new int[length];
+        Integer[] q = new Integer[length];
         for (int i = 0; i < length; i++) {
-            q[i] = c * this.point[i];
+            q[i] = c * this.point.get(i);
         }
         return new BasicPoint(q);
     }
@@ -103,20 +109,20 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
     public BasicPoint rotate(BasicAngle a) {
         int i = a.getAsInt();
         if (i < 0)
-            throw new RuntimeException("You must perform a positive number of rotations.");
+            throw new IllegalArgumentException("You must perform a positive number of rotations.");
 
-        int[] result  = new int[length];
+        Integer[] result  = new Integer[length];
         for (int j = 0; j < i; j++)
-            result = rot.rowTimes(result);
+            result = ROT.rowTimes(result);
         return new BasicPoint(result);
     }
 
     public BasicPoint reflect() {
-        return new BasicPoint(ref.rowTimes(this.point));
+        return new BasicPoint(REF.rowTimes(this.pointAsArray()));
     }
 
     public BasicPoint inflate() {
-        return new BasicPoint(infl.rowTimes(this.point));
+        return new BasicPoint(INFL.rowTimes(this.pointAsArray()));
     }
 
 } // end of class BasicPoint

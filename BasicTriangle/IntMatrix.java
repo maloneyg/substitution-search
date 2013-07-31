@@ -24,7 +24,7 @@ final public class IntMatrix {
     }
 
     // public factory method for the zero matrix.
-    public IntMatrix zeroMatrix(int M, int N) {
+    static public IntMatrix zeroMatrix(int M, int N) {
         return new IntMatrix(M, N);
     }
 
@@ -49,13 +49,6 @@ final public class IntMatrix {
         for (int i = 0; i < N; i++)
             I.data[i][i] = 1;
         return I;
-    }
-
-    // swap rows i and j
-    private void swap(int i, int j) {
-        int[] temp = data[i];
-        data[i] = data[j];
-        data[j] = temp;
     }
 
     // create and return the transpose of the invoking matrix
@@ -115,6 +108,16 @@ final public class IntMatrix {
         return result;
     }
 
+    // return C = c * A
+    public IntMatrix times(int c) {
+        IntMatrix A = this;
+        IntMatrix C = new IntMatrix(A.M, A.N);
+        for (int i = 0; i < A.M; i++)
+            for (int j = 0; j < A.N; j++)
+                C.data[i][j] = c * A.data[i][j];
+        return C;
+    }
+
     // return C = A * B
     public IntMatrix times(IntMatrix B) {
         IntMatrix A = this;
@@ -158,6 +161,23 @@ final public class IntMatrix {
         return output;
     }
 
+    /*
+    * Convert the integer array i into a row vector,
+    * then multiply it on the right by A, then convert
+    * the resulting row vector into an integer array.
+    */
+    public Integer[] rowTimes(Integer[] i) {
+        int[] newArray = new int[i.length];
+        for (int j = 0; j < i.length; j++)
+            newArray[j] = i[j].intValue();
+        newArray = this.rowTimes(newArray);
+        Integer[] output = new Integer[i.length];
+        for (int k = 0; k < i.length; k++)
+            output[k] = Integer.valueOf(newArray[k]);
+        return output;
+    }
+
+
 
 
     // test client
@@ -165,10 +185,6 @@ final public class IntMatrix {
         int[][] d = { { 1, 2, 3 }, { 4, 5, 6 }, { 9, 1, 3} };
 
         IntMatrix A = new IntMatrix(d);
-        System.out.println(A.toString()); 
-        System.out.println();
-
-        A.swap(1, 2);
         System.out.println(A.toString()); 
         System.out.println();
 

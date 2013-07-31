@@ -70,17 +70,7 @@ public class SimpleSet<T> extends HashSet<T> {
 
     // hashCode method override.
     public int hashCode() {
-        int prime = 61;
-        int result = 19;
-        LinkedList<Integer> codes = new LinkedList();
-        for ( T thing : this) {
-            codes.addLast(thing.hashCode());
-        }
-        Collections.sort(codes);
-        for ( Integer code : codes) {
-            result = prime*result + code;
-        }
-        return result;
+        return super.hashCode();
     }
 
     // test client

@@ -2,11 +2,13 @@
 *    This interface represents the properties of an edge.
 */
 
+import com.google.common.collect.*;
+
 public interface AbstractEdge<A extends AbstractAngle, P extends AbstractPoint, L extends AbstractEdgeLength, BasicOrientation, E extends AbstractEdge> {
 
     public L getLength();
 
-    public P[] getEnds();
+    public ImmutableList<P> getEnds();
 
     /* 
     * Given an edge with a (possibly different) orientation,

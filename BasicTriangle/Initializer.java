@@ -13,26 +13,21 @@
  *
  *************************************************************************/
 
+import java.lang.Math.*;
+
 class Initializer {
 
-    static protected final int N;             // the order of symmetry.
+    protected static final int N = 7;             // the order of symmetry
 
-    /*
-    * This is a little tricky.
-    * inflList is a list of integer coefficients of certain numbers.
-    * The numbers are the lengths of the diagonals of a 
-    * regular n-gon.  We're going to use inflList to create the 
-    * inflation matrix. 
-    */
-    static protected final int[] INFL_LIST = { 1, 1 };
+    protected static final IntMatrix A;           // 2cos[pi/N], as a matrix
 
     protected static final IntMatrix ROT;
     protected static final IntMatrix REF;
     protected static final IntMatrix INFL;
 
-    private Initializer(int N) {
+    static { // start of static initialization
 
-        this.N = N;
+        int[] inflList = new int[] {1, 1};
 
         /*
         * Pre-matrices.
@@ -42,7 +37,7 @@ class Initializer {
         int[][] preRot = new int[N-1][N-1];
 
         for (int i = 0; i < N - 2; i++) {
-            for (int j = 0; j < N - 2; j++) {
+            for (int j = 0; j < N - 1; j++) {
                 if (j == i + 1) {
                     preRot[i][j] = 1;
                 } else {
@@ -78,7 +73,7 @@ class Initializer {
 
         for (int i = 2; i < N - 1; i++) {
             for (int j = 0; j < N - 1; j++) {
-                if (j == N - 1 -i) {
+                if (j == N - i) {
                     preRef[i][j] = 1;
                 } else {
                     preRef[i][j] = 0;
@@ -86,7 +81,8 @@ class Initializer {
             }
         }
 
-        // matrix representation of 2*cos(pi/N).
+        // matrix representation of 2*cos(pi/N),
+        // the shortest non-edge diagonal of a regular n-gon.
         int[][] a = new int[N-1][N-1];
 
         for (int k = 0; k < N - 1; k++) {
@@ -111,11 +107,53 @@ class Initializer {
                 }
             }
         }
-        
+
+        // Make matrices representing all diagonals of the N-gon.
+        IntMatrix[] diagonals = new IntMatrix[Math.max(inflList.length, 2)];
+        IntMatrix preInfl = IntMatrix.zeroMatrix(N-1,N-1);
+
+        // initialize A
+        A = IntMatrix.createIntMatrix(a);
+
+        diagonals[0] = IntMatrix.identity(N-1);
+        diagonals[1] = A;
+
+        for (int m = 2; m < inflList.length; m++) {
+            diagonals[m] = diagonals[1].times(diagonals[m-1]).minus(diagonals[m-2]);
+        }
+
+        // Make an integer combination of these matrices, 
+        // using coefficients from inflList.
+        for (int n = 0; n < inflList.length; n++) {
+            preInfl = diagonals[n].times(inflList[n]).plus(preInfl);
+        }
+
         ROT = IntMatrix.createIntMatrix(preRot);
         REF = IntMatrix.createIntMatrix(preRef);
-        INFL = IntMatrix.createIntMatrix(preInfl);
+        INFL = preInfl;
+
+    } // end of static initialization
+
+    // private constructor
+    private Initializer() {
+    }
+
+
+
+    public static void main(String[] args) {
+
+        System.out.println("ROT");
+        System.out.println(ROT);
+        System.out.println("REF");
+        System.out.println(REF);
+        System.out.println("INFL");
+        System.out.println(INFL);
+        System.out.println("A");
+        System.out.println(A);
 
     }
+
+
+
 
 } // end of class Initializer
