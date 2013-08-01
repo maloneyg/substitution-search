@@ -5,8 +5,9 @@
 *    It has three angles, three vertices, and three edge orientations.
 */
 
+import com.google.common.collect.*;
 
-public interface AbstractTriangle<A extends AbstractAngle, Orientation, P extends AbstractPoint<P,A>, L extends AbstractEdgeLength, E extends AbstractEdge<A,P,L,O,E>, T extends AbstractTriangle> {
+public interface AbstractTriangle<A extends AbstractAngle, P extends AbstractPoint<P,A>, L extends AbstractEdgeLength, E extends AbstractEdge<A,P,L,E>, T extends AbstractTriangle> {
 
     /**
     * getter methods that return the points, angles, 
@@ -14,7 +15,7 @@ public interface AbstractTriangle<A extends AbstractAngle, Orientation, P extend
     * These things must implement various interfaces
     * representing their abstract idealizations.  
     */
-    public P[] getVertices();
+    public ImmutableList<P> getVertices();
 
     /**
     * Given two vertices that (presumably) lie on the triangle,
@@ -22,19 +23,11 @@ public interface AbstractTriangle<A extends AbstractAngle, Orientation, P extend
     */
     public P getOtherVertex(P vertex1, P vertex2);
 
-    public A[] getAngles();
+    public ImmutableList<A> getAngles();
 
-    public Orientation[] getOrientations();
+    public ImmutableList<Orientation> getOrientations();
 
     public E[] getEdges();
-
-    /**
-    * setter method for orientations.
-    * setter methods for vertices, angles, and edge lengths 
-    * probably shouldn't even exist.  
-    */
-
-    public void setOrientation(Orientation arrow, int i);
 
     /**
     * Incidence test methods.  

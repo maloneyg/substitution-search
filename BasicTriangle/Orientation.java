@@ -6,7 +6,7 @@
 
 public final class Orientation {
 
-    private Orientation opposite;
+    private final Orientation opposite;
 
     public Orientation getOpposite() {
         return opposite;
@@ -42,21 +42,6 @@ public final class Orientation {
     // return true if the two orientations are not opposites.
     public boolean compatible(Orientation o) {
         return !this.equals(o.getOpposite());
-    }
-
-    /*
-    * return to if this orientation equals from, and 
-    * -to if this orientation equals -from.
-    * Otherwise return this.
-    */
-    public Orientation reset(Orientation from, Orientation to) {
-        if (this.equals(from)) {
-            return to;
-        } else if (this.equals(from.getOpposite())) {
-            return to.getOpposite();
-        } else {
-            return this;
-        }
     }
 
 } // end of class Orientation

@@ -41,8 +41,17 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
         return new BasicPoint(vector);
     }
 
-    static public BasicPoint zeroVector() {
+    static final public BasicPoint zeroVector() {
         return new BasicPoint();
+    }
+
+    static final public BasicPoint unitVector() {
+        Integer[] vector = new Integer[length];
+        vector[0] = 1;
+        for (int i = 1; i < length; i++) {
+            vector[i] = 0;
+        }
+        return new BasicPoint(vector);
     }
 
     // toString method.

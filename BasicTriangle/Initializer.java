@@ -14,6 +14,9 @@
  *************************************************************************/
 
 import java.lang.Math.*;
+import java.util.HashSet;
+import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 
 class Initializer {
 
@@ -25,9 +28,25 @@ class Initializer {
     protected static final IntMatrix REF;
     protected static final IntMatrix INFL;
 
+    /*
+    * A list representing edge lengths.  
+    * When we initialize we take a subset of these.
+    * Notice that it's finite, so if we go to bigger 
+    * orders of symmetry, we'll need to add to the list.
+    */
+    protected enum EDGE_LENGTH {
+        E01, E02, E03, E04, E05, E06, E07, E08, //
+        E09, E10, E11, E12, E13, E14, E15, E16  //
+    }
+
+    /*
+    * A list representing the edge lengths we have actually selected.  
+    */
+    protected static final ImmutableSet<EDGE_LENGTH> LENGTHS;
+
     static { // start of static initialization
 
-        int[] inflList = new int[] {1, 1};
+        int[] inflList = new int[] {1, 1}; // need to get this from the user.
 
         /*
         * Pre-matrices.
@@ -131,6 +150,13 @@ class Initializer {
         ROT = IntMatrix.createIntMatrix(preRot);
         REF = IntMatrix.createIntMatrix(preRef);
         INFL = preInfl;
+
+        // select a subset of the edge lengths.
+        HashSet<EDGE_LENGTH> preLengths = new HashSet();
+        for (int u = 0; u < N/2 - 1; u++) {
+            preLengths.add(EDGE_LENGTH.values()[u]);
+        }
+        LENGTHS = Sets.immutableEnumSet(preLengths);
 
     } // end of static initialization
 

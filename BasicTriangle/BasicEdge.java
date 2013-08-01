@@ -4,12 +4,12 @@
 
 import com.google.common.collect.*;
 
-public class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdgeLength, Orientation, BasicEdge> {
+public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdgeLength, BasicEdge> {
 
     // Member variables. 
     private final BasicEdgeLength length;
 
-    private Orientation orientation;
+    private final Orientation orientation;
 
     private final ImmutableList<BasicPoint> ends;
 
@@ -104,6 +104,14 @@ public class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdge
         int prime = 17;
         int result = 19;
         result = prime*result + length.hashCode();
+
+        /*
+        * We can't just throw together the hashCode of the ends
+        * in order, because two BasicEdges equal one another
+        * if their ends are listed in the opposite order and 
+        * their orientations are opposites. So we have to do 
+        * something more sophisticated. 
+        */
         int h0 = ends.get(0).hashCode();
         int h1 = ends.get(1).hashCode();
         if (h0 < h1) {

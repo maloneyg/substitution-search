@@ -4,7 +4,7 @@
 
 import com.google.common.collect.*;
 
-public interface AbstractEdge<A extends AbstractAngle, P extends AbstractPoint, L extends AbstractEdgeLength, BasicOrientation, E extends AbstractEdge> {
+public interface AbstractEdge<A extends AbstractAngle, P extends AbstractPoint, L extends AbstractEdgeLength, E extends AbstractEdge> {
 
     public L getLength();
 

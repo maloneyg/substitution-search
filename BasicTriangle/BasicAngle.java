@@ -2,7 +2,7 @@
 *    This class implements an angle.
 */
 
-final public class BasicAngle implements AbstractAngle, Comparable<BasicAngle> {
+public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle> {
 
     // Every angle is implemented as an integer.
     private final int a;
