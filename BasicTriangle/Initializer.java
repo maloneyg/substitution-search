@@ -73,6 +73,7 @@ class Initializer {
             }
         }
 
+
         // Pre-reflection matrix.
         int[][] preRef = new int[N-1][N-1];
 
