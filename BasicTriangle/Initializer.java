@@ -153,7 +153,7 @@ class Initializer {
 
         // select a subset of the edge lengths.
         HashSet<EDGE_LENGTH> preLengths = new HashSet();
-        for (int u = 0; u < N/2 - 1; u++) {
+        for (int u = 0; u < N/2; u++) {
             preLengths.add(EDGE_LENGTH.values()[u]);
         }
         LENGTHS = Sets.immutableEnumSet(preLengths);

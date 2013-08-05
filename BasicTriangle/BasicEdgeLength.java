@@ -4,6 +4,7 @@
 
 import java.lang.Math.*;
 import com.google.common.collect.*;
+import com.google.common.base.*;
 
 final public class BasicEdgeLength implements AbstractEdgeLength<BasicPoint> {
 
@@ -29,9 +30,9 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicPoint> {
     static { // initialize REPS. Use recursion.
         BasicPoint[] preReps = new BasicPoint[Math.max(2,LENGTHS.size())];
         preReps[0] = BasicPoint.unitVector();
-        preReps[1] = BasicPoint.unitVector().inflate();
+        preReps[1] = BasicPoint.unitVector().timesA();
         for (int i = 2; i < preReps.length; i++)
-            preReps[i] = preReps[i-1].inflate().subtract(preReps[i-2]);
+            preReps[i] = preReps[i-1].timesA().subtract(preReps[i-2]);
         REPS = ImmutableList.copyOf(preReps);
 
         // initialize ALL_EDGE_LENGTHS.

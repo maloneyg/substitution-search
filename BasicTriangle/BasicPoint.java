@@ -4,11 +4,14 @@
 */
 
 import com.google.common.collect.*;
+import com.google.common.base.*;
 
 final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
 
     // static variables for all points.
     private static final int length = Initializer.N - 1;
+
+    private static final IntMatrix A = Initializer.A;
 
     private static final IntMatrix ROT = Initializer.ROT;
 
@@ -60,7 +63,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
         for (int i = 0; i < point.size() - 1; i++) {
             outString = outString + point.get(i) + ",";
         }
-        outString = outString + point.get(length) + ")";
+        outString = outString + point.get(length-1) + ")";
         return outString;
     }
 
@@ -132,6 +135,10 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
 
     public BasicPoint inflate() {
         return new BasicPoint(INFL.rowTimes(this.pointAsArray()));
+    }
+
+    protected BasicPoint timesA() {
+        return new BasicPoint(A.rowTimes(this.pointAsArray()));
     }
 
 } // end of class BasicPoint
