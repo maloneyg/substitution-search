@@ -62,6 +62,11 @@ public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle> {
         return this.a;
     }
 
+    // return the angle as an integer.  
+    protected BasicAngle supplement() {
+        return createBasicAngle(ANGLE_SUM - (a % 2*ANGLE_SUM));
+    }
+
     public static void main(String[] args) {
 
         BasicAngle A0 = createBasicAngle(0);

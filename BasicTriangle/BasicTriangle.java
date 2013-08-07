@@ -27,7 +27,7 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
     }
 
     // public static factory methods.
-    public BasicTriangle createBasicTriangle(BasicAngle[] a, BasicPoint[] p, Orientation[] o, BasicEdgeLength[] e) {
+    public static BasicTriangle createBasicTriangle(BasicAngle[] a, BasicPoint[] p, Orientation[] o, BasicEdgeLength[] e) {
         return new BasicTriangle(a,p,o,e);
     }
 
@@ -95,6 +95,29 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
         } else {
             return true;
         }
+    }
+
+    // euqls method
+    public boolean equals(Object obj) {
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        BasicTriangle t = (BasicTriangle) obj;
+        return (this.angles.equals(t.angles)&&this.vertices.equals(t.vertices)&&this.orientations.equals(t.orientations));
+    }
+
+    // hashCode method
+    public int hashCode() {
+        int prime = 29;
+        int result = 3;
+        result = prime*result + angles.hashCode();
+        result = prime*result + vertices.hashCode();
+        result = prime*result + orientations.hashCode();
+        return result;
+    }
+
+    // toString method
+    public String toString() {
+        return "Triangle\n    angles: (" + angles.get(0) + "," + angles.get(1) + "," + angles.get(2) + ")\n  vertices: " + vertices.get(0) + "\n            " + vertices.get(1) + "\n            " + vertices.get(2);
     }
 
     /** 

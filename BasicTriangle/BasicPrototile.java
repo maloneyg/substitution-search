@@ -93,7 +93,38 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
     * a says how to orient it.
     * flip says whether or not to reflect it.
     */
-//    public BasicTriangle place(BasicPoint p, BasicAngle a, boolean flip);
+    public BasicTriangle place(BasicPoint p, BasicAngle a, boolean flip) {
+        BasicPoint p1 = BasicPoint.ZERO_VECTOR;
+        BasicPoint p2 = lengths.get(0).getAsVector();
+        BasicPoint p0 = lengths.get(2).getAsVector().rotate(angles.get(1));
+        BasicPoint[] vertices = new BasicPoint[] { p0, p1, p2 };
+        BasicAngle[] newAngles = new BasicAngle[] { angles.get(0), angles.get(1), angles.get(2) };
+        Orientation[] newOrientations = new Orientation[] { orientations.get(0), orientations.get(1), orientations.get(2) };
+        BasicEdgeLength[] newLengths = new BasicEdgeLength[] { lengths.get(0), lengths.get(1), lengths.get(2) };
+        if (flip) {
+            for (int i = 0; i < 3; i++)
+                vertices[i] = vertices[i].reflect();
+            /* 
+            * Now flip the first and last of everything
+            * to put things in ccw order.
+            */
+            BasicPoint tempVertex = vertices[2];
+            vertices[2] = vertices[0];
+            vertices[0] = tempVertex;
+            BasicAngle tempAngle = newAngles[2];
+            newAngles[2] = newAngles[0];
+            newAngles[0] = tempAngle;
+            Orientation tempOrientation = newOrientations[2];
+            newOrientations[2] = newOrientations[0];
+            newOrientations[0] = tempOrientation;
+            BasicEdgeLength tempLength = newLengths[2];
+            newLengths[2] = newLengths[0];
+            newLengths[0] = tempLength;
+        }
+        for (int j = 0; j < 3; j++)
+            vertices[j] = vertices[j].rotate(a).add(p);
+        return BasicTriangle.createBasicTriangle(newAngles, vertices, newOrientations, newLengths);
+    }
 
     public static void main(String[] args) {
 
@@ -106,7 +137,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
         BasicPrototile P2 = createBasicPrototile(new int[] { 2, 2, 3 });
         System.out.println(P2);
 
-        BasicPrototile P3 = createBasicPrototile(new int[] { 3, 2, 2 });
+        BasicPrototile P3 = createBasicPrototile(new int[] { 1, 1, 5 });
         System.out.println(P3);
         System.out.println(P2.equals(P3)); // should be true 
         System.out.println(P2.equals(P1)); // should be false
