@@ -3,7 +3,7 @@
 */
 
 
-public interface AbstractEdgeLength<P extends AbstractPoint> {
+public interface AbstractEdgeLength<A extends AbstractAngle, P extends AbstractPoint, L extends AbstractEdgeLength> {
 
     public boolean equals(Object obj);
 

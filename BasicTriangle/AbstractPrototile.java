@@ -20,6 +20,6 @@ public interface AbstractPrototile<A extends AbstractAngle, P extends AbstractPo
     * a says how to orient it.
     * flip says whether or not to reflect it.
     */
-    public T place(P p, A a, boolean flip);
+//    public T place(P p, A a, boolean flip);
 
 } // end of interface AbstractPrototile

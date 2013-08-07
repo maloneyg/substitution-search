@@ -6,13 +6,15 @@ import java.lang.Math.*;
 import com.google.common.collect.*;
 import com.google.common.base.*;
 
-final public class BasicEdgeLength implements AbstractEdgeLength<BasicPoint> {
+final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, BasicPoint, BasicEdgeLength> {
+
+    private static final int N = Initializer.N;
 
     /*
     * A list of enums representing the allowable edge lengths.
     * This list comes from Initializer.
     */
-    static final private ImmutableSet<Initializer.EDGE_LENGTH> LENGTHS = Initializer.LENGTHS;
+    static final private ImmutableList<Initializer.EDGE_LENGTH> LENGTHS = Initializer.LENGTHS;
 
     /*
     * A list of all possible BasicEdgeLength objects.
@@ -29,8 +31,8 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicPoint> {
 
     static { // initialize REPS. Use recursion.
         BasicPoint[] preReps = new BasicPoint[Math.max(2,LENGTHS.size())];
-        preReps[0] = BasicPoint.unitVector();
-        preReps[1] = BasicPoint.unitVector().timesA();
+        preReps[0] = BasicPoint.UNIT_VECTOR;
+        preReps[1] = BasicPoint.UNIT_VECTOR.timesA();
         for (int i = 2; i < preReps.length; i++)
             preReps[i] = preReps[i-1].timesA().subtract(preReps[i-2]);
         REPS = ImmutableList.copyOf(preReps);
@@ -56,18 +58,8 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicPoint> {
 
     // private constructor
     private BasicEdgeLength(int i) {
-        UnmodifiableIterator<Initializer.EDGE_LENGTH> itr = LENGTHS.iterator();
-        Initializer.EDGE_LENGTH tempLength = itr.next();
-        for (int j = 0; j < i; j++) {
-            if (itr.hasNext()) {
-                if (j == i)
-                    tempLength = itr.next();
-                else
-                    itr.next();
-            }
-        }
         rep = REPS.get(i);
-        length = tempLength;
+        length = LENGTHS.get(i);
     }
 
     // public static factory method
@@ -92,15 +84,30 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicPoint> {
         return "Edge length " + rep;
     }
 
+    /*
+    * return a vector with length equal to this edge length.
+    * The vector should lie on the positive x-axis, if that
+    * notion makes any sense.
+    */
     public BasicPoint getAsVector() {
         return rep;
     }
 
+    /*
+    * return the edge length opposite the given angle in a triangle.
+    */
+    public static BasicEdgeLength lengthOpposite(BasicAngle a) {
+        int angleModN = a.getAsInt() % N;
+        if (angleModN == 0 || angleModN == N)
+            throw new IllegalArgumentException("There is no edge length opposite an angle of 0.");
+        return createBasicEdgeLength(Math.min(angleModN, N - angleModN)- 1);
+    }
+
     public static void main(String[] args) {
 
-        BasicEdgeLength EL0 = createBasicEdgeLength(0);
-        BasicEdgeLength EL1 = createBasicEdgeLength(1);
-        BasicEdgeLength EL2 = createBasicEdgeLength(2);
+        BasicEdgeLength EL0 = lengthOpposite(BasicAngle.createBasicAngle(1));
+        BasicEdgeLength EL1 = lengthOpposite(BasicAngle.createBasicAngle(2));
+        BasicEdgeLength EL2 = lengthOpposite(BasicAngle.createBasicAngle(4));
         System.out.println(EL0);
         System.out.println(EL1);
         System.out.println(EL2);

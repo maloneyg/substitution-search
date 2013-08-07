@@ -9,26 +9,44 @@ import com.google.common.base.*;
 final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
 
     // static variables for all points.
-    private static final int length = Initializer.N - 1;
+    public static final int length = Initializer.N - 1;
 
-    private static final IntMatrix A = Initializer.A;
+    public static final IntMatrix A = Initializer.A;
 
-    private static final IntMatrix ROT = Initializer.ROT;
+    public static final IntMatrix ROT = Initializer.ROT;
 
-    private static final IntMatrix REF = Initializer.REF;
+    public static final IntMatrix REF = Initializer.REF;
 
-    private static final IntMatrix INFL = Initializer.INFL;
+    public static final IntMatrix INFL = Initializer.INFL;
+
+    public static final BasicPoint ZERO_VECTOR = new BasicPoint();
+
+    public static final BasicPoint UNIT_VECTOR;
+
+    static { // initialize the unit vector
+
+        int[] preUnit = new int[length];
+        preUnit[0] = 1;
+        for (int i = 1; i < length; i++) {
+            preUnit[i] = 0;
+        }
+        UNIT_VECTOR = new BasicPoint(preUnit);
+
+    }
 
     // A vector identifying the point.  
     private final ImmutableList<Integer> point;
 
     // Constructor methods.
 
-    private BasicPoint(Integer[] vector) {
+    private BasicPoint(int[] vector) {
         if (vector.length != length) {
             throw new IllegalArgumentException("Point length is incorrect.");
         }
-        this.point = ImmutableList.copyOf(vector);
+        Integer[] tempVector = new Integer[length];
+        for (int i = 0; i < length; i++)
+            tempVector[i] = Integer.valueOf(vector[i]);
+        this.point = ImmutableList.copyOf(tempVector);
     }
 
     private BasicPoint() {
@@ -40,20 +58,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
     }
 
     // public static factory method
-    static public BasicPoint createBasicPoint(Integer[] vector) {
-        return new BasicPoint(vector);
-    }
-
-    static final public BasicPoint zeroVector() {
-        return new BasicPoint();
-    }
-
-    static final public BasicPoint unitVector() {
-        Integer[] vector = new Integer[length];
-        vector[0] = 1;
-        for (int i = 1; i < length; i++) {
-            vector[i] = 0;
-        }
+    static public BasicPoint createBasicPoint(int[] vector) {
         return new BasicPoint(vector);
     }
 
@@ -90,8 +95,8 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
     }
 
     // a private helper method to turn point into an array of Integers.
-    private Integer[] pointAsArray() {
-        Integer[] output = new Integer[length];
+    private int[] pointAsArray() {
+        int[] output = new int[length];
         for (int i = 0; i < length; i++)
             output[i] = point.get(i);
         return output;
@@ -99,7 +104,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
 
     // Manipulation methods.  
     public BasicPoint add(BasicPoint p) {
-        Integer[] q = new Integer[length];
+        int[] q = new int[length];
         for (int i = 0; i < length; i++) {
             q[i] = this.point.get(i) + p.point.get(i);
         }
@@ -107,7 +112,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
     }
 
     public BasicPoint scalarMultiple(int c) {
-        Integer[] q = new Integer[length];
+        int[] q = new int[length];
         for (int i = 0; i < length; i++) {
             q[i] = c * this.point.get(i);
         }
@@ -123,7 +128,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
         if (i < 0)
             throw new IllegalArgumentException("You must perform a positive number of rotations.");
 
-        Integer[] result  = new Integer[length];
+        int[] result  = new int[length];
         for (int j = 0; j < i; j++)
             result = ROT.rowTimes(result);
         return new BasicPoint(result);

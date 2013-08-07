@@ -7,7 +7,7 @@
 
 import com.google.common.collect.*;
 
-public interface AbstractTriangle<A extends AbstractAngle, P extends AbstractPoint<P,A>, L extends AbstractEdgeLength, E extends AbstractEdge<A,P,L,E>, T extends AbstractTriangle> {
+public interface AbstractTriangle<A extends AbstractAngle, P extends AbstractPoint<P,A>, L extends AbstractEdgeLength<A,P,L>, E extends AbstractEdge<A,P,L,E>, T extends AbstractTriangle> {
 
     /**
     * getter methods that return the points, angles, 

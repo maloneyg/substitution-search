@@ -14,19 +14,17 @@
  *************************************************************************/
 
 import java.lang.Math.*;
-import java.util.HashSet;
-import com.google.common.collect.Sets;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 
 class Initializer {
 
-    protected static final int N = 7;             // the order of symmetry
+    public static final int N = 7;             // the order of symmetry
 
-    protected static final IntMatrix A;           // 2cos[pi/N], as a matrix
+    public static final IntMatrix A;           // 2cos[pi/N], as a matrix
 
-    protected static final IntMatrix ROT;
-    protected static final IntMatrix REF;
-    protected static final IntMatrix INFL;
+    public static final IntMatrix ROT;
+    public static final IntMatrix REF;
+    public static final IntMatrix INFL;
 
     /*
     * A list representing edge lengths.  
@@ -34,7 +32,7 @@ class Initializer {
     * Notice that it's finite, so if we go to bigger 
     * orders of symmetry, we'll need to add to the list.
     */
-    protected enum EDGE_LENGTH {
+    public enum EDGE_LENGTH {
         E01, E02, E03, E04, E05, E06, E07, E08, //
         E09, E10, E11, E12, E13, E14, E15, E16  //
     }
@@ -42,11 +40,30 @@ class Initializer {
     /*
     * A list representing the edge lengths we have actually selected.  
     */
-    protected static final ImmutableSet<EDGE_LENGTH> LENGTHS;
+    public static final ImmutableList<EDGE_LENGTH> LENGTHS;
+
+    /*
+    * A list representing the prototile angles we have selected.
+    */
+    public static final ImmutableList<ImmutableList<Integer>> PROTOTILES;
 
     static { // start of static initialization
 
         int[] inflList = new int[] {1, 1}; // need to get this from the user.
+
+        Integer[][] anglesList = new Integer[][] { // get this from the user.
+                                             { 1, 2, 4 }, //
+                                             { 1, 3, 3 }, //
+                                             { 2, 2, 3 }  //
+                                         };
+
+        ImmutableList<Integer>[] prePrototiles = new ImmutableList[anglesList.length];
+        for (int t = 0; t < anglesList.length; t++) {
+            if (anglesList[t].length != 3)
+                throw new IllegalArgumentException("Trying to create prototiles with the wrong number of angles.");
+            prePrototiles[t] = ImmutableList.copyOf(anglesList[t]);
+        }
+        PROTOTILES = ImmutableList.copyOf(prePrototiles);
 
         /*
         * Pre-matrices.
@@ -153,11 +170,11 @@ class Initializer {
         INFL = preInfl;
 
         // select a subset of the edge lengths.
-        HashSet<EDGE_LENGTH> preLengths = new HashSet();
+        EDGE_LENGTH[] preLengths = new EDGE_LENGTH[N/2];
         for (int u = 0; u < N/2; u++) {
-            preLengths.add(EDGE_LENGTH.values()[u]);
+            preLengths[u] = EDGE_LENGTH.values()[u];
         }
-        LENGTHS = Sets.immutableEnumSet(preLengths);
+        LENGTHS = ImmutableList.copyOf(preLengths);
 
     } // end of static initialization
 

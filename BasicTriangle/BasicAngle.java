@@ -2,22 +2,36 @@
 *    This class implements an angle.
 */
 
+import com.google.common.collect.*;
+
 public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle> {
 
     // Every angle is implemented as an integer.
     private final int a;
 
     // The angle sum is a constant, shared across all triangles.
-    private final static int angleSum = Initializer.N;
+    private static final int ANGLE_SUM = Initializer.N;
+
+    // All possible angles
+    private static final ImmutableList<BasicAngle> ALL_ANGLES;
+
+    static { // initialize ALL_ANGLES
+
+        BasicAngle[] preAllAngles = new BasicAngle[2*ANGLE_SUM];
+        for (int i = 0; i < 2*ANGLE_SUM; i++)
+            preAllAngles[i] = new BasicAngle(i);
+        ALL_ANGLES = ImmutableList.copyOf(preAllAngles);
+
+    }
 
     // Constructor method.
     private BasicAngle(int i) {
-        a = i % (2*angleSum);
+        a = i % (2*ANGLE_SUM);
     }
 
-    // public factory method.
-    public BasicAngle createBasicAngle(int i) {
-        return new BasicAngle(i);
+    // static public factory method.
+    public static BasicAngle createBasicAngle(int i) {
+        return ALL_ANGLES.get(i % (2*ANGLE_SUM));
     }
 
     // compareTo
@@ -46,6 +60,17 @@ public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle> {
     // return the angle as an integer.  
     protected int getAsInt() {
         return this.a;
+    }
+
+    public static void main(String[] args) {
+
+        BasicAngle A0 = createBasicAngle(0);
+        BasicAngle A1 = createBasicAngle(5);
+        BasicAngle A2 = createBasicAngle(73);
+        System.out.println(A0);
+        System.out.println(A1);
+        System.out.println(A2);
+
     }
 
 } // end of class BasicAngle
