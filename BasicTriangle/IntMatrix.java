@@ -138,15 +138,14 @@ final public class IntMatrix {
     public int[] rowTimes(int[] i) {
         IntMatrix A = this;
         if (i.length != A.M) throw new IllegalArgumentException("Illegal matrix dimensions.");
-        int[][] row = new int[1][i.length];
-        for (int j = 0; j < i.length; j++)
-            row[0][j] = i[j];
-
-        IntMatrix result = new IntMatrix(row);
-        result = result.times(A);
-        for (int j = 0; j < i.length; j++)
-            row[0][j] = result.data[0][j];
-        return row[0];
+        int[] row = new int[A.N];
+        for (int k = 0; k < A.N; k++) {
+            row[k] = 0;
+            for (int l = 0; l < A.M; l++) {
+                row[k] = row[k] + i[l]*A.data[l][k];
+            }
+        }
+        return row;
     }
 
 
@@ -189,32 +188,19 @@ final public class IntMatrix {
         System.out.println();
 
         IntMatrix B = A.transpose();
-        System.out.println(B.toString()); 
-        System.out.println();
 
         IntMatrix C = IntMatrix.identity(5);
-        System.out.println(C.toString()); 
-        System.out.println();
-
-        System.out.println(A.plus(B).toString());
-        System.out.println();
 
         int[] testInt = { 1, 2, 4 };
         for (int k = 0; k < testInt.length; k++) 
             System.out.print(" " + testInt[k]);
         System.out.println();
-        A.toString();
+        System.out.println();
+        System.out.println(A);
         System.out.println();
         testInt = A.rowTimes(testInt);
-        for (int k = 0; k < testInt.length; k++) 
-            System.out.print(" " + testInt[k]);
-        System.out.println();
-
-        System.out.println(B.times(A).toString());
-        System.out.println();
-
-        // shouldn't be equal since AB != BA in general    
-        System.out.println(A.times(B).equals(B.times(A)));
+        for (int j = 0; j < testInt.length; j++) 
+            System.out.print(" " + testInt[j]);
         System.out.println();
 
     }

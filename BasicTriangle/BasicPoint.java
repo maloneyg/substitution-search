@@ -128,7 +128,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
         if (i < 0)
             throw new IllegalArgumentException("You must perform a positive number of rotations.");
 
-        int[] result  = new int[length];
+        int[] result  = pointAsArray();
         for (int j = 0; j < i; j++)
             result = ROT.rowTimes(result);
         return new BasicPoint(result);

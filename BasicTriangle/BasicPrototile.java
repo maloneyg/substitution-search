@@ -95,8 +95,12 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
     */
     public BasicTriangle place(BasicPoint p, BasicAngle a, boolean flip) {
         BasicPoint p1 = BasicPoint.ZERO_VECTOR;
+        System.out.println(""+p1);
         BasicPoint p2 = lengths.get(0).getAsVector();
+        System.out.println(""+p2);
         BasicPoint p0 = lengths.get(2).getAsVector().rotate(angles.get(1));
+        System.out.println(""+p0);
+        System.out.println(Initializer.ROT);
         BasicPoint[] vertices = new BasicPoint[] { p0, p1, p2 };
         BasicAngle[] newAngles = new BasicAngle[] { angles.get(0), angles.get(1), angles.get(2) };
         Orientation[] newOrientations = new Orientation[] { orientations.get(0), orientations.get(1), orientations.get(2) };
@@ -137,11 +141,8 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
         BasicPrototile P2 = createBasicPrototile(new int[] { 2, 2, 3 });
         System.out.println(P2);
 
-        BasicPrototile P3 = createBasicPrototile(new int[] { 1, 1, 5 });
-        System.out.println(P3);
-        System.out.println(P2.equals(P3)); // should be true 
-        System.out.println(P2.equals(P1)); // should be false
-        System.out.println(P2.equals(P0)); // should be false
+        BasicTriangle T0 = P2.place(BasicPoint.createBasicPoint(new int[] {1,0,1,0,1,0}),BasicAngle.createBasicAngle(3),false);
+        System.out.println(T0);
 
     }
 

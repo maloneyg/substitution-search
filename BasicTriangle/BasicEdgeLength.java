@@ -105,12 +105,12 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
 
     public static void main(String[] args) {
 
-        BasicEdgeLength EL0 = lengthOpposite(BasicAngle.createBasicAngle(1));
-        BasicEdgeLength EL1 = lengthOpposite(BasicAngle.createBasicAngle(2));
-        BasicEdgeLength EL2 = lengthOpposite(BasicAngle.createBasicAngle(4));
-        System.out.println(EL0);
-        System.out.println(EL1);
-        System.out.println(EL2);
+
+        System.out.println(Initializer.ROT);
+        for (int i = 0; i < ALL_EDGE_LENGTHS.size(); i++) {
+            System.out.println(ALL_EDGE_LENGTHS.get(i).getAsVector());
+            System.out.println(ALL_EDGE_LENGTHS.get(i).getAsVector().rotate(BasicAngle.createBasicAngle(1)));
+        }
 
     }
 
