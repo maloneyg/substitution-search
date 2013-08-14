@@ -106,10 +106,8 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
     public static void main(String[] args) {
 
 
-        System.out.println(Initializer.ROT);
         for (int i = 0; i < ALL_EDGE_LENGTHS.size(); i++) {
             System.out.println(ALL_EDGE_LENGTHS.get(i).getAsVector());
-            System.out.println(ALL_EDGE_LENGTHS.get(i).getAsVector().rotate(BasicAngle.createBasicAngle(1)));
         }
 
     }

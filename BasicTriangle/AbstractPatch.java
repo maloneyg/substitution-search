@@ -1,32 +1,16 @@
 /**
-*    This abstract class represents the properties of a collection of triangles.
+*    This interface represents the properties of a collection of triangles.
 */
 
 
-public abstract class AbstractPatch<P extends AbstractPoint<P>, A extends AbstractAngle, O extends AbstractOrientation<O>, E extends AbstractEdgeLength<E>, T extends AbstractTriangle, X extends AbstractPatch> {
-
-    // The edges that haven't been covered yet.
-    protected SimpleList<E> openEdges;
-
-    // The triangles that have been placed.
-    protected SimpleList<T> placedTiles;
-
-    /**
-    * methods for adding triangles and edges.
-    */
-
-    // If the edge is open, close it. If it's closed, open it.
-    public void placeEdge(E edge) {
-        openEdges.add(edge);
-    }
+public interface AbstractPatch<A extends AbstractAngle, P extends AbstractPoint<P,A>, L extends AbstractEdgeLength<A,P,L>, E extends AbstractEdge<A,P,L,E>, T extends AbstractTriangle, X extends AbstractPatch> {
 
     /*
-    * If the triangle is placed already, remove it. 
-    * If it isn't placed, place it.  
+    * construct a new patch that is the same as this one, with 
+    * triangle t added to it.
+    * This is what we do after compatible(t) returns true.
     */
-    public void placeTriangle(T triangle) {
-        placedTriangles.add(triangle);
-    }
+    public X placeTriangle(T t);
 
     /*
     * Get the next edge.
@@ -37,6 +21,16 @@ public abstract class AbstractPatch<P extends AbstractPoint<P>, A extends Abstra
     * to a quicker rejection of the configuration, if it is
     * already uncompletable.
     */
-    public abstract E getNextEdge();
+    public E getNextEdge();
 
-} // end of abstract class AbstractPatch
+    /*
+    * The big test.
+    * Presumably this is where all of the work will happen.
+    * We check and see if the triangle t fits in this patch.
+    * This will involve applying many different tests to it.
+    * Presumably there will be many other private functions
+    * called in the execution of this one.  
+    */
+    public boolean compatible(T t);
+
+} // end of interface AbstractPatch
