@@ -51,6 +51,16 @@ final public class IntMatrix {
         return I;
     }
 
+    // return M
+    public int getColumnDimension() {
+        return M;
+    }
+
+    // return N
+    public int getRowDimension() {
+        return N;
+    }
+
     // create and return the transpose of the invoking matrix
     public IntMatrix transpose() {
         IntMatrix A = new IntMatrix(N, M);
@@ -96,7 +106,7 @@ final public class IntMatrix {
         return true;
     }
 
-    // hashCode override.
+    // hashCode method
     public int hashCode() {
         int prime = 43;
         int result = 7;

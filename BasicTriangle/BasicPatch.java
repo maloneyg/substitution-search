@@ -22,6 +22,11 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
         closedEdges = ImmutableList.copyOf(e2);
     }
 
+    // initial constructor
+    private BasicPatch(BasicEdge[] e) {
+        BasicPatch(new BasicTriangle[0], e, new BasicEdge[0]);
+    }
+
     // equals method
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())

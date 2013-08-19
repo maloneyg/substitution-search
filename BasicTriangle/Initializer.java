@@ -49,7 +49,8 @@ class Initializer {
 
     static { // start of static initialization
 
-        int[] inflList = new int[] {1, 1}; // need to get this from the user.
+        Integer[] inflList = new Integer[] {1, 1}; // get this from the user.
+        IntPolynomial infl = IntPolynomial.createIntPolynomial(inflList);  // polynomial 
 
         Integer[][] anglesList = new Integer[][] { // get this from the user.
                                              { 1, 2, 4 }, //
@@ -145,29 +146,12 @@ class Initializer {
             }
         }
 
-        // Make matrices representing all diagonals of the N-gon.
-        IntMatrix[] diagonals = new IntMatrix[Math.max(inflList.length, 2)];
-        IntMatrix preInfl = IntMatrix.zeroMatrix(N-1,N-1);
-
         // initialize A
         A = IntMatrix.createIntMatrix(a);
 
-        diagonals[0] = IntMatrix.identity(N-1);
-        diagonals[1] = A;
-
-        for (int m = 2; m < inflList.length; m++) {
-            diagonals[m] = diagonals[1].times(diagonals[m-1]).minus(diagonals[m-2]);
-        }
-
-        // Make an integer combination of these matrices, 
-        // using coefficients from inflList.
-        for (int n = 0; n < inflList.length; n++) {
-            preInfl = diagonals[n].times(inflList[n]).plus(preInfl);
-        }
-
         ROT = IntMatrix.createIntMatrix(preRot);
         REF = IntMatrix.createIntMatrix(preRef);
-        INFL = preInfl;
+        INFL = infl.evaluate(A);
 
         // select a subset of the edge lengths.
         EDGE_LENGTH[] preLengths = new EDGE_LENGTH[N/2];
