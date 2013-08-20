@@ -12,7 +12,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
 
     private final ImmutableList<Orientation> orientations;
 
-    private static final ImmutableList<BasicPrototile> ALL_PROTOTILES;
+    public static final ImmutableList<BasicPrototile> ALL_PROTOTILES;
 
     // private constructor
     private BasicPrototile(ImmutableList<Integer> anglesList) {
@@ -59,6 +59,11 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
                 return p;
         }
         throw new IllegalArgumentException("We aren't using the prototile (" + a0+","+a1+","+a2+")");
+    }
+
+    // get all Orientations.  We need this to initialize a BasicPatch
+    protected ImmutableList<Orientation> getOrientations() {
+        return orientations;
     }
 
     // equals method

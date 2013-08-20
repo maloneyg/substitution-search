@@ -43,6 +43,14 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
     }
 
     /* 
+    * return the orientation of this edge.
+    * we need this to initialize BasicPatch.
+    */ 
+    protected Orientation getOrientation() {
+        return orientation;
+    }
+
+    /* 
     * Given an edge with a (possibly different) orientation,
     * get the orientation of this edge, using the direction
     * convention established by the other edge.  
@@ -135,7 +143,7 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
             return false;
         BasicPoint u0 = this.ends.get(0);
         BasicPoint u1 = this.ends.get(1);
-        BasicPoint v0 = e.ends.get(1);
+        BasicPoint v0 = e.ends.get(0);
         BasicPoint v1 = e.ends.get(1);
 
         if (u0.equals(v0)) {
@@ -152,6 +160,37 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
             }
         }
         return false;
+    }
+
+    // Check if two edges have the same end points
+    public boolean congruent(BasicEdge e) {
+        if (!(this.length.equals(e.length)))
+            return false;
+        BasicPoint u0 = this.ends.get(0);
+        BasicPoint u1 = this.ends.get(1);
+        BasicPoint v0 = e.ends.get(0);
+        BasicPoint v1 = e.ends.get(1);
+
+        if (u0.equals(v0)) {
+            return u1.equals(v1);
+        } else if (u0.equals(v1)) {
+            return u1.equals(v0);
+        }
+        return false;
+    }
+
+    // if two edges are congruent, extract the Orientations
+    // that get identified by placing them incident to one 
+    // another.
+    // No sanity check! We assume that they're congruent.
+    protected ImmutableList<Orientation> getMatches(BasicEdge e) {
+        BasicPoint u0 = this.ends.get(0);
+        BasicPoint v0 = e.ends.get(0);
+        if (u0.equals(v0)) {
+            return ImmutableList.of(this.orientation,e.orientation);
+        } else {
+            return ImmutableList.of(this.orientation,e.orientation.getOpposite());
+        }
     }
 
 } // end of class BasicEdge

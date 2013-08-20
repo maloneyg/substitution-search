@@ -15,16 +15,37 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
     // the closed edges in this patch
     private final ImmutableList<BasicEdge> closedEdges;
 
+    // the Orientations that have been identified with one another
+    private final OrientationPartition partition;
+
     // private constructor
-    private BasicPatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2) {
+    private BasicPatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o) {
         triangles = ImmutableList.copyOf(t);
         openEdges = ImmutableList.copyOf(e1);
         closedEdges = ImmutableList.copyOf(e2);
+        partition = o;
     }
 
     // initial constructor
     private BasicPatch(BasicEdge[] e) {
-        BasicPatch(new BasicTriangle[0], e, new BasicEdge[0]);
+        Orientation[] o = new Orientation[e.length + 3 * BasicPrototile.ALL_PROTOTILES.size()];
+        int i = 0;
+        for (i = 0; i < e.length; i++) o[i] = e[i].getOrientation();
+        for (BasicPrototile t : BasicPrototile.ALL_PROTOTILES) {
+            for (Orientation a : t.getOrientations()) {
+                o[i] = a;
+                i++;
+            }
+        }
+        triangles = ImmutableList.copyOf(new BasicTriangle[0]);
+        openEdges = ImmutableList.copyOf(e);
+        closedEdges = ImmutableList.copyOf(new BasicEdge[0]);
+        partition = OrientationPartition.createOrientationPartition(o);
+    }
+
+    // public static factory method
+    public static BasicPatch createBasicPatch(BasicEdge[] e) {
+        return new BasicPatch(e);
     }
 
     // equals method
@@ -32,7 +53,7 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
         if (obj == null || getClass() != obj.getClass())
             return false;
         BasicPatch x = (BasicPatch) obj;
-        return (this.triangles.equals(x.triangles)&&this.openEdges.equals(x.openEdges));
+        return (this.triangles.equals(x.triangles)&&this.openEdges.equals(x.openEdges)&&this.partition.equals(x.partition));
     }
 
     // hashCode method
@@ -41,19 +62,38 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
         int result = 23;
         result = prime*result + triangles.hashCode();
         result = prime*result + openEdges.hashCode();
+        result = prime*result + partition.hashCode();
         return result;
+    }
+
+    // return the new OrientationPartition obtained by
+    // identifying the Orientations of edges of t with 
+    // the Orientations of the openEdges with which they
+    // are incident.
+    private OrientationPartition newOrientationPartition(BasicTriangle t) {
+        OrientationPartition output = partition;
+        for (BasicEdge e1 : openEdges) {
+            for (BasicEdge e2 : t.getEdges()) {
+                if (e1.congruent(e2)) {
+                    ImmutableList<Orientation> matches = e1.getMatches(e2);
+                    output = output.identify(matches.get(0),matches.get(1));
+                }
+            }
+        }
+        return output;
     }
 
     /*
     * construct a new patch that is the same as this one, with 
     * triangle t added to it.
     * This is what we do after compatible(t) returns true.
+    *
     */
     public BasicPatch placeTriangle(BasicTriangle t) {
         // fill up the new triangle list
         BasicTriangle[] newTriangles = new BasicTriangle[triangles.size()+1];
         int i = 0;
-        for (i = 0; i < newTriangles.length; i++)
+        for (i = 0; i < triangles.size(); i++)
             newTriangles[i] = triangles.get(i);
         newTriangles[triangles.size()] = t;
 
@@ -118,7 +158,8 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
         return new BasicPatch( //
                                  newTriangles, //
                                  newOpenEdges, //
-                                 newClosedEdges //
+                                 newClosedEdges, //
+                                 newOrientationPartition(t) //
                              );
     }
 
