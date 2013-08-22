@@ -15,6 +15,7 @@
 
 import java.lang.Math.*;
 import com.google.common.collect.ImmutableList;
+import Jama.Matrix;
 
 class Initializer {
 
@@ -36,6 +37,12 @@ class Initializer {
         E01, E02, E03, E04, E05, E06, E07, E08, //
         E09, E10, E11, E12, E13, E14, E15, E16  //
     }
+
+    /*
+    * An IntMatrix, the (i,j)th entry of which is the number
+    * of occurrences of EdgeLength i in inflated EdgeLength j.
+    */
+    public static final IntMatrix INFLATED_LENGTHS;
 
     /*
     * A list representing the edge lengths we have actually selected.  
@@ -160,11 +167,15 @@ class Initializer {
         }
         LENGTHS = ImmutableList.copyOf(preLengths);
 
+        INFLATED_LENGTHS = LengthAndAreaCalculator.MatrixToIntMatrix(LengthAndAreaCalculator.LENGTH_MATRIX.inverse().times(infl.evaluate(LengthAndAreaCalculator.AMAT).times(LengthAndAreaCalculator.LENGTH_MATRIX)));
+
+
     } // end of static initialization
 
     // private constructor
     private Initializer() {
     }
+
 
 
 
@@ -178,6 +189,8 @@ class Initializer {
         System.out.println(INFL);
         System.out.println("A");
         System.out.println(A);
+        System.out.println("INFLATED_LENGTHS");
+        System.out.println(INFLATED_LENGTHS);
 
     }
 

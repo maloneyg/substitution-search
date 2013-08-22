@@ -10,7 +10,7 @@ public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle> {
     private final int a;
 
     // The angle sum is a constant, shared across all triangles.
-    private static final int ANGLE_SUM = Initializer.N;
+    public static final int ANGLE_SUM = Initializer.N;
 
     // All possible angles
     private static final ImmutableList<BasicAngle> ALL_ANGLES;
@@ -62,9 +62,14 @@ public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle> {
         return this.a;
     }
 
-    // return the angle as an integer.  
+    // return pi minus this angle.
     protected BasicAngle supplement() {
-        return createBasicAngle(ANGLE_SUM - (a % 2*ANGLE_SUM));
+        return createBasicAngle(ANGLE_SUM - (a % (2*ANGLE_SUM)));
+    }
+
+    // return pi plus this angle.
+    protected BasicAngle piPlus() {
+        return createBasicAngle(ANGLE_SUM + (a % (2*ANGLE_SUM)));
     }
 
     public static void main(String[] args) {

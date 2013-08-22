@@ -51,6 +51,13 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
     }
 
     /* 
+    * toString method.  Just spits out the ends.
+    */ 
+    public String toString() {
+        return "Edge\n  " + ends.get(0) + "\n  " + ends.get(1);
+    }
+
+    /* 
     * Given an edge with a (possibly different) orientation,
     * get the orientation of this edge, using the direction
     * convention established by the other edge.  

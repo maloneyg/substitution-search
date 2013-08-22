@@ -56,10 +56,32 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
     */
     final private BasicPoint rep;
 
+    /*
+    * A list of Integers representing the indices of the different 
+    * BasicEdgeLengths that appear in the the inflated version of
+    * this BasicEdgeLength.
+    */
+    final private ImmutableList<Integer> breakdown;
+
     // private constructor
     private BasicEdgeLength(int i) {
         rep = REPS.get(i);
         length = LENGTHS.get(i);
+        // get the number of each BasicEdgeLength occuring in 
+        // inflated version of this.
+        ImmutableList<Integer> preList = Initializer.INFLATED_LENGTHS.getColumn(i);
+        // now turn it into a list of indices of BasicEdgeLengths.
+        int numEdges = 0;
+        for (Integer k : preList) numEdges += k;
+        Integer[] preBreakdown = new Integer[numEdges];
+        int k = 0;
+        for (int l = 0; l < preList .size(); l++) {
+            for (int m = 0; m < preList.get(l); m++) {
+                preBreakdown[k] = l;
+                k++;
+            }
+        }
+        breakdown = ImmutableList.copyOf(preBreakdown);
     }
 
     // public static factory method
@@ -94,6 +116,17 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
     }
 
     /*
+    * return an edge breakdown of the inflated version of
+    * this BasicEdgeLength.
+    * returns the same thing every time, whereas presumably
+    * we want many such edge breakdowns, so we'll have to
+    * produce more from this one.
+    */
+    public ImmutableList<Integer> getBreakdown() {
+        return breakdown;
+    }
+
+    /*
     * return the edge length opposite the given angle in a triangle.
     */
     public static BasicEdgeLength lengthOpposite(BasicAngle a) {
@@ -109,6 +142,22 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
         for (int i = 0; i < ALL_EDGE_LENGTHS.size(); i++) {
             System.out.println(ALL_EDGE_LENGTHS.get(i).getAsVector());
         }
+
+
+        int k = 0; 
+        ImmutableList<Integer> preBreakdown = Initializer.INFLATED_LENGTHS.getColumn(k);
+        System.out.println("Testing edge breakdowns.");
+        System.out.println("PreBreakdown for edge " + k + ":");
+        System.out.print("( ");
+        for (int i = 0; i < preBreakdown.size(); i++) System.out.print(preBreakdown.get(i) + " ");
+        System.out.print(")\n");
+
+
+        BasicEdgeLength l = ALL_EDGE_LENGTHS.get(k);
+        System.out.println("Breakdown for edge " + k + ":");
+        System.out.print("( ");
+        for (int i = 0; i < l.breakdown.size(); i++) System.out.print(l.breakdown.get(i) + " ");
+        System.out.print(")\n");
 
     }
 

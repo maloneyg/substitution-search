@@ -40,9 +40,9 @@ final public class LengthAndAreaCalculator {
     // this is a representation of 2*cos(pi/N), much like
     // Initializer.A, but this representation is, or 
     // should be, irreducible.
-    private static final Matrix AMAT;
+    public static final Matrix AMAT;
     // the coefficient matrix of the Tschebyshev polynomials up to N
-    private static final Matrix LENGTH_MATRIX;
+    public static final Matrix LENGTH_MATRIX;
 
     // calculate the divisors of an integer
     public static ArrayList<Integer> divisors(int i) {
@@ -115,6 +115,21 @@ final public class LengthAndAreaCalculator {
         return output;
     }
 
+    // turn a Matrix into an IntMatrix.
+    // Round and cast to Int.
+    public static IntMatrix MatrixToIntMatrix(Matrix m) {
+        int L = m.getColumnDimension();
+        int M = m.getColumnDimension();
+        double[][] a = m.getArrayCopy();
+        int[][] preMatrix = new int[L][M];
+        for (int i = 0; i < L; i++) {
+            for (int j = 0; j < M; j++) {
+                preMatrix[i][j] = ((Double)a[i][j]).intValue();
+            }
+        }
+        return IntMatrix.createIntMatrix(preMatrix);
+    }
+
     static { // initialize MIN_POLY
 
         IntPolynomial tempPoly = IntPolynomial.diag(N);
@@ -159,7 +174,11 @@ final public class LengthAndAreaCalculator {
 
         System.out.println("Testing solve():");
         System.out.println("Solve LENGTH_MATRIX * X = (INFLATED) AMAT * LENGTH_MATRIX");
-        System.out.println(arrayString(LENGTH_MATRIX.inverse().times(testPoly.evaluate(AMAT).times(LENGTH_MATRIX)).getArray()));
+        Matrix LL = LENGTH_MATRIX.inverse().times(testPoly.evaluate(AMAT).times(LENGTH_MATRIX));
+        System.out.println(arrayString(LL.getArray()));
+
+        System.out.println("Converting to an IntMatrix:");
+        System.out.println(MatrixToIntMatrix(LL));
 
     }
 

@@ -6,6 +6,8 @@
  *
  *************************************************************************/
 
+import com.google.common.collect.ImmutableList;
+
 final public class IntMatrix {
     private final int M;             // number of rows
     private final int N;             // number of columns
@@ -170,6 +172,16 @@ final public class IntMatrix {
         return output;
     }
 
+    // extract a column
+    public ImmutableList<Integer> getColumn(int i) {
+        if (i < 0 || i >= N) 
+            throw new IllegalArgumentException("Index out of range: can't extract column " + i + " from matrix\n" + this);
+        Integer[] output = new Integer[M];
+        for (int j = 0; j < M; j++)
+            output[j] = data[j][i];
+        return ImmutableList.copyOf(output);
+    }
+
     /*
     * Convert the integer array i into a row vector,
     * then multiply it on the right by A, then convert
@@ -197,10 +209,6 @@ final public class IntMatrix {
         System.out.println(A.toString()); 
         System.out.println();
 
-        IntMatrix B = A.transpose();
-
-        IntMatrix C = IntMatrix.identity(5);
-
         int[] testInt = { 1, 2, 4 };
         for (int k = 0; k < testInt.length; k++) 
             System.out.print(" " + testInt[k]);
@@ -212,6 +220,21 @@ final public class IntMatrix {
         for (int j = 0; j < testInt.length; j++) 
             System.out.print(" " + testInt[j]);
         System.out.println();
+
+        System.out.println("A:");
+        System.out.println(A);
+
+        System.out.println("Column 0 of A:");
+        ImmutableList<Integer> column = A.getColumn(0);
+        System.out.print("( ");
+        for (Integer i : column) System.out.print(i + " ");
+        System.out.print(")\n");
+
+        System.out.println("Column 4 of A:");
+        ImmutableList<Integer> column1 = A.getColumn(4);
+        System.out.print("( ");
+        for (Integer i : column1) System.out.print(i + " ");
+        System.out.print(")\n");
 
     }
 } // end of class IntMatrix
