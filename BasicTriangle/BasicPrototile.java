@@ -100,8 +100,8 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
     */
     public BasicTriangle place(BasicPoint p, BasicAngle a, boolean flip) {
         BasicPoint p1 = BasicPoint.ZERO_VECTOR;
-        BasicPoint p2 = lengths.get(0).getAsVector();
-        BasicPoint p0 = lengths.get(2).getAsVector().rotate(angles.get(1));
+        BasicPoint p2 = lengths.get(0).getAsVector(BasicAngle.createBasicAngle(0));
+        BasicPoint p0 = lengths.get(2).getAsVector(angles.get(1));
         BasicPoint[] vertices = new BasicPoint[] { p0, p1, p2 };
         BasicAngle[] newAngles = new BasicAngle[] { angles.get(0), angles.get(1), angles.get(2) };
         Orientation[] newOrientations = new Orientation[] { orientations.get(0), orientations.get(1), orientations.get(2) };
@@ -142,7 +142,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
         BasicAngle a1 = angles.get(1).piPlus();
         BasicAngle a2 = angles.get(2).supplement();
         BasicEdgeLength currentLength;
-        BasicPoint currentPoint = lengths.get(2).getAsVector().rotate(angles.get(1)).inflate();
+        BasicPoint currentPoint = lengths.get(2).getAsVector(angles.get(1)).inflate();
         BasicPoint nextPoint;
 
         // run through the edge breakdowns, adding edges tot eh skeleton.
@@ -151,7 +151,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
         // is the angle of rotation.
         for (Integer i : b3) {
             currentLength = BasicEdgeLength.createBasicEdgeLength(i);
-            nextPoint = currentLength.getAsVector().rotate(a1).add(currentPoint);
+            nextPoint = currentLength.getAsVector(a1).add(currentPoint);
             output[k] = BasicEdge.createBasicEdge(currentLength, Orientation.createOrientation(), new BasicPoint[] { currentPoint, nextPoint });
             k++;
             currentPoint = nextPoint;
@@ -159,7 +159,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
 
         for (Integer i : b1) {
             currentLength = BasicEdgeLength.createBasicEdgeLength(i);
-            nextPoint = currentLength.getAsVector().add(currentPoint);
+            nextPoint = currentLength.getAsVector(BasicAngle.createBasicAngle(0)).add(currentPoint);
             output[k] = BasicEdge.createBasicEdge(currentLength, Orientation.createOrientation(), new BasicPoint[] { currentPoint, nextPoint });
             k++;
             currentPoint = nextPoint;
@@ -167,7 +167,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
 
         for (Integer i : b2) {
             currentLength = BasicEdgeLength.createBasicEdgeLength(i);
-            nextPoint = currentLength.getAsVector().rotate(a2).add(currentPoint);
+            nextPoint = currentLength.getAsVector(a2).add(currentPoint);
             output[k] = BasicEdge.createBasicEdge(currentLength, Orientation.createOrientation(), new BasicPoint[] { currentPoint, nextPoint });
             k++;
             currentPoint = nextPoint;

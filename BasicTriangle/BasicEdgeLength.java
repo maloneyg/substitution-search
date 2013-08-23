@@ -51,10 +51,12 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
     final private Initializer.EDGE_LENGTH length;
 
     /*
-    * The vector representation of this edge length.
-    * It is one of the vectors in REPS.
+    * The vector representations of this edge length.
+    * One vector for each possible angle.
+    * The vector associated to the zero angle 
+    * is one of the vectors in REPS.
     */
-    final private BasicPoint rep;
+    final private ImmutableList<BasicPoint> reps;
 
     /*
     * A list of Integers representing the indices of the different 
@@ -65,7 +67,14 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
 
     // private constructor
     private BasicEdgeLength(int i) {
-        rep = REPS.get(i);
+        // make a list of all edges with this length
+        // with one end at the origin
+        BasicPoint[] preReps = new BasicPoint[2 * N];
+        BasicAngle a = BasicAngle.createBasicAngle(1);
+        preReps[0] = REPS.get(i);
+        for (int j = 1; j < 2*N; j++) preReps[j] = preReps[j-1].rotate(a);
+        reps = ImmutableList.copyOf(preReps);
+        // pick the correct length out of the main list
         length = LENGTHS.get(i);
         // get the number of each BasicEdgeLength occuring in 
         // inflated version of this.
@@ -103,16 +112,15 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
     }
 
     public String toString() {
-        return "Edge length " + rep;
+        return "Edge length " + reps.get(0);
     }
 
     /*
-    * return a vector with length equal to this edge length.
-    * The vector should lie on the positive x-axis, if that
-    * notion makes any sense.
+    * return a vector with length equal to this edge length,
+    * making an angle of a with the positive x-axis.
     */
-    public BasicPoint getAsVector() {
-        return rep;
+    public BasicPoint getAsVector(BasicAngle a) {
+        return reps.get(a.getAsInt());
     }
 
     /*
@@ -140,7 +148,7 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
 
 
         for (int i = 0; i < ALL_EDGE_LENGTHS.size(); i++) {
-            System.out.println(ALL_EDGE_LENGTHS.get(i).getAsVector());
+            System.out.println(ALL_EDGE_LENGTHS.get(i).getAsVector(BasicAngle.createBasicAngle(0)));
         }
 
 

@@ -12,6 +12,6 @@ public interface AbstractEdgeLength<A extends AbstractAngle, P extends AbstractP
     * The vector should lie on the positive x-axis, if that
     * notion makes any sense.
     */
-    public P getAsVector();
+    public P getAsVector(A a);
 
 } // end of interface AbstractEdgeLength
