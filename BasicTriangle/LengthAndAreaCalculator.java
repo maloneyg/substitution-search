@@ -147,17 +147,6 @@ final public class LengthAndAreaCalculator {
     // test client
     public static void main(String[] args) {
 
-//        int n = 72;
-//        ArrayList<Integer> divs = divisors(n);
-//        ArrayList<Integer> primeDivs = primeDivisors(n);
-//        ArrayList<Integer> primePowerDivs = primePowerDivisors(n);
-//        System.out.println("Divisors of " + n + ":");
-//        System.out.println(divs);
-//        System.out.println("Prime factorization of " + n + ":");
-//        System.out.println(primeDivs);
-//        System.out.println("Prime power factorization of " + n + ":");
-//        System.out.println(primePowerDivs);
-
         System.out.println("N: " + N);
         System.out.println("Polynomial: " + MIN_POLY);
         System.out.println("AMAT:");

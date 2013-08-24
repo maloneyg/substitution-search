@@ -145,7 +145,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
         BasicPoint currentPoint = lengths.get(2).getAsVector(angles.get(1)).inflate();
         BasicPoint nextPoint;
 
-        // run through the edge breakdowns, adding edges tot eh skeleton.
+        // run through the edge breakdowns, adding edges to the skeleton.
         // this is going to get repetitive. 
         // the only thing that changes from one breakdown to the next
         // is the angle of rotation.
