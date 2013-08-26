@@ -7,13 +7,17 @@
  *************************************************************************/
 
 import java.lang.Math.*;
+import java.io.Serializable;
 import com.google.common.collect.ImmutableList;
 import Jama.Matrix;
 
-public class IntPolynomial {
+public class IntPolynomial implements Serializable {
 
     private final ImmutableList<Integer> coef;  // coefficients
     private final int deg;  // degree of polynomial (0 for the zero polynomial)
+
+    // make it Serializable
+    static final long serialVersionUID = 6924469409102773009L;
 
     // constant polynomials
     public static final IntPolynomial ZERO = new IntPolynomial(0,0);

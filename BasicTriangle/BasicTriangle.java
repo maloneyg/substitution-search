@@ -10,8 +10,12 @@
 */
 
 import com.google.common.collect.*;
+import java.io.Serializable;
 
-public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPoint, BasicEdgeLength, BasicEdge, BasicTriangle> {
+public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPoint, BasicEdgeLength, BasicEdge, BasicTriangle>, Serializable {
+
+    // make it Serializable
+    static final long serialVersionUID = 2896067610461604622L;
 
     private final ImmutableList<BasicAngle> angles;
     private final ImmutableList<BasicPoint> vertices;

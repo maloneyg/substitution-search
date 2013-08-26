@@ -3,10 +3,14 @@
 *    The main property is that every orientation has an opposite.
 */
 
+import java.io.Serializable;
 
-public final class Orientation {
+public final class Orientation implements Serializable {
 
     private final Orientation opposite;
+
+    // make it Serializable
+    static final long serialVersionUID = -8541351746816390922L;
 
     public Orientation getOpposite() {
         return opposite;

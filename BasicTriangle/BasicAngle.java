@@ -3,8 +3,9 @@
 */
 
 import com.google.common.collect.*;
+import java.io.Serializable;
 
-public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle> {
+public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle>, Serializable {
 
     // Every angle is implemented as an integer.
     private final int a;
@@ -14,6 +15,9 @@ public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle> {
 
     // All possible angles
     private static final ImmutableList<BasicAngle> ALL_ANGLES;
+
+    // we need this to make it Serializable
+    static final long serialVersionUID = -552924021062179242L;
 
     static { // initialize ALL_ANGLES
 

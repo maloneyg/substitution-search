@@ -2,9 +2,14 @@
 *    This class implements a prototile.
 *    It is not located in space.  
 */
-import com.google.common.collect.*;
 
-public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint, BasicEdgeLength, BasicEdge, BasicTriangle> {
+import com.google.common.collect.*;
+import java.io.Serializable;
+
+public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint, BasicEdgeLength, BasicEdge, BasicTriangle>, Serializable {
+
+    // make it Serializable
+    static final long serialVersionUID = 3481614476338573017L;
 
     private final ImmutableList<BasicAngle> angles;
 

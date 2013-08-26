@@ -3,8 +3,13 @@
 */
 
 import com.google.common.collect.*;
+import java.io.Serializable;
+import java.util.ArrayList;
 
-public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEdgeLength, BasicEdge, BasicTriangle, BasicPatch> {
+public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEdgeLength, BasicEdge, BasicTriangle, BasicPatch>, Serializable {
+
+    // make it Serializable
+    static final long serialVersionUID = 3422733298735932933L;
 
     // the triangles in this patch
     private final ImmutableList<BasicTriangle> triangles;

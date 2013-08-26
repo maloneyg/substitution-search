@@ -5,8 +5,12 @@
 
 import com.google.common.collect.*;
 import com.google.common.base.*;
+import java.io.Serializable;
 
-final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle> {
+final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, Serializable {
+
+    // make is Serializable
+    static final long serialVersionUID = -6462075103242603792L;
 
     // static variables for all points.
     public static final int length = Initializer.N - 1;

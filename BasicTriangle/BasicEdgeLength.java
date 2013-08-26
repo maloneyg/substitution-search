@@ -3,10 +3,14 @@
 */
 
 import java.lang.Math.*;
+import java.io.Serializable;
 import com.google.common.collect.*;
 import com.google.common.base.*;
 
-final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, BasicPoint, BasicEdgeLength> {
+final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, BasicPoint, BasicEdgeLength>, Serializable {
+
+    // make it Serializable
+    static final long serialVersionUID = -3774381761787701530L;
 
     private static final int N = Initializer.N;
 

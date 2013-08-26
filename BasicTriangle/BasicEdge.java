@@ -3,8 +3,12 @@
 */
 
 import com.google.common.collect.*;
+import java.io.Serializable;
 
-public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdgeLength, BasicEdge> {
+public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, BasicEdgeLength, BasicEdge>, Serializable {
+
+    // make it Serializable
+    static final long serialVersionUID = -6778708319703245773L;
 
     // Member variables. 
     private final BasicEdgeLength length;
@@ -184,6 +188,12 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
             return u1.equals(v0);
         }
         return false;
+    }
+
+    // return the same edge, with end points listed
+    // in reverse order and the opposite Orientation
+    public BasicEdge reverse() {
+        return new BasicEdge(length, orientation.getOpposite(), new BasicPoint[] {ends.get(1), ends.get(0)});
     }
 
     // if two edges are congruent, extract the Orientations

@@ -7,11 +7,15 @@
  *************************************************************************/
 
 import com.google.common.collect.ImmutableList;
+import java.io.Serializable;
 
-final public class IntMatrix {
+final public class IntMatrix implements Serializable {
     private final int M;             // number of rows
     private final int N;             // number of columns
     private final int[][] data;   // M-by-N array
+
+    // make it Serializable
+    static final long serialVersionUID = 692395754433643754L;
 
     // create M-by-N matrix of 0's
     private IntMatrix(int M, int N) {

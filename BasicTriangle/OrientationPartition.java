@@ -8,10 +8,14 @@
 import com.google.common.collect.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.io.Serializable;
 
-public final class OrientationPartition {
+public final class OrientationPartition implements Serializable {
 
     private final ImmutableSet<ImmutableSet<Orientation>> partition;
+
+    // make it Serializable
+    static final long serialVersionUID = 1267821834624463132L;
 
     // constructor methods.
     private OrientationPartition(ImmutableSet<ImmutableSet<Orientation>> partition) {
