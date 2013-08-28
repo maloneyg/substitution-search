@@ -106,6 +106,14 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
         return output;
     }
 
+    // a method for drawing
+    public double[] arrayToDraw() {
+        double[] output = new double[length];
+        for (int i = 0; i < length; i++)
+            output[i] = (double) point.get(i);
+        return output;
+    }
+
     // Manipulation methods.  
     public BasicPoint add(BasicPoint p) {
         int[] q = new int[length];

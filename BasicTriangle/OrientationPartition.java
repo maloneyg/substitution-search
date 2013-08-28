@@ -85,6 +85,15 @@ public final class OrientationPartition implements Serializable {
         return true;
     }
 
+    // return the set of Orientations that have been declared
+    // equivalent to o.
+    public ImmutableSet<Orientation> getEquivalenceClass(Orientation o) {
+        for (ImmutableSet<Orientation> s : partition) {
+            if (s.contains(o)) return s;
+        }
+        throw new IllegalArgumentException("Orientation " + o + " isn't on the list.");
+    }
+
     // create a new OrientationPartition by identifying
     // two Orientations.  Take the union of the two sets
     // containing them, and do the same for their 

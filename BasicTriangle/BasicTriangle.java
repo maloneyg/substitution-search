@@ -11,6 +11,8 @@
 
 import com.google.common.collect.*;
 import java.io.Serializable;
+import org.apache.commons.math3.linear.*;
+import java.util.*;
 
 public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPoint, BasicEdgeLength, BasicEdge, BasicTriangle>, Serializable {
 
@@ -122,6 +124,15 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
     // toString method
     public String toString() {
         return "Triangle\n    angles: (" + angles.get(0) + "," + angles.get(1) + "," + angles.get(2) + ")\n  vertices: " + vertices.get(0) + "\n            " + vertices.get(1) + "\n            " + vertices.get(2);
+    }
+
+    // toArray method. For drawing
+    public ArrayList<RealMatrix> toArray() {
+        ArrayList<RealMatrix> output = new ArrayList<RealMatrix>(3);
+        for (BasicPoint p : vertices) {
+            output.add((RealMatrix)new Array2DRowRealMatrix(p.arrayToDraw()));
+        }
+        return output;
     }
 
     /** 

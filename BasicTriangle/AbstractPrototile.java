@@ -10,9 +10,8 @@ public interface AbstractPrototile<A extends AbstractAngle, P extends AbstractPo
 
     /*
     * return true if this has an edge with length l
-    * and orientation o, false otherwise.
     */
-    public boolean compatible(L l, Orientation o);
+    public boolean compatible(L l);
 
     /*
     * Place the prototile in space.

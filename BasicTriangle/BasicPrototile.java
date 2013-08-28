@@ -5,6 +5,7 @@
 
 import com.google.common.collect.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint, BasicEdgeLength, BasicEdge, BasicTriangle>, Serializable {
 
@@ -91,10 +92,68 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
 
     /*
     * return true if this has an edge with length l
-    * and orientation o, false otherwise.
     */
-    public boolean compatible(BasicEdgeLength l, Orientation o) {
-        return true;
+    public boolean compatible(BasicEdgeLength l) {
+        return lengths.contains(l);
+    }
+
+    /*
+    * return all possible ways of placing this prototile
+    * against the BasicEdge e, subject to the constraint 
+    * that the Orientation of the edge that is placed
+    * incident to e not be opposite to any of the 
+    * Orientations in equivalenceClass.
+    *
+    * We've already tested to see if e.length is in 
+    * this.lengths, so this method should return a
+    * non-empty list (i.e., it is possible to place
+    * an instance of p against e somehow).
+    */
+    public ImmutableList<BasicTriangle> placements(BasicEdge e, ImmutableSet<Orientation> equivalenceClass) {
+        ArrayList<BasicTriangle> output = new ArrayList(0);
+        BasicEdgeLength l = e.getLength();
+        ImmutableList<BasicPoint> ends = e.getEnds();
+        BasicPoint e0 = ends.get(0);
+        BasicPoint e1 = ends.get(1).subtract(e0);
+        BasicPoint shift;
+        BasicAngle turn;
+        int intTurn = 0;
+        // set intTurn equal to the angle between e1 and the positive x-axis
+        for (int i = 0; i < 2*BasicAngle.ANGLE_SUM; i++) {
+            if (l.getAsVector(BasicAngle.createBasicAngle(i)).equals(e1)) {
+                intTurn = i;
+                break;
+            }
+        }
+        for (int i = 0; i < 3; i++) {
+            if (l.equals(lengths.get(i))&&!equivalenceClass.contains(orientations.get(i).getOpposite())) {
+                if (i == 0) {
+                    shift = e0;
+                    turn = BasicAngle.createBasicAngle(intTurn);
+                } else if (i == 1) {
+                    shift = e0.subtract(lengths.get(0).getAsVector(BasicAngle.createBasicAngle(0)));
+                    turn = BasicAngle.createBasicAngle(intTurn-angles.get(2).supplement().getAsInt());
+                } else {
+                    shift = e0.subtract(lengths.get(2).getAsVector(angles.get(1)));
+                    turn = BasicAngle.createBasicAngle(intTurn-angles.get(1).piPlus().getAsInt());
+                }
+                output.add(place(shift,turn,false));
+            }
+            if (l.equals(lengths.get(i))&&!equivalenceClass.contains(orientations.get(i))) {
+                if (i == 0) {
+                    shift = e0;
+                    turn = BasicAngle.createBasicAngle(intTurn+BasicAngle.ANGLE_SUM);
+                } else if (i == 1) {
+                    shift = e0.subtract(lengths.get(0).getAsVector(BasicAngle.createBasicAngle(BasicAngle.ANGLE_SUM)));
+                    turn = BasicAngle.createBasicAngle(intTurn-angles.get(2).getAsInt());
+                } else {
+                    shift = e0.subtract(lengths.get(2).getAsVector(angles.get(1).supplement()));
+                    turn = BasicAngle.createBasicAngle(intTurn+angles.get(1).getAsInt());
+                }
+                output.add(place(shift,turn,true));
+            }
+        }
+        return ImmutableList.copyOf(output);
     }
 
     /*
