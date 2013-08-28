@@ -91,6 +91,13 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
     }
 
     /*
+    * return all the lengths
+    */
+    public ImmutableList<BasicEdgeLength> getLengths() {
+        return lengths;
+    }
+
+    /*
     * return true if this has an edge with length l
     */
     public boolean compatible(BasicEdgeLength l) {

@@ -5,6 +5,7 @@
 import com.google.common.collect.*;
 import java.io.Serializable;
 import java.util.ArrayList;
+import org.apache.commons.math3.linear.*;
 
 public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEdgeLength, BasicEdge, BasicTriangle, BasicPatch>, Serializable {
 
@@ -69,6 +70,35 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
         result = prime*result + openEdges.hashCode();
         result = prime*result + partition.hashCode();
         return result;
+    }
+
+    /*
+    * The big test.
+    */
+    public ArrayList<OrderedTriple> graphicsDump() {
+        ArrayList<OrderedTriple> output = new ArrayList<OrderedTriple>(triangles.size());
+        BasicPoint p0;
+        BasicPoint p1;
+        ArrayList<RealMatrix> edgeList = new ArrayList<RealMatrix>(3);
+        int counter = 0;
+        for (BasicTriangle t : triangles)
+            output.add(new OrderedTriple(t.toArray()));
+        for (BasicEdge e : openEdges) {
+            p0 = e.getEnds().get(0);
+            p1 = e.getEnds().get(1);
+            counter++;
+            if (counter == 1) {
+                edgeList.add((RealMatrix)new Array2DRowRealMatrix(p0.arrayToDraw()));
+                edgeList.add((RealMatrix)new Array2DRowRealMatrix(p1.arrayToDraw()));
+                edgeList.add((RealMatrix)new Array2DRowRealMatrix(p0.arrayToDraw()));
+            } else {
+                edgeList.set(0,(RealMatrix)new Array2DRowRealMatrix(p0.arrayToDraw()));
+                edgeList.set(1,(RealMatrix)new Array2DRowRealMatrix(p1.arrayToDraw()));
+                edgeList.set(2,(RealMatrix)new Array2DRowRealMatrix(p0.arrayToDraw()));
+            }
+            output.add(new OrderedTriple(new ArrayList<RealMatrix>(edgeList)));
+        }
+        return output;
     }
 
     // return the new OrientationPartition obtained by
@@ -193,4 +223,4 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
         return true;
     }
 
-} // end of interface AbstractPatch
+} // end of class BasicPatch

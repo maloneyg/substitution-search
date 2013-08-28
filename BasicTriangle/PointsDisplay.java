@@ -72,8 +72,8 @@ public class PointsDisplay extends JPanel
         double widthX = maxX - minX;
         double widthY = maxY - minY;
 
-        double scaleX = windowSize*0.9 / widthX;
-        double scaleY = windowSize*0.9 / widthY;
+        double scaleX = windowSize*0.8 / widthX;
+        double scaleY = windowSize*0.8 / widthY;
         double scale  = Math.min(scaleX, scaleY);
         //scale = 1.5;
         
@@ -106,13 +106,8 @@ public class PointsDisplay extends JPanel
     public static void main(String[] args) {
 
         BasicPrototile P0 = BasicPrototile.createBasicPrototile(new int[] { 1, 3, 3 });
-        System.out.println(P0);
-
         BasicPrototile P1 = BasicPrototile.createBasicPrototile(new int[] { 1, 2, 4 });
-        System.out.println(P1);
-
         BasicPrototile P2 = BasicPrototile.createBasicPrototile(new int[] { 2, 2, 3 });
-        System.out.println(P2);
 
         BasicTriangle T2 = P2.place(BasicPoint.createBasicPoint(new int[] {0,0,0,0,0,0}),BasicAngle.createBasicAngle(1),false);
         BasicTriangle T1 = P1.place(BasicPoint.createBasicPoint(new int[] {0,0,0,0,0,0}),BasicAngle.createBasicAngle(3),true);
@@ -121,17 +116,17 @@ public class PointsDisplay extends JPanel
         triplesList.add(new OrderedTriple(T1.toArray()));
         triplesList.add(new OrderedTriple(T2.toArray()));
 
-        PointsDisplay theseData = new PointsDisplay(triplesList, "TriangleDraw");
+//        PointsDisplay theseData = new PointsDisplay(triplesList, "TriangleDraw");
 
+        BasicEdge[] edgeList = P0.createSkeleton(//
+                                P0.getLengths().get(0).getBreakdown(), //
+                                P0.getLengths().get(1).getBreakdown(), //
+                                P0.getLengths().get(2).getBreakdown()  //
+                                                );
 
+        BasicPatch patch = BasicPatch.createBasicPatch(edgeList);
 
-//        BasicEdge[] edgeList = P1.createSkeleton(//
-//                                P1.lengths.get(0).getBreakdown(), //
-//                                P1.lengths.get(1).getBreakdown(), //
-//                                P1.lengths.get(2).getBreakdown()  //
-//                                                );
-//        for (BasicEdge e : edgeList) System.out.println(e);
-
+        PointsDisplay theseData = new PointsDisplay(patch.graphicsDump(), "TriangleDraw");
 
     }
 
