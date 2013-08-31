@@ -172,7 +172,7 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
         // now put in all the new edges that don't match any old edges
         for (i = 0; i < 3; i++) {
             if (edgeIndexList[i]==-1) {
-                newOpenEdges[j] = matches[i];
+                newOpenEdges[j] = matches[i].reverse();
                 j++;
             }
         }
@@ -196,6 +196,12 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
                                  newClosedEdges, //
                                  newOrientationPartition(t) //
                              );
+    }
+
+    // return the set of Orientations that have been declared
+    // equivalent to o.
+    public ImmutableSet<Orientation> getEquivalenceClass(Orientation o) {
+        return partition.getEquivalenceClass(o);
     }
 
     /*
