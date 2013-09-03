@@ -152,7 +152,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
                     shift = e0.subtract(lengths.get(0).getAsVector(turn));
                 } else {
                     turn = BasicAngle.createBasicAngle(intTurn-angles.get(1).piPlus().getAsInt());
-                    shift = e0.subtract(lengths.get(2).getAsVector(turn));
+                    shift = e0.subtract(lengths.get(2).getAsVector(BasicAngle.createBasicAngle(turn.getAsInt()+angles.get(1).getAsInt())));
                 }
                 output.add(place(shift,turn,false));
             }
