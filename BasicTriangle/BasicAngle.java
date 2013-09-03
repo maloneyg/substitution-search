@@ -30,12 +30,14 @@ public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle>, 
 
     // Constructor method.
     private BasicAngle(int i) {
-        a = i % (2*ANGLE_SUM);
+        int shift = (i < 0)?(2*ANGLE_SUM):0;
+        a = i % (2*ANGLE_SUM) + shift;
     }
 
     // static public factory method.
     public static BasicAngle createBasicAngle(int i) {
-        return ALL_ANGLES.get(i % (2*ANGLE_SUM));
+        int shift = (i < 0)?(2*ANGLE_SUM):0;
+        return ALL_ANGLES.get(i % (2*ANGLE_SUM) + shift);
     }
 
     // compareTo

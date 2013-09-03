@@ -90,39 +90,73 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
         throw new IllegalArgumentException("You need to match edges in the same position.");
     }
 
-    // Check if two edges are the same, with identical orientations. 
+    // equals and hashCode had some problems.
+    // I had designed it so that only edges with identical
+    // Orientations are equal, but this is no longer desirable.
+    // Now I want two edges to be equal if their endpoints
+    // are the same, which turns out to be much easier.
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())
             return false;
         BasicEdge e = (BasicEdge) obj;
-        if (!(this.length.equals(e.length)))
+        BasicPoint p0 = this.ends.get(0);
+        BasicPoint p1 = this.ends.get(1);
+        BasicPoint q0 = e.ends.get(0);
+        BasicPoint q1 = e.ends.get(1);
+        if ((p0.equals(q0)&&p1.equals(q1))||(p0.equals(q1)&&p1.equals(q0))) {
+            return true;
+        } else {
             return false;
-        BasicPoint u0 = this.ends.get(0);
-        BasicPoint u1 = this.ends.get(1);
-        BasicPoint v0 = e.ends.get(1);
-        BasicPoint v1 = e.ends.get(1);
-
-        if (u0.equals(v0)) {
-            if (u1.equals(v1)) {
-                return this.orientation.equals(e.orientation);
-            } else {
-                return false;
-            }
-        } else if (u0.equals(v1)) {
-            if (u1.equals(v0)) {
-                return this.orientation.equals(e.orientation.getOpposite());
-            } else {
-                return false;
-            }
         }
-        return false;
     }
 
-    // hashCode override.
+    // new hashCode
     public int hashCode() {
         int prime = 17;
         int result = 19;
-        result = prime*result + length.hashCode();
+        int c0 = ends.get(0).hashCode();
+        int c1 = ends.get(1).hashCode();
+        if (c0<c1)
+            result = prime*result + c1;
+        result = prime*result + c0;
+        if (c0>=c1)
+            result = prime*result + c1;
+        return result;
+    }
+
+    // Check if two edges are the same, with identical orientations. 
+//    public boolean equals(Object obj) {
+//        if (obj == null || getClass() != obj.getClass())
+//            return false;
+//        BasicEdge e = (BasicEdge) obj;
+//        if (!(this.length.equals(e.length)))
+//            return false;
+//        BasicPoint u0 = this.ends.get(0);
+//        BasicPoint u1 = this.ends.get(1);
+//        BasicPoint v0 = e.ends.get(1);
+//        BasicPoint v1 = e.ends.get(1);
+//
+//        if (u0.equals(v0)) {
+//            if (u1.equals(v1)) {
+//                return this.orientation.equals(e.orientation);
+//            } else {
+//                return false;
+//            }
+//        } else if (u0.equals(v1)) {
+//            if (u1.equals(v0)) {
+//                return this.orientation.equals(e.orientation.getOpposite());
+//            } else {
+//                return false;
+//            }
+//        }
+//        return false;
+//    }
+
+    // hashCode override.
+//    public int hashCode() {
+//        int prime = 17;
+//        int result = 19;
+//        result = prime*result + length.hashCode();
 
         /*
         * We can't just throw together the hashCode of the ends
@@ -131,22 +165,22 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
         * their orientations are opposites. So we have to do 
         * something more sophisticated. 
         */
-        int h0 = ends.get(0).hashCode();
-        int h1 = ends.get(1).hashCode();
-        if (h0 < h1) {
-            result = prime*result + h0;
-            result = prime*result + h1;
-            result = prime*result + orientation.hashCode();
-        } else if (h1 < h0) {
-            result = prime*result + h1;
-            result = prime*result + h0;
-            result = prime*result + orientation.getOpposite().hashCode();
-        } else {
-            result = prime*result + h0;
-            result = prime*result + h1;
-        }
-        return result;
-    }
+//        int h0 = ends.get(0).hashCode();
+//        int h1 = ends.get(1).hashCode();
+//        if (h0 < h1) {
+//            result = prime*result + h0;
+//            result = prime*result + h1;
+//            result = prime*result + orientation.hashCode();
+//        } else if (h1 < h0) {
+//            result = prime*result + h1;
+//            result = prime*result + h0;
+//            result = prime*result + orientation.getOpposite().hashCode();
+//        } else {
+//            result = prime*result + h0;
+//            result = prime*result + h1;
+//        }
+//        return result;
+//    }
 
     // Check if two edges are the same, with non-opposite orientations. 
     public boolean compatible(BasicEdge e) {

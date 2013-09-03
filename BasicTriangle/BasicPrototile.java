@@ -158,14 +158,14 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
             }
             if (l.equals(lengths.get(i))&&!equivalenceClass.contains(orientations.get(i))) {
                 if (i == 0) {
-                    shift = e0;
-                    turn = BasicAngle.createBasicAngle(intTurn+BasicAngle.ANGLE_SUM);
+                    turn = BasicAngle.createBasicAngle(intTurn);
+                    shift = e0.add(lengths.get(0).getAsVector(turn));
                 } else if (i == 1) {
-                    turn = BasicAngle.createBasicAngle(intTurn-angles.get(2).getAsInt());
-                    shift = e0.subtract(lengths.get(0).getAsVector(turn.supplement()).reflect());
+                    turn = BasicAngle.createBasicAngle(intTurn-angles.get(2).piPlus().getAsInt());
+                    shift = e0.subtract(lengths.get(2).getAsVector(BasicAngle.createBasicAngle(turn.getAsInt()+angles.get(1).supplement().getAsInt())));
                 } else {
-                    turn = BasicAngle.createBasicAngle(intTurn+angles.get(1).getAsInt());
-                    shift = e0.subtract(lengths.get(2).getAsVector(turn.supplement()).reflect());
+                    turn = BasicAngle.createBasicAngle(intTurn-angles.get(1).supplement().getAsInt());
+                    shift = e0;
                 }
                 output.add(place(shift,turn,true));
             }
