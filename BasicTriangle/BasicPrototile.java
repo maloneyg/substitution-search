@@ -201,8 +201,9 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
             newAngles[2] = newAngles[0];
             newAngles[0] = tempAngle;
             Orientation tempOrientation = newOrientations[2];
-            newOrientations[2] = newOrientations[0];
-            newOrientations[0] = tempOrientation;
+            newOrientations[2] = newOrientations[0].getOpposite();
+            newOrientations[0] = tempOrientation.getOpposite();
+            newOrientations[1] = newOrientations[1].getOpposite();
             BasicEdgeLength tempLength = newLengths[2];
             newLengths[2] = newLengths[0];
             newLengths[0] = tempLength;

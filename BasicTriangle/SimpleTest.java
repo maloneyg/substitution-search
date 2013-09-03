@@ -27,7 +27,7 @@ public class SimpleTest
         BasicPrototile P2 = BasicPrototile.createBasicPrototile(new int[] { 2, 2, 3 });
 
 
-        PrototileList testTiles = PrototileList.createPrototileList(ImmutableList.of(P1,P1));
+        PrototileList testTiles = PrototileList.createPrototileList(ImmutableList.of(P1));
 
         BasicEdge[] edgeList = P0.createSkeleton(//
                                 P0.getLengths().get(0).getBreakdown(), //
@@ -42,6 +42,13 @@ public class SimpleTest
                                                 );
 
         BasicPatch patch = BasicPatch.createBasicPatch(edgeList);
+        BasicEdge s = patch.getNextEdge();
+        ImmutableList<BasicTriangle> newTriangles = P1.placements(s,patch.getEquivalenceClass(s.getOrientation()));
+        BasicPatch newPatch = patch.placeTriangle(newTriangles.get(0));
+        BasicEdge newEdge = newPatch.getNextEdge();
+        ImmutableList<BasicTriangle> newPlacements = P1.placements(newEdge,newPatch.getEquivalenceClass(newEdge.getOrientation()));
+        System.out.println(newPlacements);
+        
 
         // submit 30 jobs to the executor service
         // note: if this exceeds JOB_CAPACITY, then this thread will actually do the work, based on the rejected execution handler
