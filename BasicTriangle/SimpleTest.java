@@ -25,9 +25,14 @@ public class SimpleTest
         BasicPrototile P0 = BasicPrototile.createBasicPrototile(new int[] { 1, 3, 3 });
         BasicPrototile P1 = BasicPrototile.createBasicPrototile(new int[] { 1, 2, 4 });
         BasicPrototile P2 = BasicPrototile.createBasicPrototile(new int[] { 2, 2, 3 });
+        BasicTriangle T2 = P2.place(BasicPoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false);
+        System.out.println(T2);
+        System.out.println("getting edges.");
+        BasicEdge[] testy = T2.getEdges();
+        for (BasicEdge tt : testy) System.out.println(tt);
 
 
-        PrototileList testTiles = PrototileList.createPrototileList(ImmutableList.of(P1));
+        PrototileList testTiles = PrototileList.createPrototileList(ImmutableList.of(P1,P1,P2));
 
         BasicEdge[] edgeList = P0.createSkeleton(//
                                 P0.getLengths().get(0).getBreakdown(), //
@@ -47,7 +52,7 @@ public class SimpleTest
         BasicPatch newPatch = patch.placeTriangle(newTriangles.get(0));
         BasicEdge newEdge = newPatch.getNextEdge();
         ImmutableList<BasicTriangle> newPlacements = P1.placements(newEdge,newPatch.getEquivalenceClass(newEdge.getOrientation()));
-        System.out.println(newPlacements);
+//        System.out.println(newPlacements);
         
 
         // submit 30 jobs to the executor service

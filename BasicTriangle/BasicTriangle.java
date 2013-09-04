@@ -54,9 +54,9 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
         BasicPoint[] vertexPair0 = {vertices.get(0),vertices.get(1)};
         BasicPoint[] vertexPair1 = {vertices.get(1),vertices.get(2)};
         BasicPoint[] vertexPair2 = {vertices.get(2),vertices.get(0)};
-        BasicEdge e0 = BasicEdge.createBasicEdge(edgeLengths.get(0),orientations.get(0),vertexPair0);
-        BasicEdge e1 = BasicEdge.createBasicEdge(edgeLengths.get(1),orientations.get(1),vertexPair1);
-        BasicEdge e2 = BasicEdge.createBasicEdge(edgeLengths.get(2),orientations.get(2),vertexPair2);
+        BasicEdge e2 = BasicEdge.createBasicEdge(edgeLengths.get(2),orientations.get(2),vertexPair0);
+        BasicEdge e0 = BasicEdge.createBasicEdge(edgeLengths.get(0),orientations.get(0),vertexPair1);
+        BasicEdge e1 = BasicEdge.createBasicEdge(edgeLengths.get(1),orientations.get(1),vertexPair2);
         BasicEdge[] output = {e0,e1,e2};
         return output;
     }

@@ -216,7 +216,7 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
     * already uncompletable.
     */
     public BasicEdge getNextEdge() {
-        return openEdges.get(openEdges.size()-2);
+        return openEdges.get(openEdges.size()-1);
     }
 
     /*
