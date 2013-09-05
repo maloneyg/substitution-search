@@ -74,6 +74,13 @@ public class IntPolynomial implements Serializable {
         return new IntPolynomial(c);
     }
 
+    // return ca
+    public IntPolynomial scalarMultiple(int c) {
+        Integer[] b = new Integer[deg+1];
+        for (int i = 0; i < deg+1; i++) b[i] = coef.get(i)*c;
+        return new IntPolynomial(b);
+    }
+
     // return (a * b)
     public IntPolynomial times(IntPolynomial b) {
         IntPolynomial a = this;
@@ -121,6 +128,22 @@ public class IntPolynomial implements Serializable {
         IntPolynomial temp;
         for (int i = 0; i < n; i++) {
             temp = f1.times(X).minus(f0);
+            f0 = f1;
+            f1 = temp;
+        }
+        return f1;
+    }
+
+    // return a Tschebyshev polynomial of the first type
+    public static IntPolynomial T(int n) {
+        if (n == 0) return ONE;
+        if (n == 1) return X;
+        IntPolynomial f0 = ONE;
+        IntPolynomial f1 = X;
+        IntPolynomial TWO_X = X.scalarMultiple(2);
+        IntPolynomial temp;
+        for (int i = 0; i < n-1; i++) {
+            temp = f1.times(TWO_X).minus(f0);
             f0 = f1;
             f1 = temp;
         }
@@ -213,6 +236,14 @@ public class IntPolynomial implements Serializable {
         return new Matrix(preMatrix);
     }
 
+    // substitute 2x for x.
+    public IntPolynomial reParametrize(int n) {
+        Integer[] newCoeffs = new Integer[deg+1];
+        for (int i = 0; i < deg+1; i++)
+            newCoeffs[i] = coef.get(i)*((int)Math.pow(n,i));
+        return new IntPolynomial(newCoeffs);
+    }
+
     // equals method
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())
@@ -287,6 +318,14 @@ public class IntPolynomial implements Serializable {
         System.out.println(tschebyshev(3));
         System.out.println(tschebyshev(4));
         System.out.println(tschebyshev(5));
+
+        System.out.println("First type:");
+        System.out.println(T(0));
+        System.out.println(T(1));
+        System.out.println(T(2));
+        System.out.println(T(3));
+        System.out.println(T(4));
+        System.out.println(T(5));
 
         System.out.println("Tschebyshev differences:");
         System.out.println(diag(2));
