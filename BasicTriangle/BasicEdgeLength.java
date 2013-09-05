@@ -171,6 +171,43 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
         for (int i = 0; i < l.breakdown.size(); i++) System.out.print(l.breakdown.get(i) + " ");
         System.out.print(")\n");
 
+        BasicAngle a0 = BasicAngle.createBasicAngle(0);
+        BasicAngle a1 = BasicAngle.createBasicAngle(1);
+        BasicPoint p0 = ALL_EDGE_LENGTHS.get(0).getAsVector(a0);
+        BasicPoint p1 = ALL_EDGE_LENGTHS.get(1).getAsVector(a0);
+        BasicPoint p2 = ALL_EDGE_LENGTHS.get(2).getAsVector(a0);
+        BasicPoint p3 = ALL_EDGE_LENGTHS.get(2).getAsVector(a1);
+
+        System.out.print(p0 + " and " + p1 + ": " + p0.colinear(p1) + "\n");
+        System.out.print(p1 + " and " + p0 + ": " + p1.colinear(p0) + "\n");
+        System.out.print(p1 + " and " + p2 + ": " + p1.colinear(p2) + "\n");
+        System.out.print(p2 + " and " + p1 + ": " + p2.colinear(p1) + "\n");
+        System.out.print(p1 + " and " + p3 + ": " + p1.colinear(p3) + "\n");
+        System.out.print(p3 + " and " + p1 + ": " + p3.colinear(p1) + "\n");
+        System.out.print(p2 + " and " + p0 + ": " + p2.colinear(p0) + "\n");
+        System.out.print(p0 + " and " + p2 + ": " + p0.colinear(p2) + "\n");
+        System.out.print(p0 + " and " + p3 + ": " + p0.colinear(p3) + "\n");
+        System.out.print(p3 + " and " + p0 + ": " + p3.colinear(p0) + "\n");
+
+        System.out.print(p0 + "." + p1 + ": ");
+        for (int i: p0.dotProduct(p1)) System.out.print(i + " ");
+        System.out.print("\n");
+        System.out.print(p1 + "." + p0 + ": ");
+        for (int i: p1.dotProduct(p0)) System.out.print(i + " ");
+        System.out.print("\n");
+        System.out.print(p1 + "." + p2 + ": ");
+        for (int i: p1.dotProduct(p2)) System.out.print(i + " ");
+        System.out.print("\n");
+        System.out.print(p2 + "." + p1 + ": ");
+        for (int i: p2.dotProduct(p1)) System.out.print(i + " ");
+        System.out.print("\n");
+        System.out.print(p2 + "." + p3 + ": ");
+        for (int i: p2.dotProduct(p3)) System.out.print(i + " ");
+        System.out.print("\n");
+        System.out.print(p3 + "." + p2 + ": ");
+        for (int i: p3.dotProduct(p2)) System.out.print(i + " ");
+        System.out.print("\n");
+
     }
 
 } // end of class BasicEdgeLength

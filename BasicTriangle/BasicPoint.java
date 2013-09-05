@@ -158,4 +158,57 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
         return new BasicPoint(A.rowTimes(this.pointAsArray()));
     }
 
+    /*
+    * calculate the 2d cross-product of this with p, after 
+    * they have both been projected down to the plane
+    * using the standard projection (i.e., the ith
+    * standard basis vector goes to (cos(i pi/N), sin(i pi/N))).
+    *
+    * If the cross-product isn't 0, return false.
+    *
+    * WARNING: this only works for prime N right now.
+    * WARNING: this only works for odd N right now.
+    */
+    public boolean colinear(BasicPoint p) {
+        int l = length/2;
+        int[] p0 = this.pointAsArray();
+        int[] p1 = p.pointAsArray();
+        // here we store the shoelace products
+        int[] coeffs = new int[l];
+        for (int i = 0; i < l; i++) {
+            coeffs[i] = 0;
+            for (int j = 0; j < length; j++) {
+                if (j+i != length-1) coeffs[i] += p0[j]*p1[(j+i+1)%(length+1)]*((j+i+1>length)? -1 : 1);
+                if (j != i) coeffs[i] -= p0[j]*p1[(j-i-1 < 0)? length+j-i : j-i-1]*((j-i-1<0)? -1 : 1);
+            }
+            if (coeffs[i] != 0) return false;
+        }
+        return true;
+    }
+
+    /*
+    * calculate the 2d dot-product of this with p, after 
+    * they have both been projected down to the plane
+    * using the standard projection (i.e., the ith
+    * standard basis vector goes to (cos(i pi/N), sin(i pi/N))).
+    *
+    * WARNING: this only works for prime N right now.
+    * WARNING: this only works for odd N right now.
+    */
+    public int[] dotProduct(BasicPoint p) {
+        int l = length/2+1;
+        int[] p0 = this.pointAsArray();
+        int[] p1 = p.pointAsArray();
+        // here we store the shoelace products
+        int[] coeffs = new int[l];
+        for (int i = 0; i < l; i++) {
+            coeffs[i] = 0;
+            for (int j = 0; j < length; j++) {
+                if (j+i != length) coeffs[i] += p0[j]*p1[(j+i)%(length+1)]*((j+i>length)? -1 : 1);
+                if (i != 0 && j-i != -1) coeffs[i] += p0[j]*p1[(j-i < 0)? length+1+j-i : j-i]*((j-i<0)? -1 : 1);
+            }
+        }
+        return coeffs;
+    }
+
 } // end of class BasicPoint
