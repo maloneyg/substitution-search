@@ -202,7 +202,13 @@ final public class IntMatrix implements Serializable {
         return output;
     }
 
-
+    // compute the GCD of two integers.
+    public static int GCD(int a, int b) {
+        if (b == 0)
+            return a;
+        else
+            return GCD(b, a%b);
+    }
 
 
     // test client
@@ -234,11 +240,16 @@ final public class IntMatrix implements Serializable {
         for (Integer i : column) System.out.print(i + " ");
         System.out.print(")\n");
 
-        System.out.println("Column 4 of A:");
-        ImmutableList<Integer> column1 = A.getColumn(4);
-        System.out.print("( ");
-        for (Integer i : column1) System.out.print(i + " ");
-        System.out.print(")\n");
+        System.out.println("a = 72.");
+        System.out.println("b = 8.");
+        System.out.println("GCD(a,b) = " + GCD(72,8) + ".");
+        System.out.println("GCD(-b,a) = " + GCD(-8,72) + ".");
+        System.out.println("GCD(b,b) = " + GCD(8,8) + ".");
+
+        System.out.print("GCD(10,12) = ");
+        System.out.print(GCD(10,12) + ".\n");
+        System.out.print("GCD(12,10) = ");
+        System.out.print(GCD(12,10) + ".\n");
 
     }
 } // end of class IntMatrix

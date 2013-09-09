@@ -22,9 +22,14 @@ public class SimpleTest
 
         
 
-        BasicPrototile P0 = BasicPrototile.createBasicPrototile(new int[] { 1, 3, 3 });
-        BasicPrototile P1 = BasicPrototile.createBasicPrototile(new int[] { 1, 2, 4 });
-        BasicPrototile P2 = BasicPrototile.createBasicPrototile(new int[] { 2, 2, 3 });
+        BasicPrototile P0 = BasicPrototile.createBasicPrototile(new int[] { 1, 4, 6 });
+        BasicPrototile P1 = BasicPrototile.createBasicPrototile(new int[] { 1, 5, 5 });
+        BasicPrototile P2 = BasicPrototile.createBasicPrototile(new int[] { 2, 4, 5 });
+        BasicPrototile P3 = BasicPrototile.createBasicPrototile(new int[] { 2, 3, 6 });
+        BasicPrototile P4 = BasicPrototile.createBasicPrototile(new int[] { 3, 3, 5 });
+//        BasicPrototile P0 = BasicPrototile.createBasicPrototile(new int[] { 1, 3, 3 });
+//        BasicPrototile P1 = BasicPrototile.createBasicPrototile(new int[] { 1, 2, 4 });
+//        BasicPrototile P2 = BasicPrototile.createBasicPrototile(new int[] { 2, 2, 3 });
         BasicTriangle T2 = P2.place(BasicPoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false);
         System.out.println(T2);
         System.out.println("getting edges.");
@@ -32,7 +37,8 @@ public class SimpleTest
         for (BasicEdge tt : testy) System.out.println(tt);
 
 
-        PrototileList testTiles = PrototileList.createPrototileList(ImmutableList.of(P1,P1,P2));
+        PrototileList testTiles = PrototileList.createPrototileList(ImmutableList.of(P0,P0,P1,P2,P2,P3));
+//        PrototileList testTiles = PrototileList.createPrototileList(ImmutableList.of(P1,P1,P1,P0,P0,P0,P0,P2));
 
         BasicEdge[] edgeList = P0.createSkeleton(//
                                 P0.getLengths().get(0).getBreakdown(), //
@@ -46,8 +52,14 @@ public class SimpleTest
                                 P0.getLengths().get(2).getBreakdown()  //
                                                 );
 
-        BasicPatch patch = BasicPatch.createBasicPatch(edgeList);
+        ImmutableList<BasicPoint> vertices = P0.place(BasicPoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
+        ImmutableList<BasicPoint> bigVertices = ImmutableList.of(vertices.get(0).inflate(),vertices.get(1).inflate(),vertices.get(2).inflate());
+        BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
         BasicEdge s = patch.getNextEdge();
+        BasicPoint pp0 = BasicEdgeLength.createBasicEdgeLength(0).getAsVector(BasicAngle.createBasicAngle(1));
+        BasicPoint pp1 = BasicEdgeLength.createBasicEdgeLength(1).getAsVector(BasicAngle.createBasicAngle(1));
+        System.out.println(pp0 + " inside? " + patch.contains(pp0));
+        System.out.println(pp1 + " inside? " + patch.contains(pp1));
         ImmutableList<BasicTriangle> newTriangles = P1.placements(s,patch.getEquivalenceClass(s.getOrientation()));
         BasicPatch newPatch = patch.placeTriangle(newTriangles.get(0));
         BasicEdge newEdge = newPatch.getNextEdge();

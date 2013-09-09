@@ -46,6 +46,13 @@ public class IntPolynomial implements Serializable {
         return new IntPolynomial(a);
     }
 
+    // public static factory method
+    public static IntPolynomial createIntPolynomial(ImmutableList<Integer> a) {
+        Integer[] b = new Integer[a.size()];
+        for (int i = 0; i < a.size(); i++) b[i] = a.get(i);
+        return new IntPolynomial(b);
+    }
+
     // return the degree of this polynomial (0 for the zero polynomial)
     public int degree() {
         int d = 0;
@@ -150,6 +157,11 @@ public class IntPolynomial implements Serializable {
         return f1;
     }
 
+    // return a Tschebyshev polynomial of the second type
+    public static IntPolynomial U(int n) {
+        return tschebyshev(n).reParametrize(2);
+    }
+
     // return a difference of two Tschebyshev polynomials.
     // If n is odd, they should be degrees (n-1)/2 and (n-1)/2 - 1.
     // If n is even, they should be degrees n/2 and n/2 - 2.
@@ -163,6 +175,14 @@ public class IntPolynomial implements Serializable {
     // use Horner's method to compute and return the polynomial evaluated at x
     public int evaluate(int x) {
         int p = 0;
+        for (int i = deg; i >= 0; i--)
+            p = coef.get(i) + (x * p);
+        return p;
+    }
+
+    // use Horner's method to compute and return the polynomial evaluated at x
+    public double evaluate(double x) {
+        double p = 0.0;
         for (int i = deg; i >= 0; i--)
             p = coef.get(i) + (x * p);
         return p;

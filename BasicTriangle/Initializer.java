@@ -19,7 +19,11 @@ import Jama.Matrix;
 
 class Initializer {
 
-    public static final int N = 7;             // the order of symmetry
+    public static final int N = Preinitializer.N;     // the order of symmetry
+
+    public static final double COS = Math.cos(Math.PI/(double)N);// 2cos(pi/N)
+
+    public static final double EP = Preinitializer.EP;  // threshold value
 
     public static final IntMatrix A;           // 2cos[pi/N], as a matrix
 
@@ -52,26 +56,12 @@ class Initializer {
     /*
     * A list representing the prototile angles we have selected.
     */
-    public static final ImmutableList<ImmutableList<Integer>> PROTOTILES;
+    public static final ImmutableList<ImmutableList<Integer>> PROTOTILES = Preinitializer.PROTOTILES;
 
     static { // start of static initialization
 
-        Integer[] inflList = new Integer[] {1, 1}; // get this from the user.
-        IntPolynomial infl = IntPolynomial.createIntPolynomial(inflList);  // polynomial 
-
-        Integer[][] anglesList = new Integer[][] { // get this from the user.
-                                             { 1, 2, 4 }, //
-                                             { 1, 3, 3 }, //
-                                             { 2, 2, 3 }  //
-                                         };
-
-        ImmutableList<Integer>[] prePrototiles = new ImmutableList[anglesList.length];
-        for (int t = 0; t < anglesList.length; t++) {
-            if (anglesList[t].length != 3)
-                throw new IllegalArgumentException("Trying to create prototiles with the wrong number of angles.");
-            prePrototiles[t] = ImmutableList.copyOf(anglesList[t]);
-        }
-        PROTOTILES = ImmutableList.copyOf(prePrototiles);
+        ImmutableList<Integer> inflList = Preinitializer.INFL;
+        IntPolynomial infl = IntPolynomial.createIntPolynomial(inflList);
 
         /*
         * Pre-matrices.

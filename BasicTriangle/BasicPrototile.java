@@ -272,6 +272,9 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
         BasicTriangle T0 = P2.place(BasicPoint.createBasicPoint(new int[] {1,0,1,0,1,0}),BasicAngle.createBasicAngle(3),false);
         System.out.println(T0);
 
+        BasicTriangle T1 = P2.place(BasicPoint.createBasicPoint(new int[] {0,0,0,0,0,0}),BasicAngle.createBasicAngle(0),false);
+        System.out.println(T1);
+
         System.out.println("Testing skeleton output.");
         BasicEdge[] edgeList = P1.createSkeleton(//
                                 P1.lengths.get(0).getBreakdown(), //
@@ -280,6 +283,11 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
                                                 );
         for (BasicEdge e : edgeList) System.out.println(e);
 
+        BasicPoint p = BasicEdgeLength.createBasicEdgeLength(0).getAsVector(BasicAngle.createBasicAngle(0));
+        BasicEdge[] ee = T1.getEdges();
+        for (BasicEdge e : ee) {
+            System.out.print(p + " on " + e + ": " + e.incident(p) + "\n");
+        }
 
     }
 

@@ -187,6 +187,38 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
     }
 
     /*
+    * calculate the 2d cross-product of this with p, after 
+    * they have both been projected down to the plane
+    * using the standard projection (i.e., the ith
+    * standard basis vector goes to (cos(i pi/N), sin(i pi/N))).
+    *
+    * the output is a polynomial P such that the cross product is
+    * sin(x) * P(cos(x)).
+    * so if we just want to compare signs of cross products
+    * we can just plug in COS and ignore the factor of sin(x).
+    *
+    * WARNING: this only works for odd N right now.
+    */
+    public IntPolynomial crossProduct(BasicPoint p) {
+        int l = length/2;
+        int[] p0 = this.pointAsArray();
+        int[] p1 = p.pointAsArray();
+        // here we store the shoelace products
+        int[] coeffs = new int[l];
+        for (int i = 0; i < l; i++) {
+            coeffs[i] = 0;
+            for (int j = 0; j < length; j++) {
+                if (j+i != length-1) coeffs[i] += p0[j]*p1[(j+i+1)%(length+1)]*((j+i+1>length)? -1 : 1);
+                if (j != i) coeffs[i] -= p0[j]*p1[(j-i-1 < 0)? length+j-i : j-i-1]*((j-i-1<0)? -1 : 1);
+            }
+        }
+        IntPolynomial output = IntPolynomial.ZERO;
+        for (int i = 0; i < l; i++)
+            output = output.plus(LengthAndAreaCalculator.SIN_LIST.get(i).scalarMultiple(coeffs[i]));
+        return output;
+    }
+
+    /*
     * calculate the 2d dot-product of this with p, after 
     * they have both been projected down to the plane
     * using the standard projection (i.e., the ith
@@ -195,7 +227,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
     * WARNING: this only works for prime N right now.
     * WARNING: this only works for odd N right now.
     */
-    public int[] dotProduct(BasicPoint p) {
+    public IntPolynomial dotProduct(BasicPoint p) {
         int l = length/2+1;
         int[] p0 = this.pointAsArray();
         int[] p1 = p.pointAsArray();
@@ -208,7 +240,10 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
                 if (i != 0 && j-i != -1) coeffs[i] += p0[j]*p1[(j-i < 0)? length+1+j-i : j-i]*((j-i<0)? -1 : 1);
             }
         }
-        return coeffs;
+        IntPolynomial output = IntPolynomial.ZERO;
+        for (int i = 0; i < l; i++)
+            output = output.plus(LengthAndAreaCalculator.COS_LIST.get(i).scalarMultiple(coeffs[i]));
+        return output;
     }
 
 } // end of class BasicPoint

@@ -24,16 +24,20 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
     // the Orientations that have been identified with one another
     private final OrientationPartition partition;
 
+    // vertices of the big triangle
+    private final ImmutableList<BasicPoint> bigVertices;
+
     // private constructor
-    private BasicPatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o) {
+    private BasicPatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, ImmutableList<BasicPoint> v) {
         triangles = ImmutableList.copyOf(t);
         openEdges = ImmutableList.copyOf(e1);
         closedEdges = ImmutableList.copyOf(e2);
         partition = o;
+        bigVertices = v;
     }
 
     // initial constructor
-    private BasicPatch(BasicEdge[] e) {
+    private BasicPatch(BasicEdge[] e, ImmutableList<BasicPoint> v) {
         Orientation[] o = new Orientation[e.length + 6 * BasicPrototile.ALL_PROTOTILES.size()];
         int i = 0;
         for (i = 0; i < e.length; i++) o[i] = e[i].getOrientation();
@@ -49,11 +53,12 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
         openEdges = ImmutableList.copyOf(e);
         closedEdges = ImmutableList.copyOf(new BasicEdge[0]);
         partition = OrientationPartition.createOrientationPartition(o);
+        bigVertices = v;
     }
 
     // public static factory method
-    public static BasicPatch createBasicPatch(BasicEdge[] e) {
-        return new BasicPatch(e);
+    public static BasicPatch createBasicPatch(BasicEdge[] e, ImmutableList<BasicPoint> v) {
+        return new BasicPatch(e,v);
     }
 
     // equals method
@@ -196,7 +201,8 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
                                  newTriangles, //
                                  newOpenEdges, //
                                  newClosedEdges, //
-                                 newOrientationPartition(t) //
+                                 newOrientationPartition(t), //
+                                 bigVertices //
                              );
     }
 
@@ -228,6 +234,51 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
     * called in the execution of this one.  
     */
     public boolean compatible(BasicTriangle t) {
+        ImmutableList<BasicPoint> ends = getNextEdge().getEnds();
+        BasicPoint other = t.getOtherVertex(ends.get(0),ends.get(1));
+
+        // test to see if other is new or already there.
+        // if it's on an openEdge but not equal to one 
+        // of its endpoints, return false immediately.
+        boolean newVertex = true;
+        for (BasicEdge e : openEdges) {
+            if (e.hasVertex(other)) {
+                newVertex = false;
+                break;
+            } else if (e.incident(other)) {
+                return false;
+            }
+        }
+
+        if (newVertex && !contains(other)) return false;
+
+        if (newVertex) {
+            for (BasicTriangle tr : triangles) {
+                if (tr.contains(other)) return false;
+            }
+        }
+
+        return true;
+    }
+
+    /*
+    * return true if p is inside the big triangle, false otherwise.
+    * this involves taking three inner products with vectors orthogonal
+    * to the three sides.  Taking an inner product with an orthogonal
+    * vector is the same as taking the 2d cross product with the 
+    * original vector.
+    */
+    public boolean contains(BasicPoint p) {
+        BasicPoint m; // the direction vector for a side
+        BasicPoint v; // the other vertex
+        BasicPoint t; // vertex on the given side, used to test cross product
+        for (int i = 0; i < 3; i++) {
+            m = bigVertices.get((i+2)%3).subtract(bigVertices.get((i+1)%3));
+            v = bigVertices.get(i);
+            t = bigVertices.get((i+1)%3);
+            if (Math.signum((v.subtract(t)).crossProduct(m).evaluate(Initializer.COS)) != Math.signum((p.subtract(t)).crossProduct(m).evaluate(Initializer.COS)))
+                return false;
+        }
         return true;
     }
 

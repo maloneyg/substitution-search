@@ -244,4 +244,22 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
         }
     }
 
+    // check to see if the BasicPoint p touches this edge
+    // (not necessarily at the ends)
+    public boolean incident(BasicPoint p) {
+        BasicPoint u0 = this.ends.get(0).subtract(p);
+        BasicPoint u1 = p.subtract(this.ends.get(1));
+        BasicPoint u2 = this.ends.get(0).subtract(this.ends.get(1));
+        double d0 = Math.sqrt(u0.dotProduct(u0).evaluate(Initializer.COS));
+        double d1 = Math.sqrt(u1.dotProduct(u1).evaluate(Initializer.COS));
+        double d2 = Math.sqrt(u2.dotProduct(u2).evaluate(Initializer.COS));
+        return (-Initializer.EP < d0 + d1 - d2 && d0 + d1 - d2 < Initializer.EP);
+    }
+
+    // check to see if the BasicPoint p is one of the ends
+    // of this BasicEdge 
+    public boolean hasVertex(BasicPoint p) {
+        return (p.equals(ends.get(0)) || p.equals(ends.get(1)));
+    }
+
 } // end of class BasicEdge

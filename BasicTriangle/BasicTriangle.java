@@ -135,6 +135,27 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
         return output;
     }
 
+    /*
+    * return true if p is inside the triangle, false otherwise.
+    * this involves taking three inner products with vectors orthogonal
+    * to the three sides.  Taking an inner product with an orthogonal
+    * vector is the same as taking the 2d cross product with the 
+    * original vector.
+    */
+    public boolean contains(BasicPoint p) {
+        BasicPoint m; // the direction vector for a side
+        BasicPoint v; // the other vertex
+        BasicPoint t; // vertex on the given side, used to test cross product
+        for (int i = 0; i < 3; i++) {
+            m = vertices.get((i+2)%3).subtract(vertices.get((i+1)%3));
+            v = vertices.get(i);
+            t = vertices.get((i+1)%3);
+            if (Math.signum((v.subtract(t)).crossProduct(m).evaluate(Initializer.COS)) != Math.signum((p.subtract(t)).crossProduct(m).evaluate(Initializer.COS)))
+                return false;
+        }
+        return true;
+    }
+
     /** 
     * Tricky incidence test.
     * First checks if point1 and point2 are both vertices of the triangle.  

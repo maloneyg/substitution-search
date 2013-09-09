@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
 import org.apache.commons.math3.linear.*;
+import com.google.common.collect.*;
 
 public class PointsDisplay extends JPanel
 {
@@ -124,7 +125,7 @@ public class PointsDisplay extends JPanel
                                 P0.getLengths().get(2).getBreakdown()  //
                                                 );
 
-        BasicPatch patch = BasicPatch.createBasicPatch(edgeList);
+        BasicPatch patch = BasicPatch.createBasicPatch(edgeList,ImmutableList.of(BasicPoint.ZERO_VECTOR,BasicPoint.ZERO_VECTOR,BasicPoint.ZERO_VECTOR));
 
         PointsDisplay theseData = new PointsDisplay(patch.graphicsDump(), "TriangleDraw");
 

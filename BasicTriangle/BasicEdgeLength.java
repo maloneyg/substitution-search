@@ -189,24 +189,35 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
         System.out.print(p0 + " and " + p3 + ": " + p0.colinear(p3) + "\n");
         System.out.print(p3 + " and " + p0 + ": " + p3.colinear(p0) + "\n");
 
-        System.out.print(p0 + "." + p1 + ": ");
-        for (int i: p0.dotProduct(p1)) System.out.print(i + " ");
-        System.out.print("\n");
-        System.out.print(p1 + "." + p0 + ": ");
-        for (int i: p1.dotProduct(p0)) System.out.print(i + " ");
-        System.out.print("\n");
-        System.out.print(p1 + "." + p2 + ": ");
-        for (int i: p1.dotProduct(p2)) System.out.print(i + " ");
-        System.out.print("\n");
-        System.out.print(p2 + "." + p1 + ": ");
-        for (int i: p2.dotProduct(p1)) System.out.print(i + " ");
-        System.out.print("\n");
-        System.out.print(p2 + "." + p3 + ": ");
-        for (int i: p2.dotProduct(p3)) System.out.print(i + " ");
-        System.out.print("\n");
-        System.out.print(p3 + "." + p2 + ": ");
-        for (int i: p3.dotProduct(p2)) System.out.print(i + " ");
-        System.out.print("\n");
+        System.out.println(p0 + "." + p1 + ": " + p0.dotProduct(p1));
+        System.out.println(p1 + "." + p0 + ": " + p1.dotProduct(p0));
+        System.out.println(p1 + "." + p2 + ": " + p1.dotProduct(p2));
+        System.out.println(p0 + "." + p2 + ": " + p0.dotProduct(p2));
+
+        IntPolynomial p02 = p0.dotProduct(p0);
+        IntPolynomial p12 = p1.dotProduct(p1);
+        IntPolynomial q02 = p1.subtract(p0).dotProduct(p1.subtract(p0));
+
+        System.out.println(p0 + "." + p0 + ": " + p02);
+        System.out.println(p1.subtract(p0) + "." + p1.subtract(p0) + ": " + q02);
+        System.out.println(p1 + "." + p1 + ": " + p12);
+        System.out.println(p0 + "." + p0 + ": " + Math.sqrt(p02.evaluate(Initializer.COS)));
+        System.out.println(p1.subtract(p0) + "." + p1.subtract(p0) + ": " + Math.sqrt(q02.evaluate(Initializer.COS)));
+        System.out.println(p1 + "." + p1 + ": " + Math.sqrt(p12.evaluate(Initializer.COS)));
+        System.out.println("MINPOLY: " + LengthAndAreaCalculator.HALF_MIN_POLY);
+        System.out.println("Plug in cos(pi/N): " + LengthAndAreaCalculator.HALF_MIN_POLY.evaluate(Initializer.COS));
+
+        System.out.print(p0 + " x " + p1 + ": " + p0.crossProduct(p1) + "\n");
+        System.out.print(p1 + " x " + p0 + ": " + p1.crossProduct(p0) + "\n");
+        System.out.print(p1 + " x " + p2 + ": " + p1.crossProduct(p2) + "\n");
+        System.out.print(p2 + " x " + p1 + ": " + p2.crossProduct(p1) + "\n");
+        System.out.print(p1 + " x " + p3 + ": " + p1.crossProduct(p3) + "\n");
+        System.out.print(p3 + " x " + p1 + ": " + p3.crossProduct(p1) + "\n");
+        System.out.print(p2 + " x " + p0 + ": " + p2.crossProduct(p0) + "\n");
+        System.out.print(p0 + " x " + p2 + ": " + p0.crossProduct(p2) + "\n");
+        System.out.print(p0 + " x " + p3 + ": " + p0.crossProduct(p3) + "\n");
+        System.out.print(p3 + " x " + p0 + ": " + p3.crossProduct(p0) + "\n");
+
 
     }
 

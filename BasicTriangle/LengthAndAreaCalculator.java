@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import Jama.Matrix;
 import Jama.SingularValueDecomposition;
 import Jama.LUDecomposition;
+import com.google.common.collect.ImmutableList;
 
 final public class LengthAndAreaCalculator {
 
@@ -43,12 +44,30 @@ final public class LengthAndAreaCalculator {
     public static final Matrix AMAT;
     // the coefficient matrix of the Tschebyshev polynomials up to N
     public static final Matrix LENGTH_MATRIX;
+    // the coefficient matrix of the area polynomials for the prototiles
+    public static final Matrix AREA_MATRIX;
+
+    // the minimal polynomial of Cos(pi/N)
+    public static final IntPolynomial HALF_MIN_POLY;
+
+    // a list of polynomials expressing the lengths
+    // of the diagonals of a regular n-gon in terms 
+    // of the first such diagonal (that is not an edge)
+    public static final ImmutableList<IntPolynomial> EDGE_LIST;
+
+    // a list of polynomials expressing cos(k pi/N)
+    // in terms of cos(pi/N).
+    public static final ImmutableList<IntPolynomial> COS_LIST;
+
+    // a list of polynomials expressing sin((k+1) pi/N) / sin(pi/N)
+    // in terms of cos(pi/N).
+    public static final ImmutableList<IntPolynomial> SIN_LIST;
 
     // calculate the divisors of an integer
     public static ArrayList<Integer> divisors(int i) {
         if (i <= 0)
             throw new IllegalArgumentException("Can't compute divisors of the non-positive integer " + i + ".");
-        ArrayList<Integer> output = new ArrayList(1);
+        ArrayList<Integer> output = new ArrayList<>(1);
         double root = Math.sqrt(i);
         int square = 0;
         if (Math.ceil(root) == Math.floor(root)) 
@@ -67,7 +86,7 @@ final public class LengthAndAreaCalculator {
         if (i <= 0)
             throw new IllegalArgumentException("Can't compute prime divisors of the non-positive integer " + i + ".");
         int n = i;
-        ArrayList<Integer> output = new ArrayList(1);
+        ArrayList<Integer> output = new ArrayList<>(1);
         for (int d = 2; d <= Math.ceil(Math.sqrt(n)); d++) {
             if (n%d == 0) {
                 output.add(d);
@@ -84,7 +103,7 @@ final public class LengthAndAreaCalculator {
         if (i <= 0)
             throw new IllegalArgumentException("Can't compute prime power divisors of the non-positive integer " + i + ".");
         ArrayList<Integer> primes = primeDivisors(i);
-        ArrayList<Integer> output = new ArrayList(1);
+        ArrayList<Integer> output = new ArrayList<>(1);
         Integer current = 1;
         int index = -1;
         for (Integer p : primes) {
@@ -138,11 +157,67 @@ final public class LengthAndAreaCalculator {
         MIN_POLY = tempPoly;
         AMAT = MIN_POLY.companionMatrix();
 
-        IntPolynomial[] polyList = new IntPolynomial[N/2];
-        for (int i = 0; i < N/2; i++) polyList[i] = IntPolynomial.tschebyshev(i).mod(MIN_POLY);
-        LENGTH_MATRIX = IntPolynomial.coefficientMatrix(polyList);
+        HALF_MIN_POLY = tempPoly.reParametrize(2);
 
-    }
+        IntPolynomial[] polyList = new IntPolynomial[N/2];
+        IntPolynomial[] cosList = new IntPolynomial[N/2+1];
+        IntPolynomial[] sinList = new IntPolynomial[N/2];
+        for (int i = 0; i < N/2; i++) {
+            polyList[i] = IntPolynomial.tschebyshev(i).mod(MIN_POLY);
+            cosList[i] = IntPolynomial.T(i);
+            sinList[i] = IntPolynomial.U(i);
+        }
+        cosList[N/2] = IntPolynomial.T(N/2);
+        LENGTH_MATRIX = IntPolynomial.coefficientMatrix(polyList);
+        EDGE_LIST = ImmutableList.copyOf(polyList);
+        COS_LIST = ImmutableList.copyOf(cosList);
+        SIN_LIST = ImmutableList.copyOf(sinList);
+
+    } // static initialization ends here
+
+    static { // initialize the area polynomials
+
+        /*
+        * a list of polynomials representing areas of
+        * triangles that contain an angle of pi/N.
+        * expressed as polynomials in the ring of integers
+        * extended by 2*cos(pi/N), with the area of the
+        * triangle with angles (1,1,N-2) normalized to be 1.
+        */
+        IntPolynomial[] narrowAreas = new IntPolynomial[N/2 - 1];
+        narrowAreas[0] = IntPolynomial.ONE;
+        for (int i = 1; i < N/2-1; i++)
+            narrowAreas[i] = EDGE_LIST.get(i).times(EDGE_LIST.get(i)).minus(narrowAreas[i-1]);
+        IntPolynomial[] prototileAreas = new IntPolynomial[Preinitializer.PROTOTILES.size()];
+        int alreadyOne = 0;
+        int count = 0;
+        int secondMin = N;
+        for (ImmutableList<Integer> l : Preinitializer.PROTOTILES) {
+            if (l.contains(1)) { // in this case l is a narrow triangle
+                secondMin = N; // the second-smallest angle
+                alreadyOne = 0;
+                for (Integer j : l) {
+                    if (j == 1) {
+                        // find the second-smallest angle
+                        if (alreadyOne > 0) {
+                            secondMin = 1;
+                            break;
+                        } else {
+                            alreadyOne++;
+                        }
+                    } else { // this angle is not 1
+                        if (j < secondMin) secondMin = j;
+                    }
+                }
+                prototileAreas[count] = narrowAreas[secondMin-1];
+                count++;
+            } else { // in this case l is not a narrow triangle
+
+            }
+        }
+
+
+    } // initialization of area polynomials ends here
 
     // test client
     public static void main(String[] args) {
@@ -168,6 +243,10 @@ final public class LengthAndAreaCalculator {
 
         System.out.println("Converting to an IntMatrix:");
         System.out.println(MatrixToIntMatrix(LL));
+
+        System.out.println("Ordinary Tschebyshev polynomials:");
+        for (int i = 0; i < COS_LIST.size(); i++)
+            System.out.println(COS_LIST.get(i));
 
     }
 
