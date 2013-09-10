@@ -108,6 +108,20 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
     }
 
     /*
+    * return a list of BasicPrototiles.
+    * BasicPrototile p at position i in ALL_PROTOTILES 
+    * should appear counts.get(i) times in this list.
+    */
+    public static ImmutableList<BasicPrototile> getPrototileList(ImmutableList<Integer> counts) {
+        if (counts.size() != ALL_PROTOTILES.size()) throw new IllegalArgumentException("There are " + ALL_PROTOTILES.size() + " prototiles, but we're trying to initialize a list with " + counts.size() + " of them.");
+        ArrayList<BasicPrototile> output = new ArrayList<>(counts.get(0));
+        for (i = 0; i < counts.size(); i++) {
+            for (int j = 0; j < counts.get(i); j++) output.add(ALL_PROTOTILES.get(i));
+        }
+        return ImmutableList.copyOf(output);
+    }
+
+    /*
     * return true if this has an edge with length l
     */
     public boolean compatible(BasicEdgeLength l) {
@@ -218,7 +232,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
     // no sanity check!
     // we assume that these are breakdowns of the actual
     // edge of this prototile.
-    public BasicEdge[] createSkeleton(ImmutableList<Integer> b1, ImmutableList<Integer> b2, ImmutableList<Integer> b3) {
+    public ImmutableList<BasicEdge> createSkeleton(ImmutableList<Integer> b1, ImmutableList<Integer> b2, ImmutableList<Integer> b3) {
         BasicEdge[] output = new BasicEdge[b1.size()+b2.size()+b3.size()];
         int k = 0;
         BasicAngle a1 = angles.get(1).piPlus();
@@ -255,7 +269,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
             currentPoint = nextPoint;
         }
 
-        return output;
+        return ImmutableList.copyOf(output);
     }
 
     public static void main(String[] args) {

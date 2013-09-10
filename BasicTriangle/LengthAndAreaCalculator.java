@@ -184,14 +184,19 @@ final public class LengthAndAreaCalculator {
         * extended by 2*cos(pi/N), with the area of the
         * triangle with angles (1,1,N-2) normalized to be 1.
         */
-        IntPolynomial[] narrowAreas = new IntPolynomial[N/2 - 1];
+        IntPolynomial[] narrowAreas = new IntPolynomial[N/2];
         narrowAreas[0] = IntPolynomial.ONE;
-        for (int i = 1; i < N/2-1; i++)
+        for (int i = 1; i < N/2; i++)
             narrowAreas[i] = EDGE_LIST.get(i).times(EDGE_LIST.get(i)).minus(narrowAreas[i-1]);
         IntPolynomial[] prototileAreas = new IntPolynomial[Preinitializer.PROTOTILES.size()];
+        // three int variables used in identifying which 
+        // narrow triangle l represents
         int alreadyOne = 0;
         int count = 0;
         int secondMin = N;
+        // the two angles in l that are less than 90 degrees
+        int a0 = 0;
+        int a1 = 0;
         for (ImmutableList<Integer> l : Preinitializer.PROTOTILES) {
             if (l.contains(1)) { // in this case l is a narrow triangle
                 secondMin = N; // the second-smallest angle
@@ -209,13 +214,29 @@ final public class LengthAndAreaCalculator {
                         if (j < secondMin) secondMin = j;
                     }
                 }
-                prototileAreas[count] = narrowAreas[secondMin-1];
+                prototileAreas[count] = narrowAreas[secondMin-1].mod(MIN_POLY);
                 count++;
             } else { // in this case l is not a narrow triangle
-
+                a0 = 0;
+                a1 = 0;
+                alreadyOne = 0;
+                for (Integer j : l) {
+                    if (j <= N/2) {
+                        if (alreadyOne > 0) {
+                            a1 = j;
+                            break;
+                        } else {
+                            a0 = j;
+                            alreadyOne++;
+                        }
+                    }
+                }
+                prototileAreas[count] = (narrowAreas[a0-1].times(EDGE_LIST.get(a1-1)).times(EDGE_LIST.get(a1-1)).minus(narrowAreas[a1-2].times(EDGE_LIST.get(a0-1)).times(EDGE_LIST.get(a0-1)))).mod(MIN_POLY);
+                count++;
             }
         }
 
+        AREA_MATRIX = IntPolynomial.coefficientMatrix(prototileAreas);
 
     } // initialization of area polynomials ends here
 
@@ -247,6 +268,12 @@ final public class LengthAndAreaCalculator {
         System.out.println("Ordinary Tschebyshev polynomials:");
         for (int i = 0; i < COS_LIST.size(); i++)
             System.out.println(COS_LIST.get(i));
+
+        System.out.println("AREA_MATRIX:");
+        System.out.println(AREA_MATRIX);
+        System.out.println(arrayString(AREA_MATRIX.getArray()));
+
+
 
     }
 

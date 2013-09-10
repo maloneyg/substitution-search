@@ -49,6 +49,12 @@ class Initializer {
     public static final IntMatrix INFLATED_LENGTHS;
 
     /*
+    * An IntMatrix, the (i,j)th entry of which is the number
+    * of occurrences of prototile i in inflated prototile j.
+    */
+    public static final IntMatrix SUBSTITUTION_MATRIX;
+
+    /*
     * A list representing the edge lengths we have actually selected.  
     */
     public static final ImmutableList<EDGE_LENGTH> LENGTHS;
@@ -155,9 +161,12 @@ class Initializer {
         for (int u = 0; u < N/2; u++) {
             preLengths[u] = EDGE_LENGTH.values()[u];
         }
+
+        Matrix otherInfl = infl.evaluate(LengthAndAreaCalculator.AMAT);
         LENGTHS = ImmutableList.copyOf(preLengths);
 
-        INFLATED_LENGTHS = LengthAndAreaCalculator.MatrixToIntMatrix(LengthAndAreaCalculator.LENGTH_MATRIX.inverse().times(infl.evaluate(LengthAndAreaCalculator.AMAT).times(LengthAndAreaCalculator.LENGTH_MATRIX)));
+        INFLATED_LENGTHS = LengthAndAreaCalculator.MatrixToIntMatrix((LengthAndAreaCalculator.LENGTH_MATRIX.inverse()).times(otherInfl).times(LengthAndAreaCalculator.LENGTH_MATRIX));
+        SUBSTITUTION_MATRIX = LengthAndAreaCalculator.MatrixToIntMatrix((LengthAndAreaCalculator.AREA_MATRIX.inverse()).times(otherInfl).times(otherInfl).times(LengthAndAreaCalculator.AREA_MATRIX));
 
 
     } // end of static initialization
@@ -181,6 +190,8 @@ class Initializer {
         System.out.println(A);
         System.out.println("INFLATED_LENGTHS");
         System.out.println(INFLATED_LENGTHS);
+        System.out.println("SUBSTITUTION_MATRIX");
+        System.out.println(SUBSTITUTION_MATRIX);
 
     }
 

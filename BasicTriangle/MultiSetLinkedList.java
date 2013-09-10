@@ -72,6 +72,11 @@ public class MultiSetLinkedList {
         }
     }
 
+    // public static factory method
+    public static createMultiSetLinkedList(ArrayList<Integer> d) {
+        return new MultiSetLinkedList(d);
+    }
+
     // output a String
     public String toString() {
         String output = "( ";
