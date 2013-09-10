@@ -27,68 +27,70 @@ public class SimpleTest
 //        BasicPrototile P2 = BasicPrototile.createBasicPrototile(new int[] { 2, 4, 5 });
 //        BasicPrototile P3 = BasicPrototile.createBasicPrototile(new int[] { 2, 3, 6 });
 //        BasicPrototile P4 = BasicPrototile.createBasicPrototile(new int[] { 3, 3, 5 });
-        BasicPrototile P0 = BasicPrototile.createBasicPrototile(new int[] { 1, 3, 3 });
-        BasicPrototile P1 = BasicPrototile.createBasicPrototile(new int[] { 1, 2, 4 });
+        BasicPrototile P0 = BasicPrototile.createBasicPrototile(new int[] { 1, 2, 4 });
+        BasicPrototile P1 = BasicPrototile.createBasicPrototile(new int[] { 1, 3, 3 });
         BasicPrototile P2 = BasicPrototile.createBasicPrototile(new int[] { 2, 2, 3 });
-        BasicTriangle T2 = P2.place(BasicPoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false);
 
 //        PrototileList testTiles = PrototileList.createPrototileList(ImmutableList.of(P0,P0,P1,P2,P2,P3));
 //        PrototileList testTiles = PrototileList.createPrototileList(ImmutableList.of(P1,P1,P1,P0,P0,P0,P0,P2));
-        PrototileList testTiles = PrototileList.createPrototileList(ImmutableList.of(P1,P0));
-
-        BasicEdge[] edgeList = P0.createSkeleton(//
-                                P0.getLengths().get(0).getBreakdown(), //
-                                P0.getLengths().get(1).getBreakdown(), //
-                                P0.getLengths().get(2).getBreakdown()  //
-                                                );
-
-        ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(//
-                                P0.getLengths().get(0).getBreakdown(), //
-                                P0.getLengths().get(1).getBreakdown(), //
-                                P0.getLengths().get(2).getBreakdown()  //
-                                                );
-
+        ImmutableList<Integer> BD0 = P0.getLengths().get(0).getBreakdown();
+        ImmutableList<Integer> BD1 = P0.getLengths().get(1).getBreakdown();
+        ImmutableList<Integer> BD2 = P0.getLengths().get(2).getBreakdown();
+        MultiSetLinkedList edge0 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList(BD0));
+        MultiSetLinkedList edge1 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList(BD1));
+        MultiSetLinkedList edge2 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList(BD2));
+        ImmutableList<Integer> start0 = edge0.getImmutableList();
+        ImmutableList<Integer> start1 = edge1.getImmutableList();
+        ImmutableList<Integer> start2 = edge2.getImmutableList();
+        BD0 = start0;
+        BD1 = start1;
+        BD2 = start2;
+        PrototileList tiles = PrototileList.createPrototileList(BasicPrototile.getPrototileList(Initializer.SUBSTITUTION_MATRIX.getColumn(0)));
         ImmutableList<BasicPoint> vertices = P0.place(BasicPoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
         ImmutableList<BasicPoint> bigVertices = ImmutableList.of(vertices.get(0).inflate(),vertices.get(1).inflate(),vertices.get(2).inflate());
-        BasicPatch patch = BasicPatch.createBasicPatch(testBD,bigVertices);
-        BasicEdge s = patch.getNextEdge();
-        BasicPoint pp0 = BasicEdgeLength.createBasicEdgeLength(0).getAsVector(BasicAngle.createBasicAngle(1));
-        BasicPoint pp1 = BasicEdgeLength.createBasicEdgeLength(1).getAsVector(BasicAngle.createBasicAngle(1));
-        System.out.println(pp0 + " inside? " + patch.contains(pp0));
-        System.out.println(pp1 + " inside? " + patch.contains(pp1));
-        ImmutableList<BasicTriangle> newTriangles = P1.placements(s,patch.getEquivalenceClass(s.getOrientation()));
-        BasicPatch newPatch = patch.placeTriangle(newTriangles.get(0));
-        BasicEdge newEdge = newPatch.getNextEdge();
-        ImmutableList<BasicTriangle> newPlacements = P1.placements(newEdge,newPatch.getEquivalenceClass(newEdge.getOrientation()));
-//        System.out.println(newPlacements);
-        
 
         // submit 30 jobs to the executor service
         // note: if this exceeds JOB_CAPACITY, then this thread will actually do the work, based on the rejected execution handler
         ArrayList<Future> futures = new ArrayList<Future>();    // keep a list of all the futures
         LinkedHashMap<WorkUnit,Future<Result>> submittedJobs = new LinkedHashMap<WorkUnit,Future<Result>>();
-        for (int i=0; i < 1; i++)
-            {
-                // create a new unit of work
-                WorkUnit thisUnit = BasicWorkUnit.createBasicWorkUnit(patch,testBD,testTiles);
+        do {
+            do {
+                do {
 
-                // submit this unit of work to the executor service
-                // the service returns a Future object
-                // when polled, the Future object will either block if the job isn't done yet
-                // or return the result if it is
-                // (exceptions can be thrown if the job was interrupted/cancelled, failed, etc.)
-                Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
+                    ImmutableList<BasicEdge> edgeList = P0.createSkeleton(BD0, BD1, BD2);
+                    ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD1, BD2);
 
-                // make a map between pieces of work and their futures
-                submittedJobs.put(thisUnit,thisFuture);
-                System.out.println("Job " + (i+1) + " submitted.");
-                log.log(Level.INFO,"Job " + (i+1) + " submitted.");
-            }
+                    BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
+
+                    // create a new unit of work
+                    WorkUnit thisUnit = BasicWorkUnit.createBasicWorkUnit(patch,testBD,tiles);
+
+                    // submit this unit of work to the executor service
+                    // the service returns a Future object
+                    // when polled, the Future object will either block if the job isn't done yet
+                    // or return the result if it is
+                    // (exceptions can be thrown if the job was interrupted/cancelled, failed, etc.)
+                    Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
+
+                    // make a map between pieces of work and their futures
+                    submittedJobs.put(thisUnit,thisFuture);
+                    System.out.println("Job " + thisUnit.hashCode() + " submitted.");
+                    log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
+
+                    edge2.iterate();
+                    BD2 = edge2.getImmutableList();
+                } while (!BD2.equals(start2));
+                edge1.iterate();
+                BD1 = edge1.getImmutableList();
+            } while (!BD1.equals(start1));
+            edge0.iterate();
+            BD0 = edge0.getImmutableList();
+        } while (!BD0.equals(start0));
 
         // wait a few seconds and then shut down the executor service
         try
             {
-                Thread.sleep(10*1000);
+                Thread.sleep(10*100);
                 System.out.print("Writing a checkpoint...");
                 executorService.getExecutor().writeCheckpoint();
                 System.out.println("done.");
@@ -131,10 +133,10 @@ public class SimpleTest
                     }
                 System.out.println(w.toString() + " : " + r.toString());
 
+            }
+
             Enumeration<BasicPatch> output = BasicWorkUnit.output().keys();
             PointsDisplay display = new PointsDisplay(output.nextElement().graphicsDump(),"BigTest");
-
-            }
 
     }
 } // end of SimpleTest

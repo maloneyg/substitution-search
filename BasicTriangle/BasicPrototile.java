@@ -115,7 +115,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
     public static ImmutableList<BasicPrototile> getPrototileList(ImmutableList<Integer> counts) {
         if (counts.size() != ALL_PROTOTILES.size()) throw new IllegalArgumentException("There are " + ALL_PROTOTILES.size() + " prototiles, but we're trying to initialize a list with " + counts.size() + " of them.");
         ArrayList<BasicPrototile> output = new ArrayList<>(counts.get(0));
-        for (i = 0; i < counts.size(); i++) {
+        for (int i = 0; i < counts.size(); i++) {
             for (int j = 0; j < counts.get(i); j++) output.add(ALL_PROTOTILES.get(i));
         }
         return ImmutableList.copyOf(output);
@@ -290,7 +290,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
         System.out.println(T1);
 
         System.out.println("Testing skeleton output.");
-        BasicEdge[] edgeList = P1.createSkeleton(//
+        ImmutableList<BasicEdge> edgeList = P1.createSkeleton(//
                                 P1.lengths.get(0).getBreakdown(), //
                                 P1.lengths.get(1).getBreakdown(), //
                                 P1.lengths.get(2).getBreakdown()  //

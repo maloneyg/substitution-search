@@ -119,7 +119,7 @@ public class PointsDisplay extends JPanel
 
 //        PointsDisplay theseData = new PointsDisplay(triplesList, "TriangleDraw");
 
-        BasicEdge[] edgeList = P0.createSkeleton(//
+        ImmutableList<BasicEdge> edgeList = P0.createSkeleton(//
                                 P0.getLengths().get(0).getBreakdown(), //
                                 P0.getLengths().get(1).getBreakdown(), //
                                 P0.getLengths().get(2).getBreakdown()  //

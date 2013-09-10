@@ -37,10 +37,10 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
     }
 
     // initial constructor
-    private BasicPatch(BasicEdge[] e, ImmutableList<BasicPoint> v) {
-        Orientation[] o = new Orientation[e.length + 6 * BasicPrototile.ALL_PROTOTILES.size()];
+    private BasicPatch(ImmutableList<BasicEdge> e, ImmutableList<BasicPoint> v) {
+        Orientation[] o = new Orientation[e.size() + 6 * BasicPrototile.ALL_PROTOTILES.size()];
         int i = 0;
-        for (i = 0; i < e.length; i++) o[i] = e[i].getOrientation();
+        for (i = 0; i < e.size(); i++) o[i] = e.get(i).getOrientation();
         for (BasicPrototile t : BasicPrototile.ALL_PROTOTILES) {
             for (Orientation a : t.getOrientations()) {
                 o[i] = a;
@@ -57,7 +57,7 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
     }
 
     // public static factory method
-    public static BasicPatch createBasicPatch(BasicEdge[] e, ImmutableList<BasicPoint> v) {
+    public static BasicPatch createBasicPatch(ImmutableList<BasicEdge> e, ImmutableList<BasicPoint> v) {
         return new BasicPatch(e,v);
     }
 
