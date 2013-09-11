@@ -57,7 +57,7 @@ public class BasicWorkUnit implements WorkUnit, Serializable {
     // this is the main method in BasicWorkUnit.
     // it produces the TestResult.
     public Result call() {
-        System.out.println("doing a BasicWorkUnit with " + availableTiles.size() + " tiles.");
+//        System.out.println("doing a BasicWorkUnit with " + availableTiles.size() + " tiles.");
         if (availableTiles.size() == 0) {
             log.log(Level.INFO, Thread.currentThread().getName() + " BasicWorkUnit " + hashCode() + " found a hit");
             // presumably we'll eventually want to return a BasicPatch as part of this result instead.  So this next line is temporary.

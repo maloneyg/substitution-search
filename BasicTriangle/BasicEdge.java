@@ -124,64 +124,6 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
         return result;
     }
 
-    // Check if two edges are the same, with identical orientations. 
-//    public boolean equals(Object obj) {
-//        if (obj == null || getClass() != obj.getClass())
-//            return false;
-//        BasicEdge e = (BasicEdge) obj;
-//        if (!(this.length.equals(e.length)))
-//            return false;
-//        BasicPoint u0 = this.ends.get(0);
-//        BasicPoint u1 = this.ends.get(1);
-//        BasicPoint v0 = e.ends.get(1);
-//        BasicPoint v1 = e.ends.get(1);
-//
-//        if (u0.equals(v0)) {
-//            if (u1.equals(v1)) {
-//                return this.orientation.equals(e.orientation);
-//            } else {
-//                return false;
-//            }
-//        } else if (u0.equals(v1)) {
-//            if (u1.equals(v0)) {
-//                return this.orientation.equals(e.orientation.getOpposite());
-//            } else {
-//                return false;
-//            }
-//        }
-//        return false;
-//    }
-
-    // hashCode override.
-//    public int hashCode() {
-//        int prime = 17;
-//        int result = 19;
-//        result = prime*result + length.hashCode();
-
-        /*
-        * We can't just throw together the hashCode of the ends
-        * in order, because two BasicEdges equal one another
-        * if their ends are listed in the opposite order and 
-        * their orientations are opposites. So we have to do 
-        * something more sophisticated. 
-        */
-//        int h0 = ends.get(0).hashCode();
-//        int h1 = ends.get(1).hashCode();
-//        if (h0 < h1) {
-//            result = prime*result + h0;
-//            result = prime*result + h1;
-//            result = prime*result + orientation.hashCode();
-//        } else if (h1 < h0) {
-//            result = prime*result + h1;
-//            result = prime*result + h0;
-//            result = prime*result + orientation.getOpposite().hashCode();
-//        } else {
-//            result = prime*result + h0;
-//            result = prime*result + h1;
-//        }
-//        return result;
-//    }
-
     // Check if two edges are the same, with non-opposite orientations. 
     public boolean compatible(BasicEdge e) {
         if (!(this.length.equals(e.length)))
@@ -222,6 +164,49 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
             return u1.equals(v0);
         }
         return false;
+    }
+
+    // Check if two edges have any end points in common
+    public boolean commonEnd(BasicEdge e) {
+        BasicPoint u0 = this.ends.get(0);
+        BasicPoint u1 = this.ends.get(1);
+        BasicPoint v0 = e.ends.get(0);
+        BasicPoint v1 = e.ends.get(1);
+        return (u0.equals(v0)||u0.equals(v1)||u1.equals(v0)||u1.equals(v1));
+    }
+
+    // return the angle that this edge makes with the positive x-axis
+    public BasicAngle angle() {
+        BasicPoint direction = this.ends.get(1).subtract(this.ends.get(0));
+        BasicAngle output = BasicAngle.createBasicAngle(0);
+        for (int i = 0; i < 2*BasicAngle.ANGLE_SUM; i++) {
+            output = BasicAngle.createBasicAngle(i);
+            if (length.getAsVector(output).equals(direction)) break;
+        }
+        return output;
+    }
+
+    // return true if these edges cross, and false otherwise.
+    // in particular, return false if they share a common
+    // end point or if they have the same slope.
+    public boolean cross(BasicEdge e) {
+        if (commonEnd(e)) return false;
+        BasicAngle a0 = this.angle();
+        BasicAngle a1 = e.angle();
+        if (a0.equals(a1)||a0.equals(a1.piPlus())) return false;
+        BasicPoint u0 = this.ends.get(0);
+        BasicPoint u1 = this.ends.get(1);
+        BasicPoint v0 = e.ends.get(0);
+        BasicPoint v1 = e.ends.get(1);
+        BasicPoint m0 = u1.subtract(u0); // the direction vector for this edge
+        BasicPoint m1 = v1.subtract(v0); // the direction vector for e
+        return (Math.signum((u0.subtract(v0)).crossProduct(m1).evaluate(Initializer.COS)) == Math.signum((u1.subtract(v0)).crossProduct(m).evaluate(Initializer.COS)))
+        return output;
+    }
+
+                return false;
+        }
+        return true;
     }
 
     // return the same edge, with end points listed

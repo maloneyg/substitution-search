@@ -91,9 +91,9 @@ public class SimpleTest
         try
             {
                 Thread.sleep(10*100);
-                System.out.print("Writing a checkpoint...");
-                executorService.getExecutor().writeCheckpoint();
-                System.out.println("done.");
+//                System.out.print("Writing a checkpoint...");
+//                executorService.getExecutor().writeCheckpoint();
+//                System.out.println("done.");
                 log.log(Level.WARNING, "Requesting immediate executor service shutdown.");
                 System.out.println("Requesting immediate executor service shutdown.");
                 executorService.getExecutor().shutdownNow();                                     // cancel all pending and current jobs

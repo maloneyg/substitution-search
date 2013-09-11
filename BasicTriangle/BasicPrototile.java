@@ -148,37 +148,31 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
         BasicPoint e1 = ends.get(1).subtract(e0);
         BasicPoint shift;
         BasicAngle turn;
-        int intTurn = 0;
-        // set intTurn equal to the angle between e1 and the positive x-axis
-        for (int i = 0; i < 2*BasicAngle.ANGLE_SUM; i++) {
-            if (l.getAsVector(BasicAngle.createBasicAngle(i)).equals(e1)) {
-                intTurn = i;
-                break;
-            }
-        }
+        // set preTurn equal to the angle between e1 and the positive x-axis
+        BasicAngle preTurn = e.angle();
         for (int i = 0; i < 3; i++) {
             if (l.equals(lengths.get(i))&&!equivalenceClass.contains(orientations.get(i).getOpposite())) {
                 if (i == 0) {
                     shift = e0;
-                    turn = BasicAngle.createBasicAngle(intTurn);
+                    turn = preTurn;
                 } else if (i == 1) {
-                    turn = BasicAngle.createBasicAngle(intTurn-angles.get(2).supplement().getAsInt());
+                    turn = preTurn.minus(angles.get(2).supplement());
                     shift = e0.subtract(lengths.get(0).getAsVector(turn));
                 } else {
-                    turn = BasicAngle.createBasicAngle(intTurn-angles.get(1).piPlus().getAsInt());
-                    shift = e0.subtract(lengths.get(2).getAsVector(BasicAngle.createBasicAngle(turn.getAsInt()+angles.get(1).getAsInt())));
+                    turn = preTurn.minus(angles.get(1).piPlus());
+                    shift = e0.subtract(lengths.get(2).getAsVector(turn.plus(angles.get(1))));
                 }
                 output.add(place(shift,turn,false));
             }
             if (l.equals(lengths.get(i))&&!equivalenceClass.contains(orientations.get(i))) {
                 if (i == 0) {
-                    turn = BasicAngle.createBasicAngle(intTurn);
+                    turn = preTurn;
                     shift = e0.add(lengths.get(0).getAsVector(turn));
                 } else if (i == 1) {
-                    turn = BasicAngle.createBasicAngle(intTurn-angles.get(2).piPlus().getAsInt());
-                    shift = e0.subtract(lengths.get(2).getAsVector(BasicAngle.createBasicAngle(turn.getAsInt()+angles.get(1).supplement().getAsInt())));
+                    turn = preTurn.minus(angles.get(2).piPlus());
+                    shift = e0.subtract(lengths.get(2).getAsVector(turn.plus(angles.get(1).supplement())));
                 } else {
-                    turn = BasicAngle.createBasicAngle(intTurn-angles.get(1).supplement().getAsInt());
+                    turn = preTurn.minus(angles.get(1).supplement());
                     shift = e0;
                 }
                 output.add(place(shift,turn,true));

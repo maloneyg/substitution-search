@@ -68,6 +68,16 @@ public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle>, 
         return this.a;
     }
 
+    // return this angle plus a
+    public BasicAngle plus(BasicAngle other) {
+        return createBasicAngle(this.a + other.a);
+    }
+
+    // return this angle minus a
+    public BasicAngle minus(BasicAngle other) {
+        return createBasicAngle(this.a - other.a);
+    }
+
     // return pi minus this angle.
     protected BasicAngle supplement() {
         return createBasicAngle(ANGLE_SUM - (a % (2*ANGLE_SUM)));

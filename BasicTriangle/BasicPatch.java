@@ -250,13 +250,25 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
             }
         }
 
+        // make sure the new vertex is in the inflated prototile
         if (newVertex && !contains(other)) return false;
 
+        // make sure the new vertex doesn't overlap any closed edges
+        if (newVertex) {
+            for (BasicEdge e : closedEdges) {
+                if (e.incident(other)) return false;
+            }
+        }
+
+        // make sure the new vertex isn't inside any placed triangles
         if (newVertex) {
             for (BasicTriangle tr : triangles) {
                 if (tr.contains(other)) return false;
             }
         }
+
+        // make sure the orientations match
+        if (!newOrientationPartition(t).valid()) return false;
 
         return true;
     }
