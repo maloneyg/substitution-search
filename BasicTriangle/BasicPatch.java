@@ -270,6 +270,26 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
         // make sure the orientations match
         if (!newOrientationPartition(t).valid()) return false;
 
+        // newEdges are the edges containing other in t
+        BasicEdge[] newEdges = new BasicEdge[2];
+        int count = 0;
+        for (BasicEdge e : t.getEdges()) {
+            if (e.hasVertex(other)) {
+                newEdges[count] = e;
+                count++;
+            }
+        }
+
+        // return false if a new edge crosses any old one
+        for (BasicEdge e : newEdges) {
+            for (BasicEdge open : openEdges) {
+                if (e.cross(open)) return false;
+            }
+            for (BasicEdge closed : closedEdges) {
+                if (e.cross(closed)) return false;
+            }
+        }
+
         return true;
     }
 

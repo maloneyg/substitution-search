@@ -200,13 +200,7 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
         BasicPoint v1 = e.ends.get(1);
         BasicPoint m0 = u1.subtract(u0); // the direction vector for this edge
         BasicPoint m1 = v1.subtract(v0); // the direction vector for e
-        return (Math.signum((u0.subtract(v0)).crossProduct(m1).evaluate(Initializer.COS)) == Math.signum((u1.subtract(v0)).crossProduct(m).evaluate(Initializer.COS)))
-        return output;
-    }
-
-                return false;
-        }
-        return true;
+        return (Math.signum((u0.subtract(v0)).crossProduct(m1).evaluate(Initializer.COS)) != Math.signum((u1.subtract(v0)).crossProduct(m1).evaluate(Initializer.COS)) && Math.signum((v1.subtract(u0)).crossProduct(m0).evaluate(Initializer.COS)) != Math.signum((v0.subtract(u0).crossProduct(m0).evaluate(Initializer.COS))));
     }
 
     // return the same edge, with end points listed

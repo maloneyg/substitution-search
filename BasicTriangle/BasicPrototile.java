@@ -67,6 +67,13 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
         throw new IllegalArgumentException("We aren't using the prototile (" + a0+","+a1+","+a2+")");
     }
 
+    // public static factory method
+    public static BasicPrototile createBasicPrototile(ImmutableList<Integer> a) {
+        if (a.size() != 3)
+            throw new IllegalArgumentException("A prototile needs 3 angles.");
+        return createBasicPrototile(new int[] {a.get(0),a.get(1),a.get(2)});
+    }
+
     // get all Orientations.  We need this to initialize a BasicPatch
     protected ImmutableList<Orientation> getOrientations() {
         return orientations;

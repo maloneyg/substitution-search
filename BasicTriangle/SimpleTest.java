@@ -27,9 +27,10 @@ public class SimpleTest
 //        BasicPrototile P2 = BasicPrototile.createBasicPrototile(new int[] { 2, 4, 5 });
 //        BasicPrototile P3 = BasicPrototile.createBasicPrototile(new int[] { 2, 3, 6 });
 //        BasicPrototile P4 = BasicPrototile.createBasicPrototile(new int[] { 3, 3, 5 });
-        BasicPrototile P0 = BasicPrototile.createBasicPrototile(new int[] { 1, 2, 4 });
-        BasicPrototile P1 = BasicPrototile.createBasicPrototile(new int[] { 1, 3, 3 });
-        BasicPrototile P2 = BasicPrototile.createBasicPrototile(new int[] { 2, 2, 3 });
+//        BasicPrototile P0 = BasicPrototile.createBasicPrototile(new int[] { 1, 2, 4 });
+//        BasicPrototile P1 = BasicPrototile.createBasicPrototile(new int[] { 1, 3, 3 });
+//        BasicPrototile P2 = BasicPrototile.createBasicPrototile(new int[] { 2, 2, 3 });
+        BasicPrototile P0 = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(0));
 
 //        PrototileList testTiles = PrototileList.createPrototileList(ImmutableList.of(P0,P0,P1,P2,P2,P3));
 //        PrototileList testTiles = PrototileList.createPrototileList(ImmutableList.of(P1,P1,P1,P0,P0,P0,P0,P2));
