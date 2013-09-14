@@ -137,7 +137,8 @@ public class SimpleTest
             }
 
             Enumeration<BasicPatch> output = BasicWorkUnit.output().keys();
-            PointsDisplay display = new PointsDisplay(output.nextElement().graphicsDump(),"BigTest");
+            PointsDisplay display = new PointsDisplay(output,"BigTest");
+//            PointsDisplay display = new PointsDisplay(output.nextElement().graphicsDump(),"BigTest");
 
     }
 } // end of SimpleTest

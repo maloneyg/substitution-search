@@ -5,15 +5,33 @@ import java.awt.event.*;
 import java.awt.geom.*;
 import org.apache.commons.math3.linear.*;
 import com.google.common.collect.*;
+import javax.swing.AbstractButton;
+import javax.swing.JButton;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class PointsDisplay extends JPanel
+public class PointsDisplay extends JPanel implements ActionListener
 {
+
+    private Enumeration<BasicPatch> patches;
     private ArrayList<OrderedTriple> data;
+    private JButton next;
     public static final int windowSize = 500;
 
-    public PointsDisplay(ArrayList<OrderedTriple> data, String title)
+    public PointsDisplay(Enumeration<BasicPatch> patches, String title)
     {
-        this.data = data;
+        this.patches = patches;
+        this.data = this.patches.nextElement().graphicsDump();
+
+        next = new JButton("next");
+        if (!patches.hasMoreElements()) {
+            next.setEnabled(false);
+        } else {
+            next.setEnabled(true);
+        }
+        next.setActionCommand("advance");
+        next.setMnemonic(KeyEvent.VK_A);
+        next.addActionListener(this);
 
         JPanel content = new JPanel();
         content.setLayout(new BorderLayout());
@@ -26,6 +44,16 @@ public class PointsDisplay extends JPanel
         window.setLocation(10,10);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setVisible(true);
+
+        add(next);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        if ("advance".equals(e.getActionCommand())) {
+            this.data = patches.nextElement().graphicsDump();
+            if (!patches.hasMoreElements()) next.setEnabled(false);
+            this.updateUI();
+        }
     }
 
     public void paintComponent(Graphics g)
@@ -90,9 +118,6 @@ public class PointsDisplay extends JPanel
                 Point2D.Double point1 = new Point2D.Double(scale*points.get(0).getY()-offsetY+windowSize/2, -scale*points.get(0).getX()+offsetX+windowSize/2);
                 Point2D.Double point2 = new Point2D.Double(scale*points.get(1).getY()-offsetY+windowSize/2, -scale*points.get(1).getX()+offsetX+windowSize/2);
                 Point2D.Double point3 = new Point2D.Double(scale*points.get(2).getY()-offsetY+windowSize/2, -scale*points.get(2).getX()+offsetX+windowSize/2);
-//                Point2D.Double point1 = new Point2D.Double(scale*points.get(0).getX()+offsetX, scale*points.get(0).getY()+offsetY);
-//                Point2D.Double point2 = new Point2D.Double(scale*points.get(1).getX()+offsetX, scale*points.get(1).getY()+offsetY);
-//                Point2D.Double point3 = new Point2D.Double(scale*points.get(2).getX()+offsetX, scale*points.get(2).getY()+offsetY);
                 g2.draw(new Line2D.Double(point1,point2));
                 g2.draw(new Line2D.Double(point2,point3));
                 g2.draw(new Line2D.Double(point1,point3));
@@ -127,7 +152,7 @@ public class PointsDisplay extends JPanel
 
         BasicPatch patch = BasicPatch.createBasicPatch(edgeList,ImmutableList.of(BasicPoint.ZERO_VECTOR,BasicPoint.ZERO_VECTOR,BasicPoint.ZERO_VECTOR));
 
-        PointsDisplay theseData = new PointsDisplay(patch.graphicsDump(), "TriangleDraw");
+//        PointsDisplay theseData = new PointsDisplay(patch.graphicsDump(), "TriangleDraw");
 
     }
 
