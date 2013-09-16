@@ -9,31 +9,23 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
 import com.google.common.collect.*;
+import Jama.Matrix;
 
 public class SimpleTest
 {
     public static void main(String[] args)
     {
 
+        int myTile = 0;
+
         // this is the thread executor service (a singleton)
         ThreadService executorService = ThreadService.INSTANCE;
         System.out.println(executorService);
         Logger log = executorService.getLogger();
 
-        
 
-//        BasicPrototile P0 = BasicPrototile.createBasicPrototile(new int[] { 1, 4, 6 });
-//        BasicPrototile P1 = BasicPrototile.createBasicPrototile(new int[] { 1, 5, 5 });
-//        BasicPrototile P2 = BasicPrototile.createBasicPrototile(new int[] { 2, 4, 5 });
-//        BasicPrototile P3 = BasicPrototile.createBasicPrototile(new int[] { 2, 3, 6 });
-//        BasicPrototile P4 = BasicPrototile.createBasicPrototile(new int[] { 3, 3, 5 });
-//        BasicPrototile P0 = BasicPrototile.createBasicPrototile(new int[] { 1, 2, 4 });
-//        BasicPrototile P1 = BasicPrototile.createBasicPrototile(new int[] { 1, 3, 3 });
-//        BasicPrototile P2 = BasicPrototile.createBasicPrototile(new int[] { 2, 2, 3 });
-        BasicPrototile P0 = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(0));
+        BasicPrototile P0 = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(myTile));
 
-//        PrototileList testTiles = PrototileList.createPrototileList(ImmutableList.of(P0,P0,P1,P2,P2,P3));
-//        PrototileList testTiles = PrototileList.createPrototileList(ImmutableList.of(P1,P1,P1,P0,P0,P0,P0,P2));
         ImmutableList<Integer> BD0 = P0.getLengths().get(0).getBreakdown();
         ImmutableList<Integer> BD1 = P0.getLengths().get(1).getBreakdown();
         ImmutableList<Integer> BD2 = P0.getLengths().get(2).getBreakdown();
@@ -46,9 +38,16 @@ public class SimpleTest
         BD0 = start0;
         BD1 = start1;
         BD2 = start2;
-        PrototileList tiles = PrototileList.createPrototileList(BasicPrototile.getPrototileList(Initializer.SUBSTITUTION_MATRIX.getColumn(0)));
+        PrototileList tiles = PrototileList.createPrototileList(BasicPrototile.getPrototileList(Initializer.SUBSTITUTION_MATRIX.getColumn(myTile)));
         ImmutableList<BasicPoint> vertices = P0.place(BasicPoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
         ImmutableList<BasicPoint> bigVertices = ImmutableList.of(vertices.get(0).inflate(),vertices.get(1).inflate(),vertices.get(2).inflate());
+
+//        ImmutableList<Integer> inflList = Preinitializer.INFL;
+//        IntPolynomial infl = IntPolynomial.createIntPolynomial(inflList);
+//        Matrix otherInfl = infl.evaluate(LengthAndAreaCalculator.AMAT);
+//        System.out.println(Initializer.SUBSTITUTION_MATRIX.getColumn(myTile));
+//        System.out.println(Initializer.SUBSTITUTION_MATRIX);
+//        System.out.println(LengthAndAreaCalculator.arrayString((LengthAndAreaCalculator.AREA_MATRIX.inverse()).times(otherInfl).times(otherInfl).times(LengthAndAreaCalculator.AREA_MATRIX).getArray()));
 
         // submit 30 jobs to the executor service
         // note: if this exceeds JOB_CAPACITY, then this thread will actually do the work, based on the rejected execution handler

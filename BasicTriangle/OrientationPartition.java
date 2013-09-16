@@ -94,12 +94,37 @@ public final class OrientationPartition implements Serializable {
         throw new IllegalArgumentException("Orientation " + o + " isn't on the list.");
     }
 
+    // split up the set p into subsets the elements of any one of which
+    // lie in the same set in this.partition.
+    private OrientationPartition split(ImmutableSet<Orientation> p) {
+        ArrayList<ImmutableSet<Orientation>> output = new ArrayList<>();
+        ArrayList<Orientation> current;
+        for (ImmutableSet<Orientation> s : partition) {
+            current = new ArrayList<>();
+            for (Orientation o : s) {
+                if (p.contains(o)) current.add(o);
+            }
+            if (current.size() > 0) output.add(ImmutableSet.copyOf(current));
+        }
+        return new OrientationPartition(ImmutableSet.copyOf(output));
+    }
+
+    // return the refinement of this and s
+    public OrientationPartition refinement(OrientationPartition s) {
+        ArrayList<ImmutableSet<Orientation>> output = new ArrayList<>(partition.size());
+        for (ImmutableSet<Orientation> p : s.partition) {
+            for (ImmutableSet<Orientation> l : split(p).partition)
+                output.add(l);
+        }
+        return new OrientationPartition(ImmutableSet.copyOf(output));
+    }
+
     // create a new OrientationPartition by identifying
     // two Orientations.  Take the union of the two sets
     // containing them, and do the same for their 
     // opposites.  
     // Be careful here: we don't check for validity, so
-    // that will have to be done externally after 
+    // that will have to be done externally before or after 
     // identify().
     public OrientationPartition identify(Orientation o1, Orientation o2) {
         ArrayList<ImmutableSet<Orientation>> preSet = new ArrayList(partition.size()-2);

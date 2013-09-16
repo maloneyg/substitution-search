@@ -143,7 +143,7 @@ final public class LengthAndAreaCalculator {
         int[][] preMatrix = new int[L][M];
         for (int i = 0; i < L; i++) {
             for (int j = 0; j < M; j++) {
-                preMatrix[i][j] = ((Double)a[i][j]).intValue();
+                preMatrix[i][j] = (int) Math.round((Double)a[i][j]);
             }
         }
         return IntMatrix.createIntMatrix(preMatrix);
