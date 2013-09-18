@@ -10,9 +10,11 @@
 */
 
 import com.google.common.collect.*;
+import com.google.common.cache.*;
 import java.io.Serializable;
 import org.apache.commons.math3.linear.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPoint, BasicEdgeLength, BasicEdge, BasicTriangle>, Serializable {
 
@@ -23,6 +25,10 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
     private final ImmutableList<BasicPoint> vertices;
     private final ImmutableList<Orientation> orientations;
     private final ImmutableList<BasicEdgeLength> edgeLengths;
+    private static Cache<AbstractMap.SimpleEntry<BasicPoint[],Orientation[]>, BasicTriangle> cache = CacheBuilder.newBuilder()
+        .maximumSize(1000)// we may want to change this later
+        .build(); // maintain a cache of existing BasicTriangles
+
 
     // constructor methods.
     private BasicTriangle(BasicAngle[] a, BasicPoint[] p, Orientation[] o, BasicEdgeLength[] e) {
@@ -34,7 +40,20 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
 
     // public static factory methods.
     public static BasicTriangle createBasicTriangle(BasicAngle[] a, BasicPoint[] p, Orientation[] o, BasicEdgeLength[] e) {
-        return new BasicTriangle(a,p,o,e);
+        final BasicAngle[] aa = a;
+        final BasicPoint[] pp = p;
+        final Orientation[] oo = o;
+        final BasicEdgeLength[] ee = e;
+        try {
+            return cache.get(new AbstractMap.SimpleEntry(p,o), new Callable<BasicTriangle>() {
+                @Override
+                public BasicTriangle call() throws IllegalArgumentException {
+                  return new BasicTriangle(aa,pp,oo,ee);
+                }
+              });
+        } catch (ExecutionException ex) {
+            throw new IllegalArgumentException(ex.getCause());
+        }
     }
 
     public ImmutableList<BasicAngle> getAngles() {

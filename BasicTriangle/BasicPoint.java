@@ -5,6 +5,7 @@
 
 import com.google.common.collect.*;
 import com.google.common.base.*;
+import com.google.common.cache.*;
 import java.io.Serializable;
 
 final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, Serializable {
@@ -26,6 +27,16 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
     public static final BasicPoint ZERO_VECTOR = new BasicPoint();
 
     public static final BasicPoint UNIT_VECTOR;
+
+    private static LoadingCache<int[], BasicPoint> points = CacheBuilder.newBuilder()
+       //.expireAfterAccess(10, TimeUnit.MINUTES)
+       .build(
+           new CacheLoader<int[], BasicPoint>() {
+             public BasicPoint load(int[] i) { // no checked exception
+               return getCachedBasicPoint(i);
+             }
+           });
+
 
     static { // initialize the unit vector
 
@@ -63,6 +74,11 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
 
     // public static factory method
     static public BasicPoint createBasicPoint(int[] vector) {
+        return points.getUnchecked(vector);
+    }
+
+    // private static factory method
+    static private BasicPoint getCachedBasicPoint(int[] vector) {
         return new BasicPoint(vector);
     }
 
