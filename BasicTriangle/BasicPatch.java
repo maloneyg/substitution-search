@@ -36,6 +36,15 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
         bigVertices = v;
     }
 
+    // private constructor
+    private BasicPatch(ImmutableList<BasicTriangle> t, ImmutableList<BasicEdge> e1, ImmutableList<BasicEdge> e2, OrientationPartition o, ImmutableList<BasicPoint> v) {
+        triangles = t;
+        openEdges = e1;
+        closedEdges = e2;
+        partition = o;
+        bigVertices = v;
+    }
+
     // initial constructor
     private BasicPatch(ImmutableList<BasicEdge> e, ImmutableList<BasicPoint> v) {
         Orientation[] o = new Orientation[e.size() + 6 * BasicPrototile.ALL_PROTOTILES.size()];
@@ -123,6 +132,15 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
             }
         }
         return output;
+    }
+
+    /*
+    * construct a new patch that is the same as this one, with 
+    * Orientations o1 and o1 identified.
+    *
+    */
+    public BasicPatch identify(Orientation o1, Orientation o2) {
+        return new BasicPatch(triangles,openEdges,closedEdges,partition.identify(o1,o2),bigVertices);
     }
 
     /*
