@@ -13,18 +13,21 @@ import java.awt.event.ActionListener;
 public class PointsDisplay extends JPanel implements ActionListener
 {
 
-    private Enumeration<BasicPatch> patches;
+    private final ImmutableList<BasicPatch> patches;
     private ArrayList<OrderedTriple> data;
     private JButton next;
+    private JButton previous;
+    private int position;
     public static final int windowSize = 500;
 
-    public PointsDisplay(Enumeration<BasicPatch> patches, String title)
+    public PointsDisplay(ImmutableList<BasicPatch> patches, String title)
     {
         this.patches = patches;
-        this.data = this.patches.nextElement().graphicsDump();
+        this.position = 0;
+        this.data = this.patches.get(position).graphicsDump();
 
         next = new JButton("next");
-        if (!patches.hasMoreElements()) {
+        if (position+1 >= patches.size()) {
             next.setEnabled(false);
         } else {
             next.setEnabled(true);
@@ -32,6 +35,16 @@ public class PointsDisplay extends JPanel implements ActionListener
         next.setActionCommand("advance");
         next.setMnemonic(KeyEvent.VK_A);
         next.addActionListener(this);
+
+        previous = new JButton("previous");
+        if (position == 0) {
+            previous.setEnabled(false);
+        } else {
+            previous.setEnabled(true);
+        }
+        previous.setActionCommand("retreat");
+        previous.setMnemonic(KeyEvent.VK_B);
+        previous.addActionListener(this);
 
         JPanel content = new JPanel();
         content.setLayout(new BorderLayout());
@@ -45,13 +58,22 @@ public class PointsDisplay extends JPanel implements ActionListener
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setVisible(true);
 
+        add(previous);
         add(next);
     }
 
     public void actionPerformed(ActionEvent e) {
         if ("advance".equals(e.getActionCommand())) {
-            this.data = patches.nextElement().graphicsDump();
-            if (!patches.hasMoreElements()) next.setEnabled(false);
+            position++;
+            this.data = patches.get(position).graphicsDump();
+            if (position+1 == patches.size()) next.setEnabled(false);
+            if (position > 0) previous.setEnabled(true);
+            this.updateUI();
+        } else if ("retreat".equals(e.getActionCommand())) {
+            position--;
+            this.data = patches.get(position).graphicsDump();
+            if (position+1 < patches.size()) next.setEnabled(true);
+            if (position == 0) previous.setEnabled(false);
             this.updateUI();
         }
     }
