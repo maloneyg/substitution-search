@@ -16,7 +16,8 @@ public class SimpleTest
     public static void main(String[] args)
     {
 
-        int myTile = 1;
+        int myTile = 0; // uncomment this line for a small search
+//        int myTile = 4; // uncomment this line for a big search
 
         // this is the thread executor service (a singleton)
         ThreadService executorService = ThreadService.INSTANCE;
