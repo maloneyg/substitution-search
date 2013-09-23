@@ -9,7 +9,7 @@ public class ThreadService
     private final static Logger log            = Logger.getLogger(ThreadService.class.getName());
     public static final ThreadService INSTANCE = new ThreadService();
     public final int NUMBER_OF_THREADS         = Runtime.getRuntime().availableProcessors();
-    public final int JOB_CAPACITY              = 100;                                            // how many jobs can wait in the queue at a time
+    public static final int JOB_CAPACITY              = 100000;                                 // how many jobs can wait in the queue at a time
     public static final String runningJobsCheckpointFilename = "runningJobs.chk";               // serialized checkpoints
     public static final String pendingJobsCheckpointFilename = "pendingJobs.chk";               // assumed to be in working directory
 
@@ -68,6 +68,7 @@ public class ThreadService
         private Map<Future<?>,Callable<?>> jobMap = Collections.synchronizedMap(new HashMap<Future<?>,Callable<?>>());
         private List<Callable<?>> currentlyRunningJobs = Collections.synchronizedList(new ArrayList<Callable<?>>());
         private List<Callable<?>> currentlyPendingJobs = Collections.synchronizedList(new ArrayList<Callable<?>>());
+        private Map<Callable<?>,Date> startTimes = Collections.synchronizedMap(new HashMap<Callable<?>,Date>());
 
         public CustomThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
                                         ArrayBlockingQueue<Runnable> workQueue, ThreadFactory threadFactory, RejectedExecutionHandler handler)
@@ -75,36 +76,67 @@ public class ThreadService
             super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, handler);
         }
 
+        public boolean isIdle()
+        {
+            synchronized(this)
+                {
+                    System.out.print("queue size: " + getQueue().size() + " running jobs: " + currentlyRunningJobs.size() + "       ");
+                    if ( getQueue().size() == ThreadService.JOB_CAPACITY )
+                        System.out.print("\r");
+                    else
+                        System.out.println();
+                    if ( getQueue().size() > 0 || currentlyRunningJobs.size() > 0 )
+                        return false;
+                    return true;
+                }
+        }
+
+        public void printQueues()
+        {
+            synchronized(this)
+                {
+                    System.out.print("queue size: " + getQueue().size() + " running jobs: " + currentlyRunningJobs.size() + "       ");
+                }
+        }
+
+        public boolean runningJobs()
+        {
+            if ( currentlyRunningJobs.size() > 0 )
+                return true;
+            return false;
+        }
+
         protected void beforeExecute(Thread t, Runnable r)
         {
             super.beforeExecute(t,r);
             synchronized(this)
                 {
-                    currentlyRunningJobs.add(jobMap.get(r));
-                    currentlyPendingJobs.remove(jobMap.get(r));
+                    Callable<?> thisCallable = jobMap.get(r);
+                    currentlyRunningJobs.add(thisCallable);
+                    //currentlyPendingJobs.remove(thisCallable);
+                    startTimes.put(thisCallable, new Date());
                 }
 
             log.log(Level.INFO, String.format("%s is starting work on %s", Thread.currentThread().getName(), jobMap.get(r).toString()));
-            
-            String currentJobString = "";
-            synchronized(currentlyRunningJobs)
-                {
-                    for (Callable<?> c : currentlyRunningJobs)
-                        currentJobString = currentJobString + ", " + c.toString();
-                }
-            if ( currentJobString.length() > 2 )
-                log.log(Level.INFO, "Currently running jobs: " + currentJobString.substring(2));
          }
 
         protected void afterExecute(Runnable r, Throwable t)
         {
             super.afterExecute(r,t);
+            Date endTime = new Date();
+            Date startTime = null;
+            String jobName = null;
             synchronized(this)
                 {
-                    currentlyRunningJobs.remove(jobMap.get(r));
-                    jobMap.remove(r);
+                    Callable<?> thisCallable = jobMap.get(r);
+                    jobName = jobMap.get(r).toString();
+                    currentlyRunningJobs.remove(thisCallable);
+                    jobMap.remove(thisCallable);
+                    startTime = startTimes.get(thisCallable);
+                    startTimes.remove(thisCallable);
                 }
-            log.log(Level.INFO, String.format("%s is finished work", Thread.currentThread().getName()));
+            double elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
+            log.log(Level.INFO, String.format("%s finished work on %s (%.3f s)", Thread.currentThread().getName(), jobName, elapsedTime));
             try
                 {
                     Future<?> future = (Future<?>) r;
@@ -135,7 +167,7 @@ public class ThreadService
             synchronized(this)
                 {
                     jobMap.put(ftask, task);
-                    currentlyPendingJobs.add(task);
+                    //currentlyPendingJobs.add(task);
                 }
             return ftask;
         }
@@ -211,7 +243,7 @@ public class ThreadService
         public String format(LogRecord record)
             {
                 String sourceString = record.getSourceClassName() + "/" + record.getSourceMethodName() + "()";
-                String returnString = String.format("[ %s ] (%-40s) Thread %-2s - %7s : %s\n", new Date(record.getMillis()),
+                String returnString = String.format("[ %s ] (%-60s) Thread %-2s - %7s : %s\n", new Date(record.getMillis()),
                                                     sourceString, record.getThreadID(), record.getLevel(), record.getMessage());
                 return returnString;
             }
@@ -241,7 +273,8 @@ public class ThreadService
 
         public WorkerThread(Runnable runnable, String name)
         {
-            super(runnable, name + "-thread " + created.incrementAndGet());   // set work and name for thread
+            //super(runnable, name + "-thread " + created.incrementAndGet());   // set work and name for thread
+            super(runnable, "thread " + created.incrementAndGet());
             log.log(Level.INFO, "thread created: " + getName());
         }
 

@@ -59,12 +59,12 @@ public class BasicWorkUnit implements WorkUnit, Serializable {
     public Result call() {
 //        System.out.println("doing a BasicWorkUnit with " + availableTiles.size() + " tiles.");
         if (availableTiles.size() == 0) {
-            log.log(Level.INFO, Thread.currentThread().getName() + " BasicWorkUnit " + hashCode() + " found a hit");
+            log.log(Level.INFO, Thread.currentThread().getName() + " found a hit while working on BasicWorkUnit " + hashCode());
             // presumably we'll eventually want to return a BasicPatch as part of this result instead.  So this next line is temporary.
             completedPatches.put(patch,edgeBreakdown);
             return TestResult.JOB_COMPLETE;
         } else {
-            log.log(Level.INFO, Thread.currentThread().getName() + " BasicWorkUnit " + hashCode() + " doing work");
+            // log.log(Level.INFO, Thread.currentThread().getName() + " BasicWorkUnit " + hashCode() + " doing work");
         }
         int numPlaced = 0;
         BasicEdge nextEdge = patch.getNextEdge(); // the edge we try to cover
@@ -78,12 +78,12 @@ public class BasicWorkUnit implements WorkUnit, Serializable {
                 if (p.compatible(nextEdge.getLength()))
                     numPlaced += tryAndPlace(p, nextEdge, equivalenceClass);
                 if (Thread.interrupted()) {
-                    log.log(Level.WARNING, Thread.currentThread().getName() + " BasicWorkUnit " + hashCode() + " has been interrupted");
+                    log.log(Level.WARNING, Thread.currentThread().getName() + " was interrupted while working on BasicWorkUnit " + hashCode());
                     return TestResult.JOB_INTERRUPTED;
                 }
             }
         }
-        log.log(Level.INFO, Thread.currentThread().getName() + " BasicWorkUnit " + hashCode() + " finished work; placed " + numPlaced + " tiles");
+        //log.log(Level.INFO, Thread.currentThread().getName() + " finished work on BasicWorkUnit " + hashCode() + "; placed " + numPlaced + " tiles");
         return new TestResult("placed " + numPlaced + " tiles");
     } // method call() ends here
 
@@ -97,11 +97,36 @@ public class BasicWorkUnit implements WorkUnit, Serializable {
         for (BasicTriangle t : triangles) {
             if (patch.compatible(t)) {
                 nextUnit = new BasicWorkUnit(patch.placeTriangle(t),edgeBreakdown,availableTiles.remove(p));
+                checkIfBusy();
                 threadService.getExecutor().submit(nextUnit);
                 numPlaced++;
             }
         }
         return numPlaced;
+    }
+
+    // pause if the queue is getting too full
+    private static void checkIfBusy()
+    {
+        /*ThreadService executorService = ThreadService.INSTANCE;
+        int THRESHOLD = 100;
+        while (true)
+            {
+                int queueSize = executorService.getExecutor().getQueue().size();
+                if ( queueSize > THRESHOLD )
+                    {
+                        try
+                            {
+                                Thread.sleep(1*1000);
+                            }
+                        catch (InterruptedException e)
+                            {
+                                continue;
+                            }
+                    }
+                else
+                    break;
+            }*/
     }
 
     public String toString()
