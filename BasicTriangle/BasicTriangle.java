@@ -25,10 +25,10 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
     private final ImmutableList<BasicPoint> vertices;
     private final ImmutableList<Orientation> orientations;
     private final ImmutableList<BasicEdgeLength> edgeLengths;
-    private static Cache<AbstractMap.SimpleEntry<BasicPoint[],Orientation[]>, BasicTriangle> cache = CacheBuilder.newBuilder()
+/*    private static Cache<AbstractMap.SimpleEntry<BasicPoint[],Orientation[]>, BasicTriangle> cache = CacheBuilder.newBuilder()
         .maximumSize(1000)// we may want to change this later
         .build(); // maintain a cache of existing BasicTriangles
-
+*/
 
     // constructor methods.
     private BasicTriangle(BasicAngle[] a, BasicPoint[] p, Orientation[] o, BasicEdgeLength[] e) {
@@ -40,7 +40,7 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
 
     // public static factory methods.
     public static BasicTriangle createBasicTriangle(BasicAngle[] a, BasicPoint[] p, Orientation[] o, BasicEdgeLength[] e) {
-        final BasicAngle[] aa = a;
+        /*final BasicAngle[] aa = a;
         final BasicPoint[] pp = p;
         final Orientation[] oo = o;
         final BasicEdgeLength[] ee = e;
@@ -53,7 +53,8 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
               });
         } catch (ExecutionException ex) {
             throw new IllegalArgumentException(ex.getCause());
-        }
+        }*/
+        return new BasicTriangle(a,p,o,e);
     }
 
     public ImmutableList<BasicAngle> getAngles() {

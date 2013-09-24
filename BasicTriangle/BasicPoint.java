@@ -28,7 +28,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
 
     public static final BasicPoint UNIT_VECTOR;
 
-    private static LoadingCache<int[], BasicPoint> points = CacheBuilder.newBuilder()
+    /*private static LoadingCache<int[], BasicPoint> points = CacheBuilder.newBuilder()
        //.expireAfterAccess(10, TimeUnit.MINUTES)
        .build(
            new CacheLoader<int[], BasicPoint>() {
@@ -36,7 +36,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
                return getCachedBasicPoint(i);
              }
            });
-
+    */
 
     static { // initialize the unit vector
 
@@ -50,7 +50,8 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
     }
 
     // A vector identifying the point.  
-    private final ImmutableList<Integer> point;
+    //private final ImmutableList<Integer> point;
+    private final int[] point;
 
     // Constructor methods.
 
@@ -58,23 +59,26 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
         if (vector.length != length) {
             throw new IllegalArgumentException("Point length is incorrect.");
         }
-        Integer[] tempVector = new Integer[length];
+        /*Integer[] tempVector = new Integer[length];
         for (int i = 0; i < length; i++)
             tempVector[i] = Integer.valueOf(vector[i]);
-        this.point = ImmutableList.copyOf(tempVector);
+        this.point = ImmutableList.copyOf(tempVector);*/
+        point = vector;
     }
 
     private BasicPoint() {
-        Integer[] vector = new Integer[length];
+        /*Integer[] vector = new Integer[length];
         for (int i = 0; i < length; i++) {
             vector[i] = 0;
         }
-        point = ImmutableList.copyOf(vector);
+        point = ImmutableList.copyOf(vector);*/
+        point = new int[length];
     }
 
     // public static factory method
     static public BasicPoint createBasicPoint(int[] vector) {
-        return points.getUnchecked(vector);
+        //return points.getUnchecked(vector);
+        return new BasicPoint(vector);
     }
 
     // private static factory method
@@ -85,10 +89,10 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
     // toString method.
     public String toString() {
         String outString = "(";
-        for (int i = 0; i < point.size() - 1; i++) {
-            outString = outString + point.get(i) + ",";
+        for (int i = 0; i < point.length - 1; i++) {
+            outString = outString + point[i] + ",";
         }
-        outString = outString + point.get(length-1) + ")";
+        outString = outString + point[point.length-1] + ")";
         return outString;
     }
 
@@ -98,7 +102,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
             return false;
         BasicPoint p = (BasicPoint) obj;
         for (int i = 0; i < length; i++) {
-            if (p.point.get(i) != this.point.get(i))
+            if (p.point[i] != this.point[i])
                 return false;
         }
         return true;
@@ -109,24 +113,30 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
         int prime = 53;
         int result = 11;
         for (int i = 0; i < length; i++) {
-            result = prime*result + point.get(i);
+            result = prime*result + point[i];
         }
         return result;
     }
 
     // a private helper method to turn point into an array of Integers.
     private int[] pointAsArray() {
+        /*
         int[] output = new int[length];
         for (int i = 0; i < length; i++)
             output[i] = point.get(i);
         return output;
+        */
+        int[] newArray = new int[length];
+        for (int i=0; i < point.length; i++)
+            newArray[i] = point[i];
+        return newArray;
     }
 
     // a method for drawing
     public double[] arrayToDraw() {
         double[] output = new double[length];
         for (int i = 0; i < length; i++)
-            output[i] = (double) point.get(i);
+            output[i] = (double) point[i];
         return output;
     }
 
@@ -134,7 +144,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
     public BasicPoint add(BasicPoint p) {
         int[] q = new int[length];
         for (int i = 0; i < length; i++) {
-            q[i] = this.point.get(i) + p.point.get(i);
+            q[i] = point[i] + p.point[i];
         }
         return new BasicPoint(q);
     }
@@ -142,7 +152,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
     public BasicPoint scalarMultiple(int c) {
         int[] q = new int[length];
         for (int i = 0; i < length; i++) {
-            q[i] = c * this.point.get(i);
+            q[i] = c * point[i];
         }
         return new BasicPoint(q);
     }
