@@ -72,9 +72,9 @@ public class SimpleTest
                 System.out.println(reportString);
 
                 // for monitoring purposes:
-                System.out.println("Press ENTER");
-                kbd.next();
-                System.gc();
+                //System.out.println("Press ENTER");
+                //kbd.next();
+                //System.gc();
             }
 
         // stop monitoring thread
@@ -136,8 +136,8 @@ public class SimpleTest
 
     private static void createWorkUnits(List<WorkUnit> list)
     {
-        //int myTile = 0; // uncomment this line for a small search
-        int myTile = 4; // uncomment this line for a big search
+        int myTile = 0; // uncomment this line for a small search
+        //int myTile = 4; // uncomment this line for a big search
 
         BasicPrototile P0 = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(myTile));
 
