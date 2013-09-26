@@ -90,7 +90,8 @@ public class SimpleTest
         private Timer timer;
         private double updateInterval;
         private static ThreadService executorService = ThreadService.INSTANCE;
-
+        private Date lastUpdateTime = null;
+        
         public ThreadMonitor(double updateInterval) // seconds
         {
             this.updateInterval = updateInterval;
@@ -110,8 +111,17 @@ public class SimpleTest
             public void run()
             {
                 int jobsRun = executorService.getExecutor().getNumberOfJobsRun();  // number of jobs run in the last monitorInterval; simultaneously    resets counter
-                double throughput = jobsRun / updateInterval;
-                ThreadService.INSTANCE.getExecutor().printQueues(throughput);
+                // this accounts for the fact that the timer might be occasionally delayed
+                Date currentTime = new Date();
+                if ( lastUpdateTime == null )
+                    {
+                        lastUpdateTime = currentTime;
+                        return;
+                    }
+                double elapsedTime = ( currentTime.getTime() - lastUpdateTime.getTime() ) / 1000.0;
+                double throughput = jobsRun / elapsedTime;
+                lastUpdateTime = currentTime;
+                ThreadService.INSTANCE.getExecutor().printQueues(throughput, elapsedTime);
             }
         }
     }

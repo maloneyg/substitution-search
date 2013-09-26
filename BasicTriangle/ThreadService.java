@@ -8,7 +8,7 @@ public class ThreadService
 {
     private final static Logger log            = Logger.getLogger(ThreadService.class.getName());
     public static final ThreadService INSTANCE = new ThreadService();
-    public final int NUMBER_OF_THREADS         = 16; //Runtime.getRuntime().availableProcessors();
+    public final int NUMBER_OF_THREADS         = 12; //Runtime.getRuntime().availableProcessors();
     public static final int JOB_CAPACITY              = 10000000;                                 // how many jobs can wait in the queue at a time
     public static final String runningJobsCheckpointFilename = "runningJobs.chk";               // serialized checkpoints
     public static final String pendingJobsCheckpointFilename = "pendingJobs.chk";               // assumed to be in working directory
@@ -93,10 +93,10 @@ public class ThreadService
                 }
         }
 
-        public void printQueues(double throughput)
+        public void printQueues(double throughput, double timeSinceLastUpdate)
         {
-            String reportString = String.format("Queue size: %10d   Running Jobs: %2d   Throughput: %8.0f jobs / s \r",
-            getQueue().size(), currentlyRunningJobs.size(), throughput);
+            String reportString = String.format("Queue size: %10d   Running Jobs: %2d   Throughput: %8.0f jobs / s   Time since last update: %.4f s\r",
+            getQueue().size(), currentlyRunningJobs.size(), throughput, timeSinceLastUpdate);
             System.out.print(reportString);
         }
 
