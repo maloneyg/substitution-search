@@ -40,7 +40,7 @@ public class ObjectEfficiency
                         // add an old point to the list
                         int randomOldIndex = generator.nextInt(objectList.size());
                         BasicPoint oldPoint = objectList.get(randomOldIndex);
-                        int[] oldPointArray = oldPoint.asArray();
+                        int[] oldPointArray = oldPoint.pointAsArray();
                         BasicPoint newPoint = BasicPoint.createBasicPoint(oldPointArray);
                         objectList.add(newPoint);
                     }

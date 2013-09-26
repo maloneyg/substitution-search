@@ -10,6 +10,7 @@ import java.util.concurrent.*;
 import java.util.logging.*;
 import com.google.common.collect.*;
 import Jama.Matrix;
+import java.util.Scanner;
 
 public class SimpleTest
 {
@@ -24,6 +25,8 @@ public class SimpleTest
         System.out.print("Generating initial work units...");
         createWorkUnits(initialWorkUnits);
         System.out.println(initialWorkUnits.size() + " units have been generated.");
+
+        Scanner kbd = new Scanner(System.in);
 
         // start monitoring thread
         double monitorInterval = 1.0; //seconds
@@ -67,6 +70,11 @@ public class SimpleTest
                 // job is complete
                 String reportString = String.format("Job %010d complete ( %15s ).  %5d patches have been completed.", thisUnit.hashCode(), thisResult.toString(), BasicWorkUnit.output().size());
                 System.out.println(reportString);
+
+                // for monitoring purposes:
+                System.out.println("Press ENTER");
+                kbd.next();
+                System.gc();
             }
 
         // stop monitoring thread

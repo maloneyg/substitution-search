@@ -119,7 +119,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
     }
 
     // a private helper method to turn point into an array of Integers.
-    private int[] pointAsArray() {
+    protected int[] pointAsArray() {
         /*
         int[] output = new int[length];
         for (int i = 0; i < length; i++)

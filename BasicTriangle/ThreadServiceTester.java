@@ -48,7 +48,7 @@ public class ThreadServiceTester
             {
                 Thread.sleep(10*1000);
                 System.out.print("Writing a checkpoint...");
-                executorService.getExecutor().writeCheckpoint();
+                //executorService.getExecutor().writeCheckpoint();
                 System.out.println("done.");
                 log.log(Level.WARNING, "Requesting immediate executor service shutdown.");
                 System.out.println("Requesting immediate executor service shutdown.");

@@ -195,6 +195,7 @@ public class ThreadService
         {
             return currentlyRunningJobs;
         }
+
 /*
         public void writeCheckpoint()
         {
@@ -240,6 +241,7 @@ public class ThreadService
                 }
         }
 */
+
     }
 
     public void loadCheckpoint()
