@@ -73,8 +73,10 @@ public class SimpleTest
 
                 // for monitoring purposes:
                 System.out.println("Press ENTER");
-                kbd.next();
+                kbd.nextLine();
+                System.out.print("Garbage collection initiated...");
                 System.gc();
+                System.out.println("complete.");
             }
 
         // stop monitoring thread
