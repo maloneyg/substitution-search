@@ -15,14 +15,111 @@ public class SimpleTest
 {
     public static void main(String[] args)
     {
-
-//        int myTile = 0; // uncomment this line for a small search
-        int myTile = 4; // uncomment this line for a big search
-
         // this is the thread executor service (a singleton)
         ThreadService executorService = ThreadService.INSTANCE;
         System.out.println(executorService);
         Logger log = executorService.getLogger();
+
+        List<WorkUnit> initialWorkUnits = new ArrayList<WorkUnit>();
+        System.out.print("Generating initial work units...");
+        createWorkUnits(initialWorkUnits);
+        System.out.println(initialWorkUnits.size() + " units have been generated.");
+
+        // start monitoring thread
+        double monitorInterval = 1.0; //seconds
+        ThreadMonitor threadMonitor = new ThreadMonitor(monitorInterval);
+
+        // submit all jobs
+        nextUnit:
+        for (WorkUnit thisUnit : initialWorkUnits)
+            {
+                // submit the next work unit
+                Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
+                System.out.println("Job " + thisUnit.hashCode() + " submitted.");
+                log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
+
+                // wait until the result is available
+                Result thisResult = null;
+                while (true)
+                    {
+                        try
+                            {
+                                thisResult = thisFuture.get();
+                                break;
+                            }
+                        catch (InterruptedException e)
+                            {
+                                // do not allow interruption
+                                continue;
+                            }
+                        catch (ExecutionException e)
+                            {
+                                e.printStackTrace();
+                                continue nextUnit;
+                            }
+                        catch (CancellationException e)
+                            {
+                                System.out.println("Job was cancelled!");
+                                continue nextUnit;
+                            }
+                    }
+
+                // job is complete
+                String reportString = String.format("Job %010d complete ( %15s ).  %5d patches have been completed.", thisUnit.hashCode(), thisResult.toString(), BasicWorkUnit.output().size());
+                System.out.println(reportString);
+            }
+
+        // stop monitoring thread
+        threadMonitor.stop();
+
+        // display results
+        int numberOfResults = BasicWorkUnit.output().size();
+        System.out.println(numberOfResults + " completed patches have been found.");
+        if ( numberOfResults > 0 )
+            {
+                Enumeration<BasicPatch> output = BasicWorkUnit.output().keys();
+                ArrayList<BasicPatch> preList = new ArrayList<>();
+                while (output.hasMoreElements())
+                    preList.add(output.nextElement());
+                PointsDisplay display = new PointsDisplay(ImmutableList.copyOf(preList),"BigTest");
+            }
+    }
+
+    private static class ThreadMonitor
+    {
+        private Timer timer;
+        private double updateInterval;
+        private static ThreadService executorService = ThreadService.INSTANCE;
+
+        public ThreadMonitor(double updateInterval) // seconds
+        {
+            this.updateInterval = updateInterval;
+            timer = new Timer();
+            timer.schedule(new CustomTimerTask(), (int)updateInterval*1000, (int)updateInterval*1000);
+            System.out.println("Thread monitor started.");
+        }
+
+        public void stop()
+        {
+            timer.cancel();
+            System.out.println("Thread monitor stopped.");
+        }
+
+        private class CustomTimerTask extends TimerTask
+        {
+            public void run()
+            {
+                int jobsRun = executorService.getExecutor().getNumberOfJobsRun();  // number of jobs run in the last monitorInterval; simultaneously    resets counter
+                double throughput = jobsRun / updateInterval;
+                ThreadService.INSTANCE.getExecutor().printQueues(throughput);
+            }
+        }
+    }
+
+    private static void createWorkUnits(List<WorkUnit> list)
+    {
+        //int myTile = 0; // uncomment this line for a small search
+        int myTile = 4; // uncomment this line for a big search
 
         BasicPrototile P0 = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(myTile));
 
@@ -82,13 +179,14 @@ public class SimpleTest
                     WorkUnit thisUnit = BasicWorkUnit.createBasicWorkUnit(patch,testBD,tiles);
 
                     // submit this unit of work to the executor service
-                    checkIfBusy();
-                    Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
+                    //checkIfBusy();
+                    //Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
+                    list.add(thisUnit);
 
                     // make a map between pieces of work and their futures
                     //submittedJobs.put(thisUnit,thisFuture);
-                    System.out.println("Job " + thisUnit.hashCode() + " submitted.");
-                    log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
+                    //System.out.println("Job " + thisUnit.hashCode() + " submitted.");
+                    //log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
 
                     edgeList = P0.createSkeleton(BD0, BD2, true);
                     testBD = ImmutableList.of(BD0, BD2);
@@ -101,13 +199,14 @@ public class SimpleTest
                     thisUnit = BasicWorkUnit.createBasicWorkUnit(patch,testBD,tiles);
 
                     // submit this unit of work to the executor service
-                    checkIfBusy();
-                    thisFuture = executorService.getExecutor().submit(thisUnit);
+                    //checkIfBusy();
+                    //thisFuture = executorService.getExecutor().submit(thisUnit);
+                    list.add(thisUnit);
 
                     // make a map between pieces of work and their futures
                     //submittedJobs.put(thisUnit,thisFuture);
-                    System.out.println("Job " + thisUnit.hashCode() + " submitted.");
-                    log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
+                    //System.out.println("Job " + thisUnit.hashCode() + " submitted.");
+                    //log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
 
                     edge2.iterate();
                     BD2 = edge2.getImmutableList();
@@ -133,13 +232,14 @@ public class SimpleTest
                         // when polled, the Future object will either block if the job isn't done yet
                         // or return the result if it is
                         // (exceptions can be thrown if the job was interrupted/cancelled, failed, etc.)
-                        checkIfBusy();
-                        Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
+                        //checkIfBusy();
+                        //Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
+                        list.add(thisUnit);
 
                         // make a map between pieces of work and their futures
                         //submittedJobs.put(thisUnit,thisFuture);
-                        System.out.println("Job " + thisUnit.hashCode() + " submitted.");
-                        log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
+                        //System.out.println("Job " + thisUnit.hashCode() + " submitted.");
+                        //log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
 
                         edge2.iterate();
                         BD2 = edge2.getImmutableList();
@@ -151,127 +251,6 @@ public class SimpleTest
                 BD0 = edge0.getImmutableList();
             } while (!BD0.equals(start0));
         } // end of BasicWorkUnit submissions
-
-        System.out.println("Job submission complete.");
-
-        // wait for jobs to finish
-
-        while (true)
-            {
-                try
-                    {
-                        // wait for a few seconds, then check every second to see if the queue is empty
-                        Thread.sleep(1*1000);
-                        System.out.print("Waiting for jobs to complete...\r");
-                        if ( executorService.getExecutor().isIdle() )
-                            {
-                                executorService.getExecutor().shutdown();
-                                System.out.println("\nAwaiting executor shutdown...");
-                                boolean finished = executorService.getExecutor().awaitTermination(5L, TimeUnit.MINUTES);
-
-                                if ( finished )
-                                    break;
-                                else
-                                    System.out.println("Job timeout ran out.  Continuing to wait for all jobs to fnish...");
-                            }
-                    }
-                catch (InterruptedException e)
-                    {
-                        System.out.println("Interrupted!");
-                    }
-            }
-
-        System.out.println("All jobs are complete.");
-
-/*        
-        // wait a few seconds and then shut down the executor service
-        try
-            {
-                Thread.sleep(5*60*1000);
-//                System.out.print("Writing a checkpoint...");
-//                executorService.getExecutor().writeCheckpoint();
-//                System.out.println("done.");
-                log.log(Level.WARNING, "Requesting immediate executor service shutdown.");
-                System.out.println("Requesting immediate executor service shutdown.");
-                executorService.getExecutor().shutdownNow();                                     // cancel all pending and current jobs
-                executorService.getExecutor().awaitTermination(10L, TimeUnit.MINUTES);           // wait until the shutdown is complete
-            }
-        catch (InterruptedException e)
-            {
-            }
-
-        //executorService.getExecutor().shutdown();   // use this to tell the executor service to not accept any more jobs, but to finish the ones that have already started
-        
-        // list the jobs and their results
-        for (WorkUnit w : submittedJobs.keySet())
-            {
-                Future f = submittedJobs.get(w);
-                Result r;
-                try
-                    {
-                        r = (Result)f.get(10, TimeUnit.MILLISECONDS);
-                    }
-                catch (CancellationException e)
-                    {
-                        r = Result.JOB_INTERRUPTED;
-                    }
-                catch (ExecutionException e)
-                    {
-                        r = Result.JOB_FAILED;
-                    }
-                catch (InterruptedException e)
-                    {
-                        System.out.println("Attempt to retrieve result was interrupted.");
-                        r = Result.JOB_UNAVAILABLE;
-                    }
-                catch (TimeoutException e)
-                    {
-                        r = Result.JOB_UNAVAILABLE;
-                    }
-                System.out.println(w.toString() + " : " + r.toString());
-
-            }
-*/
-
-            Enumeration<BasicPatch> output = BasicWorkUnit.output().keys();
-            ArrayList<BasicPatch> preList = new ArrayList<>();
-            while (output.hasMoreElements()) preList.add(output.nextElement());
-            PointsDisplay display = new PointsDisplay(ImmutableList.copyOf(preList),"BigTest");
-
     }
 
-    // pause if the queue is too full or too many jobs are being run
-    private static void checkIfBusy()
-    {
-        ThreadService executorService = ThreadService.INSTANCE;
-        int THRESHOLD = 0;
-        boolean throttled = false;
-        try { Thread.sleep(1*1000); } catch ( InterruptedException e ) {}
-        while (true)
-            {
-                int queueSize = executorService.getExecutor().getQueue().size();
-                if ( queueSize > THRESHOLD || executorService.getExecutor().runningJobs() )
-                    {
-                        try
-                            {
-                                Thread.sleep(1*1000);
-                                if ( throttled )
-                                    System.out.print("\r");
-                                System.out.print("Throttling initial job submission...");
-                                executorService.getExecutor().printQueues();
-                                throttled = true;
-                            }
-                        catch (InterruptedException e)
-                            {
-                                continue;
-                            }
-                    }
-                else
-                    {
-                        if ( throttled )
-                            System.out.println();
-                        break;
-                    }
-            }
-    }
 } // end of SimpleTest

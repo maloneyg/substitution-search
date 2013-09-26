@@ -8,8 +8,8 @@ public class ThreadService
 {
     private final static Logger log            = Logger.getLogger(ThreadService.class.getName());
     public static final ThreadService INSTANCE = new ThreadService();
-    public final int NUMBER_OF_THREADS         = Runtime.getRuntime().availableProcessors();
-    public static final int JOB_CAPACITY              = 1000000;                                 // how many jobs can wait in the queue at a time
+    public final int NUMBER_OF_THREADS         = 16; //Runtime.getRuntime().availableProcessors();
+    public static final int JOB_CAPACITY              = 10000000;                                 // how many jobs can wait in the queue at a time
     public static final String runningJobsCheckpointFilename = "runningJobs.chk";               // serialized checkpoints
     public static final String pendingJobsCheckpointFilename = "pendingJobs.chk";               // assumed to be in working directory
 
@@ -67,13 +67,15 @@ public class ThreadService
     {
         private Map<Future<?>,Callable<?>> jobMap = Collections.synchronizedMap(new HashMap<Future<?>,Callable<?>>());
         private List<Callable<?>> currentlyRunningJobs = Collections.synchronizedList(new ArrayList<Callable<?>>());
-        private List<Callable<?>> currentlyPendingJobs = Collections.synchronizedList(new ArrayList<Callable<?>>());
-        private Map<Callable<?>,Date> startTimes = Collections.synchronizedMap(new HashMap<Callable<?>,Date>());
+        //private List<Callable<?>> currentlyPendingJobs = Collections.synchronizedList(new ArrayList<Callable<?>>());
+        //private Map<Callable<?>,Date> startTimes = Collections.synchronizedMap(new HashMap<Callable<?>,Date>());
+        private AtomicInteger jobsRun;
 
         public CustomThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
                                         ArrayBlockingQueue<Runnable> workQueue, ThreadFactory threadFactory, RejectedExecutionHandler handler)
         {
             super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, handler);
+            jobsRun = new AtomicInteger();
         }
 
         public boolean isIdle()
@@ -91,12 +93,11 @@ public class ThreadService
                 }
         }
 
-        public void printQueues()
+        public void printQueues(double throughput)
         {
-            synchronized(this)
-                {
-                    System.out.print("queue size: " + getQueue().size() + " running jobs: " + currentlyRunningJobs.size() + "       ");
-                }
+            String reportString = String.format("Queue size: %10d   Running Jobs: %2d   Throughput: %8.0f jobs / s \r",
+            getQueue().size(), currentlyRunningJobs.size(), throughput);
+            System.out.print(reportString);
         }
 
         public boolean runningJobs()
@@ -138,6 +139,8 @@ public class ThreadService
  //                   startTime = startTimes.get(thisCallable);
  //                   startTimes.remove(thisCallable);
                 }
+            jobsRun.incrementAndGet();
+            
   /*          if ( startTime == null )
                 return;
             double elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
@@ -167,6 +170,11 @@ public class ThreadService
                 */
         }
 
+        public int getNumberOfJobsRun()
+        {
+            return jobsRun.getAndSet(0);
+        }
+
         public <T> Future<T> submit(Callable<T> task)
         {
             Future<T> ftask = super.submit(task);
@@ -187,7 +195,7 @@ public class ThreadService
         {
             return currentlyRunningJobs;
         }
-
+/*
         public void writeCheckpoint()
         {
             synchronized(this)       // lock the thread service while checkpointing is in progress
@@ -231,7 +239,7 @@ public class ThreadService
                         }
                 }
         }
-
+*/
     }
 
     public void loadCheckpoint()
@@ -276,6 +284,7 @@ public class ThreadService
     public static class WorkerThread extends Thread
     {
         private static final AtomicInteger created = new AtomicInteger();     // thread safe integer
+        private static final List<WorkerThread> threadList = Collections.synchronizedList(new ArrayList<WorkerThread>()); 
 
         public WorkerThread(Runnable runnable, String name)
         {
