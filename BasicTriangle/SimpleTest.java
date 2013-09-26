@@ -246,6 +246,7 @@ public class SimpleTest
         ThreadService executorService = ThreadService.INSTANCE;
         int THRESHOLD = 0;
         boolean throttled = false;
+        try { Thread.sleep(1*1000); } catch ( InterruptedException e ) {}
         while (true)
             {
                 int queueSize = executorService.getExecutor().getQueue().size();

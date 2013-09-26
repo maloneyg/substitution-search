@@ -9,7 +9,7 @@ public class ThreadService
     private final static Logger log            = Logger.getLogger(ThreadService.class.getName());
     public static final ThreadService INSTANCE = new ThreadService();
     public final int NUMBER_OF_THREADS         = Runtime.getRuntime().availableProcessors();
-    public static final int JOB_CAPACITY              = 100000;                                 // how many jobs can wait in the queue at a time
+    public static final int JOB_CAPACITY              = 1000000;                                 // how many jobs can wait in the queue at a time
     public static final String runningJobsCheckpointFilename = "runningJobs.chk";               // serialized checkpoints
     public static final String pendingJobsCheckpointFilename = "pendingJobs.chk";               // assumed to be in working directory
 
@@ -108,33 +108,38 @@ public class ThreadService
 
         protected void beforeExecute(Thread t, Runnable r)
         {
-            super.beforeExecute(t,r);
             synchronized(this)
                 {
                     Callable<?> thisCallable = jobMap.get(r);
                     currentlyRunningJobs.add(thisCallable);
                     //currentlyPendingJobs.remove(thisCallable);
-                    startTimes.put(thisCallable, new Date());
+           //         startTimes.put(thisCallable, new Date());
                 }
 
-            log.log(Level.INFO, String.format("%s is starting work on %s", Thread.currentThread().getName(), jobMap.get(r).toString()));
+      //      if ( jobMap.get(r) != null )
+     //           log.log(Level.INFO, String.format("%s is starting work on %s", Thread.currentThread().getName(), jobMap.get(r).toString()));
+            super.beforeExecute(t,r);
          }
 
         protected void afterExecute(Runnable r, Throwable t)
         {
             super.afterExecute(r,t);
-            Date endTime = new Date();
-            Date startTime = null;
-            String jobName = null;
+  //          Date endTime = new Date();
+  //          Date startTime = null;
+  //          String jobName = null;
+            Callable<?> thisCallable = jobMap.get(r);
+            if ( thisCallable == null )
+                return;
             synchronized(this)
                 {
-                    Callable<?> thisCallable = jobMap.get(r);
-                    jobName = jobMap.get(r).toString();
+ //                   jobName = jobMap.get(r).toString();
                     currentlyRunningJobs.remove(thisCallable);
                     jobMap.remove(thisCallable);
-                    startTime = startTimes.get(thisCallable);
-                    startTimes.remove(thisCallable);
+ //                   startTime = startTimes.get(thisCallable);
+ //                   startTimes.remove(thisCallable);
                 }
+  /*          if ( startTime == null )
+                return;
             double elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
             log.log(Level.INFO, String.format("%s finished work on %s (%.3f s)", Thread.currentThread().getName(), jobName, elapsedTime));
             try
@@ -159,6 +164,7 @@ public class ThreadService
             catch (CancellationException e)
                 {
                 }
+                */
         }
 
         public <T> Future<T> submit(Callable<T> task)
