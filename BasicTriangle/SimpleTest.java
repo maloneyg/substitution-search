@@ -72,9 +72,17 @@ public class SimpleTest
                 System.out.println(reportString);
 
                 // for monitoring purposes:
+<<<<<<< HEAD
                 //System.out.println("Press ENTER");
                 //kbd.next();
                 //System.gc();
+=======
+                System.out.println("Press ENTER");
+                kbd.nextLine();
+                System.out.print("Garbage collection initiated...");
+                System.gc();
+                System.out.println("complete.");
+>>>>>>> 25470b56e6fe1953950547f4abe330b55229c907
             }
 
         // stop monitoring thread
@@ -136,8 +144,8 @@ public class SimpleTest
 
     private static void createWorkUnits(List<WorkUnit> list)
     {
-        int myTile = 0; // uncomment this line for a small search
-        //int myTile = 4; // uncomment this line for a big search
+        //int myTile = 0; // uncomment this line for a small search
+        int myTile = 4; // uncomment this line for a big search
 
         BasicPrototile P0 = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(myTile));
 
