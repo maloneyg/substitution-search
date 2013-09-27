@@ -15,7 +15,7 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
 
     private final Orientation orientation;
 
-    private final ImmutableList<BasicPoint> ends;
+    private final BasicPoint[] ends;
 
     // Constructor methods.  
     private BasicEdge(BasicEdgeLength length, Orientation orientation, BasicPoint[] ends) {
@@ -25,7 +25,7 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
             throw new IllegalArgumentException("A BasicEdge must be initialized with two different BasicPoints.");
         this.length = length;
         this.orientation = orientation;
-        this.ends = ImmutableList.of(ends[0],ends[1]);
+        this.ends = new BasicPoint[] { ends[0], ends[1] };
     }
 
     // public factory method.
@@ -38,11 +38,11 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
     }
 
     public ImmutableList<BasicPoint> getEnds() {
-        return ends;
+        return ImmutableList.of(ends[0],ends[1]);
     }
 
     public BasicEdge transform(BasicAngle a, BasicPoint v) {
-        BasicPoint[] newEnds = { ends.get(0).rotate(a).add(v), ends.get(1).rotate(a).add(v) };
+        BasicPoint[] newEnds = { ends[0].rotate(a).add(v), ends[1].rotate(a).add(v) };
         return new BasicEdge(length, orientation, newEnds);
     }
 
@@ -58,7 +58,7 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
     * toString method.  Just spits out the ends.
     */ 
     public String toString() {
-        return "Edge\n  " + ends.get(0) + "\n  " + ends.get(1);
+        return "Edge\n  " + ends[0] + "\n  " + ends[1];
     }
 
     /* 
@@ -69,10 +69,10 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
     public Orientation getOrientation(BasicEdge e) {
         if (!(this.length.equals(e.length)))
             throw new IllegalArgumentException("You need to match edges of the same length.");
-        BasicPoint u0 = this.ends.get(0);
-        BasicPoint u1 = this.ends.get(1);
-        BasicPoint v0 = e.ends.get(1);
-        BasicPoint v1 = e.ends.get(1);
+        BasicPoint u0 = this.ends[0];
+        BasicPoint u1 = this.ends[1];
+        BasicPoint v0 = e.ends[1];
+        BasicPoint v1 = e.ends[1];
 
         if (u0.equals(v0)) {
             if (u1.equals(v1)) {
@@ -99,10 +99,10 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
         if (obj == null || getClass() != obj.getClass())
             return false;
         BasicEdge e = (BasicEdge) obj;
-        BasicPoint p0 = this.ends.get(0);
-        BasicPoint p1 = this.ends.get(1);
-        BasicPoint q0 = e.ends.get(0);
-        BasicPoint q1 = e.ends.get(1);
+        BasicPoint p0 = this.ends[0];
+        BasicPoint p1 = this.ends[1];
+        BasicPoint q0 = e.ends[0];
+        BasicPoint q1 = e.ends[1];
         if ((p0.equals(q0)&&p1.equals(q1))||(p0.equals(q1)&&p1.equals(q0))) {
             return true;
         } else {
@@ -114,8 +114,8 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
     public int hashCode() {
         int prime = 17;
         int result = 19;
-        int c0 = ends.get(0).hashCode();
-        int c1 = ends.get(1).hashCode();
+        int c0 = ends[0].hashCode();
+        int c1 = ends[1].hashCode();
         if (c0<c1)
             result = prime*result + c1;
         result = prime*result + c0;
@@ -128,10 +128,10 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
     public boolean compatible(BasicEdge e) {
         if (!(this.length.equals(e.length)))
             return false;
-        BasicPoint u0 = this.ends.get(0);
-        BasicPoint u1 = this.ends.get(1);
-        BasicPoint v0 = e.ends.get(0);
-        BasicPoint v1 = e.ends.get(1);
+        BasicPoint u0 = this.ends[0];
+        BasicPoint u1 = this.ends[1];
+        BasicPoint v0 = e.ends[0];
+        BasicPoint v1 = e.ends[1];
 
         if (u0.equals(v0)) {
             if (u1.equals(v1)) {
@@ -153,10 +153,10 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
     public boolean congruent(BasicEdge e) {
         if (!(this.length.equals(e.length)))
             return false;
-        BasicPoint u0 = this.ends.get(0);
-        BasicPoint u1 = this.ends.get(1);
-        BasicPoint v0 = e.ends.get(0);
-        BasicPoint v1 = e.ends.get(1);
+        BasicPoint u0 = this.ends[0];
+        BasicPoint u1 = this.ends[1];
+        BasicPoint v0 = e.ends[0];
+        BasicPoint v1 = e.ends[1];
 
         if (u0.equals(v0)) {
             return u1.equals(v1);
@@ -168,16 +168,16 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
 
     // Check if two edges have any end points in common
     public boolean commonEnd(BasicEdge e) {
-        BasicPoint u0 = this.ends.get(0);
-        BasicPoint u1 = this.ends.get(1);
-        BasicPoint v0 = e.ends.get(0);
-        BasicPoint v1 = e.ends.get(1);
+        BasicPoint u0 = this.ends[0];
+        BasicPoint u1 = this.ends[1];
+        BasicPoint v0 = e.ends[0];
+        BasicPoint v1 = e.ends[1];
         return (u0.equals(v0)||u0.equals(v1)||u1.equals(v0)||u1.equals(v1));
     }
 
     // return the angle that this edge makes with the positive x-axis
     public BasicAngle angle() {
-        BasicPoint direction = this.ends.get(1).subtract(this.ends.get(0));
+        BasicPoint direction = this.ends[1].subtract(this.ends[0]);
         BasicAngle output = BasicAngle.createBasicAngle(0);
         for (int i = 0; i < 2*BasicAngle.ANGLE_SUM; i++) {
             output = BasicAngle.createBasicAngle(i);
@@ -194,10 +194,10 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
         BasicAngle a0 = this.angle();
         BasicAngle a1 = e.angle();
         if (a0.equals(a1)||a0.equals(a1.piPlus())) return false;
-        BasicPoint u0 = this.ends.get(0);
-        BasicPoint u1 = this.ends.get(1);
-        BasicPoint v0 = e.ends.get(0);
-        BasicPoint v1 = e.ends.get(1);
+        BasicPoint u0 = this.ends[0];
+        BasicPoint u1 = this.ends[1];
+        BasicPoint v0 = e.ends[0];
+        BasicPoint v1 = e.ends[1];
         BasicPoint m0 = u1.subtract(u0); // the direction vector for this edge
         BasicPoint m1 = v1.subtract(v0); // the direction vector for e
         return (Math.signum((u0.subtract(v0)).crossProduct(m1).evaluate(Initializer.COS)) != Math.signum((u1.subtract(v0)).crossProduct(m1).evaluate(Initializer.COS)) && Math.signum((v1.subtract(u0)).crossProduct(m0).evaluate(Initializer.COS)) != Math.signum((v0.subtract(u0).crossProduct(m0).evaluate(Initializer.COS))));
@@ -206,7 +206,7 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
     // return the same edge, with end points listed
     // in reverse order and the opposite Orientation
     public BasicEdge reverse() {
-        return new BasicEdge(length, orientation.getOpposite(), new BasicPoint[] {ends.get(1), ends.get(0)});
+        return new BasicEdge(length, orientation.getOpposite(), new BasicPoint[] {ends[1], ends[0]});
     }
 
     // if two edges are congruent, extract the Orientations
@@ -214,8 +214,8 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
     // another.
     // No sanity check! We assume that they're congruent.
     protected ImmutableList<Orientation> getMatches(BasicEdge e) {
-        BasicPoint u0 = this.ends.get(0);
-        BasicPoint v0 = e.ends.get(0);
+        BasicPoint u0 = this.ends[0];
+        BasicPoint v0 = e.ends[0];
         if (u0.equals(v0)) {
             return ImmutableList.of(this.orientation,e.orientation);
         } else {
@@ -226,9 +226,9 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
     // check to see if the BasicPoint p touches this edge
     // (not necessarily at the ends)
     public boolean incident(BasicPoint p) {
-        BasicPoint u0 = this.ends.get(0).subtract(p);
-        BasicPoint u1 = p.subtract(this.ends.get(1));
-        BasicPoint u2 = this.ends.get(0).subtract(this.ends.get(1));
+        BasicPoint u0 = this.ends[0].subtract(p);
+        BasicPoint u1 = p.subtract(this.ends[1]);
+        BasicPoint u2 = this.ends[0].subtract(this.ends[1]);
         double d0 = Math.sqrt(u0.dotProduct(u0).evaluate(Initializer.COS));
         double d1 = Math.sqrt(u1.dotProduct(u1).evaluate(Initializer.COS));
         double d2 = Math.sqrt(u2.dotProduct(u2).evaluate(Initializer.COS));
@@ -238,7 +238,7 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BasicPoint, Bas
     // check to see if the BasicPoint p is one of the ends
     // of this BasicEdge 
     public boolean hasVertex(BasicPoint p) {
-        return (p.equals(ends.get(0)) || p.equals(ends.get(1)));
+        return (p.equals(ends[0]) || p.equals(ends[1]));
     }
 
 } // end of class BasicEdge

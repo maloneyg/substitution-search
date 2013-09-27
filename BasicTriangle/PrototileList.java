@@ -9,14 +9,32 @@ import java.io.Serializable;
 
 public final class PrototileList implements Serializable {
 
-    private final ImmutableList<BasicPrototile> tiles;
+    private final int[] tileCount;
+    private static final ImmutableList<BasicPrototile> ALL_PROTOTILES = BasicPrototile.ALL_PROTOTILES;
 
     // make it Serializable
 //    static final long serialVersionUID = 1267821834624463132L;
 
+    // static method to see if a prototile is allowed
+    private static boolean valid(BasicPrototile p) {
+        return ALL_PROTOTILES.indexOf(p) > -1;
+    }
+
     // constructor methods.
     private PrototileList(ImmutableList<BasicPrototile> tiles) {
-        this.tiles = tiles;
+        int[] tempCount = new int[ALL_PROTOTILES.size()];
+        for (BasicPrototile p : tiles) {
+            if (valid(p)) {
+                tempCount[ALL_PROTOTILES.indexOf(p)]++;
+            } else {
+                throw new IllegalArgumentException("We aren't using prototile " + p);
+            }
+        }
+        tileCount = tempCount;
+    }
+
+    private PrototileList(int[] tileCount) {
+        this.tileCount = tileCount;
     }
 
     // public static factory method.
@@ -29,22 +47,14 @@ public final class PrototileList implements Serializable {
         if (obj == null || getClass() != obj.getClass())
             return false;
         PrototileList o = (PrototileList) obj;
-        // lazy test: just check to see if the two lists
-        // are the same, in the same order.
-        // A better test would check to see if the corresponding
-        // sets were the same.
-        return this.tiles.equals(o.tiles);
+        return this.tileCount.equals(o.tileCount);
     }
 
     // hashCode implementation.
     public int hashCode() {
-        ArrayList<Integer> codes = new ArrayList<>(tiles.size());
-        for (BasicPrototile p : tiles)
-            codes.add(p.hashCode());
-        Collections.sort(codes);
         int prime = 13;
         int result = 29;
-        for (Integer i : codes)
+        for (int i : tileCount)
             result = prime*result + i;
         return result;
     }
@@ -52,24 +62,28 @@ public final class PrototileList implements Serializable {
     // create a new PrototileList by removing the prototile p
     //  from this one.
     public PrototileList remove(BasicPrototile p) {
-        int count = 0;
-        ArrayList<BasicPrototile> temp = new ArrayList<>(tiles.size()-1);
-        for (BasicPrototile t : tiles) {
-            if (t.equals(p) && count == 0) {
-                count++;
-            } else {
-                temp.add(t);
-            }
-        }
-        return new PrototileList(ImmutableList.copyOf(temp));
+        int position = ALL_PROTOTILES.indexOf(p);
+        if (!valid(p))
+            throw new IllegalArgumentException("We aren't using prototile " + p);
+        if (tileCount[position]<1)
+            throw new IllegalArgumentException("Can't remove prototile " + p + "\nbecause we haven't got any left.");
+        int[] output = new int[ALL_PROTOTILES.size()];
+        for (int i = 0; i < output.length; i++)
+            output[i] = tileCount[i];
+        output[position]--;
+        return new PrototileList(output);
     }
 
     public boolean contains(BasicPrototile p) {
-        return tiles.contains(p);
+        if (!valid(p)) return false;
+        return tileCount[ALL_PROTOTILES.indexOf(p)] > 0;
     }
 
     public int size() {
-        return tiles.size();
+        int output = 0;
+        for (int i = 0; i < tileCount.length; i++)
+            output+=tileCount[i];
+        return output;
     }
 
 } // end of class PrototileList
