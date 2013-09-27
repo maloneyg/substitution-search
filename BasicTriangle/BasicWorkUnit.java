@@ -57,11 +57,13 @@ public class BasicWorkUnit implements WorkUnit, Serializable {
     // this is the main method in BasicWorkUnit.
     // it produces the TestResult.
     public Result call() {
+        ThreadService.INSTANCE.getExecutor().incrementNumberOfRunningJobs();
+
 //        System.out.println("doing a BasicWorkUnit with " + availableTiles.size() + " tiles.");
         if (availableTiles.size() == 0) {
             log.log(Level.INFO, Thread.currentThread().getName() + " found a hit while working on BasicWorkUnit " + hashCode());
             // presumably we'll eventually want to return a BasicPatch as part of this result instead.  So this next line is temporary.
-            completedPatches.put(patch,edgeBreakdown);
+         //   completedPatches.put(patch,edgeBreakdown);
             return TestResult.JOB_COMPLETE;
         } else {
             // log.log(Level.INFO, Thread.currentThread().getName() + " BasicWorkUnit " + hashCode() + " doing work");
@@ -84,6 +86,7 @@ public class BasicWorkUnit implements WorkUnit, Serializable {
             }
         }
         //log.log(Level.INFO, Thread.currentThread().getName() + " finished work on BasicWorkUnit " + hashCode() + "; placed " + numPlaced + " tiles");
+        ThreadService.INSTANCE.getExecutor().decrementNumberOfRunningJobs();
         return new TestResult("placed " + numPlaced + " tiles");
     } // method call() ends here
 

@@ -65,86 +65,37 @@ public class ThreadService
 
     protected static class CustomThreadPoolExecutor extends ThreadPoolExecutor
     {
-        private Map<Future<?>,Callable<?>> jobMap = Collections.synchronizedMap(new HashMap<Future<?>,Callable<?>>());
-        private List<Callable<?>> currentlyRunningJobs = Collections.synchronizedList(new ArrayList<Callable<?>>());
+        //private Map<Future<?>,Callable<?>> jobMap = Collections.synchronizedMap(new HashMap<Future<?>,Callable<?>>());
+        //private List<Callable<?>> currentlyRunningJobs = Collections.synchronizedList(new ArrayList<Callable<?>>());
         //private List<Callable<?>> currentlyPendingJobs = Collections.synchronizedList(new ArrayList<Callable<?>>());
         //private Map<Callable<?>,Date> startTimes = Collections.synchronizedMap(new HashMap<Callable<?>,Date>());
-        private AtomicInteger jobsRun;
+        private AtomicInteger numberOfJobsRun = new AtomicInteger();
+        private AtomicInteger numberOfRunningJobs = new AtomicInteger();
 
         public CustomThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
                                         ArrayBlockingQueue<Runnable> workQueue, ThreadFactory threadFactory, RejectedExecutionHandler handler)
         {
             super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, handler);
-            jobsRun = new AtomicInteger();
-        }
-
-        public boolean isIdle()
-        {
-            synchronized(this)
-                {
-                    System.out.print("queue size: " + getQueue().size() + " running jobs: " + currentlyRunningJobs.size() + "       ");
-                    if ( getQueue().size() == ThreadService.JOB_CAPACITY )
-                        System.out.print("\r");
-                    else
-                        System.out.println();
-                    if ( getQueue().size() > 0 || currentlyRunningJobs.size() > 0 )
-                        return false;
-                    return true;
-                }
         }
 
         public void printQueues(double throughput, double timeSinceLastUpdate)
         {
             String reportString = String.format("Queue size: %10d   Running Jobs: %2d   Throughput: %8.0f jobs / s   Time since last update: %.4f s\r",
-            getQueue().size(), currentlyRunningJobs.size(), throughput, timeSinceLastUpdate);
+            getQueue().size(), numberOfRunningJobs.get(), throughput, timeSinceLastUpdate);
             System.out.print(reportString);
-        }
-
-        public boolean runningJobs()
-        {
-            if ( currentlyRunningJobs.size() > 0 )
-                return true;
-            return false;
         }
 
         protected void beforeExecute(Thread t, Runnable r)
         {
-            synchronized(this)
-                {
-                    Callable<?> thisCallable = jobMap.get(r);
-                    currentlyRunningJobs.add(thisCallable);
-                    //currentlyPendingJobs.remove(thisCallable);
-           //         startTimes.put(thisCallable, new Date());
-                }
-
-      //      if ( jobMap.get(r) != null )
-     //           log.log(Level.INFO, String.format("%s is starting work on %s", Thread.currentThread().getName(), jobMap.get(r).toString()));
+            //log.log(Level.INFO, String.format("%s is starting work on %s", Thread.currentThread().getName(), jobMap.get(r).toString()));
             super.beforeExecute(t,r);
          }
 
         protected void afterExecute(Runnable r, Throwable t)
         {
             super.afterExecute(r,t);
-  //          Date endTime = new Date();
-  //          Date startTime = null;
-  //          String jobName = null;
-            Callable<?> thisCallable = jobMap.get(r);
-            if ( thisCallable == null )
-                return;
-            synchronized(this)
-                {
- //                   jobName = jobMap.get(r).toString();
-                    currentlyRunningJobs.remove(thisCallable);
-                    jobMap.remove(thisCallable);
- //                   startTime = startTimes.get(thisCallable);
- //                   startTimes.remove(thisCallable);
-                }
-            jobsRun.incrementAndGet();
-            
-  /*          if ( startTime == null )
-                return;
-            double elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
-            log.log(Level.INFO, String.format("%s finished work on %s (%.3f s)", Thread.currentThread().getName(), jobName, elapsedTime));
+            numberOfJobsRun.getAndIncrement();
+            //log.log(Level.INFO, String.format("%s finished work on %s", Thread.currentThread().getName(), jobName));
             try
                 {
                     Future<?> future = (Future<?>) r;
@@ -167,33 +118,37 @@ public class ThreadService
             catch (CancellationException e)
                 {
                 }
-                */
         }
 
         public int getNumberOfJobsRun()
         {
-            return jobsRun.getAndSet(0);
+            return numberOfJobsRun.getAndSet(0);
+        }
+
+        public int getNumberOfRunningJobs()
+        {
+            return numberOfRunningJobs.get();
+        }
+
+        public int incrementNumberOfRunningJobs()
+        {
+            return numberOfRunningJobs.getAndIncrement();
+        }
+
+        public int decrementNumberOfRunningJobs()
+        {
+            return numberOfRunningJobs.getAndDecrement();
         }
 
         public <T> Future<T> submit(Callable<T> task)
         {
             Future<T> ftask = super.submit(task);
-            synchronized(this)
-                {
-                    jobMap.put(ftask, task);
-                    //currentlyPendingJobs.add(task);
-                }
             return ftask;
         }
 
         public void terminated()
         {
             log.log(Level.WARNING, "Executor service has been ordered to shut down.");
-        }
-
-        public List<Callable<?>> getCurrentlyRunningJobs()
-        {
-            return currentlyRunningJobs;
         }
 
 /*
