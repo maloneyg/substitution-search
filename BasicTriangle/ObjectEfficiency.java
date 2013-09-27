@@ -91,9 +91,45 @@ public class ObjectEfficiency
         elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
         System.out.println(String.format("\nPatch List created.  Elapsed time: %.3f s", elapsedTime));
 
-        // time for Orientations
+        // time for OrientationPartitions
+//        promptEnter();
+//        System.out.println(pl.size() + " BasicPatches.");
+//        startTime = new Date();
+//        List<OrientationPartition> op = new ArrayList<OrientationPartition>(LIST_LENGTH);
+//        for (int i=0; i < LIST_LENGTH; i++) {
+//            op.add(pl.get(i).getPartition());
+//        }
+//        endTime = new Date();
+//        elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
+//        System.out.println(String.format("\nOrientationPartition List created (not from scratch, but from BasicPatch List).  Elapsed time: %.3f s", elapsedTime));
+
+        // time for OpenEdges
         promptEnter();
         System.out.println(pl.size() + " BasicPatches.");
+        startTime = new Date();
+        List<ImmutableList<BasicEdge>> be = new ArrayList<ImmutableList<BasicEdge>>(LIST_LENGTH);
+        for (int i=0; i < LIST_LENGTH; i++) {
+            be.add(pl.get(i).getOpenEdges());
+        }
+        endTime = new Date();
+        elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
+        System.out.println(String.format("\nOpenEdges List created (not from scratch, but from BasicPatch List).  Elapsed time: %.3f s", elapsedTime));
+
+        // time for BasicEdges
+        promptEnter();
+        System.out.println(be.size() + " BasicPatches.");
+        startTime = new Date();
+        List<BasicEdge> BE = new ArrayList<BasicEdge>(LIST_LENGTH);
+        for (int i=0; i < LIST_LENGTH; i++) {
+            BE.add(be.get(i).get(generator.nextInt(be.get(i).size())));
+        }
+        endTime = new Date();
+        elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
+        System.out.println(String.format("\nBasicEdges List created (not from scratch, but from OpenEdges List).  Elapsed time: %.3f s", elapsedTime));
+
+        // time for Orientations
+        promptEnter();
+        System.out.println(BE.size() + " OrientationPartitions.");
         startTime = new Date();
         List<Orientation> ol = new ArrayList<Orientation>(LIST_LENGTH);
         for (int i=0; i < LIST_LENGTH; i++) {
@@ -103,8 +139,31 @@ public class ObjectEfficiency
         elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
         System.out.println(String.format("\nOrientation List created.  Elapsed time: %.3f s", elapsedTime));
 
+        // hypothesis: ImmutableList creates Java.lang.Objects
+        // when constructed using ImmutableList.of(element1, element2, ...).
         promptEnter();
         System.out.println(ol.size() + " Orientations.");
+        startTime = new Date();
+        List<ImmutableList<BasicPoint>> bp1 = new ArrayList<ImmutableList<BasicPoint>>(LIST_LENGTH);
+        for (int i=0; i < LIST_LENGTH; i++) {
+            List<BasicPoint> tempList = new ArrayList<BasicPoint>(3);
+            for ( int k=0; k < 3; k++ ) {
+                int[] randomIntArray = new int[ARRAY_LENGTH];
+                // create a new point at random
+                for ( int j=0; j < ARRAY_LENGTH; j++ ) {
+                    randomIntArray[j] = generator.nextInt(MAX_INTEGER);
+                    BasicPoint newPoint = BasicPoint.createBasicPoint(randomIntArray);
+                    tempList.add(newPoint);
+                }
+            }
+            bp1.add(ImmutableList.copyOf(tempList));
+        }
+        endTime = new Date();
+        elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
+        System.out.println(String.format("\nImmutableList<BasicPoint> List created (copyOf).  Elapsed time: %.3f s", elapsedTime));
+
+        promptEnter();
+        System.out.println(bp1.size() + " ImmutableList<BasicPoint>.");
 
 
         while (true)
