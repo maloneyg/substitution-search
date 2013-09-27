@@ -5,7 +5,7 @@ import com.google.common.collect.*;
 public class ObjectEfficiency
 {
 
-    public static final int LIST_LENGTH = 100000;
+    public static final int LIST_LENGTH = 500000;
     public static final int ARRAY_LENGTH = 10;
     public static final int MAX_INTEGER = 100;
     public static final ImmutableList<BasicPrototile> ALL_PROTOTILES = BasicPrototile.ALL_PROTOTILES;
@@ -17,9 +17,9 @@ public class ObjectEfficiency
     private static void promptEnter() {
         System.out.println("Press ENTER");
         kbd.nextLine();
-//        System.out.print("Garbage collection initiated...");
-//        System.gc();
-//        System.out.println("complete.");
+        System.out.print("Garbage collection initiated...");
+        System.gc();
+        System.out.println("complete.");
     }
 
     public static void main(String[] args)
@@ -27,8 +27,10 @@ public class ObjectEfficiency
         Date startTime = new Date();
         List<BasicPoint> objectList = new ArrayList<BasicPoint>(LIST_LENGTH);
         Random generator = new Random();
+        Date endTime = null;
+        double elapsedTime = 0.0;
 
-        // fill up a bunch of BasicPoints
+    /*    // fill up a bunch of BasicPoints
         for (int i=0; i < LIST_LENGTH; i++)
             {
                 //System.out.print(String.format("%.2f%s   \r", (i+1)*100.0/LIST_LENGTH, "%"));
@@ -52,8 +54,8 @@ public class ObjectEfficiency
                     }
             } // end of BasicPoints
 
-        Date endTime = new Date();
-        double elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
+        endTime = new Date();
+        elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
         System.out.println(String.format("\nBasicPoint List created.  Elapsed time: %.3f s", elapsedTime));
 
         // time for BasicTriangles
@@ -73,7 +75,7 @@ public class ObjectEfficiency
         // time for BasicPatches
         promptEnter();
         System.out.println(tl.size() + " BasicTriangles.");
-        startTime = new Date();
+*/        startTime = new Date();
         List<BasicPatch> pl = new ArrayList<BasicPatch>(LIST_LENGTH);
         for (int i=0; i < LIST_LENGTH; i++) {
             BasicPrototile p = ALL_PROTOTILES.get(generator.nextInt(MAX_PROTOTILE));
@@ -85,7 +87,7 @@ public class ObjectEfficiency
             ImmutableList<BasicPoint> vertices = p.place(BasicPoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
             ImmutableList<BasicPoint> bigVertices = ImmutableList.of(vertices.get(0).inflate(),vertices.get(1).inflate(),vertices.get(2).inflate());
             BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
-            pl.add(patch);
+            //pl.add(patch);
         }
         endTime = new Date();
         elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
@@ -106,31 +108,7 @@ public class ObjectEfficiency
         // time for OpenEdges
         promptEnter();
         System.out.println(pl.size() + " BasicPatches.");
-        startTime = new Date();
-        List<ImmutableList<BasicEdge>> be = new ArrayList<ImmutableList<BasicEdge>>(LIST_LENGTH);
-        for (int i=0; i < LIST_LENGTH; i++) {
-            be.add(pl.get(i).getOpenEdges());
-        }
-        endTime = new Date();
-        elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
-        System.out.println(String.format("\nOpenEdges List created (not from scratch, but from BasicPatch List).  Elapsed time: %.3f s", elapsedTime));
-
-        // time for BasicEdges
-        promptEnter();
-        System.out.println(be.size() + " BasicPatches.");
-        startTime = new Date();
-        List<BasicEdge> BE = new ArrayList<BasicEdge>(LIST_LENGTH);
-        for (int i=0; i < LIST_LENGTH; i++) {
-            BE.add(be.get(i).get(generator.nextInt(be.get(i).size())));
-        }
-        endTime = new Date();
-        elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
-        System.out.println(String.format("\nBasicEdges List created (not from scratch, but from OpenEdges List).  Elapsed time: %.3f s", elapsedTime));
-
-        // time for Orientations
-        promptEnter();
-        System.out.println(BE.size() + " OrientationPartitions.");
-        startTime = new Date();
+  /*      startTime = new Date();
         List<Orientation> ol = new ArrayList<Orientation>(LIST_LENGTH);
         for (int i=0; i < LIST_LENGTH; i++) {
             ol.add(Orientation.createOrientation());
@@ -165,7 +143,7 @@ public class ObjectEfficiency
         promptEnter();
         System.out.println(bp1.size() + " ImmutableList<BasicPoint>.");
 
-
+*/
         while (true)
             {
                 try

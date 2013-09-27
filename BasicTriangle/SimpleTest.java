@@ -21,7 +21,7 @@ public class SimpleTest
         System.out.println(executorService);
         Logger log = executorService.getLogger();
 
-        List<WorkUnit> initialWorkUnits = new ArrayList<WorkUnit>();
+        ConcurrentLinkedQueue<WorkUnit> initialWorkUnits = new ConcurrentLinkedQueue<WorkUnit>();
         System.out.print("Generating initial work units...");
         createWorkUnits(initialWorkUnits);
         System.out.println(initialWorkUnits.size() + " units have been generated.");
@@ -34,11 +34,13 @@ public class SimpleTest
 
         // submit all jobs
         nextUnit:
-        for (WorkUnit thisUnit : initialWorkUnits)
+        while (!initialWorkUnits.isEmpty())
             {
+                WorkUnit thisUnit = initialWorkUnits.poll();
+
                 // submit the next work unit
                 Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
-                System.out.println("Job " + thisUnit.hashCode() + " submitted.");
+                System.out.println("Job " + thisUnit.hashCode() + " submitted.\n");
                 log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
 
                 // wait until the result is available
@@ -68,18 +70,20 @@ public class SimpleTest
                     }
 
                 // job is complete
-                String reportString = String.format("Job %010d complete ( %15s ).  %5d patches have been completed.", thisUnit.hashCode(), thisResult.toString(), BasicWorkUnit.output().size());
+                String reportString = String.format("Job %010d complete ( %15s ).  %5d patches have been completed.\n", thisUnit.hashCode(), thisResult.toString(), BasicWorkUnit.output().size());
                 System.out.println(reportString);
 
                 // for monitoring purposes:
                 //System.out.println("Press ENTER");
                 //kbd.next();
                 //System.gc();
-                System.out.println("Press ENTER");
-                kbd.nextLine();
+                //System.out.println("Press ENTER");
+                //kbd.nextLine();
                 System.out.print("Garbage collection initiated...");
                 System.gc();
-                System.out.println("complete.");
+                System.out.println("complete.\n");
+                //System.out.println("Press ENTER\n");
+                //kbd.nextLine();
             }
 
         // stop monitoring thread
@@ -139,7 +143,7 @@ public class SimpleTest
         }
     }
 
-    private static void createWorkUnits(List<WorkUnit> list)
+    private static void createWorkUnits(ConcurrentLinkedQueue<WorkUnit> list)
     {
         //int myTile = 0; // uncomment this line for a small search
         int myTile = 4; // uncomment this line for a big search
