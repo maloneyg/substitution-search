@@ -1,10 +1,26 @@
 import java.util.*;
+import java.util.Scanner;
+import com.google.common.collect.*;
 
 public class ObjectEfficiency
 {
-    public static final int LIST_LENGTH = 1000000;
+
+    public static final int LIST_LENGTH = 100000;
     public static final int ARRAY_LENGTH = 10;
     public static final int MAX_INTEGER = 100;
+    public static final ImmutableList<BasicPrototile> ALL_PROTOTILES = BasicPrototile.ALL_PROTOTILES;
+    public static final int MAX_PROTOTILE = ALL_PROTOTILES.size();
+    public static final int MAX_ANGLE = 2*BasicAngle.ANGLE_SUM;
+    private static final Scanner kbd = new Scanner(System.in);
+
+    // prompt the user to continue
+    private static void promptEnter() {
+        System.out.println("Press ENTER");
+        kbd.nextLine();
+//        System.out.print("Garbage collection initiated...");
+//        System.gc();
+//        System.out.println("complete.");
+    }
 
     public static void main(String[] args)
     {
@@ -12,17 +28,7 @@ public class ObjectEfficiency
         List<BasicPoint> objectList = new ArrayList<BasicPoint>(LIST_LENGTH);
         Random generator = new Random();
 
-        /*int[] pointOneArray = {1,1,1,1,1,1,1,1,1,1};
-        int[] pointTwoArray = {1,1,1,1,1,1,1,1,1,1};
-        
-        BasicPoint.ArrayWrapper a1 = new BasicPoint.ArrayWrapper(pointOneArray);
-        BasicPoint.ArrayWrapper a2 = new BasicPoint.ArrayWrapper(pointTwoArray);
-
-        BasicPoint p1 = BasicPoint.points.getUnchecked(a1);
-        BasicPoint p2 = BasicPoint.points.getUnchecked(a2);
-        //BasicPoint pointOne = BasicPoint.createBasicPoint(pointOneArray);
-        //BasicPoint pointTwo = BasicPoint.createBasicPoint(pointTwoArray);
-*/
+        // fill up a bunch of BasicPoints
         for (int i=0; i < LIST_LENGTH; i++)
             {
                 //System.out.print(String.format("%.2f%s   \r", (i+1)*100.0/LIST_LENGTH, "%"));
@@ -44,17 +50,63 @@ public class ObjectEfficiency
                         BasicPoint newPoint = BasicPoint.createBasicPoint(oldPointArray);
                         objectList.add(newPoint);
                     }
-            }
+            } // end of BasicPoints
 
         Date endTime = new Date();
         double elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
-        System.out.println(String.format("\nList created.  Elapsed time: %.3f s", elapsedTime));
-        System.out.println(objectList.size());
-        //for (BasicPoint p : objectList)
-        //    System.out.println(p);
-        //System.out.println(objectList.get(0));
-        //System.out.println(objectList.get(LIST_LENGTH-1));
-        //System.out.println(BasicPoint.points.stats());
+        System.out.println(String.format("\nBasicPoint List created.  Elapsed time: %.3f s", elapsedTime));
+
+        // time for BasicTriangles
+        promptEnter();
+        System.out.println(objectList.size() + " BasicPoints.");
+        startTime = new Date();
+        List<BasicTriangle> tl = new ArrayList<BasicTriangle>(LIST_LENGTH);
+        for (int i=0; i < LIST_LENGTH; i++) {
+            BasicPrototile p = ALL_PROTOTILES.get(generator.nextInt(MAX_PROTOTILE));
+            BasicAngle a = BasicAngle.createBasicAngle(generator.nextInt(MAX_ANGLE));
+            tl.add(p.place(objectList.get(i),a,false));
+        }
+        endTime = new Date();
+        elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
+        System.out.println(String.format("\nBasicTriangle List created.  Elapsed time: %.3f s", elapsedTime));
+
+        // time for BasicPatches
+        promptEnter();
+        System.out.println(tl.size() + " BasicTriangles.");
+        startTime = new Date();
+        List<BasicPatch> pl = new ArrayList<BasicPatch>(LIST_LENGTH);
+        for (int i=0; i < LIST_LENGTH; i++) {
+            BasicPrototile p = ALL_PROTOTILES.get(generator.nextInt(MAX_PROTOTILE));
+            ImmutableList<Integer> BD0 = p.getLengths().get(0).getBreakdown();
+            ImmutableList<Integer> BD1 = p.getLengths().get(1).getBreakdown();
+            ImmutableList<Integer> BD2 = p.getLengths().get(2).getBreakdown();
+            ImmutableList<BasicEdge> edgeList = p.createSkeleton(BD0, BD1, BD2);
+            ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD1, BD2);
+            ImmutableList<BasicPoint> vertices = p.place(BasicPoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
+            ImmutableList<BasicPoint> bigVertices = ImmutableList.of(vertices.get(0).inflate(),vertices.get(1).inflate(),vertices.get(2).inflate());
+            BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
+            pl.add(patch);
+        }
+        endTime = new Date();
+        elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
+        System.out.println(String.format("\nPatch List created.  Elapsed time: %.3f s", elapsedTime));
+
+        // time for Orientations
+        promptEnter();
+        System.out.println(pl.size() + " BasicPatches.");
+        startTime = new Date();
+        List<Orientation> ol = new ArrayList<Orientation>(LIST_LENGTH);
+        for (int i=0; i < LIST_LENGTH; i++) {
+            ol.add(Orientation.createOrientation());
+        }
+        endTime = new Date();
+        elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
+        System.out.println(String.format("\nOrientation List created.  Elapsed time: %.3f s", elapsedTime));
+
+        promptEnter();
+        System.out.println(ol.size() + " Orientations.");
+
+
         while (true)
             {
                 try
@@ -66,4 +118,4 @@ public class ObjectEfficiency
                     }
             }
     }
-}
+} // end of class ObjectEfficiency
