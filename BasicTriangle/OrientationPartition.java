@@ -23,7 +23,9 @@ public final class OrientationPartition implements Serializable {
     }
 
     // constructs the maximal partition on an array of Orientations.
+    @SuppressWarnings("unchecked")
     private OrientationPartition(Orientation[] orientations) {
+        // warning: generic array creation!
         ImmutableSet<Orientation>[] preSet = new ImmutableSet[orientations.length];
         for (int i = 0; i < orientations.length; i++)
             preSet[i] = ImmutableSet.of(orientations[i]);
@@ -62,7 +64,7 @@ public final class OrientationPartition implements Serializable {
 
     // hashCode implementation.
     public int hashCode() {
-        ArrayList<Integer> codes = new ArrayList(partition.size());
+        ArrayList<Integer> codes = new ArrayList<>(partition.size());
         for (ImmutableSet<Orientation> s : partition)
             codes.add(s.hashCode());
         Collections.sort(codes);
@@ -127,9 +129,9 @@ public final class OrientationPartition implements Serializable {
     // that will have to be done externally before or after 
     // identify().
     public OrientationPartition identify(Orientation o1, Orientation o2) {
-        ArrayList<ImmutableSet<Orientation>> preSet = new ArrayList(partition.size()-2);
-        ArrayList<Orientation> pluses = new ArrayList(1);
-        ArrayList<Orientation> minuses = new ArrayList(1);
+        ArrayList<ImmutableSet<Orientation>> preSet = new ArrayList<>(partition.size()-2);
+        ArrayList<Orientation> pluses = new ArrayList<>(1);
+        ArrayList<Orientation> minuses = new ArrayList<>(1);
         boolean combine = false;
         for (ImmutableSet<Orientation> s : partition) {
             if (s.contains(o1)||s.contains(o2)) {

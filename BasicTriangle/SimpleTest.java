@@ -70,7 +70,7 @@ public class SimpleTest
                     }
 
                 // job is complete
-                String reportString = String.format("Job %010d complete ( %15s ).  %5d patches have been completed.\n", thisUnit.hashCode(), thisResult.toString(), BasicWorkUnit.output().size());
+                String reportString = String.format("\nJob %010d complete ( %15s ).  %5d patches have been completed.\n", thisUnit.hashCode(), thisResult.toString(), BasicWorkUnit.output().size());
                 System.out.println(reportString);
 
                 // for monitoring purposes:
@@ -108,7 +108,7 @@ public class SimpleTest
         private double updateInterval;
         private static ThreadService executorService = ThreadService.INSTANCE;
         private Date lastUpdateTime = null;
-        private ArrayList<Double> throughputs = new ArrayList<Double>();
+        private LinkedList<Double> throughputs = new LinkedList<Double>();
 
         public ThreadMonitor(double updateInterval) // seconds
         {
@@ -138,14 +138,17 @@ public class SimpleTest
                     }
                 double elapsedTime = ( currentTime.getTime() - lastUpdateTime.getTime() ) / 1000.0;
                 double throughput = jobsRun / elapsedTime;
-                if ( throughput > 1.0 ) 
-                    throughputs.add(throughput);
+                
+                // keep track of how many jobs have been finished
+                throughputs.add(throughput);
+
+                // calculate moving average
                 double average = 0.0;
                 for (Double d : throughputs)
                     average += d;
                 average = average / throughputs.size();
-                if ( throughputs.size() > 1000 )
-                    throughputs.clear();
+
+                // print statistics
                 lastUpdateTime = currentTime;
                 ThreadService.INSTANCE.getExecutor().printQueues(throughput, average, elapsedTime);
             }
@@ -162,9 +165,9 @@ public class SimpleTest
         ImmutableList<Integer> BD0 = P0.getLengths().get(0).getBreakdown();
         ImmutableList<Integer> BD1 = P0.getLengths().get(1).getBreakdown();
         ImmutableList<Integer> BD2 = P0.getLengths().get(2).getBreakdown();
-        MultiSetLinkedList edge0 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList(BD0));
-        MultiSetLinkedList edge1 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList(BD1));
-        MultiSetLinkedList edge2 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList(BD2));
+        MultiSetLinkedList edge0 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(BD0));
+        MultiSetLinkedList edge1 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(BD1));
+        MultiSetLinkedList edge2 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(BD2));
         ImmutableList<Integer> start0 = edge0.getImmutableList();
         ImmutableList<Integer> start1 = edge1.getImmutableList();
         ImmutableList<Integer> start2 = edge2.getImmutableList();

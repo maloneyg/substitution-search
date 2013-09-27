@@ -8,7 +8,7 @@ public class ThreadService
 {
     private final static Logger log            = Logger.getLogger(ThreadService.class.getName());
     public static final ThreadService INSTANCE = new ThreadService();
-    public final int NUMBER_OF_THREADS         = Runtime.getRuntime().availableProcessors();
+    public final int NUMBER_OF_THREADS         = 24; //Runtime.getRuntime().availableProcessors();
     public static final int JOB_CAPACITY              = 10000000;                                 // how many jobs can wait in the queue at a time
     public static final String runningJobsCheckpointFilename = "runningJobs.chk";               // serialized checkpoints
     public static final String pendingJobsCheckpointFilename = "pendingJobs.chk";               // assumed to be in working directory
@@ -71,6 +71,7 @@ public class ThreadService
         //private Map<Callable<?>,Date> startTimes = Collections.synchronizedMap(new HashMap<Callable<?>,Date>());
         private AtomicInteger numberOfJobsRun = new AtomicInteger();
         private AtomicInteger numberOfRunningJobs = new AtomicInteger();
+        public static final double GB = 1073741824.0; // bytes per GB
 
         public CustomThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
                                         ArrayBlockingQueue<Runnable> workQueue, ThreadFactory threadFactory, RejectedExecutionHandler handler)
@@ -80,8 +81,10 @@ public class ThreadService
 
         public void printQueues(double throughput, double average, double timeSinceLastUpdate)
         {
-            String reportString = String.format("Queue size: %10d   Running Jobs: %2d   Average: %8.0f jobs /s   Now: %8.0f jobs / s   Time since last update: %.4f s\r",
-            getQueue().size(), numberOfRunningJobs.get(), average, throughput, timeSinceLastUpdate);
+            Runtime runtime = Runtime.getRuntime();
+            String reportString = String.format("Queue: %10d   Running: %2d   Average: %6.0f /s   Now: %6.0f / s   Last Update: %.2f s  Memory: %6.3f GB / %6.3f GB    \r",
+            getQueue().size(), numberOfRunningJobs.get(), average, throughput, timeSinceLastUpdate,
+            (runtime.totalMemory() - runtime.freeMemory()) / GB , (runtime.maxMemory() / GB)     );
             System.out.print(reportString);
         }
 
