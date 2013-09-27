@@ -166,14 +166,6 @@ public class PointsDisplay extends JPanel implements ActionListener
 
 //        PointsDisplay theseData = new PointsDisplay(triplesList, "TriangleDraw");
 
-        ImmutableList<BasicEdge> edgeList = P0.createSkeleton(//
-                                P0.getLengths().get(0).getBreakdown(), //
-                                P0.getLengths().get(1).getBreakdown(), //
-                                P0.getLengths().get(2).getBreakdown()  //
-                                                );
-
-        BasicPatch patch = BasicPatch.createBasicPatch(edgeList,ImmutableList.of(BasicPoint.ZERO_VECTOR,BasicPoint.ZERO_VECTOR,BasicPoint.ZERO_VECTOR));
-
 //        PointsDisplay theseData = new PointsDisplay(patch.graphicsDump(), "TriangleDraw");
 
     }

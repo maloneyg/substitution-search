@@ -70,6 +70,16 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
         return new BasicPatch(e,v);
     }
 
+    // return partition (for testing only)
+    public OrientationPartition getPartition() {
+        return partition;
+    }
+
+    // return openEdges (for testing only)
+    public ImmutableList<BasicEdge> getOpenEdges() {
+        return openEdges;
+    }
+
     // equals method
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())

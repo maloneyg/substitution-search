@@ -79,9 +79,9 @@ public class SimpleTest
                 //System.gc();
                 //System.out.println("Press ENTER");
                 //kbd.nextLine();
-                System.out.print("Garbage collection initiated...");
-                System.gc();
-                System.out.println("complete.\n");
+                //System.out.print("Garbage collection initiated...");
+                //System.gc();
+                //System.out.println("complete.\n");
                 //System.out.println("Press ENTER\n");
                 //kbd.nextLine();
             }
@@ -159,6 +159,12 @@ public class SimpleTest
         ImmutableList<Integer> start0 = edge0.getImmutableList();
         ImmutableList<Integer> start1 = edge1.getImmutableList();
         ImmutableList<Integer> start2 = edge2.getImmutableList();
+        Orientation[] ol0 = new Orientation[start0.size()];
+        Orientation[] ol1 = new Orientation[start1.size()];
+        Orientation[] ol2 = new Orientation[start2.size()];
+        for (int i = 0; i < ol0.length; i++) ol0[i] = Orientation.createOrientation();
+        for (int i = 0; i < ol1.length; i++) ol1[i] = Orientation.createOrientation();
+        for (int i = 0; i < ol2.length; i++) ol2[i] = Orientation.createOrientation();
         BD0 = start0;
         BD1 = start1;
         BD2 = start2;
@@ -195,7 +201,7 @@ public class SimpleTest
             do {
                 do {
 
-                    ImmutableList<BasicEdge> edgeList = P0.createSkeleton(BD0, BD2, false);
+                    ImmutableList<BasicEdge> edgeList = P0.createSkeleton(BD0, BD2, ol0, ol2, false);
                     ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD2);
 
                     BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
@@ -215,7 +221,7 @@ public class SimpleTest
                     //System.out.println("Job " + thisUnit.hashCode() + " submitted.");
                     //log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
 
-                    edgeList = P0.createSkeleton(BD0, BD2, true);
+                    edgeList = P0.createSkeleton(BD0, BD2, ol0, ol2, true);
                     testBD = ImmutableList.of(BD0, BD2);
 
                     patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
@@ -246,7 +252,7 @@ public class SimpleTest
                 do {
                     do {
 
-                        ImmutableList<BasicEdge> edgeList = P0.createSkeleton(BD0, BD1, BD2);
+                        ImmutableList<BasicEdge> edgeList = P0.createSkeleton(BD0, BD1, BD2, ol0, ol1, ol2);
                         ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD1, BD2);
 
                         BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);

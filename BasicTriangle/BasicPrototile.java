@@ -240,7 +240,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
     // no sanity check!
     // we assume that these are breakdowns of the actual
     // edge of this prototile.
-    public ImmutableList<BasicEdge> createSkeleton(ImmutableList<Integer> b1, ImmutableList<Integer> b2, ImmutableList<Integer> b3) {
+    public ImmutableList<BasicEdge> createSkeleton(ImmutableList<Integer> b1, ImmutableList<Integer> b2, ImmutableList<Integer> b3, Orientation[] ol1, Orientation[] ol2, Orientation[] ol3) {
         BasicEdge[] output = new BasicEdge[b1.size()+b2.size()+b3.size()];
         int k = 0;
         BasicAngle a1 = angles.get(1).piPlus();
@@ -256,7 +256,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
         for (Integer i : b3) {
             currentLength = BasicEdgeLength.createBasicEdgeLength(i);
             nextPoint = currentLength.getAsVector(a1).add(currentPoint);
-            output[k] = BasicEdge.createBasicEdge(currentLength, Orientation.createOrientation(), new BasicPoint[] { currentPoint, nextPoint });
+            output[k] = BasicEdge.createBasicEdge(currentLength, ol3[k], new BasicPoint[] { currentPoint, nextPoint });
             k++;
             currentPoint = nextPoint;
         }
@@ -264,7 +264,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
         for (Integer i : b1) {
             currentLength = BasicEdgeLength.createBasicEdgeLength(i);
             nextPoint = currentLength.getAsVector(BasicAngle.createBasicAngle(0)).add(currentPoint);
-            output[k] = BasicEdge.createBasicEdge(currentLength, Orientation.createOrientation(), new BasicPoint[] { currentPoint, nextPoint });
+            output[k] = BasicEdge.createBasicEdge(currentLength, ol1[k-ol3.length], new BasicPoint[] { currentPoint, nextPoint });
             k++;
             currentPoint = nextPoint;
         }
@@ -272,7 +272,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
         for (Integer i : b2) {
             currentLength = BasicEdgeLength.createBasicEdgeLength(i);
             nextPoint = currentLength.getAsVector(a2).add(currentPoint);
-            output[k] = BasicEdge.createBasicEdge(currentLength, Orientation.createOrientation(), new BasicPoint[] { currentPoint, nextPoint });
+            output[k] = BasicEdge.createBasicEdge(currentLength, ol2[k-ol3.length-ol1.length], new BasicPoint[] { currentPoint, nextPoint });
             k++;
             currentPoint = nextPoint;
         }
@@ -286,15 +286,15 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
     // no sanity check!
     // we assume that these are breakdowns of the actual
     // edge of this prototile.
-    public ImmutableList<BasicEdge> createSkeleton(ImmutableList<Integer> c1, ImmutableList<Integer> c2, boolean reverse) {
+    public ImmutableList<BasicEdge> createSkeleton(ImmutableList<Integer> c1, ImmutableList<Integer> c2, Orientation[] ol1, Orientation[] ol2, boolean reverse) {
         ImmutableList<Integer> b1 = c1;
         ImmutableList<Integer> b3 = c2;
         // set up the middle edge.
         // it's either the same as the first or the same as the last edge.
         Integer[] preB2 = new Integer[(angles.get(0)==angles.get(1))?b1.size():b3.size()];
         // set up lists of Orientations.
-        Orientation[] o1 = new Orientation[b1.size()];
-        Orientation[] o3 = new Orientation[b3.size()];
+        Orientation[] o1 = ol1;
+        Orientation[] o3 = ol2;
         Orientation[] o2 = new Orientation[preB2.length];
         // initialize o1 and o3.
         for (int i = 0; i < o1.length; i++) o1[i] = Orientation.createOrientation();
@@ -389,14 +389,6 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
 
         BasicTriangle T1 = P2.place(BasicPoint.createBasicPoint(new int[] {0,0,0,0,0,0}),BasicAngle.createBasicAngle(0),false);
         System.out.println(T1);
-
-        System.out.println("Testing skeleton output.");
-        ImmutableList<BasicEdge> edgeList = P1.createSkeleton(//
-                                P1.lengths.get(0).getBreakdown(), //
-                                P1.lengths.get(1).getBreakdown(), //
-                                P1.lengths.get(2).getBreakdown()  //
-                                                );
-        for (BasicEdge e : edgeList) System.out.println(e);
 
         BasicPoint p = BasicEdgeLength.createBasicEdgeLength(0).getAsVector(BasicAngle.createBasicAngle(0));
         BasicEdge[] ee = T1.getEdges();
