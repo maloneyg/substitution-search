@@ -79,9 +79,9 @@ public class SimpleTest
                 //System.gc();
                 //System.out.println("Press ENTER");
                 //kbd.nextLine();
-                //System.out.print("Garbage collection initiated...");
-                //System.gc();
-                //System.out.println("complete.\n");
+                System.out.print("Garbage collection initiated...");
+                System.gc();
+                System.out.println("complete.\n");
                 //System.out.println("Press ENTER\n");
                 //kbd.nextLine();
             }
@@ -108,7 +108,8 @@ public class SimpleTest
         private double updateInterval;
         private static ThreadService executorService = ThreadService.INSTANCE;
         private Date lastUpdateTime = null;
-        
+        private ArrayList<Double> throughputs = new ArrayList<Double>();
+
         public ThreadMonitor(double updateInterval) // seconds
         {
             this.updateInterval = updateInterval;
@@ -137,8 +138,16 @@ public class SimpleTest
                     }
                 double elapsedTime = ( currentTime.getTime() - lastUpdateTime.getTime() ) / 1000.0;
                 double throughput = jobsRun / elapsedTime;
+                if ( throughput > 1.0 ) 
+                    throughputs.add(throughput);
+                double average = 0.0;
+                for (Double d : throughputs)
+                    average += d;
+                average = average / throughputs.size();
+                if ( throughputs.size() > 1000 )
+                    throughputs.clear();
                 lastUpdateTime = currentTime;
-                ThreadService.INSTANCE.getExecutor().printQueues(throughput, elapsedTime);
+                ThreadService.INSTANCE.getExecutor().printQueues(throughput, average, elapsedTime);
             }
         }
     }
