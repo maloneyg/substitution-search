@@ -5,7 +5,7 @@ import com.google.common.collect.*;
 public class ObjectEfficiency
 {
 
-    public static final int LIST_LENGTH = 500000;
+    public static final int LIST_LENGTH = 50000;
     public static final int ARRAY_LENGTH = 10;
     public static final int MAX_INTEGER = 100;
     public static final ImmutableList<BasicPrototile> ALL_PROTOTILES = BasicPrototile.ALL_PROTOTILES;
@@ -85,13 +85,18 @@ public class ObjectEfficiency
             Orientation[] ol0 = new Orientation[BD0.size()];
             Orientation[] ol1 = new Orientation[BD1.size()];
             Orientation[] ol2 = new Orientation[BD2.size()];
+            for (int y = 0; y < ol0.length; y++) ol0[y] = Orientation.createOrientation();
+            for (int y = 0; y < ol1.length; y++) ol1[y] = Orientation.createOrientation();
+            for (int y = 0; y < ol2.length; y++) ol2[y] = Orientation.createOrientation();
             ImmutableList<BasicEdge> edgeList = p.createSkeleton(BD0, BD1, BD2,ol0,ol1,ol2);
             ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD1, BD2);
             ImmutableList<BasicPoint> vertices = p.place(BasicPoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
             ImmutableList<BasicPoint> bigVertices = ImmutableList.of(vertices.get(0).inflate(),vertices.get(1).inflate(),vertices.get(2).inflate());
             BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
-            //pl.add(patch);
+            pl.add(patch);
         }
+        ImmutableList<BasicPatch> PL = ImmutableList.copyOf(pl);
+        pl = null;
         endTime = new Date();
         elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
         System.out.println(String.format("\nPatch List created.  Elapsed time: %.3f s", elapsedTime));
@@ -110,7 +115,7 @@ public class ObjectEfficiency
 
         // time for OpenEdges
         promptEnter();
-        System.out.println(pl.size() + " BasicPatches.");
+        System.out.println(PL.size() + " BasicPatches.");
   /*      startTime = new Date();
         List<Orientation> ol = new ArrayList<Orientation>(LIST_LENGTH);
         for (int i=0; i < LIST_LENGTH; i++) {

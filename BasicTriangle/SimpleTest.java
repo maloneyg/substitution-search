@@ -79,9 +79,9 @@ public class SimpleTest
                 //System.gc();
                 //System.out.println("Press ENTER");
                 //kbd.nextLine();
-                //System.out.print("Garbage collection initiated...");
-                //System.gc();
-                //System.out.println("complete.\n");
+                System.out.print("Garbage collection initiated...");
+                System.gc();
+                System.out.println("complete.\n");
                 //System.out.println("Press ENTER\n");
                 //kbd.nextLine();
             }
