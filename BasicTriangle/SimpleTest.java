@@ -77,13 +77,13 @@ public class SimpleTest
                 //System.out.println("Press ENTER");
                 //kbd.next();
                 //System.gc();
-                System.out.println("Press ENTER");
-                kbd.nextLine();
+                //System.out.println("Press ENTER");
+                //kbd.nextLine();
                 System.out.print("Garbage collection initiated...");
                 System.gc();
                 System.out.println("complete.\n");
-                System.out.println("Press ENTER\n");
-                kbd.nextLine();
+                //System.out.println("Press ENTER\n");
+                //kbd.nextLine();
             }
 
         // stop monitoring thread
