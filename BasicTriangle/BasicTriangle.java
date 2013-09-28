@@ -21,10 +21,10 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
     // make it Serializable
     static final long serialVersionUID = 2896067610461604622L;
 
-    private final ImmutableList<BasicAngle> angles;
-    private final ImmutableList<BasicPoint> vertices;
-    private final ImmutableList<Orientation> orientations;
-    private final ImmutableList<BasicEdgeLength> edgeLengths;
+    private final BasicAngle[] angles;
+    private final BasicPoint[] vertices;
+    private final Orientation[] orientations;
+    private final BasicEdgeLength[] edgeLengths;
 /*    private static Cache<AbstractMap.SimpleEntry<BasicPoint[],Orientation[]>, BasicTriangle> cache = CacheBuilder.newBuilder()
         .maximumSize(1000)// we may want to change this later
         .build(); // maintain a cache of existing BasicTriangles
@@ -32,10 +32,12 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
 
     // constructor methods.
     private BasicTriangle(BasicAngle[] a, BasicPoint[] p, Orientation[] o, BasicEdgeLength[] e) {
-        angles = ImmutableList.copyOf(a);
-        vertices = ImmutableList.copyOf(p);
-        orientations = ImmutableList.copyOf(o);
-        edgeLengths = ImmutableList.copyOf(e);
+        angles = a;
+        BasicPoint[] tempVertices = new BasicPoint[p.length];
+        for (int i = 0; i < p.length; i++) tempVertices[i] = p[i];
+        vertices = tempVertices;
+        orientations = o;
+        edgeLengths = e;
     }
 
     // public static factory methods.
@@ -58,25 +60,25 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
     }
 
     public ImmutableList<BasicAngle> getAngles() {
-        return angles;
+        return ImmutableList.copyOf(angles);
     }
 
     public ImmutableList<BasicPoint> getVertices() {
-        return vertices;
+        return ImmutableList.copyOf(vertices);
     }
 
     public ImmutableList<Orientation> getOrientations() {
-        return orientations;
+        return ImmutableList.copyOf(orientations);
     }
 
     // Don't call this method too often; it's time-consuming.
     public BasicEdge[] getEdges() {
-        BasicPoint[] vertexPair0 = {vertices.get(0),vertices.get(1)};
-        BasicPoint[] vertexPair1 = {vertices.get(1),vertices.get(2)};
-        BasicPoint[] vertexPair2 = {vertices.get(2),vertices.get(0)};
-        BasicEdge e2 = BasicEdge.createBasicEdge(edgeLengths.get(2),orientations.get(2),vertexPair0);
-        BasicEdge e0 = BasicEdge.createBasicEdge(edgeLengths.get(0),orientations.get(0),vertexPair1);
-        BasicEdge e1 = BasicEdge.createBasicEdge(edgeLengths.get(1),orientations.get(1),vertexPair2);
+        BasicPoint[] vertexPair0 = {vertices[0],vertices[1]};
+        BasicPoint[] vertexPair1 = {vertices[1],vertices[2]};
+        BasicPoint[] vertexPair2 = {vertices[2],vertices[0]};
+        BasicEdge e2 = BasicEdge.createBasicEdge(edgeLengths[2],orientations[2],vertexPair0);
+        BasicEdge e0 = BasicEdge.createBasicEdge(edgeLengths[0],orientations[0],vertexPair1);
+        BasicEdge e1 = BasicEdge.createBasicEdge(edgeLengths[1],orientations[1],vertexPair2);
         BasicEdge[] output = {e0,e1,e2};
         return output;
     }
@@ -91,8 +93,8 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
 
         // Now return the vertex that is different from both of them.  
         for (int i = 0; i < 3; i++) {
-            if (!(vertices.get(i).equals(vertex1) || vertices.get(i).equals(vertex2))) {
-                return vertices.get(i);
+            if (!(vertices[i].equals(vertex1) || vertices[i].equals(vertex2))) {
+                return vertices[i];
             }
         }
 
@@ -108,7 +110,7 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
     */
     private int indexOf(BasicPoint point) {
         for (int i = 0; i < 3; i++) {
-            if (vertices.get(i).equals(point))
+            if (vertices[i].equals(point))
                 return i;
         }
         return -1;
@@ -143,7 +145,7 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
 
     // toString method
     public String toString() {
-        return "Triangle\n    angles: (" + angles.get(0) + "," + angles.get(1) + "," + angles.get(2) + ")\n  vertices: " + vertices.get(0) + "\n            " + vertices.get(1) + "\n            " + vertices.get(2);
+        return "Triangle\n    angles: (" + angles[0] + "," + angles[1] + "," + angles[2] + ")\n  vertices: " + vertices[0] + "\n            " + vertices[1] + "\n            " + vertices[2];
     }
 
     // toArray method. For drawing
@@ -167,9 +169,9 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
         BasicPoint v; // the other vertex
         BasicPoint t; // vertex on the given side, used to test cross product
         for (int i = 0; i < 3; i++) {
-            m = vertices.get((i+2)%3).subtract(vertices.get((i+1)%3));
-            v = vertices.get(i);
-            t = vertices.get((i+1)%3);
+            m = vertices[(i+2)%3].subtract(vertices[(i+1)%3]);
+            v = vertices[i];
+            t = vertices[(i+1)%3];
             if (Math.signum((v.subtract(t)).crossProduct(m).evaluate(Initializer.COS)) != Math.signum((p.subtract(t)).crossProduct(m).evaluate(Initializer.COS)))
                 return false;
         }
@@ -215,13 +217,13 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicPo
         * in the listing of vertices.
         */
         if (j - i == 1 || j - i == -2) { // This tests for cw order.
-            if (orientations.get(other).equals(arrow)) {
+            if (orientations[other].equals(arrow)) {
                 return true;
             } else {
                 return false;
             }
         } else {
-            if (orientations.get(other).getOpposite().equals(arrow)) {
+            if (orientations[other].getOpposite().equals(arrow)) {
                 return true;
             } else {
                 return false;

@@ -5,6 +5,8 @@
 import com.google.common.collect.*;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Arrays;
 import org.apache.commons.math3.linear.*;
 
 public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEdgeLength, BasicEdge, BasicTriangle, BasicPatch>, Serializable {
@@ -13,31 +15,22 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
     static final long serialVersionUID = 3422733298735932933L;
 
     // the triangles in this patch
-    private final ImmutableList<BasicTriangle> triangles;
+    private final BasicTriangle[] triangles;
 
     // the open edges in this patch
-    private final ImmutableList<BasicEdge> openEdges;
+    private final BasicEdge[] openEdges;
 
     // the closed edges in this patch
-    private final ImmutableList<BasicEdge> closedEdges;
+    private final BasicEdge[] closedEdges;
 
     // the Orientations that have been identified with one another
     private final OrientationPartition partition;
 
     // vertices of the big triangle
-    private final ImmutableList<BasicPoint> bigVertices;
+    private final BasicPoint[] bigVertices;
 
     // private constructor
-    private BasicPatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, ImmutableList<BasicPoint> v) {
-        triangles = ImmutableList.copyOf(t);
-        openEdges = ImmutableList.copyOf(e1);
-        closedEdges = ImmutableList.copyOf(e2);
-        partition = o;
-        bigVertices = v;
-    }
-
-    // private constructor
-    private BasicPatch(ImmutableList<BasicTriangle> t, ImmutableList<BasicEdge> e1, ImmutableList<BasicEdge> e2, OrientationPartition o, ImmutableList<BasicPoint> v) {
+    private BasicPatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, BasicPoint[] v) {
         triangles = t;
         openEdges = e1;
         closedEdges = e2;
@@ -46,10 +39,10 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
     }
 
     // initial constructor
-    private BasicPatch(ImmutableList<BasicEdge> e, ImmutableList<BasicPoint> v) {
-        Orientation[] o = new Orientation[e.size() + 6 * BasicPrototile.ALL_PROTOTILES.size()];
+    private BasicPatch(BasicEdge[] e, BasicPoint[] v) {
+        Orientation[] o = new Orientation[e.length + 6 * BasicPrototile.ALL_PROTOTILES.size()];
         int i = 0;
-        for (i = 0; i < e.size(); i++) o[i] = e.get(i).getOrientation();
+        for (i = 0; i < e.length; i++) o[i] = e[i].getOrientation();
         for (BasicPrototile t : BasicPrototile.ALL_PROTOTILES) {
             for (Orientation a : t.getOrientations()) {
                 o[i] = a;
@@ -58,15 +51,19 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
                 i++;
             }
         }
-        triangles = ImmutableList.copyOf(new BasicTriangle[0]);
-        openEdges = ImmutableList.copyOf(e);
-        closedEdges = ImmutableList.copyOf(new BasicEdge[0]);
+        triangles = new BasicTriangle[0];
+        BasicEdge[] tempEdges = new BasicEdge[e.length];
+        for (int j = 0; j < e.length; j++) tempEdges[j] = e[j];
+        openEdges = tempEdges;
+        closedEdges = new BasicEdge[0];
         partition = OrientationPartition.createOrientationPartition(o);
-        bigVertices = v;
+        BasicPoint[] tempVertices = new BasicPoint[v.length];
+        for (int j = 0; j < v.length; j++) tempVertices[j] = v[j];
+        bigVertices = tempVertices;
     }
 
     // public static factory method
-    public static BasicPatch createBasicPatch(ImmutableList<BasicEdge> e, ImmutableList<BasicPoint> v) {
+    public static BasicPatch createBasicPatch(BasicEdge[] e, BasicPoint[] v) {
         return new BasicPatch(e,v);
     }
 
@@ -76,8 +73,10 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
     }
 
     // return openEdges (for testing only)
-    public ImmutableList<BasicEdge> getOpenEdges() {
-        return openEdges;
+    public BasicEdge[] getOpenEdges() {
+        BasicEdge[] output = new BasicEdge[openEdges.length];
+        for (int i = 0; i < openEdges.length; i++) output[i] = openEdges[i];
+        return output;
     }
 
     // equals method
@@ -102,7 +101,7 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
     * The big test.
     */
     public ArrayList<OrderedTriple> graphicsDump() {
-        ArrayList<OrderedTriple> output = new ArrayList<OrderedTriple>(triangles.size());
+        ArrayList<OrderedTriple> output = new ArrayList<OrderedTriple>(triangles.length);
         BasicPoint p0;
         BasicPoint p1;
         ArrayList<RealMatrix> edgeList = new ArrayList<RealMatrix>(3);
@@ -161,11 +160,11 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
     */
     public BasicPatch placeTriangle(BasicTriangle t) {
         // fill up the new triangle list
-        BasicTriangle[] newTriangles = new BasicTriangle[triangles.size()+1];
+        BasicTriangle[] newTriangles = new BasicTriangle[triangles.length+1];
         int i = 0;
-        for (i = 0; i < triangles.size(); i++)
-            newTriangles[i] = triangles.get(i);
-        newTriangles[triangles.size()] = t;
+        for (i = 0; i < triangles.length; i++)
+            newTriangles[i] = triangles[i];
+        newTriangles[triangles.length] = t;
 
         BasicEdge[] matches = t.getEdges();
         /*
@@ -173,18 +172,20 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
         * already in closedEdges.
         */
         for (i = 0; i < 3; i++) {
-            if (closedEdges.contains(matches[i]))
+            if (Arrays.asList(closedEdges).contains(matches[i]))
                 throw new IllegalArgumentException("Trying to add " + matches[i] + ", which is already closed in this patch.");
         }
 
         /*
         * find the indices of the edges of t in openEdges.
         */
+        List<BasicEdge> tempEdges = Arrays.asList(openEdges);
         int[] edgeIndexList = { //
-                                  openEdges.indexOf(matches[0]), // 
-                                  openEdges.indexOf(matches[1]), // 
-                                  openEdges.indexOf(matches[2])  // 
+                                  tempEdges.indexOf(matches[0]), // 
+                                  tempEdges.indexOf(matches[1]), // 
+                                  tempEdges.indexOf(matches[2])  // 
                               };
+        tempEdges = null;
 
         // find the indices of the edges of t in openEdges.
         int totalMatches = 0;
@@ -195,12 +196,12 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
         }
 
         // fill up the new openEdge list
-        BasicEdge[] newOpenEdges = new BasicEdge[openEdges.size()+3-2*totalMatches];
+        BasicEdge[] newOpenEdges = new BasicEdge[openEdges.length+3-2*totalMatches];
         int j = 0;
         // first put in all the old open edges that haven't been covered
-        for (i = 0; i < openEdges.size(); i++) {
+        for (i = 0; i < openEdges.length; i++) {
             if (!(i==edgeIndexList[0]||i==edgeIndexList[1]||i==edgeIndexList[2])) {
-                newOpenEdges[j] = openEdges.get(i);
+                newOpenEdges[j] = openEdges[i];
                 j++;
             }
         }
@@ -213,10 +214,10 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
         }
 
         // fill up the new closedEdgeList
-        BasicEdge[] newClosedEdges = new BasicEdge[closedEdges.size()+totalMatches];
+        BasicEdge[] newClosedEdges = new BasicEdge[closedEdges.length+totalMatches];
         // first put in all the old closed edges
-        for (i = 0; i < closedEdges.size(); i++) {
-            newClosedEdges[i] = closedEdges.get(i);
+        for (i = 0; i < closedEdges.length; i++) {
+            newClosedEdges[i] = closedEdges[i];
         }
         // now put in all the new edges from t
         for (j = 0; j < 3; j++) {
@@ -250,7 +251,7 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
     * already uncompletable.
     */
     public BasicEdge getNextEdge() {
-        return openEdges.get(openEdges.size()-1);
+        return openEdges[openEdges.length-1];
     }
 
     /*
@@ -333,9 +334,9 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
         BasicPoint v; // the other vertex
         BasicPoint t; // vertex on the given side, used to test cross product
         for (int i = 0; i < 3; i++) {
-            m = bigVertices.get((i+2)%3).subtract(bigVertices.get((i+1)%3));
-            v = bigVertices.get(i);
-            t = bigVertices.get((i+1)%3);
+            m = bigVertices[(i+2)%3].subtract(bigVertices[(i+1)%3]);
+            v = bigVertices[i];
+            t = bigVertices[(i+1)%3];
             if (Math.signum((v.subtract(t)).crossProduct(m).evaluate(Initializer.COS)) != Math.signum((p.subtract(t)).crossProduct(m).evaluate(Initializer.COS)))
                 return false;
         }

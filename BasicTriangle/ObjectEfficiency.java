@@ -88,10 +88,10 @@ public class ObjectEfficiency
             for (int y = 0; y < ol0.length; y++) ol0[y] = Orientation.createOrientation();
             for (int y = 0; y < ol1.length; y++) ol1[y] = Orientation.createOrientation();
             for (int y = 0; y < ol2.length; y++) ol2[y] = Orientation.createOrientation();
-            ImmutableList<BasicEdge> edgeList = p.createSkeleton(BD0, BD1, BD2,ol0,ol1,ol2);
+            BasicEdge[] edgeList = p.createSkeleton(BD0, BD1, BD2,ol0,ol1,ol2);
             ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD1, BD2);
             ImmutableList<BasicPoint> vertices = p.place(BasicPoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
-            ImmutableList<BasicPoint> bigVertices = ImmutableList.of(vertices.get(0).inflate(),vertices.get(1).inflate(),vertices.get(2).inflate());
+            BasicPoint[] bigVertices = new BasicPoint[] {vertices.get(0).inflate(),vertices.get(1).inflate(),vertices.get(2).inflate()};
             BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
             pl.add(patch);
         }

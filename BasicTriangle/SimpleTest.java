@@ -182,7 +182,7 @@ public class SimpleTest
         BD2 = start2;
         PrototileList tiles = PrototileList.createPrototileList(BasicPrototile.getPrototileList(Initializer.SUBSTITUTION_MATRIX.getColumn(myTile)));
         ImmutableList<BasicPoint> vertices = P0.place(BasicPoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
-        ImmutableList<BasicPoint> bigVertices = ImmutableList.of(vertices.get(0).inflate(),vertices.get(1).inflate(),vertices.get(2).inflate());
+        BasicPoint[] bigVertices = new BasicPoint[] {vertices.get(0).inflate(),vertices.get(1).inflate(),vertices.get(2).inflate()};
 
 //        ImmutableList<Integer> inflList = Preinitializer.INFL;
 //        IntPolynomial infl = IntPolynomial.createIntPolynomial(inflList);
@@ -213,7 +213,7 @@ public class SimpleTest
             do {
                 do {
 
-                    ImmutableList<BasicEdge> edgeList = P0.createSkeleton(BD0, BD2, ol0, ol2, false);
+                    BasicEdge[] edgeList = P0.createSkeleton(BD0, BD2, ol0, ol2, false);
                     ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD2);
 
                     BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
@@ -264,7 +264,7 @@ public class SimpleTest
                 do {
                     do {
 
-                        ImmutableList<BasicEdge> edgeList = P0.createSkeleton(BD0, BD1, BD2, ol0, ol1, ol2);
+                        BasicEdge[] edgeList = P0.createSkeleton(BD0, BD1, BD2, ol0, ol1, ol2);
                         ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD1, BD2);
 
                         BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
