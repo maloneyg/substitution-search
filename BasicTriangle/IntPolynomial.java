@@ -13,7 +13,7 @@ import Jama.Matrix;
 
 public class IntPolynomial implements Serializable {
 
-    private final ImmutableList<Integer> coef;  // coefficients
+    private final int[] coef;  // coefficients
     private final int deg;  // degree of polynomial (0 for the zero polynomial)
 
     // make it Serializable
@@ -28,27 +28,29 @@ public class IntPolynomial implements Serializable {
 
     // a * x^b
     private IntPolynomial(int a, int b) {
-        Integer[] preCoef = new Integer[b+1];
+        int[] preCoef = new int[b+1];
         for (int i = 0; i < b+1; i++) preCoef[i] = 0;
         preCoef[b] += a;
-        coef = ImmutableList.copyOf(preCoef);
+        coef = preCoef;
         deg = degree();
     }
 
     // create a polynomial from an integer array
-    private IntPolynomial(Integer[] a) {
-        coef = ImmutableList.copyOf(a);
+    private IntPolynomial(int[] a) {
+        int[] preCoef = new int[a.length];
+        for (int i = 0; i < a.length; i++) preCoef[i] = a[i];
+        coef = preCoef;
         deg = degree();
     }
 
     // public static factory method
-    public static IntPolynomial createIntPolynomial(Integer[] a) {
+    public static IntPolynomial createIntPolynomial(int[] a) {
         return new IntPolynomial(a);
     }
 
     // public static factory method
     public static IntPolynomial createIntPolynomial(ImmutableList<Integer> a) {
-        Integer[] b = new Integer[a.size()];
+        int[] b = new int[a.size()];
         for (int i = 0; i < a.size(); i++) b[i] = a.get(i);
         return new IntPolynomial(b);
     }
@@ -56,46 +58,46 @@ public class IntPolynomial implements Serializable {
     // return the degree of this polynomial (0 for the zero polynomial)
     public int degree() {
         int d = 0;
-        for (int i = 0; i < coef.size(); i++)
-            if (coef.get(i) != 0) d = i;
+        for (int i = 0; i < coef.length; i++)
+            if (coef[i] != 0) d = i;
         return d;
     }
 
     // return c = a + b
     public IntPolynomial plus(IntPolynomial b) {
         IntPolynomial a = this;
-        Integer[] c = new Integer[Math.max(a.deg,b.deg)+1];
+        int[] c = new int[Math.max(a.deg,b.deg)+1];
         for (int i = 0; i < c.length; i++) c[i] = 0;
-        for (int i = 0; i <= a.deg; i++) c[i] += a.coef.get(i);
-        for (int i = 0; i <= b.deg; i++) c[i] += b.coef.get(i);
+        for (int i = 0; i <= a.deg; i++) c[i] += a.coef[i];
+        for (int i = 0; i <= b.deg; i++) c[i] += b.coef[i];
         return new IntPolynomial(c);
     }
 
     // return (a - b)
     public IntPolynomial minus(IntPolynomial b) {
         IntPolynomial a = this;
-        Integer[] c = new Integer[Math.max(a.deg,b.deg)+1];
+        int[] c = new int[Math.max(a.deg,b.deg)+1];
         for (int i = 0; i < c.length; i++) c[i] = 0;
-        for (int i = 0; i <= a.deg; i++) c[i] += a.coef.get(i);
-        for (int i = 0; i <= b.deg; i++) c[i] -= b.coef.get(i);
+        for (int i = 0; i <= a.deg; i++) c[i] += a.coef[i];
+        for (int i = 0; i <= b.deg; i++) c[i] -= b.coef[i];
         return new IntPolynomial(c);
     }
 
     // return ca
     public IntPolynomial scalarMultiple(int c) {
-        Integer[] b = new Integer[deg+1];
-        for (int i = 0; i < deg+1; i++) b[i] = coef.get(i)*c;
+        int[] b = new int[deg+1];
+        for (int i = 0; i < deg+1; i++) b[i] = coef[i]*c;
         return new IntPolynomial(b);
     }
 
     // return (a * b)
     public IntPolynomial times(IntPolynomial b) {
         IntPolynomial a = this;
-        Integer[] c = new Integer[a.deg+b.deg+1];
+        int[] c = new int[a.deg+b.deg+1];
         for (int i = 0; i < c.length; i++) c[i] = 0;
         for (int i = 0; i <= a.deg; i++)
             for (int j = 0; j <= b.deg; j++)
-                c[i+j] += (a.coef.get(i) * b.coef.get(j));
+                c[i+j] += (a.coef[i] * b.coef[j]);
         return new IntPolynomial(c);
     }
 
@@ -107,8 +109,8 @@ public class IntPolynomial implements Serializable {
         if (a.equals(ZERO)) return ZERO;
         if (a.deg < b.deg)
             throw new IllegalArgumentException("Can't divide " + a + " by " + b + ": degree of divisor is too big.");
-        Integer aLeading = a.coef.get(a.deg);
-        Integer bLeading = b.coef.get(b.deg);
+        int aLeading = a.coef[a.deg];
+        int bLeading = b.coef[b.deg];
         if (aLeading % bLeading != 0)
             throw new IllegalArgumentException("Can't divide " + a + " by " + b + ": leading coefficients aren't divisible.");
         IntPolynomial newMonic = new IntPolynomial(aLeading / bLeading, a.deg - b.deg);
@@ -119,8 +121,8 @@ public class IntPolynomial implements Serializable {
     public IntPolynomial mod(IntPolynomial b) {
         IntPolynomial a = this;
         if (a.deg < b.deg) return a;
-        Integer aLeading = a.coef.get(a.deg);
-        Integer bLeading = b.coef.get(b.deg);
+        int aLeading = a.coef[a.deg];
+        int bLeading = b.coef[b.deg];
         if (aLeading % bLeading != 0)
             throw new IllegalArgumentException("Can't divide " + a + " by " + b + ": leading coefficients aren't divisible.");
         IntPolynomial newMonic = new IntPolynomial(aLeading / bLeading, a.deg - b.deg);
@@ -176,7 +178,7 @@ public class IntPolynomial implements Serializable {
     public int evaluate(int x) {
         int p = 0;
         for (int i = deg; i >= 0; i--)
-            p = coef.get(i) + (x * p);
+            p = coef[i] + (x * p);
         return p;
     }
 
@@ -184,7 +186,7 @@ public class IntPolynomial implements Serializable {
     public double evaluate(double x) {
         double p = 0.0;
         for (int i = deg; i >= 0; i--)
-            p = coef.get(i) + (x * p);
+            p = coef[i] + (x * p);
         return p;
     }
 
@@ -202,7 +204,7 @@ public class IntPolynomial implements Serializable {
                         preMatrix[i][j] = 0.0;
                     }
                 } else {
-                    preMatrix[i][j] = (double) -f.coef.get(i);
+                    preMatrix[i][j] = (double) -f.coef[i];
                 }
             }
         }
@@ -218,7 +220,7 @@ public class IntPolynomial implements Serializable {
         Matrix id = Matrix.identity(m,n);
         for (int i = deg; i >= 0; i--) {
             p = p.times(x);
-            p.plusEquals(id.times(coef.get(i))); 
+            p.plusEquals(id.times(coef[i])); 
         }
         return p;
     }
@@ -232,7 +234,7 @@ public class IntPolynomial implements Serializable {
         IntMatrix id = IntMatrix.identity(m);
         for (int i = deg; i >= 0; i--) {
             p = p.times(x);
-            p = p.plus(id.times(coef.get(i))); 
+            p = p.plus(id.times(coef[i])); 
         }
         return p;
     }
@@ -247,7 +249,7 @@ public class IntPolynomial implements Serializable {
         for (int i = 0; i <= d; i++) {
             for (int j = 0; j < p.length; j++) {
                 if (i <= p[j].deg) {
-                    preMatrix[i][j] = p[j].coef.get(i);
+                    preMatrix[i][j] = p[j].coef[i];
                 } else {
                     preMatrix[i][j] = 0;
                 }
@@ -258,9 +260,9 @@ public class IntPolynomial implements Serializable {
 
     // substitute 2x for x.
     public IntPolynomial reParametrize(int n) {
-        Integer[] newCoeffs = new Integer[deg+1];
+        int [] newCoeffs = new int [deg+1];
         for (int i = 0; i < deg+1; i++)
-            newCoeffs[i] = coef.get(i)*((int)Math.pow(n,i));
+            newCoeffs[i] = coef[i]*((int)Math.pow(n,i));
         return new IntPolynomial(newCoeffs);
     }
 
@@ -272,7 +274,7 @@ public class IntPolynomial implements Serializable {
         IntPolynomial a = this;
         if (a.deg != b.deg) return false;
         for (int i = a.deg; i >= 0; i--)
-            if (a.coef.get(i) != b.coef.get(i)) return false;
+            if (a.coef[i] != b.coef[i]) return false;
         return true;
     }
 
@@ -281,20 +283,20 @@ public class IntPolynomial implements Serializable {
         int prime = 71;
         int result = 5;
         for (int i = 0; i < deg; i++) {
-            result = prime*result + coef.get(i);
+            result = prime*result + coef[i];
         }
         return result;
     }
 
     // convert to string representation
     public String toString() {
-        if (deg ==  0) return "" + coef.get(0);
-        if (deg ==  1) return coef.get(1) + "x + " + coef.get(0);
-        String s = coef.get(deg) + "x^" + deg;
+        if (deg ==  0) return "" + coef[0];
+        if (deg ==  1) return coef[1] + "x + " + coef[0];
+        String s = coef[deg] + "x^" + deg;
         for (int i = deg-1; i >= 0; i--) {
-            if      (coef.get(i) == 0) continue;
-            else if (coef.get(i)  > 0) s = s + " + " + ( coef.get(i));
-            else if (coef.get(i)  < 0) s = s + " - " + (-coef.get(i));
+            if      (coef[i] == 0) continue;
+            else if (coef[i]  > 0) s = s + " + " + ( coef[i]);
+            else if (coef[i]  < 0) s = s + " - " + (-coef[i]);
             if      (i == 1) s = s + "x";
             else if (i >  1) s = s + "x^" + i;
         }
@@ -304,8 +306,8 @@ public class IntPolynomial implements Serializable {
     // test client
     public static void main(String[] args) {
 
-        Integer[] d = { 1, 2, 3 };
-        Integer[] c = { -2, 5, 3, 0, 0, -4 };
+        int[] d = { 1, 2, 3 };
+        int[] c = { -2, 5, 3, 0, 0, -4 };
         IntPolynomial D = new IntPolynomial(d);
         IntPolynomial C = new IntPolynomial(c);
 

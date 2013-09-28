@@ -248,7 +248,7 @@ final public class LengthAndAreaCalculator {
         System.out.println("AMAT:");
         System.out.println(arrayString(AMAT.getArray()));
 
-        IntPolynomial testPoly = IntPolynomial.createIntPolynomial(new Integer[] {1,1});
+        IntPolynomial testPoly = IntPolynomial.createIntPolynomial(new int[] {1,1});
         System.out.println("testPoly:");
         System.out.println(testPoly);
         System.out.println("AMAT plugged into testPoly:");
