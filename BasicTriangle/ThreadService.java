@@ -8,11 +8,7 @@ public class ThreadService
 {
     private final static Logger log            = Logger.getLogger(ThreadService.class.getName());
     public static final ThreadService INSTANCE = new ThreadService();
-<<<<<<< HEAD
     public final int NUMBER_OF_THREADS         = 4; //Runtime.getRuntime().availableProcessors();
-=======
-    public final int NUMBER_OF_THREADS         = Runtime.getRuntime().availableProcessors();
->>>>>>> e097c6714e905ddad9eabe6475caa8422d4dce8a
     public static final int JOB_CAPACITY              = 10000000;                                 // how many jobs can wait in the queue at a time
     public static final String runningJobsCheckpointFilename = "runningJobs.chk";               // serialized checkpoints
     public static final String pendingJobsCheckpointFilename = "pendingJobs.chk";               // assumed to be in working directory
