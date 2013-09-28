@@ -79,9 +79,9 @@ public class SimpleTest
                 //System.gc();
                 //System.out.println("Press ENTER");
                 //kbd.nextLine();
-                System.out.print("Garbage collection initiated...");
-                System.gc();
-                System.out.println("complete.\n");
+                //System.out.print("Garbage collection initiated...");
+                //System.gc();
+                //System.out.println("complete.\n");
                 //System.out.println("Press ENTER\n");
                 //kbd.nextLine();
             }
@@ -158,7 +158,7 @@ public class SimpleTest
     private static void createWorkUnits(ConcurrentLinkedQueue<WorkUnit> list)
     {
         //int myTile = 0; // uncomment this line for a small search
-        int myTile = 2; // uncomment this line for a big search
+        int myTile = 4; // uncomment this line for a big search
 
         BasicPrototile P0 = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(myTile));
 
