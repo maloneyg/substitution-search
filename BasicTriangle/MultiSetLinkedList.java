@@ -153,7 +153,7 @@ public class MultiSetLinkedList {
     // test client
     public static void main(String[] args) {
 
-        ArrayList<Integer> test = new ArrayList(5);
+        ArrayList<Integer> test = new ArrayList<>(5);
         test.add(1);
         test.add(2);
         test.add(0);
