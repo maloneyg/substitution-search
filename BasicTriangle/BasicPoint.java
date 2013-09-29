@@ -24,33 +24,29 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
 
     public static final IntMatrix INFL = Initializer.INFL;
 
-    public static final BasicPoint ZERO_VECTOR = new BasicPoint();
+    public static final BasicPoint ZERO_VECTOR;
 
     public static final BasicPoint UNIT_VECTOR;
 
-    /*private static LoadingCache<int[], BasicPoint> points = CacheBuilder.newBuilder()
-       //.expireAfterAccess(10, TimeUnit.MINUTES)
-       .build(
-           new CacheLoader<int[], BasicPoint>() {
-             public BasicPoint load(int[] i) { // no checked exception
-               return getCachedBasicPoint(i);
-             }
-           });
-    */
+    // a pool containing all the BasicPoints that have been created
+    private static final BasicPointPool POOL = BasicPointPool.getInstance();
 
     static { // initialize the unit vector
 
         int[] preUnit = new int[length];
+        int[] preZero = new int[length];
         preUnit[0] = 1;
+        preZero[0] = 0;
         for (int i = 1; i < length; i++) {
             preUnit[i] = 0;
+            preZero[i] = 0;
         }
-        UNIT_VECTOR = new BasicPoint(preUnit);
+        UNIT_VECTOR = createBasicPoint(preUnit);
+        ZERO_VECTOR = createBasicPoint(preZero);
 
     }
 
     // A vector identifying the point.  
-    //private final ImmutableList<Integer> point;
     private final int[] point;
 
     // Constructor methods.
@@ -59,30 +55,21 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
         if (vector.length != length) {
             throw new IllegalArgumentException("Point length is incorrect.");
         }
-        /*Integer[] tempVector = new Integer[length];
-        for (int i = 0; i < length; i++)
-            tempVector[i] = Integer.valueOf(vector[i]);
-        this.point = ImmutableList.copyOf(tempVector);*/
         point = vector;
     }
 
     private BasicPoint() {
-        /*Integer[] vector = new Integer[length];
-        for (int i = 0; i < length; i++) {
-            vector[i] = 0;
-        }
-        point = ImmutableList.copyOf(vector);*/
         point = new int[length];
     }
 
-    // public static factory method
+    // public static factory method for getting a recycled point
     static public BasicPoint createBasicPoint(int[] vector) {
-        //return points.getUnchecked(vector);
-        return new BasicPoint(vector);
+//        return new BasicPoint(vector);
+        return POOL.getCanonicalVersion(vector);
     }
 
-    // private static factory method
-    static private BasicPoint getCachedBasicPoint(int[] vector) {
+    // public static factory method for creating a brand new point
+    static protected BasicPoint createExNihilo(int[] vector) {
         return new BasicPoint(vector);
     }
 
@@ -146,7 +133,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
         for (int i = 0; i < length; i++) {
             q[i] = point[i] + p.point[i];
         }
-        return new BasicPoint(q);
+        return createBasicPoint(q);
     }
 
     public BasicPoint scalarMultiple(int c) {
@@ -154,7 +141,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
         for (int i = 0; i < length; i++) {
             q[i] = c * point[i];
         }
-        return new BasicPoint(q);
+        return createBasicPoint(q);
     }
 
     public BasicPoint subtract(BasicPoint p) {
@@ -169,19 +156,19 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
         int[] result  = pointAsArray();
         for (int j = 0; j < i; j++)
             result = ROT.rowTimes(result);
-        return new BasicPoint(result);
+        return createBasicPoint(result);
     }
 
     public BasicPoint reflect() {
-        return new BasicPoint(REF.rowTimes(this.pointAsArray()));
+        return createBasicPoint(REF.rowTimes(this.pointAsArray()));
     }
 
     public BasicPoint inflate() {
-        return new BasicPoint(INFL.rowTimes(this.pointAsArray()));
+        return createBasicPoint(INFL.rowTimes(this.pointAsArray()));
     }
 
     protected BasicPoint timesA() {
-        return new BasicPoint(A.rowTimes(this.pointAsArray()));
+        return createBasicPoint(A.rowTimes(this.pointAsArray()));
     }
 
     /*

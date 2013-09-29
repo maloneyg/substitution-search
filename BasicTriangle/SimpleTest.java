@@ -14,6 +14,9 @@ import java.util.Scanner;
 
 public class SimpleTest
 {
+
+    private static final BasicPointPool POOL = BasicPointPool.getInstance();
+
     public static void main(String[] args)
     {
         // this is the thread executor service (a singleton)
@@ -75,13 +78,11 @@ public class SimpleTest
 
                 // for monitoring purposes:
                 //System.out.println("Press ENTER");
-                //kbd.next();
-                //System.gc();
-                //System.out.println("Press ENTER");
                 //kbd.nextLine();
-                //System.out.print("Garbage collection initiated...");
-                //System.gc();
-                //System.out.println("complete.\n");
+                System.out.print("Garbage collection initiated...");
+                POOL.clear();
+                System.gc();
+                System.out.println("complete.\n");
                 //System.out.println("Press ENTER\n");
                 //kbd.nextLine();
             }
