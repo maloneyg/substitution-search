@@ -24,6 +24,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
     private final Orientation[] flipOrientations;
 
     public static final ImmutableList<BasicPrototile> ALL_PROTOTILES;
+    public static final ImmutableList<BasicEdgeLength> EDGE_LENGTHS = BasicEdgeLength.ALL_EDGE_LENGTHS;
 
     // private constructor
     private BasicPrototile(ImmutableList<Integer> anglesList) {
@@ -251,7 +252,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
     // no sanity check!
     // we assume that these are breakdowns of the actual
     // edge of this prototile.
-    public BasicEdge[] createSkeleton(ImmutableList<Integer> b1, ImmutableList<Integer> b2, ImmutableList<Integer> b3, Orientation[] ol1, Orientation[] ol2, Orientation[] ol3) {
+    public BasicEdge[] createSkeleton(ImmutableList<Integer> b1, ImmutableList<Integer> b2, ImmutableList<Integer> b3) {
         BasicEdge[] output = new BasicEdge[b1.size()+b2.size()+b3.size()];
         int k = 0;
         BasicAngle a1 = angles[1].piPlus();
@@ -259,6 +260,30 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
         BasicEdgeLength currentLength;
         BasicPoint currentPoint = lengths[2].getAsVector(angles[1]).inflate();
         BasicPoint nextPoint;
+
+        // create lists of Orientations 
+        int[] oCount = new int[EDGE_LENGTHS.size()]; // how many Orientations used from each pool?
+        Orientation[] ol1 = new Orientation[b1.size()];
+        Orientation[] ol2 = new Orientation[b2.size()];
+        Orientation[] ol3 = new Orientation[b3.size()];
+        for (int i = 0; i < ol1.length; i++) {
+            int currentIndex = b1.get(i);
+            BasicEdgeLength nowLength = EDGE_LENGTHS.get(currentIndex);
+            ol1[i] = nowLength.getOrientation(oCount[currentIndex]);
+            oCount[currentIndex]++;
+        }
+        for (int i = 0; i < ol2.length; i++) {
+            int currentIndex = b2.get(i);
+            BasicEdgeLength nowLength = EDGE_LENGTHS.get(currentIndex);
+            ol2[i] = nowLength.getOrientation(oCount[currentIndex]);
+            oCount[currentIndex]++;
+        }
+        for (int i = 0; i < ol3.length; i++) {
+            int currentIndex = b3.get(i);
+            BasicEdgeLength nowLength = EDGE_LENGTHS.get(currentIndex);
+            ol3[i] = nowLength.getOrientation(oCount[currentIndex]);
+            oCount[currentIndex]++;
+        }
 
         // run through the edge breakdowns, adding edges to the skeleton.
         // this is going to get repetitive. 
@@ -297,16 +322,30 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BasicPoint,
     // no sanity check!
     // we assume that these are breakdowns of the actual
     // edge of this prototile.
-    public BasicEdge[] createSkeleton(ImmutableList<Integer> c1, ImmutableList<Integer> c2, Orientation[] ol1, Orientation[] ol2, boolean reverse) {
+    public BasicEdge[] createSkeleton(ImmutableList<Integer> c1, ImmutableList<Integer> c2, boolean reverse) {
         ImmutableList<Integer> b1 = c1;
         ImmutableList<Integer> b3 = c2;
         // set up the middle edge.
         // it's either the same as the first or the same as the last edge.
         Integer[] preB2 = new Integer[(angles[0]==angles[1])?b1.size():b3.size()];
-        // set up lists of Orientations.
-        Orientation[] o1 = ol1;
-        Orientation[] o3 = ol2;
+
+        // create lists of Orientations 
+        int[] oCount = new int[EDGE_LENGTHS.size()]; // how many Orientations used from each pool?
+        Orientation[] o1 = new Orientation[b1.size()];
+        Orientation[] o3 = new Orientation[b3.size()];
         Orientation[] o2 = new Orientation[preB2.length];
+        for (int i = 0; i < o1.length; i++) {
+            int currentIndex = b1.get(i);
+            BasicEdgeLength nowLength = EDGE_LENGTHS.get(currentIndex);
+            o1[i] = nowLength.getOrientation(oCount[currentIndex]);
+            oCount[currentIndex]++;
+        }
+        for (int i = 0; i < o3.length; i++) {
+            int currentIndex = b3.get(i);
+            BasicEdgeLength nowLength = EDGE_LENGTHS.get(currentIndex);
+            o3[i] = nowLength.getOrientation(oCount[currentIndex]);
+            oCount[currentIndex]++;
+        }
         // initialize o1 and o3.
         for (int i = 0; i < o1.length; i++) o1[i] = Orientation.createOrientation();
         for (int i = 0; i < o3.length; i++) o3[i] = Orientation.createOrientation();

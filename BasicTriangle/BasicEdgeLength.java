@@ -25,7 +25,7 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
     * When someone asks for a BasicEdgeLength, we just give 
     * his one of these.
     */
-    static final private ImmutableList<BasicEdgeLength> ALL_EDGE_LENGTHS;
+    static final protected ImmutableList<BasicEdgeLength> ALL_EDGE_LENGTHS;
 
     /*
     * A list of vector representatives of the allowable edge lengths.
@@ -69,6 +69,11 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
     */
     final private ImmutableList<Integer> breakdown;
 
+    /*
+    * A pool of Orientations to be used with edges of this length.
+    */
+    final private ImmutableList<Orientation> orientationPool;
+
     // private constructor
     private BasicEdgeLength(int i) {
         // make a list of all edges with this length
@@ -95,6 +100,13 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
             }
         }
         breakdown = ImmutableList.copyOf(preBreakdown);
+
+        ImmutableList<Integer> numOccurrences = Initializer.INFLATED_LENGTHS.getRow(i);
+        int kk = 0;
+        for (int j = 0; j < numOccurrences.size(); j++) kk += numOccurrences.get(j);
+        Orientation[] preO = new Orientation[kk];
+        for (int j = 0; j < preO.length; j++) preO[j] = Orientation.createOrientation();
+        orientationPool = ImmutableList.copyOf(preO);
     }
 
     // public static factory method
@@ -136,6 +148,13 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
     */
     public ImmutableList<Integer> getBreakdown() {
         return breakdown;
+    }
+
+    /*
+    * return a new Orientation for an edge of this length
+    */
+    public Orientation getOrientation(int i) {
+        return orientationPool.get(i);
     }
 
     /*

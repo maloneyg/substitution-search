@@ -82,13 +82,7 @@ public class ObjectEfficiency
             ImmutableList<Integer> BD0 = p.getLengths().get(0).getBreakdown();
             ImmutableList<Integer> BD1 = p.getLengths().get(1).getBreakdown();
             ImmutableList<Integer> BD2 = p.getLengths().get(2).getBreakdown();
-            Orientation[] ol0 = new Orientation[BD0.size()];
-            Orientation[] ol1 = new Orientation[BD1.size()];
-            Orientation[] ol2 = new Orientation[BD2.size()];
-            for (int y = 0; y < ol0.length; y++) ol0[y] = Orientation.createOrientation();
-            for (int y = 0; y < ol1.length; y++) ol1[y] = Orientation.createOrientation();
-            for (int y = 0; y < ol2.length; y++) ol2[y] = Orientation.createOrientation();
-            BasicEdge[] edgeList = p.createSkeleton(BD0, BD1, BD2,ol0,ol1,ol2);
+            BasicEdge[] edgeList = p.createSkeleton(BD0, BD1, BD2);
             ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD1, BD2);
             ImmutableList<BasicPoint> vertices = p.place(BasicPoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
             BasicPoint[] bigVertices = new BasicPoint[] {vertices.get(0).inflate(),vertices.get(1).inflate(),vertices.get(2).inflate()};

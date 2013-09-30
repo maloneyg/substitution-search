@@ -186,6 +186,16 @@ final public class IntMatrix implements Serializable {
         return ImmutableList.copyOf(output);
     }
 
+    // extract a row
+    public ImmutableList<Integer> getRow(int i) {
+        if (i < 0 || i >= M) 
+            throw new IllegalArgumentException("Index out of range: can't extract row " + i + " from matrix\n" + this);
+        Integer[] output = new Integer[N];
+        for (int j = 0; j < N; j++)
+            output[j] = data[i][j];
+        return ImmutableList.copyOf(output);
+    }
+
     /*
     * Convert the integer array i into a row vector,
     * then multiply it on the right by A, then convert
