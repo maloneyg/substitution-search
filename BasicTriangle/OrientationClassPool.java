@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class OrientationClassPool {
 
     // all existing Orientation classes are held here.
-    private static ConcurrentHashMap<HashSet<Orientation>,HashSet<Orientation>> pool = new ConcurrentHashMap<>(100000);
+    private static ConcurrentHashMap<HashSet<Orientation>,HashSet<Orientation>> pool = new ConcurrentHashMap<>(1000000,0.75F,24);
 
     private static AtomicInteger hits = new AtomicInteger();
     private static AtomicInteger tries = new AtomicInteger();
@@ -51,6 +51,8 @@ public class OrientationClassPool {
     // clean it out
     public void clear() {
         pool.clear();
+        hits.set(0);
+        tries.set(0);
     }
 
     // how many hits have we got?
@@ -60,7 +62,7 @@ public class OrientationClassPool {
 
     // batting average
     public double hitPercentage() {
-        return ((double) hits.get())/tries.get();
+        return (100.0* hits.get())/tries.get();
     }
 
 } // end of class OrientationClassPool

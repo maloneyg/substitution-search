@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BasicPointPool {
 
     // all existing points are held here.
-    private static ConcurrentHashMap<IntWrapper,BasicPoint> pool = new ConcurrentHashMap<IntWrapper,BasicPoint>(1000);
+    private static ConcurrentHashMap<IntWrapper,BasicPoint> pool = new ConcurrentHashMap<IntWrapper,BasicPoint>(10000,0.75F,24);
 
     private static AtomicInteger hits = new AtomicInteger();
     private static AtomicInteger tries = new AtomicInteger();
@@ -53,6 +53,8 @@ public class BasicPointPool {
     // clean it out
     public void clear() {
         pool.clear();
+        hits.set(0);
+        tries.set(0);
     }
 
     // how many hits?
@@ -62,7 +64,7 @@ public class BasicPointPool {
 
     // batting average
     public double hitPercentage() {
-        return ((double) hits.get())/tries.get();
+        return (100.0*hits.get())/tries.get();
     }
 
 } // end of class BasicPointPool

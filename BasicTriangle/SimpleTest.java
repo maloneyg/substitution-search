@@ -81,13 +81,13 @@ public class SimpleTest
                 // for monitoring purposes:
                 //System.out.println("Press ENTER");
                 //kbd.nextLine();
-                System.out.print("Garbage collection initiated...");
+                System.out.println("OrientationClassPool hits: " + String.format("%.3f", OC.hitPercentage()) + "%       Pool size: " + OC.size());
+                System.out.println("BasicPointPool hits: " + String.format("%.3f", POOL.hitPercentage()) + "%   Pool size: " + POOL.size());
                 POOL.clear();
                 OC.clear();
+                System.out.print("Garbage collection initiated...");
                 System.gc();
                 System.out.println("complete.\n");
-                System.out.println("OrientationClassPool hits: " + OC.hitPercentage());
-                System.out.println("BasicPointPool hits: " + POOL.hitPercentage());
                 //System.out.println("Press ENTER\n");
                 //kbd.nextLine();
             }
