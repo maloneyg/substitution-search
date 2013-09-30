@@ -11,13 +11,15 @@ import com.google.common.base.*;
 import com.google.common.cache.*;
 import java.io.Serializable;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class BasicPointPool {
 
     // all existing points are held here.
     private static ConcurrentHashMap<IntWrapper,BasicPoint> pool = new ConcurrentHashMap<IntWrapper,BasicPoint>(1000);
 
-    private static int hits = 0;
+    private static AtomicInteger hits = new AtomicInteger();
+    private static AtomicInteger tries = new AtomicInteger();
 
     // the only instance of this class
     private static BasicPointPool instance = new BasicPointPool();
@@ -38,11 +40,12 @@ public class BasicPointPool {
     // return the BasicPoint created from key.
     public BasicPoint getCanonicalVersion(int[] key) {
         BasicPoint output = pool.get(IntWrapper.createIntWrapper(key));
+        tries.getAndIncrement();
         if (output == null) {
             output = BasicPoint.createExNihilo(key);
             pool.put(IntWrapper.createIntWrapper(key),output);
         } else {
-            hits++;
+            hits.getAndIncrement();
         }
         return output;
     }
@@ -54,7 +57,12 @@ public class BasicPointPool {
 
     // how many hits?
     public int hits() {
-        return hits;
+        return hits.get();
+    }
+
+    // batting average
+    public double hitPercentage() {
+        return ((double) hits.get())/tries.get();
     }
 
 } // end of class BasicPointPool
