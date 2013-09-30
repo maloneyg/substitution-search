@@ -86,7 +86,7 @@ public class SimpleTest
                 OC.clear();
                 System.gc();
                 System.out.println("complete.\n");
-                System.out.println("OrientationClassPool hits: " + OC.hits());
+                System.out.println("OrientationClassPool hits: " + OC.hitPercentage());
                 System.out.println("BasicPointPool hits: " + POOL.hits());
                 //System.out.println("Press ENTER\n");
                 //kbd.nextLine();
