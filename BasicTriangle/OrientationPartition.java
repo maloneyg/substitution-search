@@ -9,27 +9,33 @@ import com.google.common.collect.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.ArrayList;
 
 public final class OrientationPartition implements Serializable {
 
-    private final ImmutableSet<ImmutableSet<Orientation>> partition;
+    private final HashSet<HashSet<Orientation>> partition;
+
+    // a pool of existing HashSet<Orientation> objects for recycling
+    private static OrientationClassPool POOL = OrientationClassPool.getInstance();
 
     // make it Serializable
     static final long serialVersionUID = 1267821834624463132L;
 
     // constructor methods.
-    private OrientationPartition(ImmutableSet<ImmutableSet<Orientation>> partition) {
+    private OrientationPartition(HashSet<HashSet<Orientation>> partition) {
         this.partition = partition;
     }
 
     // constructs the maximal partition on an array of Orientations.
-    @SuppressWarnings("unchecked")
     private OrientationPartition(Orientation[] orientations) {
-        // warning: generic array creation!
-        ImmutableSet<Orientation>[] preSet = new ImmutableSet[orientations.length];
-        for (int i = 0; i < orientations.length; i++)
-            preSet[i] = ImmutableSet.of(orientations[i]);
-        partition = ImmutableSet.copyOf(preSet);
+        HashSet<HashSet<Orientation>> output = new HashSet<>(orientations.length);
+        for (int i = 0; i < orientations.length; i++) {
+            HashSet<Orientation> thisSet = new HashSet<>(1);
+            thisSet.add(orientations[i]);
+            output.add(POOL.getCanonicalVersion(thisSet)); // POOL
+        }
+        partition = output;
     }
 
     // public static factory method.
@@ -42,30 +48,13 @@ public final class OrientationPartition implements Serializable {
         if (obj == null || getClass() != obj.getClass())
             return false;
         OrientationPartition o = (OrientationPartition) obj;
-        int s1 = this.partition.size();
-        int s2 = o.partition.size();
-        if (s1 != s2) return false;
-        // now we go through and check each set in this.partition.
-        // if it has an equal in o.partition, keep going.
-        // if not, return false.
-        boolean foundMatch = false;
-        for (ImmutableSet<Orientation> s : this.partition) {
-            foundMatch = false;
-            for (ImmutableSet<Orientation> t : o.partition) {
-                if (s.equals(t)) {
-                    foundMatch = true;
-                    break;
-                }
-            }
-            if (!foundMatch) return false;
-        }
-        return true;
+        return this.partition.equals(o.partition);
     }
 
     // hashCode implementation.
     public int hashCode() {
         ArrayList<Integer> codes = new ArrayList<>(partition.size());
-        for (ImmutableSet<Orientation> s : partition)
+        for (HashSet<Orientation> s : partition)
             codes.add(s.hashCode());
         Collections.sort(codes);
         int prime = 71;
@@ -79,7 +68,7 @@ public final class OrientationPartition implements Serializable {
     // return false if any Orientation lies in the same
     // subset as its opposite, otherwise return true.
     public boolean valid() {
-        for (ImmutableSet<Orientation> s : partition) {
+        for (HashSet<Orientation> s : partition) {
             for (Orientation o : s) {
                 if (s.contains(o.getOpposite())) return false;
             }
@@ -90,36 +79,36 @@ public final class OrientationPartition implements Serializable {
     // return the set of Orientations that have been declared
     // equivalent to o.
     public ImmutableSet<Orientation> getEquivalenceClass(Orientation o) {
-        for (ImmutableSet<Orientation> s : partition) {
-            if (s.contains(o)) return s;
+        for (HashSet<Orientation> s : partition) {
+            if (s.contains(o)) return ImmutableSet.copyOf(s);
         }
         throw new IllegalArgumentException("Orientation " + o + " isn't on the list.");
     }
 
     // split up the set p into subsets the elements of any one of which
     // lie in the same set in this.partition.
-    private OrientationPartition split(ImmutableSet<Orientation> p) {
-        ArrayList<ImmutableSet<Orientation>> output = new ArrayList<>();
-        ArrayList<Orientation> current;
-        for (ImmutableSet<Orientation> s : partition) {
-            current = new ArrayList<>();
-            for (Orientation o : s) {
-                if (p.contains(o)) current.add(o);
-            }
-            if (current.size() > 0) output.add(ImmutableSet.copyOf(current));
-        }
-        return new OrientationPartition(ImmutableSet.copyOf(output));
-    }
+//    private OrientationPartition split(ImmutableSet<Orientation> p) {
+//        ArrayList<ImmutableSet<Orientation>> output = new ArrayList<>();
+//        ArrayList<Orientation> current;
+//        for (ImmutableSet<Orientation> s : partition) {
+//            current = new ArrayList<>();
+//            for (Orientation o : s) {
+//                if (p.contains(o)) current.add(o);
+//            }
+//            if (current.size() > 0) output.add(ImmutableSet.copyOf(current));
+//        }
+//        return new OrientationPartition(ImmutableSet.copyOf(output));
+//    }
 
     // return the refinement of this and s
-    public OrientationPartition refinement(OrientationPartition s) {
-        ArrayList<ImmutableSet<Orientation>> output = new ArrayList<>(partition.size());
-        for (ImmutableSet<Orientation> p : s.partition) {
-            for (ImmutableSet<Orientation> l : split(p).partition)
-                output.add(l);
-        }
-        return new OrientationPartition(ImmutableSet.copyOf(output));
-    }
+//    public OrientationPartition refinement(OrientationPartition s) {
+//        ArrayList<ImmutableSet<Orientation>> output = new ArrayList<>(partition.size());
+//        for (ImmutableSet<Orientation> p : s.partition) {
+//            for (ImmutableSet<Orientation> l : split(p).partition)
+//                output.add(l);
+//        }
+//        return new OrientationPartition(ImmutableSet.copyOf(output));
+//    }
 
     // create a new OrientationPartition by identifying
     // two Orientations.  Take the union of the two sets
@@ -129,11 +118,11 @@ public final class OrientationPartition implements Serializable {
     // that will have to be done externally before or after 
     // identify().
     public OrientationPartition identify(Orientation o1, Orientation o2) {
-        ArrayList<ImmutableSet<Orientation>> preSet = new ArrayList<>(partition.size()-2);
-        ArrayList<Orientation> pluses = new ArrayList<>(1);
-        ArrayList<Orientation> minuses = new ArrayList<>(1);
+        HashSet<HashSet<Orientation>> output = new HashSet<>(partition.size()-2);
+        HashSet<Orientation> pluses = new HashSet<>(1);
+        HashSet<Orientation> minuses = new HashSet<>(1);
         boolean combine = false;
-        for (ImmutableSet<Orientation> s : partition) {
+        for (HashSet<Orientation> s : partition) {
             if (s.contains(o1)||s.contains(o2)) {
                 for (Orientation o : s) pluses.add(o);
                 if (s.contains(o1.getOpposite())||s.contains(o2.getOpposite()))
@@ -141,13 +130,13 @@ public final class OrientationPartition implements Serializable {
             } else if (s.contains(o1.getOpposite())||s.contains(o2.getOpposite())) {
                 for (Orientation o : s) minuses.add(o);
             } else {
-                preSet.add(s);
+                output.add(POOL.getCanonicalVersion(s)); // POOL
             }
         }
         if (combine) pluses.addAll(minuses);
-        preSet.add(ImmutableSet.copyOf(pluses));
-        if (!combine) preSet.add(ImmutableSet.copyOf(minuses));
-        return new OrientationPartition(ImmutableSet.copyOf(preSet));
+        output.add(POOL.getCanonicalVersion(pluses)); // POOL
+        if (!combine) output.add(POOL.getCanonicalVersion(minuses)); // POOL
+        return new OrientationPartition(output);
     }
 
 } // end of class OrientationPartition

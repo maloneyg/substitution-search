@@ -14,11 +14,10 @@ import java.util.concurrent.*;
 
 public class BasicPointPool {
 
-    // make is Serializable
-//    static final long serialVersionUID = -6462075103242603792L;
-
     // all existing points are held here.
     private static ConcurrentHashMap<IntWrapper,BasicPoint> pool = new ConcurrentHashMap<IntWrapper,BasicPoint>(1000);
+
+    private static int hits = 0;
 
     // the only instance of this class
     private static BasicPointPool instance = new BasicPointPool();
@@ -42,6 +41,8 @@ public class BasicPointPool {
         if (output == null) {
             output = BasicPoint.createExNihilo(key);
             pool.put(IntWrapper.createIntWrapper(key),output);
+        } else {
+            hits++;
         }
         return output;
     }
@@ -49,6 +50,11 @@ public class BasicPointPool {
     // clean it out
     public void clear() {
         pool.clear();
+    }
+
+    // how many hits?
+    public int hits() {
+        return hits;
     }
 
 } // end of class BasicPointPool

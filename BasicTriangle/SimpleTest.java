@@ -15,7 +15,9 @@ import java.util.Scanner;
 public class SimpleTest
 {
 
+    // the two object pools
     private static final BasicPointPool POOL = BasicPointPool.getInstance();
+    private static final OrientationClassPool OC = OrientationClassPool.getInstance();
 
     public static void main(String[] args)
     {
@@ -81,8 +83,11 @@ public class SimpleTest
                 //kbd.nextLine();
                 System.out.print("Garbage collection initiated...");
                 POOL.clear();
+                OC.clear();
                 System.gc();
                 System.out.println("complete.\n");
+                System.out.println("OrientationClassPool hits: " + OC.hits());
+                System.out.println("BasicPointPool hits: " + POOL.hits());
                 //System.out.println("Press ENTER\n");
                 //kbd.nextLine();
             }
