@@ -137,4 +137,25 @@ public class BasicWorkUnit implements WorkUnit, Serializable {
         return "job " + hashCode();
     }
 
+    // check if this is a dud
+    public boolean dud() {
+        if (availableTiles.size() == 0) return false;
+        BasicEdge nextEdge = patch.getNextEdge(); // the edge we try to cover
+        ImmutableSet<Orientation> equivalenceClass = patch.getEquivalenceClass(nextEdge.getOrientation()); // the Orientations declared to be equivalent to the Orientation of nextEdge
+        for (BasicPrototile p : BasicPrototile.ALL_PROTOTILES) {
+            if (availableTiles.contains(p)) { 
+                // the geometric work happens here.
+                // we try to place p, and 
+                // if we can we return false
+                if (p.compatible(nextEdge.getLength())) {
+                    ImmutableList<BasicTriangle> triangles = p.placements(nextEdge, equivalenceClass);
+                    for (BasicTriangle t : triangles) {
+                        if (patch.compatible(t)) return false;
+                    }
+                }
+            }
+        }
+        return true; // if we couldn't place anything, it's a dud
+    } // method dud() ends here
+
 } // end of class BasicWorkUnit

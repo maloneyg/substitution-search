@@ -38,12 +38,12 @@ public class OrientationClassPool {
     // return the BasicPoint created from key.
     public HashSet<Orientation> getCanonicalVersion(HashSet<Orientation> key) {
         HashSet<Orientation> output = pool.get(key);
-        tries.getAndIncrement();
+//        tries.getAndIncrement();
         if (output == null) {
             pool.put(key,key);
             output = key;
         } else {
-            hits.getAndIncrement();
+//            hits.getAndIncrement();
         } 
         return output;
     }
@@ -61,8 +61,8 @@ public class OrientationClassPool {
     }
 
     // batting average
-    public double hitPercentage() {
-        return (100.0* hits.get())/tries.get();
-    }
+//    public double hitPercentage() {
+//        return (100.0* hits.get())/tries.get();
+//    }
 
 } // end of class OrientationClassPool

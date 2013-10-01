@@ -40,12 +40,12 @@ public class BasicPointPool {
     // return the BasicPoint created from key.
     public BasicPoint getCanonicalVersion(int[] key) {
         BasicPoint output = pool.get(IntWrapper.createIntWrapper(key));
-        tries.getAndIncrement();
+//        tries.getAndIncrement();
         if (output == null) {
             output = BasicPoint.createExNihilo(key);
             pool.put(IntWrapper.createIntWrapper(key),output);
         } else {
-            hits.getAndIncrement();
+//            hits.getAndIncrement();
         }
         return output;
     }
@@ -63,8 +63,8 @@ public class BasicPointPool {
     }
 
     // batting average
-    public double hitPercentage() {
-        return (100.0*hits.get())/tries.get();
-    }
+//    public double hitPercentage() {
+//        return (100.0*hits.get())/tries.get();
+//    }
 
 } // end of class BasicPointPool

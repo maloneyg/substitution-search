@@ -81,8 +81,8 @@ public class SimpleTest
                 // for monitoring purposes:
                 //System.out.println("Press ENTER");
                 //kbd.nextLine();
-                System.out.println("OrientationClassPool hits: " + String.format("%.3f", OC.hitPercentage()) + "%       Pool size: " + OC.size());
-                System.out.println("BasicPointPool hits: " + String.format("%.3f", POOL.hitPercentage()) + "%   Pool size: " + POOL.size());
+//                System.out.println("OrientationClassPool hits: " + String.format("%.3f", OC.hitPercentage()) + "%       Pool size: " + OC.size());
+//                System.out.println("BasicPointPool hits: " + String.format("%.3f", POOL.hitPercentage()) + "%   Pool size: " + POOL.size());
                 POOL.clear();
                 OC.clear();
                 System.out.print("Garbage collection initiated...");
