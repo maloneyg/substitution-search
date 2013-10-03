@@ -17,7 +17,7 @@ public final class OrientationPartition implements Serializable {
     private final HashSet<HashSet<Orientation>> partition;
 
     // a pool of existing HashSet<Orientation> objects for recycling
-//    private static OrientationClassPool POOL = OrientationClassPool.getInstance();
+    //private static OrientationClassPool POOL = OrientationClassPool.getInstance();
 
     // make it Serializable
     static final long serialVersionUID = 1267821834624463132L;
