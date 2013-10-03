@@ -74,6 +74,24 @@ public class SimpleTest
                             }
                     }
 
+                // wait for queue to empty
+                while (true)
+                    {
+                        if ( executorService.getExecutor().getQueue().size() > 0 )
+                            {
+                                try
+                                    {
+                                        Thread.sleep(100);
+                                    }
+                                catch (InterruptedException e)
+                                    {
+                                        continue;
+                                    }
+                            }
+                        else
+                            break;
+                    }
+
                 // job is complete
                 String reportString = String.format("\nJob %010d complete ( %15s ).  %5d patches have been completed.\n", thisUnit.hashCode(), thisResult.toString(), BasicWorkUnit.output().size());
                 System.out.println(reportString);
@@ -88,8 +106,8 @@ public class SimpleTest
                 System.out.print("Garbage collection initiated...");
                 System.gc();
                 System.out.println("complete.\n");
-                //System.out.println("Press ENTER\n");
-                //kbd.nextLine();
+                System.out.println("Press ENTER\n");
+                kbd.nextLine();
             }
 
         // stop monitoring thread
