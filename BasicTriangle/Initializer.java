@@ -67,7 +67,7 @@ class Initializer {
     static { // start of static initialization
 
         ImmutableList<Integer> inflList = Preinitializer.INFL;
-        IntPolynomial infl = IntPolynomial.createIntPolynomial(inflList);
+        ShortPolynomial infl = ShortPolynomial.createShortPolynomial(inflList);
 
         /*
         * Pre-matrices.

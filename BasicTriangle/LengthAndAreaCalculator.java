@@ -31,12 +31,12 @@ final public class LengthAndAreaCalculator {
     private static final int N = Initializer.N;  // order of rotational symmetry
 
     // 0, 1, and x as integer polynomials
-    private static final IntPolynomial ZERO = IntPolynomial.ZERO;
-    private static final IntPolynomial ONE = IntPolynomial.ONE;
-    private static final IntPolynomial X = IntPolynomial.X;
+    private static final ShortPolynomial ZERO = ShortPolynomial.ZERO;
+    private static final ShortPolynomial ONE = ShortPolynomial.ONE;
+    private static final ShortPolynomial X = ShortPolynomial.X;
 
     // the minimal polynomial of 2 * Cos(pi/N)
-    private static final IntPolynomial MIN_POLY;
+    private static final ShortPolynomial MIN_POLY;
     // the companion matrix of MIN_POLY.
     // this is a representation of 2*cos(pi/N), much like
     // Initializer.A, but this representation is, or 
@@ -48,20 +48,20 @@ final public class LengthAndAreaCalculator {
     public static final Matrix AREA_MATRIX;
 
     // the minimal polynomial of Cos(pi/N)
-    public static final IntPolynomial HALF_MIN_POLY;
+    public static final ShortPolynomial HALF_MIN_POLY;
 
     // a list of polynomials expressing the lengths
     // of the diagonals of a regular n-gon in terms 
     // of the first such diagonal (that is not an edge)
-    public static final ImmutableList<IntPolynomial> EDGE_LIST;
+    public static final ImmutableList<ShortPolynomial> EDGE_LIST;
 
     // a list of polynomials expressing cos(k pi/N)
     // in terms of cos(pi/N).
-    public static final ImmutableList<IntPolynomial> COS_LIST;
+    public static final ImmutableList<ShortPolynomial> COS_LIST;
 
     // a list of polynomials expressing sin((k+1) pi/N) / sin(pi/N)
     // in terms of cos(pi/N).
-    public static final ImmutableList<IntPolynomial> SIN_LIST;
+    public static final ImmutableList<ShortPolynomial> SIN_LIST;
 
     // calculate the divisors of an integer
     public static ArrayList<Integer> divisors(int i) {
@@ -151,24 +151,24 @@ final public class LengthAndAreaCalculator {
 
     static { // initialize MIN_POLY
 
-        IntPolynomial tempPoly = IntPolynomial.diag(N);
+        ShortPolynomial tempPoly = ShortPolynomial.diag((short)N);
         for (Integer p : primePowerDivisors(N))
-            tempPoly = tempPoly.quotient(IntPolynomial.diag(p));
+            tempPoly = tempPoly.quotient(ShortPolynomial.diag((short)(int)p));
         MIN_POLY = tempPoly;
         AMAT = MIN_POLY.companionMatrix();
 
-        HALF_MIN_POLY = tempPoly.reParametrize(2);
+        HALF_MIN_POLY = tempPoly.reParametrize((short)2);
 
-        IntPolynomial[] polyList = new IntPolynomial[N/2];
-        IntPolynomial[] cosList = new IntPolynomial[N/2+1];
-        IntPolynomial[] sinList = new IntPolynomial[N/2];
+        ShortPolynomial[] polyList = new ShortPolynomial[N/2];
+        ShortPolynomial[] cosList = new ShortPolynomial[N/2+1];
+        ShortPolynomial[] sinList = new ShortPolynomial[N/2];
         for (int i = 0; i < N/2; i++) {
-            polyList[i] = IntPolynomial.tschebyshev(i).mod(MIN_POLY);
-            cosList[i] = IntPolynomial.T(i);
-            sinList[i] = IntPolynomial.U(i);
+            polyList[i] = ShortPolynomial.tschebyshev((short)i).mod(MIN_POLY);
+            cosList[i] = ShortPolynomial.T((short)i);
+            sinList[i] = ShortPolynomial.U((short)i);
         }
-        cosList[N/2] = IntPolynomial.T(N/2);
-        LENGTH_MATRIX = IntPolynomial.coefficientMatrix(polyList);
+        cosList[N/2] = ShortPolynomial.T((short)(N/2));
+        LENGTH_MATRIX = ShortPolynomial.coefficientMatrix(polyList);
         EDGE_LIST = ImmutableList.copyOf(polyList);
         COS_LIST = ImmutableList.copyOf(cosList);
         SIN_LIST = ImmutableList.copyOf(sinList);
@@ -184,11 +184,11 @@ final public class LengthAndAreaCalculator {
         * extended by 2*cos(pi/N), with the area of the
         * triangle with angles (1,1,N-2) normalized to be 1.
         */
-        IntPolynomial[] narrowAreas = new IntPolynomial[N/2];
-        narrowAreas[0] = IntPolynomial.ONE;
+        ShortPolynomial[] narrowAreas = new ShortPolynomial[N/2];
+        narrowAreas[0] = ShortPolynomial.ONE;
         for (int i = 1; i < N/2; i++)
             narrowAreas[i] = EDGE_LIST.get(i).times(EDGE_LIST.get(i)).minus(narrowAreas[i-1]);
-        IntPolynomial[] prototileAreas = new IntPolynomial[Preinitializer.PROTOTILES.size()];
+        ShortPolynomial[] prototileAreas = new ShortPolynomial[Preinitializer.PROTOTILES.size()];
         // three int variables used in identifying which 
         // narrow triangle l represents
         int alreadyOne = 0;
@@ -236,45 +236,8 @@ final public class LengthAndAreaCalculator {
             }
         }
 
-        AREA_MATRIX = IntPolynomial.coefficientMatrix(prototileAreas);
+        AREA_MATRIX = ShortPolynomial.coefficientMatrix(prototileAreas);
 
     } // initialization of area polynomials ends here
-
-    // test client
-    public static void main(String[] args) {
-
-        System.out.println("N: " + N);
-        System.out.println("Polynomial: " + MIN_POLY);
-        System.out.println("AMAT:");
-        System.out.println(arrayString(AMAT.getArray()));
-
-        IntPolynomial testPoly = IntPolynomial.createIntPolynomial(new int[] {1,1});
-        System.out.println("testPoly:");
-        System.out.println(testPoly);
-        System.out.println("AMAT plugged into testPoly:");
-        System.out.println(arrayString(testPoly.evaluate(AMAT).getArray()));
-
-        System.out.println("LENGTH_MATRIX:");
-        System.out.println(arrayString(LENGTH_MATRIX.getArray()));
-
-        System.out.println("Testing solve():");
-        System.out.println("Solve LENGTH_MATRIX * X = (INFLATED) AMAT * LENGTH_MATRIX");
-        Matrix LL = LENGTH_MATRIX.inverse().times(testPoly.evaluate(AMAT).times(LENGTH_MATRIX));
-        System.out.println(arrayString(LL.getArray()));
-
-        System.out.println("Converting to an IntMatrix:");
-        System.out.println(MatrixToIntMatrix(LL));
-
-        System.out.println("Ordinary Tschebyshev polynomials:");
-        for (int i = 0; i < COS_LIST.size(); i++)
-            System.out.println(COS_LIST.get(i));
-
-        System.out.println("AREA_MATRIX:");
-        System.out.println(AREA_MATRIX);
-        System.out.println(arrayString(AREA_MATRIX.getArray()));
-
-
-
-    }
 
 } // end of class LengthAndAreaCalculator
