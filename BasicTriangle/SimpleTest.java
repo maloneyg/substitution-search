@@ -16,7 +16,7 @@ public class SimpleTest
 {
 
     // the two object pools
-    private static final BasicPointPool POOL = BasicPointPool.getInstance();
+    //private static final BasicPointPool POOL = BasicPointPool.getInstance();
     private static final OrientationClassPool OC = OrientationClassPool.getInstance();
 
     public static void main(String[] args)
@@ -83,7 +83,7 @@ public class SimpleTest
                 //kbd.nextLine();
 //                System.out.println("OrientationClassPool hits: " + String.format("%.3f", OC.hitPercentage()) + "%       Pool size: " + OC.size());
 //                System.out.println("BasicPointPool hits: " + String.format("%.3f", POOL.hitPercentage()) + "%   Pool size: " + POOL.size());
-                POOL.clear();
+                //POOL.clear();
                 OC.clear();
                 System.out.print("Garbage collection initiated...");
                 System.gc();
