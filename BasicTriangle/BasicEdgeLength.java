@@ -213,9 +213,9 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
         System.out.println(p1 + "." + p2 + ": " + p1.dotProduct(p2));
         System.out.println(p0 + "." + p2 + ": " + p0.dotProduct(p2));
 
-        IntPolynomial p02 = p0.dotProduct(p0);
-        IntPolynomial p12 = p1.dotProduct(p1);
-        IntPolynomial q02 = p1.subtract(p0).dotProduct(p1.subtract(p0));
+        ShortPolynomial p02 = p0.dotProduct(p0);
+        ShortPolynomial p12 = p1.dotProduct(p1);
+        ShortPolynomial q02 = p1.subtract(p0).dotProduct(p1.subtract(p0));
 
         System.out.println(p0 + "." + p0 + ": " + p02);
         System.out.println(p1.subtract(p0) + "." + p1.subtract(p0) + ": " + q02);

@@ -212,7 +212,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
     *
     * WARNING: this only works for odd N right now.
     */
-    public IntPolynomial crossProduct(BasicPoint p) {
+    public ShortPolynomial crossProduct(BasicPoint p) {
         int l = length/2;
         int[] p0 = this.pointAsArray();
         int[] p1 = p.pointAsArray();
@@ -225,9 +225,9 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
                 if (j != i) coeffs[i] -= p0[j]*p1[(j-i-1 < 0)? length+j-i : j-i-1]*((j-i-1<0)? -1 : 1);
             }
         }
-        IntPolynomial output = IntPolynomial.ZERO;
+        ShortPolynomial output = ShortPolynomial.ZERO;
         for (int i = 0; i < l; i++)
-            output = output.plus(LengthAndAreaCalculator.SIN_LIST.get(i).scalarMultiple(coeffs[i]));
+            output = output.plus(LengthAndAreaCalculator.SIN_LIST.get(i).scalarMultiple((short)coeffs[i]));
         return output;
     }
 
@@ -240,7 +240,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
     * WARNING: this only works for prime N right now.
     * WARNING: this only works for odd N right now.
     */
-    public IntPolynomial dotProduct(BasicPoint p) {
+    public ShortPolynomial dotProduct(BasicPoint p) {
         int l = length/2+1;
         int[] p0 = this.pointAsArray();
         int[] p1 = p.pointAsArray();
@@ -253,9 +253,9 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
                 if (i != 0 && j-i != -1) coeffs[i] += p0[j]*p1[(j-i < 0)? length+1+j-i : j-i]*((j-i<0)? -1 : 1);
             }
         }
-        IntPolynomial output = IntPolynomial.ZERO;
+        ShortPolynomial output = ShortPolynomial.ZERO;
         for (int i = 0; i < l; i++)
-            output = output.plus(LengthAndAreaCalculator.COS_LIST.get(i).scalarMultiple(coeffs[i]));
+            output = output.plus(LengthAndAreaCalculator.COS_LIST.get(i).scalarMultiple((short)coeffs[i]));
         return output;
     }
 

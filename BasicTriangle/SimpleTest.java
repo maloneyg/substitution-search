@@ -186,7 +186,7 @@ public class SimpleTest
         BasicPoint[] bigVertices = new BasicPoint[] {vertices.get(0).inflate(),vertices.get(1).inflate(),vertices.get(2).inflate()};
 
 //        ImmutableList<Integer> inflList = Preinitializer.INFL;
-//        IntPolynomial infl = IntPolynomial.createIntPolynomial(inflList);
+//        ShortPolynomial infl = ShortPolynomial.createShortPolynomial(inflList);
 //        Matrix otherInfl = infl.evaluate(LengthAndAreaCalculator.AMAT);
 //        System.out.println(Initializer.SUBSTITUTION_MATRIX.getColumn(myTile));
 //        System.out.println(Initializer.SUBSTITUTION_MATRIX);
