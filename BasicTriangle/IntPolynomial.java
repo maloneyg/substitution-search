@@ -226,12 +226,12 @@ public class IntPolynomial implements Serializable {
     }
 
     // use Horner's method to compute and return the polynomial evaluated at x
-    public IntMatrix evaluate(IntMatrix x) {
+    public ByteMatrix evaluate(ByteMatrix x) {
         int m = x.getColumnDimension();
         int n = x.getRowDimension();
-        if (m != n) throw new IllegalArgumentException("Can't plug non-square IntMatrix x into a polynomial. x = " + x);
-        IntMatrix p = IntMatrix.zeroMatrix(m,n);
-        IntMatrix id = IntMatrix.identity(m);
+        if (m != n) throw new IllegalArgumentException("Can't plug non-square ByteMatrix x into a polynomial. x = " + x);
+        ByteMatrix p = ByteMatrix.zeroMatrix(m,n);
+        ByteMatrix id = ByteMatrix.identity(m);
         for (int i = deg; i >= 0; i--) {
             p = p.times(x);
             p = p.plus(id.times(coef[i])); 

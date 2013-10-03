@@ -17,13 +17,13 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     // static variables for all points.
     public static final int length = Initializer.N - 1;
 
-    public static final IntMatrix A = Initializer.A;
+    public static final ByteMatrix A = Initializer.A;
 
-    public static final IntMatrix ROT = Initializer.ROT;
+    public static final ByteMatrix ROT = Initializer.ROT;
 
-    public static final IntMatrix REF = Initializer.REF;
+    public static final ByteMatrix REF = Initializer.REF;
 
-    public static final IntMatrix INFL = Initializer.INFL;
+    public static final ByteMatrix INFL = Initializer.INFL;
 
     public static final BytePoint ZERO_VECTOR;
 
@@ -179,19 +179,20 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     */
     public boolean colinear(BytePoint p) {
         int l = length/2;
-        byte[] p0 = this.pointAsArray();
-        byte[] p1 = p.pointAsArray();
+        byte[] p0 = this.point;
+        byte[] p1 = p.point;
         // here we store the shoelace products
         byte[] coeffs = new byte[l];
         for (int i = 0; i < l; i++) {
             coeffs[i] = (byte)0;
             for (int j = 0; j < length; j++) {
                 if (j+i != length-1)
-                    coeffs[i] += p0[j]*p1[(j+i+1)%(length+1)]*((j+i+1>length)? -1 : 1);
+                    coeffs[i] += (byte)( p0[j] * p1[(j+i+1)%(length+1)] * ((j+i+1>length)? -1 : 1));
                 if (j != i)
-                    coeffs[i] -= p0[j]*p1[(j-i-1 < 0)? length+j-i : j-i-1]*((j-i-1<0)? -1 : 1);
+                    coeffs[i] -= (byte)( p0[j] * p1[(j-i-1 < 0)? length+j-i : j-i-1]*((j-i-1<0)? -1 : 1) );
             }
-            if (coeffs[i] != 0) return false;
+            if (coeffs[i] != (byte)0)
+                return false;
         }
         return true;
     }
@@ -211,15 +212,17 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     */
     public ShortPolynomial crossProduct(BytePoint p) {
         int l = length/2;
-        int[] p0 = this.pointAsArray();
-        int[] p1 = p.pointAsArray();
+        byte[] p0 = this.point;
+        byte[] p1 = p.point;
         // here we store the shoelace products
-        int[] coeffs = new int[l];
+        byte[] coeffs = new byte[l];
         for (int i = 0; i < l; i++) {
-            coeffs[i] = 0;
+            coeffs[i] = (byte)0;
             for (int j = 0; j < length; j++) {
-                if (j+i != length-1) coeffs[i] += p0[j]*p1[(j+i+1)%(length+1)]*((j+i+1>length)? -1 : 1);
-                if (j != i) coeffs[i] -= p0[j]*p1[(j-i-1 < 0)? length+j-i : j-i-1]*((j-i-1<0)? -1 : 1);
+                if (j+i != length-1)
+                    coeffs[i] += (byte)(p0[j] * p1[(j+i+1)%(length+1)] * ((j+i+1>length)? -1 : 1));
+                if (j != i)
+                    coeffs[i] -= (byte)(p0[j] * p1[(j-i-1 < 0)? length+j-i : j-i-1] * ((j-i-1<0)? -1 : 1));
             }
         }
         ShortPolynomial output = ShortPolynomial.ZERO;
@@ -239,15 +242,18 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     */
     public ShortPolynomial dotProduct(BytePoint p) {
         int l = length/2+1;
-        int[] p0 = this.pointAsArray();
-        int[] p1 = p.pointAsArray();
+        int[] p0 = point;
+        int[] p1 = p.point;
+        
         // here we store the shoelace products
-        int[] coeffs = new int[l];
+        int[] coeffs = new byte[l];
         for (int i = 0; i < l; i++) {
-            coeffs[i] = 0;
+            coeffs[i] = (byte)0;
             for (int j = 0; j < length; j++) {
-                if (j+i != length) coeffs[i] += p0[j]*p1[(j+i)%(length+1)]*((j+i>length)? -1 : 1);
-                if (i != 0 && j-i != -1) coeffs[i] += p0[j]*p1[(j-i < 0)? length+1+j-i : j-i]*((j-i<0)? -1 : 1);
+                if (j+i != length)
+                    coeffs[i] += (byte)( p0[j] *p1[(j+i)%(length+1)] * ((j+i>length)? -1 : 1) );
+                if (i != 0 && j-i != -1)
+                    coeffs[i] += (byte)( p0[j] *p1[(j-i < 0)? length+1+j-i : j-i] * ((j-i<0)? -1 : 1) );
             }
         }
         ShortPolynomial output = ShortPolynomial.ZERO;

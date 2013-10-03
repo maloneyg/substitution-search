@@ -25,11 +25,11 @@ class Initializer {
 
     public static final double EP = Preinitializer.EP;  // threshold value
 
-    public static final IntMatrix A;           // 2cos[pi/N], as a matrix
+    public static final ByteMatrix A;           // 2cos[pi/N], as a matrix
 
-    public static final IntMatrix ROT;
-    public static final IntMatrix REF;
-    public static final IntMatrix INFL;
+    public static final ByteMatrix ROT;
+    public static final ByteMatrix REF;
+    public static final ByteMatrix INFL;
 
     /*
     * A list representing edge lengths.  
@@ -43,16 +43,16 @@ class Initializer {
     }
 
     /*
-    * An IntMatrix, the (i,j)th entry of which is the number
+    * An ByteMatrix, the (i,j)th entry of which is the number
     * of occurrences of EdgeLength i in inflated EdgeLength j.
     */
-    public static final IntMatrix INFLATED_LENGTHS;
+    public static final ByteMatrix INFLATED_LENGTHS;
 
     /*
-    * An IntMatrix, the (i,j)th entry of which is the number
+    * An ByteMatrix, the (i,j)th entry of which is the number
     * of occurrences of prototile i in inflated prototile j.
     */
-    public static final IntMatrix SUBSTITUTION_MATRIX;
+    public static final ByteMatrix SUBSTITUTION_MATRIX;
 
     /*
     * A list representing the edge lengths we have actually selected.  
@@ -150,10 +150,10 @@ class Initializer {
         }
 
         // initialize A
-        A = IntMatrix.createIntMatrix(a);
+        A = ByteMatrix.createByteMatrix(a);
 
-        ROT = IntMatrix.createIntMatrix(preRot);
-        REF = IntMatrix.createIntMatrix(preRef);
+        ROT = ByteMatrix.createByteMatrix(preRot);
+        REF = ByteMatrix.createByteMatrix(preRef);
         INFL = infl.evaluate(A);
 
         // select a subset of the edge lengths.
@@ -165,8 +165,8 @@ class Initializer {
         Matrix otherInfl = infl.evaluate(LengthAndAreaCalculator.AMAT);
         LENGTHS = ImmutableList.copyOf(preLengths);
 
-        INFLATED_LENGTHS = LengthAndAreaCalculator.MatrixToIntMatrix((LengthAndAreaCalculator.LENGTH_MATRIX.inverse()).times(otherInfl).times(LengthAndAreaCalculator.LENGTH_MATRIX));
-        SUBSTITUTION_MATRIX = LengthAndAreaCalculator.MatrixToIntMatrix((LengthAndAreaCalculator.AREA_MATRIX.inverse()).times(otherInfl).times(otherInfl).times(LengthAndAreaCalculator.AREA_MATRIX));
+        INFLATED_LENGTHS = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.LENGTH_MATRIX.inverse()).times(otherInfl).times(LengthAndAreaCalculator.LENGTH_MATRIX));
+        SUBSTITUTION_MATRIX = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.AREA_MATRIX.inverse()).times(otherInfl).times(otherInfl).times(LengthAndAreaCalculator.AREA_MATRIX));
 
 
     } // end of static initialization

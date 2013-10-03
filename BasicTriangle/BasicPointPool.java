@@ -1,8 +1,8 @@
 /**
-*    This class implements a pool for BasicPoints.
+*    This class implements a pool for BytePoints.
 *    If we need one and it already exists, the pool gives it to us.
 *    The theoretical justification for this is that there are a few 
-*    thousand BasicPoints that need to be used, but each one has 
+*    thousand BytePoints that need to be used, but each one has 
 *    thousands of references to it for calculation purposes.
 */
 
@@ -13,23 +13,23 @@ import java.io.Serializable;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class BasicPointPool {
+public class BytePointPool {
 
     // all existing points are held here.
-    private static ConcurrentHashMap<IntWrapper,BasicPoint> pool = new ConcurrentHashMap<IntWrapper,BasicPoint>(10000,0.75F,24);
+    private static ConcurrentHashMap<IntWrapper,BytePoint> pool = new ConcurrentHashMap<IntWrapper,BytePoint>(10000,0.75F,24);
 
     private static AtomicInteger hits = new AtomicInteger();
     private static AtomicInteger tries = new AtomicInteger();
 
     // the only instance of this class
-    private static BasicPointPool instance = new BasicPointPool();
+    private static BytePointPool instance = new BytePointPool();
 
     // constructor
-    private BasicPointPool() {
+    private BytePointPool() {
     }
 
     // public static factory method
-    public static BasicPointPool getInstance() {
+    public static BytePointPool getInstance() {
         return instance;
     }
 
@@ -37,12 +37,12 @@ public class BasicPointPool {
         return pool.size();
     }
 
-    // return the BasicPoint created from key.
-    public BasicPoint getCanonicalVersion(int[] key) {
-        BasicPoint output = pool.get(IntWrapper.createIntWrapper(key));
+    // return the BytePoint created from key.
+    public BytePoint getCanonicalVersion(int[] key) {
+        BytePoint output = pool.get(IntWrapper.createIntWrapper(key));
 //        tries.getAndIncrement();
         if (output == null) {
-            output = BasicPoint.createExNihilo(key);
+            output = BytePoint.createExNihilo(key);
             pool.put(IntWrapper.createIntWrapper(key),output);
         } else {
 //            hits.getAndIncrement();
@@ -67,4 +67,4 @@ public class BasicPointPool {
 //        return (100.0*hits.get())/tries.get();
 //    }
 
-} // end of class BasicPointPool
+} // end of class BytePointPool

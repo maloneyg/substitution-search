@@ -35,7 +35,7 @@ public class OrientationClassPool {
         return pool.size();
     }
 
-    // return the BasicPoint created from key.
+    // return the BytePoint created from key.
     public HashSet<Orientation> getCanonicalVersion(HashSet<Orientation> key) {
         HashSet<Orientation> output = pool.get(key);
 //        tries.getAndIncrement();

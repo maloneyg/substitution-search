@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Arrays;
 import org.apache.commons.math3.linear.*;
 
-public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEdgeLength, BasicEdge, BasicTriangle, BasicPatch>, Serializable {
+public class BasicPatch implements AbstractPatch<BasicAngle, BytePoint, BasicEdgeLength, BasicEdge, BasicTriangle, BasicPatch>, Serializable {
 
     // make it Serializable
     static final long serialVersionUID = 3422733298735932933L;
@@ -27,10 +27,10 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
     private final OrientationPartition partition;
 
     // vertices of the big triangle
-    private final BasicPoint[] bigVertices;
+    private final BytePoint[] bigVertices;
 
     // private constructor
-    private BasicPatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, BasicPoint[] v) {
+    private BasicPatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, BytePoint[] v) {
         triangles = t;
         openEdges = e1;
         closedEdges = e2;
@@ -39,7 +39,7 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
     }
 
     // initial constructor
-    private BasicPatch(BasicEdge[] e, BasicPoint[] v) {
+    private BasicPatch(BasicEdge[] e, BytePoint[] v) {
         Orientation[] o = new Orientation[e.length + 6 * BasicPrototile.ALL_PROTOTILES.size()];
         int i = 0;
         for (i = 0; i < e.length; i++) o[i] = e[i].getOrientation();
@@ -57,13 +57,13 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
         openEdges = tempEdges;
         closedEdges = new BasicEdge[0];
         partition = OrientationPartition.createOrientationPartition(o);
-        BasicPoint[] tempVertices = new BasicPoint[v.length];
+        BytePoint[] tempVertices = new BytePoint[v.length];
         for (int j = 0; j < v.length; j++) tempVertices[j] = v[j];
         bigVertices = tempVertices;
     }
 
     // public static factory method
-    public static BasicPatch createBasicPatch(BasicEdge[] e, BasicPoint[] v) {
+    public static BasicPatch createBasicPatch(BasicEdge[] e, BytePoint[] v) {
         return new BasicPatch(e,v);
     }
 
@@ -102,8 +102,8 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
     */
     public ArrayList<OrderedTriple> graphicsDump() {
         ArrayList<OrderedTriple> output = new ArrayList<OrderedTriple>(triangles.length);
-        BasicPoint p0;
-        BasicPoint p1;
+        BytePoint p0;
+        BytePoint p1;
         ArrayList<RealMatrix> edgeList = new ArrayList<RealMatrix>(3);
         int counter = 0;
         for (BasicTriangle t : triangles)
@@ -263,8 +263,8 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
     * called in the execution of this one.  
     */
     public boolean compatible(BasicTriangle t) {
-        ImmutableList<BasicPoint> ends = getNextEdge().getEnds();
-        BasicPoint other = t.getOtherVertex(ends.get(0),ends.get(1));
+        ImmutableList<BytePoint> ends = getNextEdge().getEnds();
+        BytePoint other = t.getOtherVertex(ends.get(0),ends.get(1));
 
         // test to see if other is new or already there.
         // if it's on an openEdge but not equal to one 
@@ -329,10 +329,10 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BasicPoint, BasicEd
     * vector is the same as taking the 2d cross product with the 
     * original vector.
     */
-    public boolean contains(BasicPoint p) {
-        BasicPoint m; // the direction vector for a side
-        BasicPoint v; // the other vertex
-        BasicPoint t; // vertex on the given side, used to test cross product
+    public boolean contains(BytePoint p) {
+        BytePoint m; // the direction vector for a side
+        BytePoint v; // the other vertex
+        BytePoint t; // vertex on the given side, used to test cross product
         for (int i = 0; i < 3; i++) {
             m = bigVertices[(i+2)%3].subtract(bigVertices[(i+1)%3]);
             v = bigVertices[i];
