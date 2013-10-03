@@ -1,6 +1,6 @@
 /*************************************************************************
- *  Compilation:  javac ByteMatrix.java
- *  Execution:    java ByteMatrix
+ *  Compilation:  javac IntMatrix.java
+ *  Execution:    java IntMatrix
  *
  *  A bare-bones immutable data type for M-by-N matrices.
  *
@@ -9,7 +9,7 @@
 import com.google.common.collect.ImmutableList;
 import java.io.Serializable;
 
-final public class ByteMatrix implements Serializable {
+final public class IntMatrix implements Serializable {
     private final int M;             // number of rows
     private final int N;             // number of columns
     private final int[][] data;   // M-by-N array
@@ -18,7 +18,7 @@ final public class ByteMatrix implements Serializable {
     static final long serialVersionUID = 692395754433643754L;
 
     // create M-by-N matrix of 0's
-    private ByteMatrix(int M, int N) {
+    private IntMatrix(int M, int N) {
         this.M = M;
         this.N = N;
         data = new int[M][N];
@@ -30,12 +30,12 @@ final public class ByteMatrix implements Serializable {
     }
 
     // public factory method for the zero matrix.
-    static public ByteMatrix zeroMatrix(int M, int N) {
-        return new ByteMatrix(M, N);
+    static public IntMatrix zeroMatrix(int M, int N) {
+        return new IntMatrix(M, N);
     }
 
     // create matrix based on 2d array
-    private ByteMatrix(int[][] data) {
+    private IntMatrix(int[][] data) {
         M = data.length;
         N = data[0].length;
         this.data = new int[M][N];
@@ -45,13 +45,13 @@ final public class ByteMatrix implements Serializable {
     }
 
     // public factory method.  
-    static public ByteMatrix createByteMatrix(int[][] data) {
-        return new ByteMatrix(data);
+    static public IntMatrix createIntMatrix(int[][] data) {
+        return new IntMatrix(data);
     }
 
     // create and return the N-by-N identity matrix
-    public static ByteMatrix identity(int N) {
-        ByteMatrix I = new ByteMatrix(N, N);
+    public static IntMatrix identity(int N) {
+        IntMatrix I = new IntMatrix(N, N);
         for (int i = 0; i < N; i++)
             I.data[i][i] = 1;
         return I;
@@ -68,8 +68,8 @@ final public class ByteMatrix implements Serializable {
     }
 
     // create and return the transpose of the invoking matrix
-    public ByteMatrix transpose() {
-        ByteMatrix A = new ByteMatrix(N, M);
+    public IntMatrix transpose() {
+        IntMatrix A = new IntMatrix(N, M);
         for (int i = 0; i < M; i++)
             for (int j = 0; j < N; j++)
                 A.data[j][i] = this.data[i][j];
@@ -77,10 +77,10 @@ final public class ByteMatrix implements Serializable {
     }
 
     // return C = A + B
-    public ByteMatrix plus(ByteMatrix B) {
-        ByteMatrix A = this;
+    public IntMatrix plus(IntMatrix B) {
+        IntMatrix A = this;
         if (B.M != A.M || B.N != A.N) throw new IllegalArgumentException("Illegal matrix dimensions.");
-        ByteMatrix C = new ByteMatrix(M, N);
+        IntMatrix C = new IntMatrix(M, N);
         for (int i = 0; i < M; i++)
             for (int j = 0; j < N; j++)
                 C.data[i][j] = A.data[i][j] + B.data[i][j];
@@ -89,10 +89,10 @@ final public class ByteMatrix implements Serializable {
 
 
     // return C = A - B
-    public ByteMatrix minus(ByteMatrix B) {
-        ByteMatrix A = this;
+    public IntMatrix minus(IntMatrix B) {
+        IntMatrix A = this;
         if (B.M != A.M || B.N != A.N) throw new IllegalArgumentException("Illegal matrix dimensions.");
-        ByteMatrix C = new ByteMatrix(M, N);
+        IntMatrix C = new IntMatrix(M, N);
         for (int i = 0; i < M; i++)
             for (int j = 0; j < N; j++)
                 C.data[i][j] = A.data[i][j] - B.data[i][j];
@@ -103,8 +103,8 @@ final public class ByteMatrix implements Serializable {
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())
             return false;
-        ByteMatrix B = (ByteMatrix) obj;
-        ByteMatrix A = this;
+        IntMatrix B = (IntMatrix) obj;
+        IntMatrix A = this;
         if (B.M != A.M || B.N != A.N) throw new IllegalArgumentException("Illegal matrix dimensions.");
         for (int i = 0; i < M; i++)
             for (int j = 0; j < N; j++)
@@ -125,9 +125,9 @@ final public class ByteMatrix implements Serializable {
     }
 
     // return C = c * A
-    public ByteMatrix times(int c) {
-        ByteMatrix A = this;
-        ByteMatrix C = new ByteMatrix(A.M, A.N);
+    public IntMatrix times(int c) {
+        IntMatrix A = this;
+        IntMatrix C = new IntMatrix(A.M, A.N);
         for (int i = 0; i < A.M; i++)
             for (int j = 0; j < A.N; j++)
                 C.data[i][j] = c * A.data[i][j];
@@ -135,10 +135,10 @@ final public class ByteMatrix implements Serializable {
     }
 
     // return C = A * B
-    public ByteMatrix times(ByteMatrix B) {
-        ByteMatrix A = this;
+    public IntMatrix times(IntMatrix B) {
+        IntMatrix A = this;
         if (A.N != B.M) throw new IllegalArgumentException("Illegal matrix dimensions.");
-        ByteMatrix C = new ByteMatrix(A.M, B.N);
+        IntMatrix C = new IntMatrix(A.M, B.N);
         for (int i = 0; i < C.M; i++)
             for (int j = 0; j < C.N; j++)
                 for (int k = 0; k < A.N; k++)
@@ -152,7 +152,7 @@ final public class ByteMatrix implements Serializable {
     * the resulting row vector into an integer array.
     */
     public int[] rowTimes(int[] i) {
-        ByteMatrix A = this;
+        IntMatrix A = this;
         if (i.length != A.M) throw new IllegalArgumentException("Illegal matrix dimensions.");
         int[] row = new int[A.N];
         for (int k = 0; k < A.N; k++) {
@@ -225,7 +225,7 @@ final public class ByteMatrix implements Serializable {
     public static void main(String[] args) {
         int[][] d = { { 1, 2, 3 }, { 4, 5, 6 }, { 9, 1, 3} };
 
-        ByteMatrix A = new ByteMatrix(d);
+        IntMatrix A = new IntMatrix(d);
         System.out.println(A.toString()); 
         System.out.println();
 
@@ -262,4 +262,4 @@ final public class ByteMatrix implements Serializable {
         System.out.print(GCD(12,10) + ".\n");
 
     }
-} // end of class ByteMatrix
+} // end of class IntMatrix

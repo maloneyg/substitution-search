@@ -242,11 +242,11 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     */
     public ShortPolynomial dotProduct(BytePoint p) {
         int l = length/2+1;
-        int[] p0 = point;
-        int[] p1 = p.point;
+        byte[] p0 = point;
+        byte[] p1 = p.point;
         
         // here we store the shoelace products
-        int[] coeffs = new byte[l];
+        byte[] coeffs = new byte[l];
         for (int i = 0; i < l; i++) {
             coeffs[i] = (byte)0;
             for (int j = 0; j < length; j++) {

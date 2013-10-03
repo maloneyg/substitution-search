@@ -140,10 +140,10 @@ final public class LengthAndAreaCalculator {
         int L = m.getColumnDimension();
         int M = m.getColumnDimension();
         double[][] a = m.getArrayCopy();
-        int[][] preMatrix = new int[L][M];
+        byte[][] preMatrix = new byte[L][M];
         for (int i = 0; i < L; i++) {
             for (int j = 0; j < M; j++) {
-                preMatrix[i][j] = (int) Math.round((Double)a[i][j]);
+                preMatrix[i][j] = (byte) Math.round((Double)a[i][j]);
             }
         }
         return ByteMatrix.createByteMatrix(preMatrix);

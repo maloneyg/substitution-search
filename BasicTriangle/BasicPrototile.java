@@ -425,6 +425,8 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
 
     public static void main(String[] args) {
 
+        byte Z = (byte) 0;
+
         BasicPrototile P0 = createBasicPrototile(new int[] { 1, 3, 3 });
         System.out.println(P0);
 
@@ -434,10 +436,10 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
         BasicPrototile P2 = createBasicPrototile(new int[] { 2, 2, 3 });
         System.out.println(P2);
 
-        BasicTriangle T0 = P2.place(BytePoint.createBytePoint(new int[] {1,0,1,0,1,0}),BasicAngle.createBasicAngle(3),false);
-        System.out.println(T0);
+        BasicTriangle TZ = P2.place(BytePoint.createBytePoint(new byte[] {1,Z,1,Z,1,Z}),BasicAngle.createBasicAngle(3),false);
+        System.out.println(TZ);
 
-        BasicTriangle T1 = P2.place(BytePoint.createBytePoint(new int[] {0,0,0,0,0,0}),BasicAngle.createBasicAngle(0),false);
+        BasicTriangle T1 = P2.place(BytePoint.createBytePoint(new byte[] {Z,Z,Z,Z,Z,Z}),BasicAngle.createBasicAngle(Z),false);
         System.out.println(T1);
 
         BytePoint p = BasicEdgeLength.createBasicEdgeLength(0).getAsVector(BasicAngle.createBasicAngle(0));

@@ -74,77 +74,80 @@ class Initializer {
         */
 
         // Pre-rotation matrix.
-        int[][] preRot = new int[N-1][N-1];
+        byte Z = (byte) 0;
+        byte O = (byte) 1;
+
+        byte[][] preRot = new byte[N-1][N-1];
 
         for (int i = 0; i < N - 2; i++) {
             for (int j = 0; j < N - 1; j++) {
                 if (j == i + 1) {
-                    preRot[i][j] = 1;
+                    preRot[i][j] = O;
                 } else {
-                    preRot[i][j] = 0;
+                    preRot[i][j] = Z;
                 }
             }
         }
 
         for (int k = 0; k < N - 1; k++) {
             if (k % 2 == 1) {
-                preRot[N-2][k] = 1;
+                preRot[N-2][k] = O;
             } else {
-                preRot[N-2][k] = -1;
+                preRot[N-2][k] = (byte)(-1);
             }
         }
 
 
         // Pre-reflection matrix.
-        int[][] preRef = new int[N-1][N-1];
+        byte[][] preRef = new byte[N-1][N-1];
 
-        preRef[0][0] = -1;
+        preRef[0][0] = (byte)(-1);
 
         for (int l = 1; l < N - 1; l++) {
-            preRef[0][l] = 0;
+            preRef[0][l] = Z;
         }
 
         for (int k = 0; k < N - 1; k++) {
             if (k % 2 == 1) {
-                preRef[1][k] = 1;
+                preRef[1][k] = O;
             } else {
-                preRef[1][k] = -1;
+                preRef[1][k] = (byte)(-1);
             }
         }
 
         for (int i = 2; i < N - 1; i++) {
             for (int j = 0; j < N - 1; j++) {
                 if (j == N - i) {
-                    preRef[i][j] = 1;
+                    preRef[i][j] = O;
                 } else {
-                    preRef[i][j] = 0;
+                    preRef[i][j] = Z;
                 }
             }
         }
 
         // matrix representation of 2*cos(pi/N),
         // the shortest non-edge diagonal of a regular n-gon.
-        int[][] a = new int[N-1][N-1];
+        byte[][] a = new byte[N-1][N-1];
 
         for (int k = 0; k < N - 1; k++) {
             if (k % 2 == 1) {
-                a[0][k] = -1;
-                a[N-2][k] = 1;
+                a[0][k] = (byte)(-1);
+                a[N-2][k] = O;
             } else {
-                a[0][k] = 1;
-                a[N-2][k] = -1;
+                a[0][k] = O;
+                a[N-2][k] = (byte)(-1);
             }
         }
 
-        a[0][1] = 0;
-        a[N-2][N-3] = 0;
+        a[0][1] = Z;
+        a[N-2][N-3] = Z;
 
         for (int i = 1; i < N - 2; i++) {
             for (int j = 0; j < N - 1; j++) {
                 if (j == i + 1 || j == i - 1) {
-                    a[i][j] = 1;
+                    a[i][j] = O;
                 } else {
-                    a[i][j] = 0;
+                    a[i][j] = Z;
                 }
             }
         }
