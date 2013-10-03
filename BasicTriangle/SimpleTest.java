@@ -88,6 +88,7 @@ public class SimpleTest
                 System.out.print("Garbage collection initiated...");
                 System.gc();
                 System.out.println("complete.\n");
+                System.out.println("Maximum integer in a BasicPoint: " + POOL.max());
                 //System.out.println("Press ENTER\n");
                 //kbd.nextLine();
             }
