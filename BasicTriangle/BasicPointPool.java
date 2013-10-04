@@ -62,6 +62,11 @@ public class BasicPointPool {
         return hits.get();
     }
 
+    // what's the current max?
+    public int max() {
+        return maxInt.get();
+    }
+
     // batting average
 //    public double hitPercentage() {
 //        return (100.0*hits.get())/tries.get();
