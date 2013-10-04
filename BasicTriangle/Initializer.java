@@ -25,11 +25,11 @@ class Initializer {
 
     public static final double EP = Preinitializer.EP;  // threshold value
 
-    public static final IntMatrix A;           // 2cos[pi/N], as a matrix
+    public static final ByteMatrix A;           // 2cos[pi/N], as a matrix
 
-    public static final IntMatrix ROT;
-    public static final IntMatrix REF;
-    public static final IntMatrix INFL;
+    public static final ByteMatrix ROT;
+    public static final ByteMatrix REF;
+    public static final ByteMatrix INFL;
 
     /*
     * A list representing edge lengths.  
@@ -43,16 +43,16 @@ class Initializer {
     }
 
     /*
-    * An IntMatrix, the (i,j)th entry of which is the number
+    * An ByteMatrix, the (i,j)th entry of which is the number
     * of occurrences of EdgeLength i in inflated EdgeLength j.
     */
-    public static final IntMatrix INFLATED_LENGTHS;
+    public static final ByteMatrix INFLATED_LENGTHS;
 
     /*
-    * An IntMatrix, the (i,j)th entry of which is the number
+    * An ByteMatrix, the (i,j)th entry of which is the number
     * of occurrences of prototile i in inflated prototile j.
     */
-    public static final IntMatrix SUBSTITUTION_MATRIX;
+    public static final ByteMatrix SUBSTITUTION_MATRIX;
 
     /*
     * A list representing the edge lengths we have actually selected.  
@@ -74,86 +74,89 @@ class Initializer {
         */
 
         // Pre-rotation matrix.
-        int[][] preRot = new int[N-1][N-1];
+        byte Z = (byte) 0;
+        byte O = (byte) 1;
+
+        byte[][] preRot = new byte[N-1][N-1];
 
         for (int i = 0; i < N - 2; i++) {
             for (int j = 0; j < N - 1; j++) {
                 if (j == i + 1) {
-                    preRot[i][j] = 1;
+                    preRot[i][j] = O;
                 } else {
-                    preRot[i][j] = 0;
+                    preRot[i][j] = Z;
                 }
             }
         }
 
         for (int k = 0; k < N - 1; k++) {
             if (k % 2 == 1) {
-                preRot[N-2][k] = 1;
+                preRot[N-2][k] = O;
             } else {
-                preRot[N-2][k] = -1;
+                preRot[N-2][k] = (byte)(-1);
             }
         }
 
 
         // Pre-reflection matrix.
-        int[][] preRef = new int[N-1][N-1];
+        byte[][] preRef = new byte[N-1][N-1];
 
-        preRef[0][0] = -1;
+        preRef[0][0] = (byte)(-1);
 
         for (int l = 1; l < N - 1; l++) {
-            preRef[0][l] = 0;
+            preRef[0][l] = Z;
         }
 
         for (int k = 0; k < N - 1; k++) {
             if (k % 2 == 1) {
-                preRef[1][k] = 1;
+                preRef[1][k] = O;
             } else {
-                preRef[1][k] = -1;
+                preRef[1][k] = (byte)(-1);
             }
         }
 
         for (int i = 2; i < N - 1; i++) {
             for (int j = 0; j < N - 1; j++) {
                 if (j == N - i) {
-                    preRef[i][j] = 1;
+                    preRef[i][j] = O;
                 } else {
-                    preRef[i][j] = 0;
+                    preRef[i][j] = Z;
                 }
             }
         }
 
         // matrix representation of 2*cos(pi/N),
         // the shortest non-edge diagonal of a regular n-gon.
-        int[][] a = new int[N-1][N-1];
+        byte[][] a = new byte[N-1][N-1];
 
         for (int k = 0; k < N - 1; k++) {
             if (k % 2 == 1) {
-                a[0][k] = -1;
-                a[N-2][k] = 1;
+                a[0][k] = (byte)(-1);
+                a[N-2][k] = O;
             } else {
-                a[0][k] = 1;
-                a[N-2][k] = -1;
+                a[0][k] = O;
+                a[N-2][k] = (byte)(-1);
             }
         }
 
-        a[0][1] = 0;
-        a[N-2][N-3] = 0;
+        a[0][1] = Z;
+        a[N-2][N-3] = Z;
 
         for (int i = 1; i < N - 2; i++) {
             for (int j = 0; j < N - 1; j++) {
                 if (j == i + 1 || j == i - 1) {
-                    a[i][j] = 1;
+                    a[i][j] = O;
                 } else {
-                    a[i][j] = 0;
+                    a[i][j] = Z;
                 }
             }
         }
 
         // initialize A
-        A = IntMatrix.createIntMatrix(a);
+        A = ByteMatrix.createByteMatrix(a);
 
-        ROT = IntMatrix.createIntMatrix(preRot);
-        REF = IntMatrix.createIntMatrix(preRef);
+        ROT = ByteMatrix.createByteMatrix(preRot);
+        REF = ByteMatrix.createByteMatrix(preRef);
         INFL = infl.evaluate(A);
 
         // select a subset of the edge lengths.
@@ -165,8 +168,8 @@ class Initializer {
         Matrix otherInfl = infl.evaluate(LengthAndAreaCalculator.AMAT);
         LENGTHS = ImmutableList.copyOf(preLengths);
 
-        INFLATED_LENGTHS = LengthAndAreaCalculator.MatrixToIntMatrix((LengthAndAreaCalculator.LENGTH_MATRIX.inverse()).times(otherInfl).times(LengthAndAreaCalculator.LENGTH_MATRIX));
-        SUBSTITUTION_MATRIX = LengthAndAreaCalculator.MatrixToIntMatrix((LengthAndAreaCalculator.AREA_MATRIX.inverse()).times(otherInfl).times(otherInfl).times(LengthAndAreaCalculator.AREA_MATRIX));
+        INFLATED_LENGTHS = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.LENGTH_MATRIX.inverse()).times(otherInfl).times(LengthAndAreaCalculator.LENGTH_MATRIX));
+        SUBSTITUTION_MATRIX = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.AREA_MATRIX.inverse()).times(otherInfl).times(otherInfl).times(LengthAndAreaCalculator.AREA_MATRIX));
 
 
     } // end of static initialization

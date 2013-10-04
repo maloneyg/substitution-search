@@ -7,7 +7,7 @@ import java.io.Serializable;
 import com.google.common.collect.*;
 import com.google.common.base.*;
 
-final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, BasicPoint, BasicEdgeLength>, Serializable {
+final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, BytePoint, BasicEdgeLength>, Serializable {
 
     // make it Serializable
     static final long serialVersionUID = -3774381761787701530L;
@@ -31,12 +31,12 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
     * A list of vector representatives of the allowable edge lengths.
     * Each one starts at the origin and lies on the positive x-axis.
     */
-    static final private ImmutableList<BasicPoint> REPS;
+    static final private ImmutableList<BytePoint> REPS;
 
     static { // initialize REPS. Use recursion.
-        BasicPoint[] preReps = new BasicPoint[Math.max(2,LENGTHS.size())];
-        preReps[0] = BasicPoint.UNIT_VECTOR;
-        preReps[1] = BasicPoint.UNIT_VECTOR.timesA();
+        BytePoint[] preReps = new BytePoint[Math.max(2,LENGTHS.size())];
+        preReps[0] = BytePoint.UNIT_VECTOR;
+        preReps[1] = BytePoint.UNIT_VECTOR.timesA();
         for (int i = 2; i < preReps.length; i++)
             preReps[i] = preReps[i-1].timesA().subtract(preReps[i-2]);
         REPS = ImmutableList.copyOf(preReps);
@@ -60,7 +60,7 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
     * The vector associated to the zero angle 
     * is one of the vectors in REPS.
     */
-    final private ImmutableList<BasicPoint> reps;
+    final private ImmutableList<BytePoint> reps;
 
     /*
     * A list of Integers representing the indices of the different 
@@ -78,7 +78,7 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
     private BasicEdgeLength(int i) {
         // make a list of all edges with this length
         // with one end at the origin
-        BasicPoint[] preReps = new BasicPoint[2 * N];
+        BytePoint[] preReps = new BytePoint[2 * N];
         BasicAngle a = BasicAngle.createBasicAngle(1);
         preReps[0] = REPS.get(i);
         for (int j = 1; j < 2*N; j++) preReps[j] = preReps[j-1].rotate(a);
@@ -135,7 +135,7 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
     * return a vector with length equal to this edge length,
     * making an angle of a with the positive x-axis.
     */
-    public BasicPoint getAsVector(BasicAngle a) {
+    public BytePoint getAsVector(BasicAngle a) {
         return reps.get(a.getAsInt());
     }
 
@@ -192,10 +192,10 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Bas
 
         BasicAngle a0 = BasicAngle.createBasicAngle(0);
         BasicAngle a1 = BasicAngle.createBasicAngle(1);
-        BasicPoint p0 = ALL_EDGE_LENGTHS.get(0).getAsVector(a0);
-        BasicPoint p1 = ALL_EDGE_LENGTHS.get(1).getAsVector(a0);
-        BasicPoint p2 = ALL_EDGE_LENGTHS.get(2).getAsVector(a0);
-        BasicPoint p3 = ALL_EDGE_LENGTHS.get(2).getAsVector(a1);
+        BytePoint p0 = ALL_EDGE_LENGTHS.get(0).getAsVector(a0);
+        BytePoint p1 = ALL_EDGE_LENGTHS.get(1).getAsVector(a0);
+        BytePoint p2 = ALL_EDGE_LENGTHS.get(2).getAsVector(a0);
+        BytePoint p3 = ALL_EDGE_LENGTHS.get(2).getAsVector(a1);
 
         System.out.print(p0 + " and " + p1 + ": " + p0.colinear(p1) + "\n");
         System.out.print(p1 + " and " + p0 + ": " + p1.colinear(p0) + "\n");

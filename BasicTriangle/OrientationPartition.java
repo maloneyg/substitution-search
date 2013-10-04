@@ -17,7 +17,7 @@ public final class OrientationPartition implements Serializable {
     private final HashSet<HashSet<Orientation>> partition;
 
     // a pool of existing HashSet<Orientation> objects for recycling
-    private static OrientationClassPool POOL = OrientationClassPool.getInstance();
+    //private static OrientationClassPool POOL = OrientationClassPool.getInstance();
 
     // make it Serializable
     static final long serialVersionUID = 1267821834624463132L;
@@ -33,7 +33,7 @@ public final class OrientationPartition implements Serializable {
         for (int i = 0; i < orientations.length; i++) {
             HashSet<Orientation> thisSet = new HashSet<>(1);
             thisSet.add(orientations[i]);
-            output.add(POOL.getCanonicalVersion(thisSet)); // POOL
+            output.add(thisSet); // POOL
         }
         partition = output;
     }
@@ -130,12 +130,12 @@ public final class OrientationPartition implements Serializable {
             } else if (s.contains(o1.getOpposite())||s.contains(o2.getOpposite())) {
                 for (Orientation o : s) minuses.add(o);
             } else {
-                output.add(POOL.getCanonicalVersion(s)); // POOL
+                output.add(s); // POOL
             }
         }
         if (combine) pluses.addAll(minuses);
-        output.add(POOL.getCanonicalVersion(pluses)); // POOL
-        if (!combine) output.add(POOL.getCanonicalVersion(minuses)); // POOL
+        output.add(pluses); // POOL
+        if (!combine) output.add(minuses); // POOL
         return new OrientationPartition(output);
     }
 

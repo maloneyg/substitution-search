@@ -16,7 +16,7 @@ public class SimpleTest
 {
 
     // the two object pools
-    private static final BasicPointPool POOL = BasicPointPool.getInstance();
+    //private static final BytePointPool POOL = BytePointPool.getInstance();
     private static final OrientationClassPool OC = OrientationClassPool.getInstance();
 
     public static void main(String[] args)
@@ -74,6 +74,24 @@ public class SimpleTest
                             }
                     }
 
+                // wait for queue to empty
+                while (true)
+                    {
+                        if ( executorService.getExecutor().getQueue().size() > 0 )
+                            {
+                                try
+                                    {
+                                        Thread.sleep(100);
+                                    }
+                                catch (InterruptedException e)
+                                    {
+                                        continue;
+                                    }
+                            }
+                        else
+                            break;
+                    }
+
                 // job is complete
                 String reportString = String.format("\nJob %010d complete ( %15s ).  %5d patches have been completed.\n", thisUnit.hashCode(), thisResult.toString(), BasicWorkUnit.output().size());
                 System.out.println(reportString);
@@ -82,15 +100,14 @@ public class SimpleTest
                 //System.out.println("Press ENTER");
                 //kbd.nextLine();
 //                System.out.println("OrientationClassPool hits: " + String.format("%.3f", OC.hitPercentage()) + "%       Pool size: " + OC.size());
-//                System.out.println("BasicPointPool hits: " + String.format("%.3f", POOL.hitPercentage()) + "%   Pool size: " + POOL.size());
-                POOL.clear();
+//                System.out.println("BytePointPool hits: " + String.format("%.3f", POOL.hitPercentage()) + "%   Pool size: " + POOL.size());
+                //POOL.clear();
                 OC.clear();
                 System.out.print("Garbage collection initiated...");
                 System.gc();
                 System.out.println("complete.\n");
-                System.out.println("Maximum integer in a BasicPoint: " + POOL.max());
-                //System.out.println("Press ENTER\n");
-                //kbd.nextLine();
+                System.out.println("Press ENTER\n");
+                kbd.nextLine();
             }
 
         // stop monitoring thread
@@ -182,8 +199,8 @@ public class SimpleTest
         BD1 = start1;
         BD2 = start2;
         PrototileList tiles = PrototileList.createPrototileList(BasicPrototile.getPrototileList(Initializer.SUBSTITUTION_MATRIX.getColumn(myTile)));
-        ImmutableList<BasicPoint> vertices = P0.place(BasicPoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
-        BasicPoint[] bigVertices = new BasicPoint[] {vertices.get(0).inflate(),vertices.get(1).inflate(),vertices.get(2).inflate()};
+        ImmutableList<BytePoint> vertices = P0.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
+        BytePoint[] bigVertices = new BytePoint[] {vertices.get(0).inflate(),vertices.get(1).inflate(),vertices.get(2).inflate()};
 
 //        ImmutableList<Integer> inflList = Preinitializer.INFL;
 //        ShortPolynomial infl = ShortPolynomial.createShortPolynomial(inflList);

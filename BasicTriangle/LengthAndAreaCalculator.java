@@ -134,19 +134,19 @@ final public class LengthAndAreaCalculator {
         return output;
     }
 
-    // turn a Matrix into an IntMatrix.
+    // turn a Matrix into an ByteMatrix.
     // Round and cast to Int.
-    public static IntMatrix MatrixToIntMatrix(Matrix m) {
+    public static ByteMatrix MatrixToByteMatrix(Matrix m) {
         int L = m.getColumnDimension();
         int M = m.getColumnDimension();
         double[][] a = m.getArrayCopy();
-        int[][] preMatrix = new int[L][M];
+        byte[][] preMatrix = new byte[L][M];
         for (int i = 0; i < L; i++) {
             for (int j = 0; j < M; j++) {
-                preMatrix[i][j] = (int) Math.round((Double)a[i][j]);
+                preMatrix[i][j] = (byte) Math.round((Double)a[i][j]);
             }
         }
-        return IntMatrix.createIntMatrix(preMatrix);
+        return ByteMatrix.createByteMatrix(preMatrix);
     }
 
     static { // initialize MIN_POLY

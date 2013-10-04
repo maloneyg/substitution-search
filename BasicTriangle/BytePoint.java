@@ -1,6 +1,7 @@
 /**
 *    This class implements a point.
 *    It uses a representation as a vector of integers.  
+*    -- modified to use bytes to save memory
 */
 
 import com.google.common.collect.*;
@@ -8,7 +9,7 @@ import com.google.common.base.*;
 import com.google.common.cache.*;
 import java.io.Serializable;
 
-final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, Serializable {
+final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Serializable {
 
     // make is Serializable
     static final long serialVersionUID = -6462075103242603792L;
@@ -16,62 +17,62 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
     // static variables for all points.
     public static final int length = Initializer.N - 1;
 
-    public static final IntMatrix A = Initializer.A;
+    public static final ByteMatrix A = Initializer.A;
 
-    public static final IntMatrix ROT = Initializer.ROT;
+    public static final ByteMatrix ROT = Initializer.ROT;
 
-    public static final IntMatrix REF = Initializer.REF;
+    public static final ByteMatrix REF = Initializer.REF;
 
-    public static final IntMatrix INFL = Initializer.INFL;
+    public static final ByteMatrix INFL = Initializer.INFL;
 
-    public static final BasicPoint ZERO_VECTOR;
+    public static final BytePoint ZERO_VECTOR;
 
-    public static final BasicPoint UNIT_VECTOR;
+    public static final BytePoint UNIT_VECTOR;
 
-    // a pool containing all the BasicPoints that have been created
-    private static final BasicPointPool POOL = BasicPointPool.getInstance();
+    // a pool containing all the BytePoints that have been created
+    //private static final BytePointPool POOL = BytePointPool.getInstance();
 
     static { // initialize the unit vector
 
-        int[] preUnit = new int[length];
-        int[] preZero = new int[length];
-        preUnit[0] = 1;
-        preZero[0] = 0;
+        byte[] preUnit = new byte[length];
+        byte[] preZero = new byte[length];
+        preUnit[0] = (byte)1;
+        preZero[0] = (byte)0;
         for (int i = 1; i < length; i++) {
-            preUnit[i] = 0;
-            preZero[i] = 0;
+            preUnit[i] = (byte)0;
+            preZero[i] = (byte)0;
         }
-        UNIT_VECTOR = createBasicPoint(preUnit);
-        ZERO_VECTOR = createBasicPoint(preZero);
+        UNIT_VECTOR = createBytePoint(preUnit);
+        ZERO_VECTOR = createBytePoint(preZero);
 
     }
 
     // A vector identifying the point.  
-    private final int[] point;
+    private final byte[] point;
 
     // Constructor methods.
 
-    private BasicPoint(int[] vector) {
+    private BytePoint(byte[] vector) {
         if (vector.length != length) {
             throw new IllegalArgumentException("Point length is incorrect.");
         }
         point = vector;
     }
 
-    private BasicPoint() {
-        point = new int[length];
+    private BytePoint() {
+        point = new byte[length];
     }
 
     // public static factory method for getting a recycled point
-    static public BasicPoint createBasicPoint(int[] vector) {
-//        return new BasicPoint(vector);
-        return POOL.getCanonicalVersion(vector);
+    static public BytePoint createBytePoint(byte[] vector) {
+        return new BytePoint(vector);
+        //return POOL.getCanonicalVersion(vector);
     }
 
     // public static factory method for creating a brand new point
-    static protected BasicPoint createExNihilo(int[] vector) {
-        return new BasicPoint(vector);
-    }
+    //static protected BytePoint createExNihilo(int[] vector) {
+   //     return new BytePoint(vector);
+    //}
 
     // toString method.
     public String toString() {
@@ -87,7 +88,7 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())
             return false;
-        BasicPoint p = (BasicPoint) obj;
+        BytePoint p = (BytePoint) obj;
         for (int i = 0; i < length; i++) {
             if (p.point[i] != this.point[i])
                 return false;
@@ -100,20 +101,14 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
         int prime = 53;
         int result = 11;
         for (int i = 0; i < length; i++) {
-            result = prime*result + point[i];
+            result = prime*result + (int)point[i];
         }
         return result;
     }
 
-    // a private helper method to turn point into an array of Integers.
-    protected int[] pointAsArray() {
-        /*
-        int[] output = new int[length];
-        for (int i = 0; i < length; i++)
-            output[i] = point.get(i);
-        return output;
-        */
-        int[] newArray = new int[length];
+    // return a deep copy of the contents of this BytePoint
+    protected byte[] pointAsArray() {
+        byte[] newArray = new byte[length];
         for (int i=0; i < point.length; i++)
             newArray[i] = point[i];
         return newArray;
@@ -128,47 +123,47 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
     }
 
     // Manipulation methods.  
-    public BasicPoint add(BasicPoint p) {
-        int[] q = new int[length];
+    public BytePoint add(BytePoint p) {
+        byte[] q = new byte[length];
         for (int i = 0; i < length; i++) {
-            q[i] = point[i] + p.point[i];
+            q[i] = (byte)(point[i] + p.point[i]);
         }
-        return createBasicPoint(q);
+        return createBytePoint(q);
     }
 
-    public BasicPoint scalarMultiple(int c) {
-        int[] q = new int[length];
+    public BytePoint scalarMultiple(byte c) {
+        byte[] q = new byte[length];
         for (int i = 0; i < length; i++) {
-            q[i] = c * point[i];
+            q[i] = (byte)(c * point[i]);
         }
-        return createBasicPoint(q);
+        return createBytePoint(q);
     }
 
-    public BasicPoint subtract(BasicPoint p) {
-        return this.add(p.scalarMultiple(-1));
+    public BytePoint subtract(BytePoint p) {
+        return this.add(p.scalarMultiple((byte)-1));
     }
 
-    public BasicPoint rotate(BasicAngle a) {
+    public BytePoint rotate(BasicAngle a) {
         int i = a.getAsInt();
         if (i < 0)
             throw new IllegalArgumentException("You must perform a positive number of rotations.");
 
-        int[] result  = pointAsArray();
+        byte[] result  = pointAsArray();
         for (int j = 0; j < i; j++)
             result = ROT.rowTimes(result);
-        return createBasicPoint(result);
+        return createBytePoint(result);
     }
 
-    public BasicPoint reflect() {
-        return createBasicPoint(REF.rowTimes(this.pointAsArray()));
+    public BytePoint reflect() {
+        return createBytePoint(REF.rowTimes(this.pointAsArray()));
     }
 
-    public BasicPoint inflate() {
-        return createBasicPoint(INFL.rowTimes(this.pointAsArray()));
+    public BytePoint inflate() {
+        return createBytePoint(INFL.rowTimes(this.pointAsArray()));
     }
 
-    protected BasicPoint timesA() {
-        return createBasicPoint(A.rowTimes(this.pointAsArray()));
+    protected BytePoint timesA() {
+        return createBytePoint(A.rowTimes(this.pointAsArray()));
     }
 
     /*
@@ -182,19 +177,22 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
     * WARNING: this only works for prime N right now.
     * WARNING: this only works for odd N right now.
     */
-    public boolean colinear(BasicPoint p) {
+    public boolean colinear(BytePoint p) {
         int l = length/2;
-        int[] p0 = this.pointAsArray();
-        int[] p1 = p.pointAsArray();
+        byte[] p0 = this.point;
+        byte[] p1 = p.point;
         // here we store the shoelace products
-        int[] coeffs = new int[l];
+        byte[] coeffs = new byte[l];
         for (int i = 0; i < l; i++) {
-            coeffs[i] = 0;
+            coeffs[i] = (byte)0;
             for (int j = 0; j < length; j++) {
-                if (j+i != length-1) coeffs[i] += p0[j]*p1[(j+i+1)%(length+1)]*((j+i+1>length)? -1 : 1);
-                if (j != i) coeffs[i] -= p0[j]*p1[(j-i-1 < 0)? length+j-i : j-i-1]*((j-i-1<0)? -1 : 1);
+                if (j+i != length-1)
+                    coeffs[i] += (byte)( p0[j] * p1[(j+i+1)%(length+1)] * ((j+i+1>length)? -1 : 1));
+                if (j != i)
+                    coeffs[i] -= (byte)( p0[j] * p1[(j-i-1 < 0)? length+j-i : j-i-1]*((j-i-1<0)? -1 : 1) );
             }
-            if (coeffs[i] != 0) return false;
+            if (coeffs[i] != (byte)0)
+                return false;
         }
         return true;
     }
@@ -212,17 +210,19 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
     *
     * WARNING: this only works for odd N right now.
     */
-    public ShortPolynomial crossProduct(BasicPoint p) {
+    public ShortPolynomial crossProduct(BytePoint p) {
         int l = length/2;
-        int[] p0 = this.pointAsArray();
-        int[] p1 = p.pointAsArray();
+        byte[] p0 = this.point;
+        byte[] p1 = p.point;
         // here we store the shoelace products
-        int[] coeffs = new int[l];
+        byte[] coeffs = new byte[l];
         for (int i = 0; i < l; i++) {
-            coeffs[i] = 0;
+            coeffs[i] = (byte)0;
             for (int j = 0; j < length; j++) {
-                if (j+i != length-1) coeffs[i] += p0[j]*p1[(j+i+1)%(length+1)]*((j+i+1>length)? -1 : 1);
-                if (j != i) coeffs[i] -= p0[j]*p1[(j-i-1 < 0)? length+j-i : j-i-1]*((j-i-1<0)? -1 : 1);
+                if (j+i != length-1)
+                    coeffs[i] += (byte)(p0[j] * p1[(j+i+1)%(length+1)] * ((j+i+1>length)? -1 : 1));
+                if (j != i)
+                    coeffs[i] -= (byte)(p0[j] * p1[(j-i-1 < 0)? length+j-i : j-i-1] * ((j-i-1<0)? -1 : 1));
             }
         }
         ShortPolynomial output = ShortPolynomial.ZERO;
@@ -240,17 +240,20 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
     * WARNING: this only works for prime N right now.
     * WARNING: this only works for odd N right now.
     */
-    public ShortPolynomial dotProduct(BasicPoint p) {
+    public ShortPolynomial dotProduct(BytePoint p) {
         int l = length/2+1;
-        int[] p0 = this.pointAsArray();
-        int[] p1 = p.pointAsArray();
+        byte[] p0 = point;
+        byte[] p1 = p.point;
+        
         // here we store the shoelace products
-        int[] coeffs = new int[l];
+        byte[] coeffs = new byte[l];
         for (int i = 0; i < l; i++) {
-            coeffs[i] = 0;
+            coeffs[i] = (byte)0;
             for (int j = 0; j < length; j++) {
-                if (j+i != length) coeffs[i] += p0[j]*p1[(j+i)%(length+1)]*((j+i>length)? -1 : 1);
-                if (i != 0 && j-i != -1) coeffs[i] += p0[j]*p1[(j-i < 0)? length+1+j-i : j-i]*((j-i<0)? -1 : 1);
+                if (j+i != length)
+                    coeffs[i] += (byte)( p0[j] *p1[(j+i)%(length+1)] * ((j+i>length)? -1 : 1) );
+                if (i != 0 && j-i != -1)
+                    coeffs[i] += (byte)( p0[j] *p1[(j-i < 0)? length+1+j-i : j-i] * ((j-i<0)? -1 : 1) );
             }
         }
         ShortPolynomial output = ShortPolynomial.ZERO;
@@ -259,4 +262,4 @@ final public class BasicPoint implements AbstractPoint<BasicPoint, BasicAngle>, 
         return output;
     }
 
-} // end of class BasicPoint
+} // end of class BytePoint
