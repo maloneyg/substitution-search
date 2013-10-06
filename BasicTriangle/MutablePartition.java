@@ -166,33 +166,45 @@ public class MutablePartition<E> {
         if (head.equals(c2)) head = afterLast2;
     }
 
-//    public Iterable<E> equivalenceClass(E data) {
-//        return new Iterable<E>() {
-//            // an iterator that iterates through things in this class
-//            public Iterator<E> iterator() {
-//                return new Iterator<E>() {
-//
-//                    private PartitionNode<E> current = subset(data);
-//                    private boolean fresh = true;
-//
-//                    public boolean hasNext() {
-//                        return (fresh || !current.isHead());
-//                    }
-//
-//                    public E next() {
-//                        fresh = false;
-//                        E output = current.getData();
-//                        current = current.getNext();
-//                        return output;
-//                    }
-//
-//                    public void remove() { // do nothing
-//                    }
-//
-//                };
-//            } // first iterator ends here
-//        };
-//    }
+    public Iterable<E> equivalenceClass(E data) {
+        final E thing = data;
+        return new Iterable<E>() {
+            // an iterator that iterates through things in this class
+            public Iterator<E> iterator() {
+                return new Iterator<E>() {
+
+                    private PartitionNode<E> current = subset(thing);
+                    private boolean fresh = true;
+
+                    public boolean hasNext() {
+                        return (fresh || !(current==null || current.isHead()));
+                    }
+
+                    public E next() {
+                        fresh = false;
+                        E output = current.getData();
+                        current = current.getNext();
+                        return output;
+                    }
+
+                    public void remove() { // do nothing
+                    }
+
+                };
+            } // first iterator ends here
+        };
+    }
+
+    // return true if this contains o
+    public contains(Object o) {
+        PartitionNode currentNode = head;
+        if (currentNode.getData().getClass() != o.getClass()) return false;
+        while (currentNode != null) {
+            if (currentNode.getData().equals(o)) return true;
+            currentNode = currentNode.getNext();
+        }
+        return false;
+    }
 
     // output a String
     public String toString() {
