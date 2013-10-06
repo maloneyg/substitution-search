@@ -103,13 +103,13 @@ public class MutablePartition<E> {
     private PartitionNode<E> head;
 
     // private constructor
-    private MutablePartition(E data) {
-        head = new PartitionNode(data);
+    protected MutablePartition(E data) {
+        head = new PartitionNode<>(data);
     }
 
     // add data and make it the head of a one-unit subset
     public void add(E data) {
-        PartitionNode<E> newNode = new PartitionNode(data,head,null,true);
+        PartitionNode<E> newNode = new PartitionNode<>(data,head,null,true);
         head.setPrevious(newNode);
         head = newNode;
     }
@@ -119,54 +119,51 @@ public class MutablePartition<E> {
         PartitionNode<E> current = head;
         PartitionNode<E> output = head;
         while (current != null) {
+            if (current.isHead()) output = current;
             if (current.getData().equals(data)) return output;
             current = current.getNext();
-            if (current.isHead()) output = current;
         }
         throw new IllegalArgumentException(data + " is not in this partition.");
     }
 
-    // combine the sets containing one and two
+    // return the head node
+    public PartitionNode<E> getHead() {
+        return head;
+    }
+
+    // identify the classes containing one and two
     public void identify(E one, E two) {
         PartitionNode<E> c1 = subset(one);
         PartitionNode<E> c2 = subset(two);
-        if (c1.equals(c2)) return; // don't do anything if they're in the same class
+        if (c1.equals(c2)) return;
 
-        // find the end of c1
         PartitionNode<E> last1 = c1;
         PartitionNode<E> afterLast1 = c1.getNext();
         while (afterLast1 != null && !afterLast1.isHead()) {
             last1 = afterLast1;
-            afterLast1 = last1.getNext();;
+            afterLast1 = last1.getNext();
         }
 
-        // find the end of c2
         PartitionNode<E> last2 = c2;
         PartitionNode<E> afterLast2 = c2.getNext();
         while (afterLast2 != null && !afterLast2.isHead()) {
             last2 = afterLast2;
-            afterLast2 = last2.getNext();;
+            afterLast2 = last2.getNext();
         }
 
-        PartitionNode<E> before2 = (PartitionNode<E>) c2.getPrevious();
-        if (afterLast1 == null) afterLast1 = (PartitionNode<E>) afterLast1;
-        if (afterLast2 == null) afterLast2 = (PartitionNode<E>) afterLast2;
+        PartitionNode<E> before2 = c2.getPrevious();
 
-        try {
-            before2.setNext(afterLast2);
-            c2.setPrevious(last1);
+        last1.setNext(c2);
+        c2.setPrevious(last1);
 
-            last1.setNext(c2);
-            afterLast1.setPrevious(last2);
+        last2.setNext(afterLast1);
+        if (afterLast1 != null) afterLast1.setPrevious(last2);
 
-            last2.setNext(afterLast1);
-            afterLast2.setPrevious(before2);
-
-            System.out.println("inside");
-        } catch (NullPointerException npe) {
-        }
+        if (before2 != null) before2.setNext(afterLast2);
+        if (afterLast2 != null) afterLast2.setPrevious(before2);
 
         c2.setHead(false);
+        if (head.equals(c2)) head = afterLast2;
     }
 
 //    public Iterable<E> equivalenceClass(E data) {
@@ -245,7 +242,7 @@ public class MutablePartition<E> {
         String s3 = "ugly";
         String s4 = "evil";
         String s5 = "great";
-        MutablePartition<String> test = new MutablePartition(s1);
+        MutablePartition<String> test = new MutablePartition<>(s1);
         test.add(s2);
         test.add(s3);
         test.add(s4);
@@ -256,6 +253,8 @@ public class MutablePartition<E> {
         test.identify("bad","evil");
         System.out.println(test);
         test.identify("good","great");
+        System.out.println(test);
+        test.identify("ugly","great");
         System.out.println(test);
 
     }
