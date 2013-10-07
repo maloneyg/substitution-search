@@ -14,6 +14,7 @@ import com.google.common.cache.*;
 import java.io.Serializable;
 import org.apache.commons.math3.linear.*;
 import java.util.*;
+import java.util.Arrays;
 import java.util.concurrent.*;
 
 public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoint, BasicEdgeLength, BasicEdge, BasicTriangle>, Serializable {
@@ -230,4 +231,12 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
             }
         } 
     }
+
+    // simple incidence test
+    public boolean simpleIncidentEdge(BasicEdge e) {
+        ImmutableList<BytePoint> ends = e.getEnds();
+        List<BytePoint> points = Arrays.asList(vertices);
+        return (points.contains(ends.get(0))&&points.contains(ends.get(1)));
+    }
+
 } // end of class BasicTriangle

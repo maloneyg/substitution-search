@@ -23,6 +23,11 @@ public class MutableOrientationPartition extends MutablePartition<Orientation> {
         return output;
     }
 
+    // public static factory method.
+    public static MutableOrientationPartition createMutableOrientationPartition(Orientation o) {
+        return new MutableOrientationPartition(o);
+    }
+
     // identify two orientations with each other.
     // do the same for their opposites.
     public void identify(Orientation one, Orientation two) {

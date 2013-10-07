@@ -196,7 +196,7 @@ public class MutablePartition<E> {
     }
 
     // return true if this contains o
-    public contains(Object o) {
+    public boolean contains(Object o) {
         PartitionNode currentNode = head;
         if (currentNode.getData().getClass() != o.getClass()) return false;
         while (currentNode != null) {
@@ -260,14 +260,21 @@ public class MutablePartition<E> {
         test.add(s4);
         test.add(s5);
 
-        System.out.println(test.subset("bad"));
+        System.out.println("The set:");
         System.out.println(test);
+        System.out.println("Equating bad and evil:");
         test.identify("bad","evil");
         System.out.println(test);
+        System.out.println("Equating good and great:");
         test.identify("good","great");
         System.out.println(test);
+        System.out.println("Equating ugly and great:");
         test.identify("ugly","great");
         System.out.println(test);
+
+        System.out.println("\nPrinting out all things equal to good.\n");
+        for (String s : test.equivalenceClass("good")) System.out.print(s + " ");
+        System.out.println("\n");
 
     }
 
