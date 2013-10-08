@@ -8,6 +8,7 @@ import com.google.common.collect.*;
 import com.google.common.base.*;
 import com.google.common.cache.*;
 import java.io.Serializable;
+import java.lang.Math;
 
 final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Serializable {
 
@@ -28,6 +29,8 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     public static final BytePoint ZERO_VECTOR;
 
     public static final BytePoint UNIT_VECTOR;
+
+    public static final float[] COS_POWERS = Initializer.COS_LIST;
 
     // a pool containing all the BytePoints that have been created
     //private static final BytePointPool POOL = BytePointPool.getInstance();
@@ -203,6 +206,36 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     * using the standard projection (i.e., the ith
     * standard basis vector goes to (cos(i pi/N), sin(i pi/N))).
     *
+    * If the cross-product isn't 0, return false.
+    *
+    * WARNING: this only works for prime N right now.
+    * WARNING: this only works for odd N right now.
+    */
+    public boolean parallel(BytePoint p) {
+        int l = length/2;
+        byte[] p0 = this.point;
+        byte[] p1 = p.point;
+        // calculate the shoelace products
+        int coeffs = 0;
+        for (int i = 0; i < l; i++) {
+            for (int j = 0; j < length; j++) {
+                if (j+i != length-1)
+                    coeffs += ( p0[j] * p1[(j+i+1)%(length+1)] * ((j+i+1>length)? -1 : 1));
+                if (j != i)
+                    coeffs -= ( p0[j] * p1[(j-i-1 < 0)? length+j-i : j-i-1]*((j-i-1<0)? -1 : 1) );
+            }
+            if (coeffs != 0)
+                return false;
+        }
+        return true;
+    }
+
+    /*
+    * calculate the 2d cross-product of this with p, after 
+    * they have both been projected down to the plane
+    * using the standard projection (i.e., the ith
+    * standard basis vector goes to (cos(i pi/N), sin(i pi/N))).
+    *
     * the output is a polynomial P such that the cross product is
     * sin(x) * P(cos(x)).
     * so if we just want to compare signs of cross products
@@ -210,25 +243,50 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     *
     * WARNING: this only works for odd N right now.
     */
-    public ShortPolynomial crossProduct(BytePoint p) {
+//    public ShortPolynomial crossProduct(BytePoint p) {
+//        int l = length/2;
+//        byte[] p0 = this.point;
+//        byte[] p1 = p.point;
+//        // here we store the shoelace products
+//        byte[] coeffs = new byte[l];
+//        for (int i = 0; i < l; i++) {
+//            coeffs[i] = (byte)0;
+//            for (int j = 0; j < length; j++) {
+//                if (j+i != length-1)
+//                    coeffs[i] += (byte)(p0[j] * p1[(j+i+1)%(length+1)] * ((j+i+1>length)? -1 : 1));
+//                if (j != i)
+//                    coeffs[i] -= (byte)(p0[j] * p1[(j-i-1 < 0)? length+j-i : j-i-1] * ((j-i-1<0)? -1 : 1));
+//            }
+//        }
+//        ShortPolynomial output = ShortPolynomial.ZERO;
+//        for (int i = 0; i < l; i++)
+//            output = output.plus(LengthAndAreaCalculator.SIN_LIST.get(i).scalarMultiple((short)coeffs[i]));
+//        return output;
+//    }
+
+    /*
+    * calculate the 2d cross-product of this with p, after 
+    * they have both been projected down to the plane
+    * using the standard projection (i.e., the ith
+    * standard basis vector goes to (cos(i pi/N), sin(i pi/N))).
+    *
+    * WARNING: this only works for odd N right now.
+    */
+    public float crossProduct(BytePoint p) {
         int l = length/2;
         byte[] p0 = this.point;
         byte[] p1 = p.point;
         // here we store the shoelace products
-        byte[] coeffs = new byte[l];
+        float coeffs = 0.0f;
         for (int i = 0; i < l; i++) {
-            coeffs[i] = (byte)0;
             for (int j = 0; j < length; j++) {
                 if (j+i != length-1)
-                    coeffs[i] += (byte)(p0[j] * p1[(j+i+1)%(length+1)] * ((j+i+1>length)? -1 : 1));
+                    coeffs += COS_POWERS[i]*(p0[j] * p1[(j+i+1)%(length+1)] * ((j+i+1>length)? -1 : 1));
                 if (j != i)
-                    coeffs[i] -= (byte)(p0[j] * p1[(j-i-1 < 0)? length+j-i : j-i-1] * ((j-i-1<0)? -1 : 1));
+                    coeffs -= COS_POWERS[i]*(p0[j] * p1[(j-i-1 < 0)? length+j-i : j-i-1] * ((j-i-1<0)? -1 : 1));
             }
         }
-        ShortPolynomial output = ShortPolynomial.ZERO;
-        for (int i = 0; i < l; i++)
-            output = output.plus(LengthAndAreaCalculator.SIN_LIST.get(i).scalarMultiple((short)coeffs[i]));
-        return output;
+        return coeffs;
     }
 
     /*
@@ -240,26 +298,53 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     * WARNING: this only works for prime N right now.
     * WARNING: this only works for odd N right now.
     */
-    public ShortPolynomial dotProduct(BytePoint p) {
+//    public ShortPolynomial dotProduct(BytePoint p) {
+//        int l = length/2+1;
+//        byte[] p0 = point;
+//        byte[] p1 = p.point;
+//        
+//        // here we store the shoelace products
+//        byte[] coeffs = new byte[l];
+//        for (int i = 0; i < l; i++) {
+//            coeffs[i] = (byte)0;
+//            for (int j = 0; j < length; j++) {
+//                if (j+i != length)
+//                    coeffs[i] += (byte)( p0[j] *p1[(j+i)%(length+1)] * ((j+i>length)? -1 : 1) );
+//                if (i != 0 && j-i != -1)
+//                    coeffs[i] += (byte)( p0[j] *p1[(j-i < 0)? length+1+j-i : j-i] * ((j-i<0)? -1 : 1) );
+//            }
+//        }
+//        ShortPolynomial output = ShortPolynomial.ZERO;
+//        for (int i = 0; i < l; i++)
+//            output = output.plus(LengthAndAreaCalculator.COS_LIST.get(i).scalarMultiple((short)coeffs[i]));
+//        return output;
+//    }
+
+    /*
+    * calculate the 2d dot-product of this with p, after 
+    * they have both been projected down to the plane
+    * using the standard projection (i.e., the ith
+    * standard basis vector goes to (cos(i pi/N), sin(i pi/N))).
+    *
+    * WARNING: this only works for prime N right now.
+    * WARNING: this only works for odd N right now.
+    */
+    public float dotProduct(BytePoint p) {
         int l = length/2+1;
         byte[] p0 = point;
         byte[] p1 = p.point;
         
         // here we store the shoelace products
-        byte[] coeffs = new byte[l];
+        float coeffs = 0.0f;
         for (int i = 0; i < l; i++) {
-            coeffs[i] = (byte)0;
             for (int j = 0; j < length; j++) {
                 if (j+i != length)
-                    coeffs[i] += (byte)( p0[j] *p1[(j+i)%(length+1)] * ((j+i>length)? -1 : 1) );
+                    coeffs += COS_POWERS[i]*( p0[j] *p1[(j+i)%(length+1)] * ((j+i>length)? -1 : 1) );
                 if (i != 0 && j-i != -1)
-                    coeffs[i] += (byte)( p0[j] *p1[(j-i < 0)? length+1+j-i : j-i] * ((j-i<0)? -1 : 1) );
+                    coeffs += COS_POWERS[i]*( p0[j] *p1[(j-i < 0)? length+1+j-i : j-i] * ((j-i<0)? -1 : 1) );
             }
         }
-        ShortPolynomial output = ShortPolynomial.ZERO;
-        for (int i = 0; i < l; i++)
-            output = output.plus(LengthAndAreaCalculator.COS_LIST.get(i).scalarMultiple((short)coeffs[i]));
-        return output;
+        return coeffs;
     }
 
 } // end of class BytePoint

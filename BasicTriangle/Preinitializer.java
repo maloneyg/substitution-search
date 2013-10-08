@@ -14,7 +14,7 @@ class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final double EP = 0.000001;  // threshold value
+    public static final float EP = 0.000001f;  // threshold value
 
     // the inflation factor, represented as coefficients of
     // 1, a, a^2, etc., where a = 2*cos(pi/N).

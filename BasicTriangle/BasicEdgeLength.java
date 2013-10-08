@@ -213,16 +213,17 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
         System.out.println(p1 + "." + p2 + ": " + p1.dotProduct(p2));
         System.out.println(p0 + "." + p2 + ": " + p0.dotProduct(p2));
 
-        ShortPolynomial p02 = p0.dotProduct(p0);
-        ShortPolynomial p12 = p1.dotProduct(p1);
-        ShortPolynomial q02 = p1.subtract(p0).dotProduct(p1.subtract(p0));
+//        ShortPolynomial p02 = p0.dotProduct(p0);
+//        ShortPolynomial p12 = p1.dotProduct(p1);
+//        ShortPolynomial q02 = p1.subtract(p0).dotProduct(p1.subtract(p0));
+
+        float p02 = p0.dotProduct(p0);
+        float p12 = p1.dotProduct(p1);
+        float q02 = p1.subtract(p0).dotProduct(p1.subtract(p0));
 
         System.out.println(p0 + "." + p0 + ": " + p02);
         System.out.println(p1.subtract(p0) + "." + p1.subtract(p0) + ": " + q02);
         System.out.println(p1 + "." + p1 + ": " + p12);
-        System.out.println(p0 + "." + p0 + ": " + Math.sqrt(p02.evaluate(Initializer.COS)));
-        System.out.println(p1.subtract(p0) + "." + p1.subtract(p0) + ": " + Math.sqrt(q02.evaluate(Initializer.COS)));
-        System.out.println(p1 + "." + p1 + ": " + Math.sqrt(p12.evaluate(Initializer.COS)));
         System.out.println("MINPOLY: " + LengthAndAreaCalculator.HALF_MIN_POLY);
         System.out.println("Plug in cos(pi/N): " + LengthAndAreaCalculator.HALF_MIN_POLY.evaluate(Initializer.COS));
 

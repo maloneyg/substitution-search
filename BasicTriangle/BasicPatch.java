@@ -337,7 +337,8 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BytePoint, BasicEdg
             m = bigVertices[(i+2)%3].subtract(bigVertices[(i+1)%3]);
             v = bigVertices[i];
             t = bigVertices[(i+1)%3];
-            if (Math.signum((v.subtract(t)).crossProduct(m).evaluate(Initializer.COS)) != Math.signum((p.subtract(t)).crossProduct(m).evaluate(Initializer.COS)))
+            if (Math.signum((v.subtract(t)).crossProduct(m)) != Math.signum((p.subtract(t)).crossProduct(m)))
+//            if (Math.signum((v.subtract(t)).crossProduct(m).evaluate(Initializer.COS)) != Math.signum((p.subtract(t)).crossProduct(m).evaluate(Initializer.COS)))
                 return false;
         }
         return true;

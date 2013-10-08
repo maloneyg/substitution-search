@@ -200,7 +200,8 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
         BytePoint v1 = e.ends[1];
         BytePoint m0 = u1.subtract(u0); // the direction vector for this edge
         BytePoint m1 = v1.subtract(v0); // the direction vector for e
-        return (Math.signum((u0.subtract(v0)).crossProduct(m1).evaluate(Initializer.COS)) != Math.signum((u1.subtract(v0)).crossProduct(m1).evaluate(Initializer.COS)) && Math.signum((v1.subtract(u0)).crossProduct(m0).evaluate(Initializer.COS)) != Math.signum((v0.subtract(u0).crossProduct(m0).evaluate(Initializer.COS))));
+//        return (Math.signum((u0.subtract(v0)).crossProduct(m1).evaluate(Initializer.COS)) != Math.signum((u1.subtract(v0)).crossProduct(m1).evaluate(Initializer.COS)) && Math.signum((v1.subtract(u0)).crossProduct(m0).evaluate(Initializer.COS)) != Math.signum((v0.subtract(u0).crossProduct(m0).evaluate(Initializer.COS))));
+        return (Math.signum((u0.subtract(v0)).crossProduct(m1)) != Math.signum((u1.subtract(v0)).crossProduct(m1)) && Math.signum((v1.subtract(u0)).crossProduct(m0)) != Math.signum((v0.subtract(u0).crossProduct(m0))));
     }
 
     // return the same edge, with end points listed
@@ -229,9 +230,12 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
         BytePoint u0 = this.ends[0].subtract(p);
         BytePoint u1 = p.subtract(this.ends[1]);
         BytePoint u2 = this.ends[0].subtract(this.ends[1]);
-        double d0 = Math.sqrt(u0.dotProduct(u0).evaluate(Initializer.COS));
-        double d1 = Math.sqrt(u1.dotProduct(u1).evaluate(Initializer.COS));
-        double d2 = Math.sqrt(u2.dotProduct(u2).evaluate(Initializer.COS));
+//        double d0 = Math.sqrt(u0.dotProduct(u0).evaluate(Initializer.COS));
+//        double d1 = Math.sqrt(u1.dotProduct(u1).evaluate(Initializer.COS));
+//        double d2 = Math.sqrt(u2.dotProduct(u2).evaluate(Initializer.COS));
+        float d0 = u0.dotProduct(u0);
+        float d1 = u1.dotProduct(u1);
+        float d2 = u2.dotProduct(u2);
         return (-Initializer.EP < d0 + d1 - d2 && d0 + d1 - d2 < Initializer.EP);
     }
 

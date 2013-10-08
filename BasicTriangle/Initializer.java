@@ -21,9 +21,11 @@ class Initializer {
 
     public static final int N = Preinitializer.N;     // the order of symmetry
 
-    public static final double COS = Math.cos(Math.PI/(double)N);// 2cos(pi/N)
+//    public static final double COS = Math.cos(Math.PI/(double)N);// 2cos(pi/N)
+    public static final float COS = (float)Math.cos(Math.PI/(double)N);
+    public static final float[] COS_LIST; // powers of COS
 
-    public static final double EP = Preinitializer.EP;  // threshold value
+    public static final float EP = Preinitializer.EP;  // threshold value
 
     public static final ByteMatrix A;           // 2cos[pi/N], as a matrix
 
@@ -63,6 +65,14 @@ class Initializer {
     * A list representing the prototile angles we have selected.
     */
     public static final ImmutableList<ImmutableList<Integer>> PROTOTILES = Preinitializer.PROTOTILES;
+
+    static { // initialize COS_LIST
+
+        float[] preCos = new float[N];
+        for (int i = 0; i < preCos.length; i++) preCos[i] = (float)Math.pow(COS,i);
+        COS_LIST = preCos;
+
+    } // COS_LIST has been initialized
 
     static { // start of static initialization
 

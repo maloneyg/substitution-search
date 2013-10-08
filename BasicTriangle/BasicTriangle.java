@@ -173,7 +173,8 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
             m = vertices[(i+2)%3].subtract(vertices[(i+1)%3]);
             v = vertices[i];
             t = vertices[(i+1)%3];
-            if (Math.signum((v.subtract(t)).crossProduct(m).evaluate(Initializer.COS)) != Math.signum((p.subtract(t)).crossProduct(m).evaluate(Initializer.COS)))
+            if (Math.signum((v.subtract(t)).crossProduct(m)) != Math.signum((p.subtract(t)).crossProduct(m)))
+//            if (Math.signum((v.subtract(t)).crossProduct(m).evaluate(Initializer.COS)) != Math.signum((p.subtract(t)).crossProduct(m).evaluate(Initializer.COS)))
                 return false;
         }
         return true;
