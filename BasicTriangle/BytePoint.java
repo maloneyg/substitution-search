@@ -54,11 +54,7 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     private final byte[] point;
 
     // Constructor methods.
-
     private BytePoint(byte[] vector) {
-        if (vector.length != length) {
-            throw new IllegalArgumentException("Point length is incorrect.");
-        }
         point = vector;
     }
 
@@ -66,10 +62,20 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
         point = new byte[length];
     }
 
-    // public static factory method for getting a recycled point
+    // public static factory method 
     static public BytePoint createBytePoint(byte[] vector) {
         return new BytePoint(vector);
         //return POOL.getCanonicalVersion(vector);
+    }
+
+    // public static factory method
+    static public BytePoint createBytePoint(BytePoint p, boolean flip, BasicAngle a, BytePoint shift) {
+        byte[] vector = p.pointAsArray();
+        if (flip) vector = REF.rowTimes(vector);
+        vector = a.getRotation().rowTimes(vector);
+        byte[] copyMe = shift.pointAsArray();
+        for (int i = 0; i < vector.length; i++) vector[i] = (byte)(vector[i]+copyMe[i]);
+        return new BytePoint(vector);
     }
 
     // public static factory method for creating a brand new point

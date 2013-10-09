@@ -41,7 +41,7 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
     }
 
     public BasicEdge transform(BasicAngle a, BytePoint v) {
-        BytePoint[] newEnds = { ends[0].rotate(a).add(v), ends[1].rotate(a).add(v) };
+        BytePoint[] newEnds = { BytePoint.createBytePoint(ends[0],false,a,v), BytePoint.createBytePoint(ends[1],false,a,v) };
         return new BasicEdge(length, orientation, newEnds);
     }
 

@@ -230,8 +230,6 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
         Orientation[] newOrientations = orientations;
         BasicEdgeLength[] newLengths = lengths;
         if (flip) {
-            for (int i = 0; i < 3; i++)
-                vertices[i] = vertices[i].reflect();
             /* 
             * Now flip the first and last of everything
             * to put things in ccw order.
@@ -244,7 +242,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
             newOrientations = flipOrientations;
         }
         for (int j = 0; j < 3; j++)
-            vertices[j] = vertices[j].rotate(a).add(p);
+            vertices[j] = BytePoint.createBytePoint(vertices[j],flip,a,p);
         return BasicTriangle.createBasicTriangle(newAngles, vertices, newOrientations, newLengths);
     }
 

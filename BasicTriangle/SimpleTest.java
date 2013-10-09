@@ -15,9 +15,112 @@ import java.util.Scanner;
 public class SimpleTest
 {
 
-    // the two object pools
-    //private static final BytePointPool POOL = BytePointPool.getInstance();
-    private static final OrientationClassPool OC = OrientationClassPool.getInstance();
+     // the number of the triangle we're searching
+    private static final int myTile = 4;
+     // the triangle we're searching
+    private static final BasicPrototile P0 = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(myTile));
+    // the numbers of the different prototiles that fit in INFL.P0
+    private static final PrototileList tiles = PrototileList.createPrototileList(BasicPrototile.getPrototileList(Initializer.SUBSTITUTION_MATRIX.getColumn(myTile)));
+    // vertices of INFL.P0
+    private static final BytePoint[] vertices = P0.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
+    private static final BytePoint[] bigVertices = new BytePoint[] {vertices[0].inflate(),vertices[1].inflate(),vertices[2].inflate()};
+    // the starting edge breakdowns of P0
+    private static ImmutableList<Integer> BD0 = P0.getLengths()[0].getBreakdown();
+    private static ImmutableList<Integer> BD1 = P0.getLengths()[1].getBreakdown();
+    private static ImmutableList<Integer> BD2 = P0.getLengths()[2].getBreakdown();
+    // iterators for producing new edge breakdowns
+    private static MultiSetLinkedList edge0 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(BD0));
+    private static MultiSetLinkedList edge1 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(BD1));
+    private static MultiSetLinkedList edge2 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(BD2));
+    // the starting edge breakdowns
+    private static final ImmutableList<Integer> start0 = edge0.getImmutableList();
+    private static final ImmutableList<Integer> start1 = edge1.getImmutableList();
+    private static final ImmutableList<Integer> start2 = edge2.getImmutableList();
+    // two Orientations to be identified.
+    // only relevant if P0 is isosceles.
+    private static final Orientation o1;
+    private static final Orientation o2;
+    // a boolean that tells us if o1 = o2 or o1 = -o2.
+    // only relevant if P0 is isosceles.
+    private static boolean flip = false;
+
+    // set BD0, BD1, BD2 equal to the starting edge breakdowns
+    //BD0 = start0;
+    //BD1 = start1;
+    //BD2 = start2;
+
+    // true if we haven't created all edge breakdowns yet
+    private static boolean notDoneYet = true;
+
+    static { // initialize o1 and o2
+        BasicAngle[] a = P0.getAngles();
+        Orientation[] o = P0.getOrientations();
+        // we want to identify the Orientations on the two equal edges.
+        // to do that we need to know which Orientations those are.
+        o1 = o[1];
+        if (a[1].equals(a[0])) {
+            o2 = o[0];
+        } else {
+            o2 = o[2];
+        }
+    } // initialization of o1 and o2 ends here
+
+    private static void iterateEdgeBreakdown() {
+        edge0.iterate();
+        BD0 = edge0.getImmutableList();
+        if (BD0.equals(start0)) {
+            if (P0.isosceles()) { // then we only need two breakdowns
+                edge2.iterate();
+                BD2 = edge2.getImmutableList();
+                if (BD2.equals(start2)) notDoneYet = false;
+            } else { // if it's not isosceles, use all three breakdowns
+                edge1.iterate();
+                BD1 = edge1.getImmutableList();
+                if (BD1.equals(start1)) {
+                    edge2.iterate();
+                    BD2 = edge2.getImmutableList();
+                    if (BD2.equals(start2)) notDoneYet = false;
+                }
+            }
+        }
+    }
+
+    private static WorkUnit nextWorkUnit() {
+
+        if (P0.isosceles()) {
+        // how we submit BasicWorkUnits
+        // depends on whether P0 is isosceles.
+
+            BasicEdge[] edgeList = P0.createSkeleton(BD0, BD2, flip);
+            ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD2);
+            BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
+            // identify the Orientations on the two equal edges
+            if (flip) {
+                patch = patch.identify(o1,o2.getOpposite());
+            } else {
+                patch = patch.identify(o1,o2);
+            }
+
+            if (flip) iterateEdgeBreakdown();
+            flip = !flip;
+
+            // create a new unit of work
+            return BasicWorkUnit.createBasicWorkUnit(patch,testBD,tiles);
+
+        } else {
+
+            BasicEdge[] edgeList = P0.createSkeleton(BD0, BD1, BD2);
+            ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD1, BD2);
+
+            BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
+
+            iterateEdgeBreakdown();
+
+            return BasicWorkUnit.createBasicWorkUnit(patch,testBD,tiles);
+
+        } // end of BasicWorkUnit submissions
+    }
+
 
     public static void main(String[] args)
     {
@@ -27,9 +130,6 @@ public class SimpleTest
         Logger log = executorService.getLogger();
 
         ConcurrentLinkedQueue<WorkUnit> initialWorkUnits = new ConcurrentLinkedQueue<WorkUnit>();
-        System.out.print("Generating initial work units...");
-        createWorkUnits(initialWorkUnits);
-        System.out.println(initialWorkUnits.size() + " units have been generated.");
 
         Scanner kbd = new Scanner(System.in);
 
@@ -39,9 +139,9 @@ public class SimpleTest
 
         // submit all jobs
         nextUnit:
-        while (!initialWorkUnits.isEmpty())
+        while (notDoneYet)
             {
-                WorkUnit thisUnit = initialWorkUnits.poll();
+                WorkUnit thisUnit = nextWorkUnit();
 
                 // submit the next work unit
                 Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
@@ -99,10 +199,6 @@ public class SimpleTest
                 // for monitoring purposes:
                 //System.out.println("Press ENTER");
                 //kbd.nextLine();
-//                System.out.println("OrientationClassPool hits: " + String.format("%.3f", OC.hitPercentage()) + "%       Pool size: " + OC.size());
-//                System.out.println("BytePointPool hits: " + String.format("%.3f", POOL.hitPercentage()) + "%   Pool size: " + POOL.size());
-                //POOL.clear();
-                OC.clear();
                 System.out.print("Garbage collection initiated...");
                 System.gc();
                 System.out.println("complete.\n");
@@ -179,141 +275,5 @@ public class SimpleTest
         }
     }
 
-    private static void createWorkUnits(ConcurrentLinkedQueue<WorkUnit> list)
-    {
-        //int myTile = 0; // uncomment this line for a small search
-        int myTile = 0; // uncomment this line for a big search
-
-        BasicPrototile P0 = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(myTile));
-
-        ImmutableList<Integer> BD0 = P0.getLengths()[0].getBreakdown();
-        ImmutableList<Integer> BD1 = P0.getLengths()[1].getBreakdown();
-        ImmutableList<Integer> BD2 = P0.getLengths()[2].getBreakdown();
-        MultiSetLinkedList edge0 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(BD0));
-        MultiSetLinkedList edge1 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(BD1));
-        MultiSetLinkedList edge2 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(BD2));
-        ImmutableList<Integer> start0 = edge0.getImmutableList();
-        ImmutableList<Integer> start1 = edge1.getImmutableList();
-        ImmutableList<Integer> start2 = edge2.getImmutableList();
-        BD0 = start0;
-        BD1 = start1;
-        BD2 = start2;
-        PrototileList tiles = PrototileList.createPrototileList(BasicPrototile.getPrototileList(Initializer.SUBSTITUTION_MATRIX.getColumn(myTile)));
-        BytePoint[] vertices = P0.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
-        BytePoint[] bigVertices = new BytePoint[] {vertices[0].inflate(),vertices[1].inflate(),vertices[2].inflate()};
-
-//        ImmutableList<Integer> inflList = Preinitializer.INFL;
-//        ShortPolynomial infl = ShortPolynomial.createShortPolynomial(inflList);
-//        Matrix otherInfl = infl.evaluate(LengthAndAreaCalculator.AMAT);
-//        System.out.println(Initializer.SUBSTITUTION_MATRIX.getColumn(myTile));
-//        System.out.println(Initializer.SUBSTITUTION_MATRIX);
-//        System.out.println(LengthAndAreaCalculator.arrayString((LengthAndAreaCalculator.AREA_MATRIX.inverse()).times(otherInfl).times(otherInfl).times(LengthAndAreaCalculator.AREA_MATRIX).getArray()));
-
-        // submit 30 jobs to the executor service
-        // note: if this exceeds JOB_CAPACITY, then this thread will actually do the work, based on the rejected execution handler
-        //ArrayList<Future> futures = new ArrayList<Future>();    // keep a list of all the futures
-        //LinkedHashMap<WorkUnit,Future<Result>> submittedJobs = new LinkedHashMap<WorkUnit,Future<Result>>();
-
-        if (P0.isosceles()) {
-        // how we submit BasicWorkUnits
-        // depends on whether P0 is isosceles.
-            BasicAngle[] a = P0.getAngles();
-            Orientation[] o = P0.getOrientations();
-            // we want to identify the Orientations on the two equal edges.
-            // to do that we need to know which Orientations those are.
-            Orientation o1 = o[1];
-            Orientation o2;
-            if (a[1].equals(a[0])) {
-                o2 = o[0];
-            } else {
-                o2 = o[2];
-            }
-            do {
-                do {
-
-                    BasicEdge[] edgeList = P0.createSkeleton(BD0, BD2, false);
-                    ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD2);
-
-                    BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
-                    // identify the Orientations on the two equal edges
-                    patch = patch.identify(o1,o2);
-
-                    // create a new unit of work
-                    WorkUnit thisUnit = BasicWorkUnit.createBasicWorkUnit(patch,testBD,tiles);
-
-                    // submit this unit of work to the executor service
-                    //checkIfBusy();
-                    //Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
-                    list.add(thisUnit);
-
-                    // make a map between pieces of work and their futures
-                    //submittedJobs.put(thisUnit,thisFuture);
-                    //System.out.println("Job " + thisUnit.hashCode() + " submitted.");
-                    //log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
-
-                    edgeList = P0.createSkeleton(BD0, BD2, true);
-                    testBD = ImmutableList.of(BD0, BD2);
-
-                    patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
-                    // identify the Orientations on the two equal edges
-                    patch = patch.identify(o1.getOpposite(),o2);
-
-                    // create a new unit of work
-                    thisUnit = BasicWorkUnit.createBasicWorkUnit(patch,testBD,tiles);
-
-                    // submit this unit of work to the executor service
-                    //checkIfBusy();
-                    //thisFuture = executorService.getExecutor().submit(thisUnit);
-                    list.add(thisUnit);
-
-                    // make a map between pieces of work and their futures
-                    //submittedJobs.put(thisUnit,thisFuture);
-                    //System.out.println("Job " + thisUnit.hashCode() + " submitted.");
-                    //log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
-
-                    edge2.iterate();
-                    BD2 = edge2.getImmutableList();
-                } while (!BD2.equals(start2));
-                edge0.iterate();
-                BD0 = edge0.getImmutableList();
-            } while (!BD0.equals(start0));
-        } else {
-            do {
-                do {
-                    do {
-
-                        BasicEdge[] edgeList = P0.createSkeleton(BD0, BD1, BD2);
-                        ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD1, BD2);
-
-                        BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
-
-                        // create a new unit of work
-                        WorkUnit thisUnit = BasicWorkUnit.createBasicWorkUnit(patch,testBD,tiles);
-
-                        // submit this unit of work to the executor service
-                        // the service returns a Future object
-                        // when polled, the Future object will either block if the job isn't done yet
-                        // or return the result if it is
-                        // (exceptions can be thrown if the job was interrupted/cancelled, failed, etc.)
-                        //checkIfBusy();
-                        //Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
-                        list.add(thisUnit);
-
-                        // make a map between pieces of work and their futures
-                        //submittedJobs.put(thisUnit,thisFuture);
-                        //System.out.println("Job " + thisUnit.hashCode() + " submitted.");
-                        //log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
-
-                        edge2.iterate();
-                        BD2 = edge2.getImmutableList();
-                    } while (!BD2.equals(start2));
-                    edge1.iterate();
-                    BD1 = edge1.getImmutableList();
-                } while (!BD1.equals(start1));
-                edge0.iterate();
-                BD0 = edge0.getImmutableList();
-            } while (!BD0.equals(start0));
-        } // end of BasicWorkUnit submissions
-    }
 
 } // end of SimpleTest
