@@ -96,7 +96,7 @@ public class BasicWorkUnit implements WorkUnit, Serializable {
     private int tryAndPlace(BasicPrototile p, BasicEdge e, ImmutableSet<Orientation> o) {
         int numPlaced = 0;
         BasicWorkUnit nextUnit;
-        ImmutableList<BasicTriangle> triangles = p.placements(e, o);
+        List<BasicTriangle> triangles = p.placements(e, o);
         for (BasicTriangle t : triangles) {
             if (patch.compatible(t)) {
                 nextUnit = new BasicWorkUnit(patch.placeTriangle(t),edgeBreakdown,availableTiles.remove(p));
@@ -148,7 +148,7 @@ public class BasicWorkUnit implements WorkUnit, Serializable {
                 // we try to place p, and 
                 // if we can we return false
                 if (p.compatible(nextEdge.getLength())) {
-                    ImmutableList<BasicTriangle> triangles = p.placements(nextEdge, equivalenceClass);
+                    List<BasicTriangle> triangles = p.placements(nextEdge, equivalenceClass);
                     for (BasicTriangle t : triangles) {
                         if (patch.compatible(t)) return false;
                     }

@@ -182,13 +182,13 @@ public class SimpleTest
     private static void createWorkUnits(ConcurrentLinkedQueue<WorkUnit> list)
     {
         //int myTile = 0; // uncomment this line for a small search
-        int myTile = 4; // uncomment this line for a big search
+        int myTile = 0; // uncomment this line for a big search
 
         BasicPrototile P0 = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(myTile));
 
-        ImmutableList<Integer> BD0 = P0.getLengths().get(0).getBreakdown();
-        ImmutableList<Integer> BD1 = P0.getLengths().get(1).getBreakdown();
-        ImmutableList<Integer> BD2 = P0.getLengths().get(2).getBreakdown();
+        ImmutableList<Integer> BD0 = P0.getLengths()[0].getBreakdown();
+        ImmutableList<Integer> BD1 = P0.getLengths()[1].getBreakdown();
+        ImmutableList<Integer> BD2 = P0.getLengths()[2].getBreakdown();
         MultiSetLinkedList edge0 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(BD0));
         MultiSetLinkedList edge1 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(BD1));
         MultiSetLinkedList edge2 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(BD2));
@@ -199,8 +199,8 @@ public class SimpleTest
         BD1 = start1;
         BD2 = start2;
         PrototileList tiles = PrototileList.createPrototileList(BasicPrototile.getPrototileList(Initializer.SUBSTITUTION_MATRIX.getColumn(myTile)));
-        ImmutableList<BytePoint> vertices = P0.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
-        BytePoint[] bigVertices = new BytePoint[] {vertices.get(0).inflate(),vertices.get(1).inflate(),vertices.get(2).inflate()};
+        BytePoint[] vertices = P0.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
+        BytePoint[] bigVertices = new BytePoint[] {vertices[0].inflate(),vertices[1].inflate(),vertices[2].inflate()};
 
 //        ImmutableList<Integer> inflList = Preinitializer.INFL;
 //        ShortPolynomial infl = ShortPolynomial.createShortPolynomial(inflList);
@@ -217,16 +217,16 @@ public class SimpleTest
         if (P0.isosceles()) {
         // how we submit BasicWorkUnits
         // depends on whether P0 is isosceles.
-            ImmutableList<BasicAngle> a = P0.getAngles();
-            ImmutableList<Orientation> o = P0.getOrientations();
+            BasicAngle[] a = P0.getAngles();
+            Orientation[] o = P0.getOrientations();
             // we want to identify the Orientations on the two equal edges.
             // to do that we need to know which Orientations those are.
-            Orientation o1 = o.get(1);
+            Orientation o1 = o[1];
             Orientation o2;
-            if (a.get(1).equals(a.get(0))) {
-                o2 = o.get(0);
+            if (a[1].equals(a[0])) {
+                o2 = o[0];
             } else {
-                o2 = o.get(2);
+                o2 = o[2];
             }
             do {
                 do {

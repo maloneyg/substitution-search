@@ -79,13 +79,13 @@ public class ObjectEfficiency
         List<BasicPatch> pl = new ArrayList<BasicPatch>(LIST_LENGTH);
         for (int i=0; i < LIST_LENGTH; i++) {
             BasicPrototile p = ALL_PROTOTILES.get(generator.nextInt(MAX_PROTOTILE));
-            ImmutableList<Integer> BD0 = p.getLengths().get(0).getBreakdown();
-            ImmutableList<Integer> BD1 = p.getLengths().get(1).getBreakdown();
-            ImmutableList<Integer> BD2 = p.getLengths().get(2).getBreakdown();
+            ImmutableList<Integer> BD0 = p.getLengths()[0].getBreakdown();
+            ImmutableList<Integer> BD1 = p.getLengths()[1].getBreakdown();
+            ImmutableList<Integer> BD2 = p.getLengths()[2].getBreakdown();
             BasicEdge[] edgeList = p.createSkeleton(BD0, BD1, BD2);
             ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD1, BD2);
-            ImmutableList<BytePoint> vertices = p.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
-            BytePoint[] bigVertices = new BytePoint[] {vertices.get(0).inflate(),vertices.get(1).inflate(),vertices.get(2).inflate()};
+            BytePoint[] vertices = p.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
+            BytePoint[] bigVertices = new BytePoint[] {vertices[0].inflate(),vertices[1].inflate(),vertices[2].inflate()};
             BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
             pl.add(patch);
         }

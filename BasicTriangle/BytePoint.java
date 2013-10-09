@@ -147,13 +147,7 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     }
 
     public BytePoint rotate(BasicAngle a) {
-        int i = a.getAsInt();
-        if (i < 0)
-            throw new IllegalArgumentException("You must perform a positive number of rotations.");
-
-        byte[] result  = pointAsArray();
-        for (int j = 0; j < i; j++)
-            result = ROT.rowTimes(result);
+        byte[] result  = a.getRotation().rowTimes(pointAsArray());
         return createBytePoint(result);
     }
 
