@@ -2,7 +2,6 @@
 *    This class implements an edge.
 */
 
-import com.google.common.collect.*;
 import java.io.Serializable;
 
 public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, BasicEdgeLength, BasicEdge>, Serializable {
@@ -37,12 +36,12 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
         return length;
     }
 
-    public ImmutableList<BytePoint> getEnds() {
-        return ImmutableList.of(ends[0],ends[1]);
+    public BytePoint[] getEnds() {
+        return new BytePoint[] {ends[0],ends[1]};
     }
 
     public BasicEdge transform(BasicAngle a, BytePoint v) {
-        BytePoint[] newEnds = { ends[0].rotate(a).add(v), ends[1].rotate(a).add(v) };
+        BytePoint[] newEnds = { BytePoint.createBytePoint(ends[0],false,a,v), BytePoint.createBytePoint(ends[1],false,a,v) };
         return new BasicEdge(length, orientation, newEnds);
     }
 
@@ -214,13 +213,13 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
     // that get identified by placing them incident to one 
     // another.
     // No sanity check! We assume that they're congruent.
-    protected ImmutableList<Orientation> getMatches(BasicEdge e) {
+    protected Orientation[] getMatches(BasicEdge e) {
         BytePoint u0 = this.ends[0];
         BytePoint v0 = e.ends[0];
         if (u0.equals(v0)) {
-            return ImmutableList.of(this.orientation,e.orientation);
+            return new Orientation[] {this.orientation,e.orientation};
         } else {
-            return ImmutableList.of(this.orientation,e.orientation.getOpposite());
+            return new Orientation[] {this.orientation,e.orientation.getOpposite()};
         }
     }
 

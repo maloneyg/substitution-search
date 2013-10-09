@@ -8,7 +8,7 @@ public interface AbstractEdge<A extends AbstractAngle, P extends AbstractPoint, 
 
     public L getLength();
 
-    public ImmutableList<P> getEnds();
+    public P[] getEnds();
 
     /* 
     * Given an edge with a (possibly different) orientation,

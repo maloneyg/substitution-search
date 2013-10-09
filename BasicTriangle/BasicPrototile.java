@@ -94,8 +94,9 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
     }
 
     // get all Orientations.  We need this to initialize a BasicPatch
-    protected ImmutableList<Orientation> getOrientations() {
-        return ImmutableList.copyOf(orientations);
+    // unsafe operation: passing a final field to the outside world
+    protected Orientation[] getOrientations() {
+        return orientations;
     }
 
     // equals method
@@ -119,15 +120,15 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
     /*
     * return all the lengths
     */
-    public ImmutableList<BasicEdgeLength> getLengths() {
-        return ImmutableList.copyOf(lengths);
+    public BasicEdgeLength[] getLengths() {
+        return lengths;
     }
 
     /*
     * return all the angles
     */
-    public ImmutableList<BasicAngle> getAngles() {
-        return ImmutableList.copyOf(angles);
+    public BasicAngle[] getAngles() {
+        return angles;
     }
 
     /*
@@ -173,12 +174,12 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
     * non-empty list (i.e., it is possible to place
     * an instance of p against e somehow).
     */
-    public ImmutableList<BasicTriangle> placements(BasicEdge e, ImmutableSet<Orientation> equivalenceClass) {
+    public List<BasicTriangle> placements(BasicEdge e, ImmutableSet<Orientation> equivalenceClass) {
         ArrayList<BasicTriangle> output = new ArrayList<>(0);
         BasicEdgeLength l = e.getLength();
-        ImmutableList<BytePoint> ends = e.getEnds();
-        BytePoint e0 = ends.get(0);
-        BytePoint e1 = ends.get(1).subtract(e0);
+        BytePoint[] ends = e.getEnds();
+        BytePoint e0 = ends[0];
+        BytePoint e1 = ends[1].subtract(e0);
         BytePoint shift;
         BasicAngle turn;
         // set preTurn equal to the angle between e1 and the positive x-axis
@@ -211,7 +212,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
                 output.add(place(shift,turn,true));
             }
         }
-        return ImmutableList.copyOf(output);
+        return output;
     }
 
     /*
@@ -229,8 +230,6 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
         Orientation[] newOrientations = orientations;
         BasicEdgeLength[] newLengths = lengths;
         if (flip) {
-            for (int i = 0; i < 3; i++)
-                vertices[i] = vertices[i].reflect();
             /* 
             * Now flip the first and last of everything
             * to put things in ccw order.
@@ -243,7 +242,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
             newOrientations = flipOrientations;
         }
         for (int j = 0; j < 3; j++)
-            vertices[j] = vertices[j].rotate(a).add(p);
+            vertices[j] = BytePoint.createBytePoint(vertices[j],flip,a,p);
         return BasicTriangle.createBasicTriangle(newAngles, vertices, newOrientations, newLengths);
     }
 
@@ -346,9 +345,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
             o3[i] = nowLength.getOrientation(oCount[currentIndex]);
             oCount[currentIndex]++;
         }
-        // initialize o1 and o3.
-        for (int i = 0; i < o1.length; i++) o1[i] = Orientation.createOrientation();
-        for (int i = 0; i < o3.length; i++) o3[i] = Orientation.createOrientation();
+
         // initialize preB2 and o2.
         if (angles[0]==angles[1]) {
             if (reverse) {

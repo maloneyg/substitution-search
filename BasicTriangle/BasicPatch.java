@@ -109,8 +109,8 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BytePoint, BasicEdg
         for (BasicTriangle t : triangles)
             output.add(new OrderedTriple(t.toArray()));
         for (BasicEdge e : openEdges) {
-            p0 = e.getEnds().get(0);
-            p1 = e.getEnds().get(1);
+            p0 = e.getEnds()[0];
+            p1 = e.getEnds()[1];
             counter++;
             if (counter == 1) {
                 edgeList.add((RealMatrix)new Array2DRowRealMatrix(p0.arrayToDraw()));
@@ -135,8 +135,8 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BytePoint, BasicEdg
         for (BasicEdge e1 : openEdges) {
             for (BasicEdge e2 : t.getEdges()) {
                 if (e1.congruent(e2)) {
-                    ImmutableList<Orientation> matches = e1.getMatches(e2);
-                    output = output.identify(matches.get(0),matches.get(1));
+                    Orientation[] matches = e1.getMatches(e2);
+                    output = output.identify(matches[0],matches[1]);
                 }
             }
         }
@@ -263,8 +263,8 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BytePoint, BasicEdg
     * called in the execution of this one.  
     */
     public boolean compatible(BasicTriangle t) {
-        ImmutableList<BytePoint> ends = getNextEdge().getEnds();
-        BytePoint other = t.getOtherVertex(ends.get(0),ends.get(1));
+        BytePoint[] ends = getNextEdge().getEnds();
+        BytePoint other = t.getOtherVertex(ends[0],ends[1]);
 
         // test to see if other is new or already there.
         // if it's on an openEdge but not equal to one 

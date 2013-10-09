@@ -60,16 +60,19 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
         return new BasicTriangle(a,p,o,e);
     }
 
-    public ImmutableList<BasicAngle> getAngles() {
-        return ImmutableList.copyOf(angles);
+    // unsafe: passes final variable to outside world
+    public BasicAngle[] getAngles() {
+        return angles;
     }
 
-    public ImmutableList<BytePoint> getVertices() {
-        return ImmutableList.copyOf(vertices);
+    // unsafe: passes final variable to outside world
+    public BytePoint[] getVertices() {
+        return vertices;
     }
 
-    public ImmutableList<Orientation> getOrientations() {
-        return ImmutableList.copyOf(orientations);
+    // unsafe: passes final variable to outside world
+    public Orientation[] getOrientations() {
+        return orientations;
     }
 
     // Don't call this method too often; it's time-consuming.
@@ -235,9 +238,9 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
 
     // simple incidence test
     public boolean simpleIncidentEdge(BasicEdge e) {
-        ImmutableList<BytePoint> ends = e.getEnds();
+        BytePoint[] ends = e.getEnds();
         List<BytePoint> points = Arrays.asList(vertices);
-        return (points.contains(ends.get(0))&&points.contains(ends.get(1)));
+        return (points.contains(ends[0])&&points.contains(ends[1]));
     }
 
 } // end of class BasicTriangle

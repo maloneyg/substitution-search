@@ -15,7 +15,7 @@ public interface AbstractTriangle<A extends AbstractAngle, P extends AbstractPoi
     * These things must implement various interfaces
     * representing their abstract idealizations.  
     */
-    public ImmutableList<P> getVertices();
+    public P[] getVertices();
 
     /**
     * Given two vertices that (presumably) lie on the triangle,
@@ -23,9 +23,9 @@ public interface AbstractTriangle<A extends AbstractAngle, P extends AbstractPoi
     */
     public P getOtherVertex(P vertex1, P vertex2);
 
-    public ImmutableList<A> getAngles();
+    public A[] getAngles();
 
-    public ImmutableList<Orientation> getOrientations();
+    public Orientation[] getOrientations();
 
     public E[] getEdges();
 

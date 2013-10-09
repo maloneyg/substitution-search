@@ -19,6 +19,9 @@ public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle>, 
     // we need this to make it Serializable
     static final long serialVersionUID = -552924021062179242L;
 
+    // the rotation matrix associated to this angle
+    private final ByteMatrix rot;
+
     static { // initialize ALL_ANGLES
 
         BasicAngle[] preAllAngles = new BasicAngle[2*ANGLE_SUM];
@@ -32,6 +35,10 @@ public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle>, 
     private BasicAngle(int i) {
         int shift = (i < 0)?(2*ANGLE_SUM):0;
         a = i % (2*ANGLE_SUM) + shift;
+        ByteMatrix preRot = ByteMatrix.identity(ANGLE_SUM-1);
+        for (int k = 0; k < i; k++)
+            preRot = preRot.times(Initializer.ROT);
+        rot = preRot;
     }
 
     // static public factory method.
@@ -66,6 +73,11 @@ public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle>, 
     // return the angle as an integer.  
     protected int getAsInt() {
         return this.a;
+    }
+
+    // return the rotation matrix associated to this angle
+    public ByteMatrix getRotation() {
+        return this.rot;
     }
 
     // return this angle plus a
