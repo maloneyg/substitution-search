@@ -16,7 +16,7 @@ public class SimpleTest
 {
 
      // the number of the triangle we're searching
-    private static final int myTile = 0;
+    private static final int myTile = Preinitializer.MY_TILE;
      // the triangle we're searching
     private static final BasicPrototile P0 = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(myTile));
     // the numbers of the different prototiles that fit in INFL.P0
@@ -24,18 +24,18 @@ public class SimpleTest
     // vertices of INFL.P0
     private static final BytePoint[] vertices = P0.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
     private static final BytePoint[] bigVertices = new BytePoint[] {vertices[0].inflate(),vertices[1].inflate(),vertices[2].inflate()};
-    // the starting edge breakdowns of P0
-    private static ImmutableList<Integer> BD0 = P0.getLengths()[0].getBreakdown();
-    private static ImmutableList<Integer> BD1 = P0.getLengths()[1].getBreakdown();
-    private static ImmutableList<Integer> BD2 = P0.getLengths()[2].getBreakdown();
     // iterators for producing new edge breakdowns
-    private static MultiSetLinkedList edge0 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(BD0));
-    private static MultiSetLinkedList edge1 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(BD1));
-    private static MultiSetLinkedList edge2 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(BD2));
+    private static MultiSetLinkedList edge0;
+    private static MultiSetLinkedList edge1;
+    private static MultiSetLinkedList edge2;
     // the starting edge breakdowns
-    private static final ImmutableList<Integer> start0 = edge0.getImmutableList();
-    private static final ImmutableList<Integer> start1 = edge1.getImmutableList();
-    private static final ImmutableList<Integer> start2 = edge2.getImmutableList();
+    private static final ImmutableList<Integer> start0;
+    private static final ImmutableList<Integer> start1;
+    private static final ImmutableList<Integer> start2;
+    // the starting edge breakdowns of P0
+    private static ImmutableList<Integer> BD0;
+    private static ImmutableList<Integer> BD1;
+    private static ImmutableList<Integer> BD2;
     // two Orientations to be identified.
     // only relevant if P0 is isosceles.
     private static final Orientation o1;
@@ -44,13 +44,23 @@ public class SimpleTest
     // only relevant if P0 is isosceles.
     private static boolean flip = false;
 
-    // set BD0, BD1, BD2 equal to the starting edge breakdowns
-    //BD0 = start0;
-    //BD1 = start1;
-    //BD2 = start2;
-
     // true if we haven't created all edge breakdowns yet
     private static boolean notDoneYet = true;
+
+    static { // initialize the edge breakdown iterators
+        ImmutableList<Integer> first0 = P0.getLengths()[0].getBreakdown();
+        ImmutableList<Integer> first1 = P0.getLengths()[1].getBreakdown();
+        ImmutableList<Integer> first2 = P0.getLengths()[2].getBreakdown();
+        edge0 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(first0));
+        edge1 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(first1));
+        edge2 = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(first2));
+        start0 = edge0.getImmutableList();
+        start1 = edge1.getImmutableList();
+        start2 = edge2.getImmutableList();
+        BD0 = start0;
+        BD1 = start1;
+        BD2 = start2;
+    } // initialization of edge breakdown iterators ends here
 
     static { // initialize o1 and o2
         BasicAngle[] a = P0.getAngles();
