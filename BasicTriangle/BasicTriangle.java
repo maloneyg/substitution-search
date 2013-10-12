@@ -30,19 +30,25 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
         .maximumSize(1000)// we may want to change this later
         .build(); // maintain a cache of existing BasicTriangles
 */
+    // the prototile of which this is an instance
+    private final BasicPrototile prototile;
+    // is it reflected or not?
+    private final boolean flip;
 
     // constructor methods.
-    private BasicTriangle(BasicAngle[] a, BytePoint[] p, Orientation[] o, BasicEdgeLength[] e) {
+    private BasicTriangle(BasicAngle[] a, BytePoint[] p, Orientation[] o, BasicEdgeLength[] e, BasicPrototile P, boolean f) {
         angles = a;
         BytePoint[] tempVertices = new BytePoint[p.length];
         for (int i = 0; i < p.length; i++) tempVertices[i] = p[i];
         vertices = tempVertices;
         orientations = o;
         edgeLengths = e;
+        prototile = P;
+        flip = f;
     }
 
     // public static factory methods.
-    public static BasicTriangle createBasicTriangle(BasicAngle[] a, BytePoint[] p, Orientation[] o, BasicEdgeLength[] e) {
+    public static BasicTriangle createBasicTriangle(BasicAngle[] a, BytePoint[] p, Orientation[] o, BasicEdgeLength[] e, BasicPrototile P, boolean f) {
         /*final BasicAngle[] aa = a;
         final BytePoint[] pp = p;
         final Orientation[] oo = o;
@@ -57,7 +63,15 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
         } catch (ExecutionException ex) {
             throw new IllegalArgumentException(ex.getCause());
         }*/
-        return new BasicTriangle(a,p,o,e);
+        return new BasicTriangle(a,p,o,e,P,f);
+    }
+
+    public BasicPrototile getPrototile() {
+        return prototile;
+    }
+
+    public boolean getFlip() {
+        return flip;
     }
 
     // unsafe: passes final variable to outside world

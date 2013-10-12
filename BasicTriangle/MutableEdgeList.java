@@ -90,25 +90,30 @@ public class MutableEdgeList {
     }
 
     // place triangle t 
-    public void place(BasicTriangle t) {
+    public void place(BasicTriangle t, MutableOrientationPartition p) {
         BasicEdge[] matches = t.getEdges();
         /*
         * find the indices of the edges of t in openEdges.
         */
         List<Integer> indexList = new ArrayList<>();
+        List<Integer> tList = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             int thisIndex = openEdges.indexOf(matches[i]);
             if (thisIndex == -1) {
                 openEdges.push(matches[i].reverse());
             } else {
                 indexList.add(thisIndex);
+                tList.add(i);
             }
         }
         Collections.sort(indexList);
 
-        // the last point is the first to be added to closedEdges
+        // the last open edge is the first to be added to closedEdges
         for (int j = 0; j < indexList.size(); j++) {
-            closedEdges.push(new IndexAndEdge(indexList.get(j),openEdges.get(indexList.get(j))));
+            int k = indexList.get(j);
+            BasicEdge e = openEdges.get(k);
+            p.identify(e.getOrientation(),matches[tList.get(j)].getOrientation());
+            closedEdges.push(new IndexAndEdge(k,e));
         }
         // but the last to be removed from openEdges
         for (int j = indexList.size()-1; j >= 0; j--) {

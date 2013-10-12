@@ -93,6 +93,16 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
         return createBasicPrototile(new int[] {a.get(0),a.get(1),a.get(2)});
     }
 
+    // public static factory method to return the first tile
+    public static BasicPrototile getFirstTile() {
+        return ALL_PROTOTILES.get(0);
+    }
+
+    // return the prototile after this one in the list
+    public BasicPrototile getNextTile() {
+        return ALL_PROTOTILES.get((ALL_PROTOTILES.indexOf(this)+1)%ALL_PROTOTILES.size());
+    }
+
     // get all Orientations.  We need this to initialize a BasicPatch
     // unsafe operation: passing a final field to the outside world
     protected Orientation[] getOrientations() {
@@ -142,6 +152,17 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
     }
 
     /*
+    * return true if this has two edges of length l
+    */
+    public boolean hasTwo(BasicEdgeLength l) {
+        int count = 0;
+        for (int i = 0; i < 3; i++) {
+            if (lengths[i].equals(l)) count++;
+        }
+        return (count==2);
+    }
+
+    /*
     * return a list of BasicPrototiles.
     * BasicPrototile p at position i in ALL_PROTOTILES 
     * should appear counts.get(i) times in this list.
@@ -160,6 +181,38 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
     */
     public boolean compatible(BasicEdgeLength l) {
         return Arrays.asList(lengths).contains(l);
+    }
+
+    /*
+    * check if this has an edge with length equal
+    * to that of e.
+    * if not, return false.
+    * if yes, then check either the first or 
+    * second such edge, depending on if secondEdge
+    * is false or true. make sure its orientation
+    * does not lie in klass (or its opposite 
+    * does not lie in klass, if flip is true). 
+    */
+    public boolean compatible(BasicEdge e, boolean secondEdge, boolean flip, Iterable<Orientation> klass) {
+        int i = -1;
+        boolean yet = !secondEdge;
+        for (int j = 0; j < 3; j++) {
+            if (lengths[j].equals(e.getLength())) {
+                if (yet) {
+                    i = j;
+                    break;
+                } else {
+                    yet = true;
+                }
+            }
+        }
+        if (i == -1) return false; // we can't find this length
+        // if we're flipping, check the opposite Orientation
+        Orientation o = (flip)? orientations[i] : orientations[i].getOpposite();
+        for (Orientation a : klass) {
+            if (a.equals(o)) return false;
+        }
+        return true;
     }
 
     /*
@@ -243,7 +296,62 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
         }
         for (int j = 0; j < 3; j++)
             vertices[j] = BytePoint.createBytePoint(vertices[j],flip,a,p);
-        return BasicTriangle.createBasicTriangle(newAngles, vertices, newOrientations, newLengths);
+        return BasicTriangle.createBasicTriangle(newAngles, vertices, newOrientations, newLengths, this, flip);
+    }
+
+    /*
+    * place this prototile against e.
+    * this triangle might contain two edges with length
+    * equal to that of e. If so, secondEdge tells us 
+    * whether or not to place the second of them against
+    * e. flip tells us whether or not to reflect this.
+    */
+    public BasicTriangle place(BasicEdge e, boolean secondEdge, boolean flip) {
+        BasicEdgeLength l = e.getLength();
+        BytePoint[] ends = e.getEnds();
+        BytePoint e0 = ends[0];
+        BytePoint e1 = ends[1].subtract(e0);
+        BytePoint shift;
+        BasicAngle turn;
+        // set preTurn equal to the angle between e1 and the positive x-axis
+        BasicAngle preTurn = e.angle();
+        int i;
+        boolean yet = !secondEdge; // we might have to go past the first matching edge
+        // find the index of the edge matching length l
+        for (i = 0; i < 3; i++) {
+            if (l.equals(lengths[i])) {
+                if (yet) {
+                    break;
+                } else {
+                    yet = true;
+                }
+            }
+        }
+
+        if (!flip) {
+            if (i == 0) {
+                shift = e0;
+                turn = preTurn;
+            } else if (i == 1) {
+                turn = preTurn.minus(angles[2].supplement());
+                shift = e0.subtract(lengths[0].getAsVector(turn));
+            } else {
+                turn = preTurn.minus(angles[1].piPlus());
+                shift = e0.subtract(lengths[2].getAsVector(turn.plus(angles[1])));
+            }
+        } else {
+            if (i == 0) {
+                turn = preTurn;
+                shift = e0.add(lengths[0].getAsVector(turn));
+            } else if (i == 1) {
+                turn = preTurn.minus(angles[2].piPlus());
+                shift = e0.subtract(lengths[2].getAsVector(turn.plus(angles[1].supplement())));
+            } else {
+                turn = preTurn.minus(angles[1].supplement());
+                shift = e0;
+            }
+        }
+    return place(shift,turn,flip);
     }
 
     // create an outline of the inflated prototile.  
@@ -422,27 +530,10 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
 
     public static void main(String[] args) {
 
-        byte Z = (byte) 0;
-
-        BasicPrototile P0 = createBasicPrototile(new int[] { 1, 3, 3 });
-        System.out.println(P0);
-
-        BasicPrototile P1 = createBasicPrototile(new int[] { 1, 2, 4 });
-        System.out.println(P1);
-
-        BasicPrototile P2 = createBasicPrototile(new int[] { 2, 2, 3 });
-        System.out.println(P2);
-
-        BasicTriangle TZ = P2.place(BytePoint.createBytePoint(new byte[] {1,Z,1,Z,1,Z}),BasicAngle.createBasicAngle(3),false);
-        System.out.println(TZ);
-
-        BasicTriangle T1 = P2.place(BytePoint.createBytePoint(new byte[] {Z,Z,Z,Z,Z,Z}),BasicAngle.createBasicAngle(Z),false);
-        System.out.println(T1);
-
-        BytePoint p = BasicEdgeLength.createBasicEdgeLength(0).getAsVector(BasicAngle.createBasicAngle(0));
-        BasicEdge[] ee = T1.getEdges();
-        for (BasicEdge e : ee) {
-            System.out.print(p + " on " + e + ": " + e.incident(p) + "\n");
+        BasicPrototile testMe = getFirstTile();
+        for (int k = 0; k < 10; k++) {
+            System.out.println(testMe);
+            testMe = testMe.getNextTile();
         }
 
     }

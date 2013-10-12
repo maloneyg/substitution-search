@@ -14,6 +14,17 @@ public class MutablePatch {
     // make it Serializable
 //    static final long serialVersionUID = 3422733298735932933L;
 
+    /*
+    * The state variables.
+    * These variables store the current state of the puzzle--
+    * what it looks like, what has been placed so far, what
+    * still needs to be placed, etc. 
+    * They don't contain direct information about what we're
+    * trying to place now, what we placed before, or what we'll
+    * place next, although some of this can be inferred from 
+    * the state.
+    */
+
     // the triangles in this patch
     private Stack<BasicTriangle> triangles;
 
@@ -23,8 +34,48 @@ public class MutablePatch {
     // the Orientations that have been identified with one another
     private MutableOrientationPartition partition;
 
+    // prototiles available for placement
+    private ArrayList<BasicPrototile> tileList;
+
     // vertices of the big triangle
     private final BytePoint[] bigVertices;
+
+    /*
+    * The step variables.
+    * They tell us what we've tried most recently and what
+    * we're going to try next.  They are reset whenever we
+    * place or remove a triangle.  
+    */
+
+    // which edge are we currently trying to cover?
+    private BasicEdge currentEdge;
+
+    // which prototile are we currently trying to place?
+    private BasicPrototile currentPrototile;
+
+    // currentPrototile might have two edges of the same 
+    // length as current Edge; are we on the second one?
+    private boolean secondEdge;
+
+    // are we trying to place a reflected version of currentPrototile?
+    private boolean flip;
+
+    /*
+    * The intial state of the step variables.
+    * They tell us when we've tried every possibility
+    * for a given edge, and have to give up and remove
+    * the most recent triangle.  
+    */
+
+    // the first prototile
+    private BasicPrototile initialPrototile = BasicPrototile.getFirstTile();
+
+    // initially, we are not on the second edge
+    // in an isosceles triangle
+    private boolean initialSecondEdge = false;
+
+    // initially we are not trying to place a reflected tile
+    private boolean initialFlip = false;
 
     // initial constructor
     private MutablePatch(BasicEdge[] e, BytePoint[] v) {
@@ -55,6 +106,56 @@ public class MutablePatch {
         return new MutablePatch(e,v);
     }
 
+    // advance the step variables by one step
+    private void step() {
+        flip = !flip;
+        if (flip == initialFlip) {
+            secondEdge = !secondEdge;
+            if (!currentPrototile.hasTwo(currentEdge.getLength())) secondEdge = initialSecondEdge;
+            if (secondEdge == initialSecondEdge) {
+                currentPrototile = currentPrototile.getNextTile();
+            }
+        }
+    }
+
+    // return true if the step variables are at the start, else false
+    private boolean backToStart() {
+        return (flip == initialFlip && secondEdge == initialSecondEdge && currentPrototile.equals(initialPrototile));
+    }
+
+    // reset the step variables to their initial states
+    // use this when you've just placed a triangle
+    private void resetSteps() {
+        flip = initialFlip;
+        secondEdge = initialSecondEdge;
+        currentPrototile = initialPrototile;
+        currentEdge = edges.getNextEdge();
+    }
+
+    // here is where all of the work is done.
+    // place a single tile, then call this method recursively.
+    public void solve() {
+        do {
+            if (tileList.contains(currentPrototile) && currentPrototile.compatible(currentEdge,secondEdge,flip,partition.equivalenceClass(currentEdge.getOrientation()))) {
+                BasicTriangle t = currentPrototile.place(currentEdge,secondEdge,flip);
+                if (compatible(t)) {
+                    placeTriangle(t);
+                    if (partition.valid()) solve(); // the recursive call
+                    //remove();
+                }
+            }
+
+            step();
+        } while (!backToStart()); // stop when we've tried all prototiles
+
+        // if there are triangles in the list, pop the
+        // last one and restore the previous state and steps
+        //if (!triangles.empty()) {
+        // do stuff
+        //}
+
+    } // solve ends here
+
     // equals method
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())
@@ -74,7 +175,7 @@ public class MutablePatch {
     }
 
     /*
-    * The big test.
+    * output for drawing the result
     */
     public ArrayList<OrderedTriple> graphicsDump() {
         ArrayList<OrderedTriple> output = new ArrayList<OrderedTriple>(triangles.size());
@@ -102,97 +203,31 @@ public class MutablePatch {
         return output;
     }
 
-    // Identify the Orientations of edges of t with 
-    // the Orientations of the openEdges with which they
-    // are incident.
-//    private void updateOrientations(BasicTriangle t) {
-//        for (BasicEdge e1 : openEdges) {
-//            for (BasicEdge e2 : t.getEdges()) {
-//                if (e1.congruent(e2)) {
-//                    ImmutableList<Orientation> matches = e1.getMatches(e2);
-//                    output.identify(matches.get(0),matches.get(1));
-//                }
-//            }
-//        }
-//    }
+    /*
+    * update this patch by adding triangle t to it.
+    * This is what we do after compatible(t) returns true.
+    */
+    private void placeTriangle(BasicTriangle t) {
+        tileList.remove(currentPrototile);
+        edges.place(t,partition);
+        resetSteps();
+        currentEdge = edges.getNextEdge();
+        triangles.push(t);
+    } // placeTriangle(t) ends here
 
     /*
-    * update this patch by addign triangle t to it.
-    * This is what we do after compatible(t) returns true.
-    *
+    * remove the most recent triangle from this patch.
+    * this is what we do after running through solve()
+    * from beginning to end.
     */
-//    public void placeTriangle(BasicTriangle t) {
-//        triangles.push(t);
-//        updateOrientations(t);
-//
-//        BasicEdge[] matches = t.getEdges();
-//        /*
-//        * return an error message if any of the edges in t is
-//        * already in closedEdges.
-//        */
-//        for (i = 0; i < 3; i++) {
-//            if (closedEdges.contains(matches[i]))
-//                throw new IllegalArgumentException("Trying to add " + matches[i] + ", which is already closed in this patch.");
-//        }
-//
-//        /*
-//        * find the indices of the edges of t in openEdges.
-//        */
-//        List<BasicEdge> tempEdges = Arrays.asList(openEdges);
-//        int[] edgeIndexList = { //
-//                                  tempEdges.indexOf(matches[0]), // 
-//                                  tempEdges.indexOf(matches[1]), // 
-//                                  tempEdges.indexOf(matches[2])  // 
-//                              };
-//        tempEdges = null;
-//
-//        // find the indices of the edges of t in openEdges.
-//        int totalMatches = 0;
-//        // count how many edges of t are in openEdges.
-//        for (i = 0; i < 3; i++) {
-//            if (edgeIndexList[i] != -1)
-//                totalMatches++;
-//        }
-//
-//        // fill up the new openEdge list
-//        BasicEdge[] newOpenEdges = new BasicEdge[openEdges.length+3-2*totalMatches];
-//        int j = 0;
-//        // first put in all the old open edges that haven't been covered
-//        for (i = 0; i < openEdges.length; i++) {
-//            if (!(i==edgeIndexList[0]||i==edgeIndexList[1]||i==edgeIndexList[2])) {
-//                newOpenEdges[j] = openEdges[i];
-//                j++;
-//            }
-//        }
-//        // now put in all the new edges that don't match any old edges
-//        for (i = 0; i < 3; i++) {
-//            if (edgeIndexList[i]==-1) {
-//                newOpenEdges[j] = matches[i].reverse();
-//                j++;
-//            }
-//        }
-//
-//        // fill up the new closedEdgeList
- //       BasicEdge[] newClosedEdges = new BasicEdge[closedEdges.length+totalMatches];
-//        // first put in all the old closed edges
-//        for (i = 0; i < closedEdges.length; i++) {
-//            newClosedEdges[i] = closedEdges[i];
-//        }
-//        // now put in all the new edges from t
-//        for (j = 0; j < 3; j++) {
-//            if (edgeIndexList[j]!=-1) {
-//                newClosedEdges[i] = matches[j];
-//                i++;
-//            }
-//        }
-//        return new MutablePatch( //
-//                                 newTriangles, //
- //                                newOpenEdges, //
-//                                 newClosedEdges, //
-//                                 newOrientationPartition(t), //
-//                                 bigVertices //
-//                             );
-//    } // placeTriangle(t) ends here
+    private void remove() {
+        BasicTriangle t = triangles.pop();
+        edges.remove(t);
+        currentEdge = edges.getNextEdge();
+        currentPrototile = t.getPrototile();
+        flip = t.getFlip();
+        tileList.add(currentPrototile);
+    }
 
     /*
     * Get the next edge.
