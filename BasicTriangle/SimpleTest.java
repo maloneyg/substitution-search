@@ -16,7 +16,7 @@ public class SimpleTest
 {
 
      // the number of the triangle we're searching
-    private static final int myTile = 4;
+    private static final int myTile = 0;
      // the triangle we're searching
     private static final BasicPrototile P0 = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(myTile));
     // the numbers of the different prototiles that fit in INFL.P0
