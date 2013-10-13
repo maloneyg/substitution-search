@@ -123,13 +123,13 @@ public class MutableEdgeList {
     }
 
     // remove triangle t 
-    public void remove(BasicTriangle t) {
+    public void remove(BasicTriangle t, Iterable<BasicTriangle> triangles, MutableOrientationPartition o) {
         BasicEdge[] matches = t.getEdges();
         // remove BasicEdges from openEdges until you get
         // one that isn't incident with t
         while (true) {
             BasicEdge e = openEdges.pop();
-            if (!t.simpleIncidentEdge(e)) {
+            if (!t.reverseIncidentEdge(e)) {
                 openEdges.push(e);
                 break;
             }

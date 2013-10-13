@@ -141,7 +141,7 @@ public class MutablePatch {
                 if (compatible(t)) {
                     placeTriangle(t);
                     if (partition.valid()) solve(); // the recursive call
-                    //remove();
+                    removeTriangle();
                 }
             }
 
@@ -220,9 +220,9 @@ public class MutablePatch {
     * this is what we do after running through solve()
     * from beginning to end.
     */
-    private void remove() {
+    private void removeTriangle() {
         BasicTriangle t = triangles.pop();
-        edges.remove(t);
+        edges.remove(t,triangles,partition);
         currentEdge = edges.getNextEdge();
         currentPrototile = t.getPrototile();
         flip = t.getFlip();

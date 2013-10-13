@@ -11,6 +11,11 @@ import java.util.ArrayList;
 
 public class MutableOrientationPartition extends MutablePartition<Orientation> {
 
+    // instructions to tell us which Orientations were initially identifed.
+    // these help us reconstruct earlier versions of the partition.
+    private ArrayList<Orientation> instructions1 = new ArrayList<>();
+    private ArrayList<Orientation> instructions2 = new ArrayList<>();
+
     // constructor 
     private MutableOrientationPartition(Orientation o) {
         super(o);
@@ -33,6 +38,13 @@ public class MutableOrientationPartition extends MutablePartition<Orientation> {
     public void identify(Orientation one, Orientation two) {
         super.identify(one,two);
         super.identify(one.getOpposite(),two.getOpposite());
+    }
+
+    // add identification instructions
+    public void addInstructions(Orientation one, Orientation two) {
+        instructions1.add(one);
+        instructions2.add(two);
+        this.identify(one,two);
     }
 
     // check if a partition is valid.

@@ -254,7 +254,15 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
     public boolean simpleIncidentEdge(BasicEdge e) {
         BytePoint[] ends = e.getEnds();
         List<BytePoint> points = Arrays.asList(vertices);
-        return (points.contains(ends[0])&&points.contains(ends[1]));
+//        return (points.contains(ends[0])&&points.contains(ends[1]));
+        return (points.contains(ends[0])&&points.indexOf(ends[1])==(points.indexOf(ends[0])+1)%3);
+    }
+
+    // reverse incidence test
+    public boolean reverseIncidentEdge(BasicEdge e) {
+        BytePoint[] ends = e.getEnds();
+        List<BytePoint> points = Arrays.asList(vertices);
+        return (points.contains(ends[1])&&points.indexOf(ends[0])==(points.indexOf(ends[1])+1)%3);
     }
 
 } // end of class BasicTriangle
