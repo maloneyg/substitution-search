@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.io.Serializable;
 
-public final class PrototileList implements Serializable {
+public class MutablePrototileList implements Serializable {
 
-    private final int[] tileCount;
+    private int[] tileCount;
     private static final ImmutableList<BasicPrototile> ALL_PROTOTILES = BasicPrototile.ALL_PROTOTILES;
 
     // make it Serializable
@@ -21,7 +21,7 @@ public final class PrototileList implements Serializable {
     }
 
     // constructor methods.
-    private PrototileList(ImmutableList<BasicPrototile> tiles) {
+    private MutablePrototileList(ImmutableList<BasicPrototile> tiles) {
         int[] tempCount = new int[ALL_PROTOTILES.size()];
         for (BasicPrototile p : tiles) {
             if (valid(p)) {
@@ -33,27 +33,20 @@ public final class PrototileList implements Serializable {
         tileCount = tempCount;
     }
 
-    private PrototileList(int[] tileCount) {
+    private MutablePrototileList(int[] tileCount) {
         this.tileCount = tileCount;
     }
 
     // public static factory method.
-    static public PrototileList createPrototileList(ImmutableList<BasicPrototile> tiles) {
-        return new PrototileList(tiles);
-    }
-
-    // dump a MutablePrototileList
-    public MutablePrototileList dumpMutablePrototileList() {
-        int[] tempCount = new int[tileCount.length];
-        for (int i = 0; i < tempCount.length; i++) tempCount[i] = tileCount[i];
-        return MutablePrototileList.createMutablePrototileList(tempCount);
+    static public MutablePrototileList createMutablePrototileList(int[] i) {
+        return new MutablePrototileList(i);
     }
 
     // implementation of equals method.  
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())
             return false;
-        PrototileList o = (PrototileList) obj;
+        MutablePrototileList o = (MutablePrototileList) obj;
         return this.tileCount.equals(o.tileCount);
     }
 
@@ -66,19 +59,22 @@ public final class PrototileList implements Serializable {
         return result;
     }
 
-    // create a new PrototileList by removing the prototile p
-    //  from this one.
-    public PrototileList remove(BasicPrototile p) {
+    // remove the prototile p
+    public void remove(BasicPrototile p) {
         int position = ALL_PROTOTILES.indexOf(p);
         if (!valid(p))
             throw new IllegalArgumentException("We aren't using prototile " + p);
         if (tileCount[position]<1)
             throw new IllegalArgumentException("Can't remove prototile " + p + "\nbecause we haven't got any left.");
-        int[] output = new int[ALL_PROTOTILES.size()];
-        for (int i = 0; i < output.length; i++)
-            output[i] = tileCount[i];
-        output[position]--;
-        return new PrototileList(output);
+        tileCount[position]--;
+    }
+
+    // add the prototile p
+    public void add(BasicPrototile p) {
+        int position = ALL_PROTOTILES.indexOf(p);
+        if (!valid(p))
+            throw new IllegalArgumentException("We aren't using prototile " + p);
+        tileCount[position]++;
     }
 
     public boolean contains(BasicPrototile p) {
@@ -93,4 +89,11 @@ public final class PrototileList implements Serializable {
         return output;
     }
 
-} // end of class PrototileList
+    public boolean empty() {
+        for (int i = 0; i < tileCount.length; i++) {
+            if (tileCount[i] != 0) return false;
+        }
+        return true;
+    }
+
+} // end of class MutablePrototileList

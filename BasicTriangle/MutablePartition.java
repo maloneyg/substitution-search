@@ -123,12 +123,21 @@ public class MutablePartition<E> {
             if (current.getData().equals(data)) return output;
             current = current.getNext();
         }
-        throw new IllegalArgumentException(data + " is not in this partition.");
+        throw new IllegalArgumentException(data + " is not in this partition: " + this + " with size " + size() + ".");
     }
 
     // return the head node
     public PartitionNode<E> getHead() {
         return head;
+    }
+
+    // split the class containing data into many pieces
+    public void split(E data) {
+        PartitionNode<E> current = subset(data).getNext();
+        while (current != null && !current.isHead()) {
+            current.setHead(true);
+            current = current.getNext();
+        }
     }
 
     // identify the classes containing one and two
@@ -153,14 +162,16 @@ public class MutablePartition<E> {
 
         PartitionNode<E> before2 = c2.getPrevious();
 
-        last1.setNext(c2);
-        c2.setPrevious(last1);
+        if (!c2.equals(afterLast1)) {
+            last1.setNext(c2);
+            c2.setPrevious(last1);
 
-        last2.setNext(afterLast1);
-        if (afterLast1 != null) afterLast1.setPrevious(last2);
+            last2.setNext(afterLast1);
+            if (afterLast1 != null) afterLast1.setPrevious(last2);
 
-        if (before2 != null) before2.setNext(afterLast2);
-        if (afterLast2 != null) afterLast2.setPrevious(before2);
+            if (before2 != null) before2.setNext(afterLast2);
+            if (afterLast2 != null) afterLast2.setPrevious(before2);
+        }
 
         c2.setHead(false);
         if (head.equals(c2)) head = afterLast2;
@@ -215,7 +226,7 @@ public class MutablePartition<E> {
             output += currentNode.getData() + " ";
             currentNode = currentNode.getNext();
         }
-        return output;
+        return output + "\n";
     }
 
     // equals method.
@@ -245,6 +256,17 @@ public class MutablePartition<E> {
         return result;
     }
 
+    // the number of elements in the partition
+    public int size() {
+        int output = 0;
+        PartitionNode<E> currentNode = head;
+        while (currentNode != null) {
+            output++;
+            currentNode = currentNode.getNext();
+        }
+        return output;
+    }
+
 
     // test client
     public static void main(String[] args) {
@@ -268,13 +290,34 @@ public class MutablePartition<E> {
         System.out.println("Equating good and great:");
         test.identify("good","great");
         System.out.println(test);
-        System.out.println("Equating ugly and great:");
-        test.identify("ugly","great");
+        System.out.println("Equating great and good:");
+        test.identify("great","good");
         System.out.println(test);
 
         System.out.println("\nPrinting out all things equal to good.\n");
         for (String s : test.equivalenceClass("good")) System.out.print(s + " ");
         System.out.println("\n");
+
+        System.out.println("Splitting good.");
+        test.split("good");
+        System.out.println(test);
+        System.out.println("Adding troll, wicked, and cool.");
+        test.add("troll");
+        test.add("wicked");
+        test.add("cool");
+        System.out.println(test);
+
+        System.out.println("Equating good and cool:");
+        test.identify("good","cool");
+        System.out.println(test);
+
+        System.out.println("Equating wicked and cool:");
+        test.identify("wicked","cool");
+        System.out.println(test);
+
+        System.out.println("Equating bad and great:");
+        test.identify("bad","great");
+        System.out.println(test);
 
     }
 

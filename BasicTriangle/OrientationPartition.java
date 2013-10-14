@@ -43,6 +43,11 @@ public final class OrientationPartition implements Serializable {
         return new OrientationPartition(orientations);
     }
 
+    // public static factory method.
+    static public OrientationPartition createOrientationPartition(HashSet<HashSet<Orientation>> partition) {
+        return new OrientationPartition(partition);
+    }
+
     // implementation of equals method.  
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())

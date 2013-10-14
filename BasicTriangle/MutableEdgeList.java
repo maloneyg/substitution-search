@@ -51,7 +51,7 @@ public class MutableEdgeList {
         openEdges = new Stack<>();
         closedEdges = new Stack<>();
 
-        for (int i = 1; i < e.length; i++) {
+        for (int i = 0; i < e.length; i++) {
             openEdges.push(e[i]);
         }
     }
@@ -127,7 +127,7 @@ public class MutableEdgeList {
         BasicEdge[] matches = t.getEdges();
         // remove BasicEdges from openEdges until you get
         // one that isn't incident with t
-        while (true) {
+        while (!openEdges.empty()) {
             BasicEdge e = openEdges.pop();
             if (!t.reverseIncidentEdge(e)) {
                 openEdges.push(e);
@@ -137,13 +137,27 @@ public class MutableEdgeList {
 
         // return BasicEdges from closedEdges to openEdges
         // until you get one that isn't incident with t
-        while (true) {
+        while (!closedEdges.empty()) {
             IndexAndEdge ie = closedEdges.pop();
             if (t.simpleIncidentEdge(ie.getEdge())) {
+                o.split(ie.getEdge().getOrientation());
                 openEdges.add(ie.getIndex(),ie.getEdge());
             } else {
                 closedEdges.push(ie);
                 break;
+            }
+        }
+
+        // the Orientation partition has been split; now put it back together
+        o.followInstructions();
+        for (BasicTriangle a : triangles) {
+            for (BasicEdge c : closed()) {
+                if (a.simpleIncidentEdge(c)) {
+                    for (BasicEdge b : a.getEdges()) {
+                        if (b.congruent(c))
+                            o.identify(b.getOrientation(),c.getOrientation());
+                    }
+                }
             }
         }
 
@@ -154,11 +168,22 @@ public class MutableEdgeList {
         return openEdges.peek();
     }
 
+    // return the number of open edges
+    public int openSize() {
+        return openEdges.size();
+    }
+
+    // return the number of closed edges
+    public int closedSize() {
+        return closedEdges.size();
+    }
+
     // return openEdges for iteration purposes
     public Iterable<BasicEdge> open() {
         // we could convert to an ArrayList if we're worried
         // about other methods accessing this directly
-        return new ArrayList<>(openEdges);
+        //return new ArrayList<>(openEdges);
+        return openEdges;
     }
 
     // return closedEdges for iteration purposes

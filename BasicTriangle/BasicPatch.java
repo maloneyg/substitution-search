@@ -67,6 +67,11 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BytePoint, BasicEdg
         return new BasicPatch(e,v);
     }
 
+    // public static factory method 
+    public static BasicPatch createBasicPatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, BytePoint[] v) {
+        return new BasicPatch(t,e1,e2,o,v);
+    }
+
     // return partition (for testing only)
     public OrientationPartition getPartition() {
         return partition;

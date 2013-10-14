@@ -8,6 +8,7 @@
 import java.util.Collections;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class MutableOrientationPartition extends MutablePartition<Orientation> {
 
@@ -40,11 +41,40 @@ public class MutableOrientationPartition extends MutablePartition<Orientation> {
         super.identify(one.getOpposite(),two.getOpposite());
     }
 
+    // split an Orientation equivalence class.
+    // do the same for the opposite class.
+    public void split(Orientation o) {
+        super.split(o);
+        super.split(o.getOpposite());
+    }
+
     // add identification instructions
     public void addInstructions(Orientation one, Orientation two) {
         instructions1.add(one);
         instructions2.add(two);
         this.identify(one,two);
+    }
+
+    // follow identification instructions
+    public void followInstructions() {
+        for (int i = 0; i < instructions1.size(); i++)
+            this.identify(instructions1.get(i),instructions2.get(i));
+    }
+
+    // produce an OrientationPartition
+    public OrientationPartition dumpOrientationPartition() {
+        PartitionNode<Orientation> current = getHead();
+        HashSet<HashSet<Orientation>> output = new HashSet<>();
+        ArrayList<Orientation> currentClass = new ArrayList<>();
+        do {
+            currentClass.add(current.getData());
+            current = current.getNext();
+            if (current == null || current.isHead()) {
+                output.add(new HashSet<>(currentClass));
+                currentClass.clear();
+            }
+        } while (current != null);
+        return OrientationPartition.createOrientationPartition(output);
     }
 
     // check if a partition is valid.

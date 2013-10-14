@@ -7,12 +7,25 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Stack;
 import java.util.Arrays;
+import java.util.List;
 import org.apache.commons.math3.linear.*;
+import java.util.Collections;
 
 public class MutablePatch {
 
     // make it Serializable
 //    static final long serialVersionUID = 3422733298735932933L;
+
+    // the number of completed patches this has found
+    private int numCompleted = 0;
+
+    // the completed patches that have been found
+    private static List<BasicPatch> completedPatches;
+
+    static { // initialize completedPatches
+        ArrayList<BasicPatch> tempList = new ArrayList<>();
+        completedPatches = Collections.synchronizedList(tempList);
+    }
 
     /*
     * The state variables.
@@ -35,7 +48,7 @@ public class MutablePatch {
     private MutableOrientationPartition partition;
 
     // prototiles available for placement
-    private ArrayList<BasicPrototile> tileList;
+    private MutablePrototileList tileList;
 
     // vertices of the big triangle
     private final BytePoint[] bigVertices;
@@ -68,22 +81,24 @@ public class MutablePatch {
     */
 
     // the first prototile
-    private BasicPrototile initialPrototile = BasicPrototile.getFirstTile();
+    private final BasicPrototile initialPrototile = BasicPrototile.getFirstTile();
 
     // initially, we are not on the second edge
     // in an isosceles triangle
-    private boolean initialSecondEdge = false;
+    private final boolean initialSecondEdge = false;
 
     // initially we are not trying to place a reflected tile
-    private boolean initialFlip = false;
+    private final boolean initialFlip = false;
 
     // initial constructor
-    private MutablePatch(BasicEdge[] e, BytePoint[] v) {
+    private MutablePatch(BasicEdge[] e, BytePoint[] v, MutablePrototileList TL) {
+        tileList = TL;
         triangles = new Stack<>();
         edges = MutableEdgeList.createMutableEdgeList(e);
 
         // fill up the partition
         partition = MutableOrientationPartition.createMutableOrientationPartition(e[0].getOrientation());
+        partition.add(e[0].getOrientation().getOpposite());
         for (int i = 1; i < e.length; i++) {
             Orientation o = e[i].getOrientation();
             if (!partition.contains(o)) partition.add(o);
@@ -96,14 +111,41 @@ public class MutablePatch {
             }
         }
 
+        System.out.println("partition size: " + partition.size());
         BytePoint[] tempVertices = new BytePoint[v.length];
         for (int j = 0; j < v.length; j++) tempVertices[j] = v[j];
         bigVertices = tempVertices;
+        resetSteps();
     }
 
     // public static factory method
-    public static MutablePatch createMutablePatch(BasicEdge[] e, BytePoint[] v) {
-        return new MutablePatch(e,v);
+    public static MutablePatch createMutablePatch(BasicEdge[] e, BytePoint[] v, MutablePrototileList TL) {
+        return new MutablePatch(e,v,TL);
+    }
+
+    // get all the completed patches
+    public static List<BasicPatch> getCompletedPatches() {
+        return completedPatches;
+    }
+
+    // dump the contents of this as a BasicPatch
+    public BasicPatch dumpBasicPatch() {
+        BasicTriangle[] t = new BasicTriangle[triangles.size()];
+        for (int i = 0; i < t.length; i++) t[i] = triangles.get(i);
+        BasicEdge[] e1 = new BasicEdge[edges.openSize()];
+        int j = 0;
+        for (BasicEdge e : edges.open()) {
+            e1[j] = e;
+            j++;
+        }
+        BasicEdge[] e2 = new BasicEdge[edges.closedSize()];
+        j = 0;
+        for (BasicEdge e : edges.closed()) {
+            e2[j] = e;
+            j++;
+        }
+        OrientationPartition o = partition.dumpOrientationPartition();
+        return BasicPatch.createBasicPatch(t,e1,e2,o,bigVertices);
     }
 
     // advance the step variables by one step
@@ -132,27 +174,32 @@ public class MutablePatch {
         currentEdge = edges.getNextEdge();
     }
 
+    // identify two Orientations
+    public void identify(Orientation one, Orientation two) {
+        partition.identify(one,two);
+    }
+
     // here is where all of the work is done.
     // place a single tile, then call this method recursively.
     public void solve() {
         do {
+            //System.out.print(printStep());
+            if (tileList.empty()) {
+                completedPatches.add(dumpBasicPatch());
+                numCompleted++;
+                break;
+            }
             if (tileList.contains(currentPrototile) && currentPrototile.compatible(currentEdge,secondEdge,flip,partition.equivalenceClass(currentEdge.getOrientation()))) {
                 BasicTriangle t = currentPrototile.place(currentEdge,secondEdge,flip);
                 if (compatible(t)) {
                     placeTriangle(t);
-                    if (partition.valid()) solve(); // the recursive call
+                    if (partition.valid()) {solve();} else {System.out.println("Rejecting for Orientation.");} // the recursive call
                     removeTriangle();
                 }
             }
 
             step();
         } while (!backToStart()); // stop when we've tried all prototiles
-
-        // if there are triangles in the list, pop the
-        // last one and restore the previous state and steps
-        //if (!triangles.empty()) {
-        // do stuff
-        //}
 
     } // solve ends here
 
@@ -172,6 +219,11 @@ public class MutablePatch {
         result = prime*result + edges.hashCode();
         result = prime*result + partition.hashCode();
         return result;
+    }
+
+    // return the number of completed puzzles
+    public int getNumCompleted() {
+        return numCompleted;
     }
 
     /*
@@ -227,6 +279,7 @@ public class MutablePatch {
         currentPrototile = t.getPrototile();
         flip = t.getFlip();
         tileList.add(currentPrototile);
+        secondEdge = t.isSecondEdge(currentEdge);
     }
 
     /*
@@ -240,6 +293,13 @@ public class MutablePatch {
     */
     public BasicEdge getNextEdge() {
         return edges.getNextEdge();
+    }
+
+    /*
+    * print the current step variables
+    */
+    public String printStep() {
+        return currentPrototile + "\n" + secondEdge + "\n" + flip + "\n";
     }
 
     /*

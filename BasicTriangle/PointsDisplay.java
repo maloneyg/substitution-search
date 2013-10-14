@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.util.*;
 import java.awt.*;
+import java.util.List;
 import java.awt.event.*;
 import java.awt.geom.*;
 import org.apache.commons.math3.linear.*;
@@ -13,14 +14,14 @@ import java.awt.event.ActionListener;
 public class PointsDisplay extends JPanel implements ActionListener
 {
 
-    private final ImmutableList<BasicPatch> patches;
+    private final List<BasicPatch> patches;
     private ArrayList<OrderedTriple> data;
     private JButton next;
     private JButton previous;
     private int position;
     public static final int windowSize = 500;
 
-    public PointsDisplay(ImmutableList<BasicPatch> patches, String title)
+    public PointsDisplay(List<BasicPatch> patches, String title)
     {
         this.patches = patches;
         this.position = 0;

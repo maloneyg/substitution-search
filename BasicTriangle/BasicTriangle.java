@@ -265,4 +265,13 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
         return (points.contains(ends[1])&&points.indexOf(ends[0])==(points.indexOf(ends[1])+1)%3);
     }
 
+    // return true if e is the second edge of its length in this
+    public boolean isSecondEdge(BasicEdge e) {
+        if (!prototile.hasTwo(e.getLength())) return false;
+        for (BasicEdge f: getEdges()) {
+            if (f.getLength().equals(e.getLength())) return (e.congruent(f) == flip);
+        }
+        return false;
+    }
+
 } // end of class BasicTriangle
