@@ -88,8 +88,8 @@ public class MutableOrientationPartition extends MutablePartition<Orientation> {
             Orientation now = current.getData();
             for (Orientation o : checkList) {
                 if (o.equals(now.getOpposite())) return false;
-                checkList.add(now);
             }
+            checkList.add(now);
             current = current.getNext();
         }
         return true;

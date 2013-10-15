@@ -96,29 +96,37 @@ public class MutableEdgeList {
         * find the indices of the edges of t in openEdges.
         */
         List<Integer> indexList = new ArrayList<>();
-        List<Integer> tList = new ArrayList<>();
+//        List<Integer> tList = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             int thisIndex = openEdges.indexOf(matches[i]);
             if (thisIndex == -1) {
                 openEdges.push(matches[i].reverse());
             } else {
                 indexList.add(thisIndex);
-                tList.add(i);
+//                tList.add(i);
             }
         }
         Collections.sort(indexList);
 
         // the last open edge is the first to be added to closedEdges
-        for (int j = 0; j < indexList.size(); j++) {
-            int k = indexList.get(j);
+        for (int j = indexList.size()-1; j >= 0; j--) { // new
+            int k = indexList.get(j); // important: k is not an Integer
             BasicEdge e = openEdges.get(k);
-            p.identify(e.getOrientation(),matches[tList.get(j)].getOrientation());
+            for (BasicEdge m : matches) {
+                if (m.congruent(e)) {
+                    p.identify(e.getOrientation(),m.getOrientation());
+                    break;
+                }
+            }
             closedEdges.push(new IndexAndEdge(k,e));
+            openEdges.remove(k); // new
         }
         // but the last to be removed from openEdges
-        for (int j = indexList.size()-1; j >= 0; j--) {
-            openEdges.remove(indexList.get(j));
-        }
+//        for (int j = indexList.size()-1; j >= 0; j--) {
+//            int k = indexList.get(j);
+//            openEdges.remove(indexList.get(j));
+//            openEdges.remove(k);
+//        }
 
     }
 
@@ -165,7 +173,11 @@ public class MutableEdgeList {
 
     // return the next BasicEdge to be checked
     public BasicEdge getNextEdge() {
-        return openEdges.peek();
+        if (openEdges.empty()) {
+            return null;
+        } else {
+            return openEdges.peek();
+        }
     }
 
     // return the number of open edges

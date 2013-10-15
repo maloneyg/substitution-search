@@ -105,9 +105,9 @@ public class MutableTest
             MutablePatch patch = MutablePatch.createMutablePatch(edgeList,bigVertices,tiles.dumpMutablePrototileList());
             // identify the Orientations on the two equal edges
             if (flip) {
-                patch.identify(o1,o2.getOpposite());
+                patch.addInstructions(o1,o2.getOpposite());
             } else {
-                patch.identify(o1,o2);
+                patch.addInstructions(o1,o2);
             }
 
             if (flip) iterateEdgeBreakdown();

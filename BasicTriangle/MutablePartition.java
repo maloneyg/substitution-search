@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Stack;
 
 class PartitionNode<E> {
 
@@ -318,6 +319,22 @@ public class MutablePartition<E> {
         System.out.println("Equating bad and great:");
         test.identify("bad","great");
         System.out.println(test);
+
+        System.out.println("Splitting wicked:");
+        test.split("wicked");
+        System.out.println(test);
+
+        Stack<Integer> something = new Stack<>();
+        something.push(1);
+        something.push(2);
+        something.push(3);
+        something.push(4);
+        something.push(5);
+        for (int i = 0; i < something.size(); i++) System.out.print(something.get(i)+" ");
+        System.out.println();
+        something.add(3,17);
+        for (int i = 0; i < something.size(); i++) System.out.print(something.get(i)+" ");
+        System.out.println();
 
     }
 

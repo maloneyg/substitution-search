@@ -210,7 +210,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
         // if we're flipping, check the opposite Orientation
         Orientation o = (flip)? orientations[i] : orientations[i].getOpposite();
         for (Orientation a : klass) {
-            if (a.equals(o)) return false;
+//            if (a.equals(o)) {System.out.println("Rejecting for Orientation.");return false;}
         }
         return true;
     }

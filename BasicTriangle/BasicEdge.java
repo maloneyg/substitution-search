@@ -149,6 +149,7 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
     }
 
     // Check if two edges have the same end points
+    // This method is now the same as equals, except without a cast
     public boolean congruent(BasicEdge e) {
         if (!(this.length.equals(e.length)))
             return false;

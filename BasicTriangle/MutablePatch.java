@@ -111,7 +111,6 @@ public class MutablePatch {
             }
         }
 
-        System.out.println("partition size: " + partition.size());
         BytePoint[] tempVertices = new BytePoint[v.length];
         for (int j = 0; j < v.length; j++) tempVertices[j] = v[j];
         bigVertices = tempVertices;
@@ -179,11 +178,15 @@ public class MutablePatch {
         partition.identify(one,two);
     }
 
+    // add instructions to identify two Orientations at all times in the future
+    public void addInstructions(Orientation one, Orientation two) {
+        partition.addInstructions(one,two);
+    }
+
     // here is where all of the work is done.
     // place a single tile, then call this method recursively.
     public void solve() {
         do {
-            //System.out.print(printStep());
             if (tileList.empty()) {
                 completedPatches.add(dumpBasicPatch());
                 numCompleted++;
@@ -193,7 +196,7 @@ public class MutablePatch {
                 BasicTriangle t = currentPrototile.place(currentEdge,secondEdge,flip);
                 if (compatible(t)) {
                     placeTriangle(t);
-                    if (partition.valid()) {solve();} else {System.out.println("Rejecting for Orientation.");} // the recursive call
+                    if (partition.valid()) solve();
                     removeTriangle();
                 }
             }
@@ -311,7 +314,7 @@ public class MutablePatch {
     * called in the execution of this one.  
     */
     public boolean compatible(BasicTriangle t) {
-        BytePoint[] ends = getNextEdge().getEnds();
+        BytePoint[] ends = currentEdge.getEnds();
         BytePoint other = t.getOtherVertex(ends[0],ends[1]);
 
         // test to see if other is new or already there.
@@ -345,7 +348,7 @@ public class MutablePatch {
         }
 
         // make sure the orientations match
-        if (!partition.valid()) return false;
+//        if (!partition.valid()) return false;
 
         // newEdges are the edges containing other in t
         BasicEdge[] newEdges = new BasicEdge[2];

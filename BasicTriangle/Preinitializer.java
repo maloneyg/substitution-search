@@ -21,9 +21,9 @@ class Preinitializer {
     // the inflation factor, represented as coefficients of
     // 1, a, a^2, etc., where a = 2*cos(pi/N).
 
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search
+//    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search
 //    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search
 
     public static final ImmutableList<ImmutableList<Integer>> PROTOTILES = ImmutableList.of( 
                              //    ImmutableList.of( 1, 2, 4 ),  //
