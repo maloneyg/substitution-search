@@ -168,11 +168,11 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
 
     // Check if two edges have any end points in common
     public boolean commonEnd(BasicEdge e) {
-        BytePoint u0 = this.ends[0];
-        BytePoint u1 = this.ends[1];
-        BytePoint v0 = e.ends[0];
-        BytePoint v1 = e.ends[1];
-        return (u0.equals(v0)||u0.equals(v1)||u1.equals(v0)||u1.equals(v1));
+//        BytePoint u0 = this.ends[0];
+//        BytePoint u1 = this.ends[1];
+//        BytePoint v0 = e.ends[0];
+//        BytePoint v1 = e.ends[1];
+        return (ends[0].equals(e.ends[0])||ends[0].equals(e.ends[1])||ends[1].equals(e.ends[0])||ends[1].equals(e.ends[1]));
     }
 
     // return the angle that this edge makes with the positive x-axis
