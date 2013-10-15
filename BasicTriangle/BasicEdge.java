@@ -186,7 +186,7 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
         return output;
     }
 
-    // return true if these edges cross, and false otherwise.
+/*    // return true if these edges cross, and false otherwise.
     // in particular, return false if they share a common
     // end point or if they have the same slope.
     public boolean cross(BasicEdge e) {
@@ -203,6 +203,26 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
 //        return (Math.signum((u0.subtract(v0)).crossProduct(m1).evaluate(Initializer.COS)) != Math.signum((u1.subtract(v0)).crossProduct(m1).evaluate(Initializer.COS)) && Math.signum((v1.subtract(u0)).crossProduct(m0).evaluate(Initializer.COS)) != Math.signum((v0.subtract(u0).crossProduct(m0).evaluate(Initializer.COS))));
         return (Math.signum((u0.subtract(v0)).crossProduct(m1)) != Math.signum((u1.subtract(v0)).crossProduct(m1)) && Math.signum((v1.subtract(u0)).crossProduct(m0)) != Math.signum((v0.subtract(u0).crossProduct(m0))));
     }
+*/
+    // end point or if they have the same slope.
+    public boolean cross(BasicEdge e) {
+        if (commonEnd(e)) return false;
+        BasicAngle a0 = this.angle();
+        BasicAngle a1 = e.angle();
+        if ( a0.equals(a1) || a0.equals(a1.piPlus()))
+            return false;
+        
+        BytePoint u0 = this.ends[0];
+        BytePoint u1 = this.ends[1];
+        BytePoint v0 = e.ends[0];
+        BytePoint v1 = e.ends[1];
+
+        BytePoint m0 = ends[1].subtract(ends[0]); // the direction vector for this edge
+        BytePoint m1 = e.ends[1].subtract(e.ends[0]); // the direction vector for e
+        
+        return (Math.signum((ends[0].subtract(e.ends[0])).crossProduct(m1)) != Math.signum((ends[1].subtract(e.ends[0])).crossProduct(m1)) && Math.signum((e.ends[1].subtract(ends[0])).crossProduct(m0)) != Math.signum((e.ends[0].subtract(ends[0]).crossProduct(m0))));
+    }
+
 
     // return the same edge, with end points listed
     // in reverse order and the opposite Orientation
