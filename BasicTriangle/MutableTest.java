@@ -215,6 +215,7 @@ public class MutableTest
                 List<BasicPatch> output = MutablePatch.getCompletedPatches();
                 PointsDisplay display = new PointsDisplay(output,"mutable test");
             }
+        System.exit(0);
     }
 
     private static class ThreadMonitor
