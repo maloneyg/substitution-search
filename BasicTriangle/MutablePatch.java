@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.math3.linear.*;
 import java.util.Collections;
+import java.util.concurrent.atomic.*;
 
 public class MutablePatch {
 
@@ -21,6 +22,8 @@ public class MutablePatch {
 
     // the completed patches that have been found
     private static List<BasicPatch> completedPatches;
+
+    private AtomicInteger count;
 
     static { // initialize completedPatches
         ArrayList<BasicPatch> tempList = new ArrayList<>();
@@ -183,6 +186,11 @@ public class MutablePatch {
         partition.addInstructions(one,two);
     }
 
+    public void setCount(AtomicInteger count)
+    {
+        this.count = count;
+    }
+
     // here is where all of the work is done.
     // place a single tile, then call this method recursively.
     public void solve() {
@@ -196,7 +204,11 @@ public class MutablePatch {
                 BasicTriangle t = currentPrototile.place(currentEdge,secondEdge,flip);
                 if (compatible(t)) {
                     placeTriangle(t);
-                    if (partition.valid()) solve();
+                    if (partition.valid())
+                        {
+                            solve();
+                            count.getAndIncrement();
+                        }
                     removeTriangle();
                 }
             }

@@ -15,31 +15,39 @@ import java.util.Scanner;
 public class MutableTest
 {
 
-     // the number of the triangle we're searching
+    // the number of the triangle we're searching
     private static final int myTile = Preinitializer.MY_TILE;
-     // the triangle we're searching
+    
+    // the triangle we're searching
     private static final BasicPrototile P0 = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(myTile));
+    
     // the numbers of the different prototiles that fit in INFL.P0
     private static final PrototileList tiles = PrototileList.createPrototileList(BasicPrototile.getPrototileList(Initializer.SUBSTITUTION_MATRIX.getColumn(myTile)));
+    
     // vertices of INFL.P0
     private static final BytePoint[] vertices = P0.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
     private static final BytePoint[] bigVertices = new BytePoint[] {vertices[0].inflate(),vertices[1].inflate(),vertices[2].inflate()};
+    
     // iterators for producing new edge breakdowns
     private static MultiSetLinkedList edge0;
     private static MultiSetLinkedList edge1;
     private static MultiSetLinkedList edge2;
+    
     // the starting edge breakdowns
     private static final ImmutableList<Integer> start0;
     private static final ImmutableList<Integer> start1;
     private static final ImmutableList<Integer> start2;
+    
     // the starting edge breakdowns of P0
     private static ImmutableList<Integer> BD0;
     private static ImmutableList<Integer> BD1;
     private static ImmutableList<Integer> BD2;
+    
     // two Orientations to be identified.
     // only relevant if P0 is isosceles.
     private static final Orientation o1;
     private static final Orientation o2;
+    
     // a boolean that tells us if o1 = o2 or o1 = -o2.
     // only relevant if P0 is isosceles.
     private static boolean flip = false;
@@ -146,52 +154,26 @@ public class MutableTest
         ThreadMonitor threadMonitor = new ThreadMonitor(monitorInterval);
 
         // submit all jobs
-        nextUnit:
         while (notDoneYet)
             {
                 WorkUnit thisUnit = nextWorkUnit();
-
+            
                 // submit the next work unit
                 Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
                 System.out.println("Job " + thisUnit.hashCode() + " submitted.\n");
                 log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
-
-                // wait until the result is available
-                Result thisResult = null;
+            
+                // if the queue is full, wait
                 while (true)
                     {
-                        try
-                            {
-                                thisResult = thisFuture.get();
-                                break;
-                            }
-                        catch (InterruptedException e)
-                            {
-                                // do not allow interruption
-                                continue;
-                            }
-                        catch (ExecutionException e)
-                            {
-                                e.printStackTrace();
-                                continue nextUnit;
-                            }
-                        catch (CancellationException e)
-                            {
-                                System.out.println("Job was cancelled!");
-                                continue nextUnit;
-                            }
-                    }
-
-                // wait for queue to empty
-                while (true)
-                    {
-                        if ( executorService.getExecutor().getQueue().size() > 0 )
+                        int queueSize = executorService.getExecutor().getQueue().size();
+                        if ( queueSize > 0 )
                             {
                                 try
                                     {
-                                        Thread.sleep(100);
+                                        Thread.sleep(1000);
                                     }
-                                catch (InterruptedException e)
+                                catch ( InterruptedException e )
                                     {
                                         continue;
                                     }
@@ -199,20 +181,28 @@ public class MutableTest
                         else
                             break;
                     }
-
-                // job is complete
-                String reportString = String.format("\nJob %010d complete ( %15s ).  %5d patches have been completed.\n", thisUnit.hashCode(), thisResult.toString(), MutablePatch.getCompletedPatches().size());
-                System.out.println(reportString);
-
-                // for monitoring purposes:
-                //System.out.println("Press ENTER");
-                //kbd.nextLine();
-                System.out.print("Garbage collection initiated...");
-                System.gc();
-                System.out.println("complete.\n");
-                //System.out.println("Press ENTER\n");
-                //kbd.nextLine();
             }
+
+        // wait for all jobs to complete
+        while (true)
+            {
+                int queueSize = executorService.getExecutor().getQueue().size();
+                int runningJobs = executorService.getExecutor().getNumberOfRunningJobs();
+                if ( queueSize > 0 || runningJobs > 0 )
+                    {
+                        try
+                            {
+                                Thread.sleep(1000);
+                            }
+                        catch ( InterruptedException e )
+                            {
+                                continue;
+                            }
+                    }
+                else
+                    break;
+            }
+        System.out.println("All jobs have finished.");
 
         // stop monitoring thread
         threadMonitor.stop();
@@ -253,7 +243,9 @@ public class MutableTest
         {
             public void run()
             {
-                int jobsRun = executorService.getExecutor().getNumberOfJobsRun();  // number of jobs run in the last monitorInterval; simultaneously    resets counter
+                // number of jobs run in the last monitorInterval; simultaneously resets counter
+                long jobsRun = executorService.getExecutor().getNumberOfSolveCalls();
+                
                 // this accounts for the fact that the timer might be occasionally delayed
                 Date currentTime = new Date();
                 if ( lastUpdateTime == null )

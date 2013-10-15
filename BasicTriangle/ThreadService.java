@@ -69,6 +69,8 @@ public class ThreadService
         //private List<Callable<?>> currentlyRunningJobs = Collections.synchronizedList(new ArrayList<Callable<?>>());
         //private List<Callable<?>> currentlyPendingJobs = Collections.synchronizedList(new ArrayList<Callable<?>>());
         //private Map<Callable<?>,Date> startTimes = Collections.synchronizedMap(new HashMap<Callable<?>,Date>());
+
+        private List<AtomicInteger> listOfCounters = Collections.synchronizedList(new ArrayList<AtomicInteger>());
         private AtomicInteger numberOfJobsRun = new AtomicInteger();
         private AtomicInteger numberOfRunningJobs = new AtomicInteger();
         public static final double GB = 1073741824.0; // bytes per GB
@@ -79,11 +81,30 @@ public class ThreadService
             super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, handler);
         }
 
+        public void registerCounter(AtomicInteger counter)
+        {
+            listOfCounters.add(counter);
+        }
+
+        public void deregisterCounter(AtomicInteger counter)
+        {
+            listOfCounters.remove(counter);
+        }
+
+        // resets all counters and returns the total number of solve calls since the last reset
+        public long getNumberOfSolveCalls()
+        {
+            long numberOfCalls = 0L;
+            for (AtomicInteger i : listOfCounters)
+                numberOfCalls += (long)i.getAndSet(0);
+            return numberOfCalls;
+        }
+
         public void printQueues(double throughput, double average, double timeSinceLastUpdate)
         {
             Runtime runtime = Runtime.getRuntime();
-            String reportString = String.format("Queue: %10d   Running: %2d   Average: %6.0f /s   Now: %6.0f / s   Last Update: %.2f s  Memory: %6.3f GB / %6.3f GB    \r",
-            getQueue().size(), numberOfRunningJobs.get(), average, throughput, timeSinceLastUpdate,
+            String reportString = String.format("Queue: %10d   Running: %2d   Complete: %5d   Average: %6.0f /s   Now: %6.0f / s   Last Update: %.2f s  Memory: %6.3f GB / %6.3f GB    \r",
+            getQueue().size(), numberOfRunningJobs.get(), numberOfJobsRun.get(), average, throughput, timeSinceLastUpdate,
             (runtime.totalMemory() - runtime.freeMemory()) / GB , (runtime.maxMemory() / GB)     );
             System.out.print(reportString);
         }
@@ -92,11 +113,13 @@ public class ThreadService
         {
             //log.log(Level.INFO, String.format("%s is starting work on %s", Thread.currentThread().getName(), jobMap.get(r).toString()));
             super.beforeExecute(t,r);
+            incrementNumberOfRunningJobs();
          }
 
         protected void afterExecute(Runnable r, Throwable t)
         {
             super.afterExecute(r,t);
+            decrementNumberOfRunningJobs();
             numberOfJobsRun.getAndIncrement();
             //log.log(Level.INFO, String.format("%s finished work on %s", Thread.currentThread().getName(), jobName));
             try
@@ -125,7 +148,7 @@ public class ThreadService
 
         public int getNumberOfJobsRun()
         {
-            return numberOfJobsRun.getAndSet(0);
+            return numberOfJobsRun.get();
         }
 
         public int getNumberOfRunningJobs()
