@@ -212,10 +212,10 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
         if ( a0.equals(a1) || a0.equals(a1.piPlus()))
             return false;
         
-        BytePoint u0 = this.ends[0];
-        BytePoint u1 = this.ends[1];
-        BytePoint v0 = e.ends[0];
-        BytePoint v1 = e.ends[1];
+//        BytePoint u0 = this.ends[0];
+//        BytePoint u1 = this.ends[1];
+//        BytePoint v0 = e.ends[0];
+//        BytePoint v1 = e.ends[1];
 
         BytePoint m0 = ends[1].subtract(ends[0]); // the direction vector for this edge
         BytePoint m1 = e.ends[1].subtract(e.ends[0]); // the direction vector for e
