@@ -13,7 +13,7 @@ import org.apache.commons.math3.linear.*;
 import java.util.Iterator;
 import java.util.Collections;
 
-public class MutableEdgeList {
+public class MutableEdgeList implements Serializable {
 
     // a helper class. closedEdges holds a Stack of these.
     private class IndexAndEdge { // nested class begins here

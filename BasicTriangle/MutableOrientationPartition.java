@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public class MutableOrientationPartition extends MutablePartition<Orientation> {
+public class MutableOrientationPartition extends MutablePartition<Orientation> implements Serializable {
 
     // instructions to tell us which Orientations were initially identifed.
     // these help us reconstruct earlier versions of the partition.

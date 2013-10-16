@@ -14,8 +14,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Stack;
+import java.io.Serializable;
 
-class PartitionNode<E> {
+class PartitionNode<E> implements Serializable {
 
     private final E data;
 
@@ -99,7 +100,7 @@ class PartitionNode<E> {
 
 } // end of class PartitionNode
 
-public class MutablePartition<E> {
+public class MutablePartition<E> implements Serializable {
 
     private PartitionNode<E> head;
 
@@ -338,4 +339,4 @@ public class MutablePartition<E> {
 
     }
 
-} // end of class MultiSetLinkedList
+} // end of class MutablePartition

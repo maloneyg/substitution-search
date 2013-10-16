@@ -12,7 +12,7 @@ import org.apache.commons.math3.linear.*;
 import java.util.Collections;
 import java.util.concurrent.atomic.*;
 
-public class MutablePatch {
+public class MutablePatch implements Serializable {
 
     // make it Serializable
 //    static final long serialVersionUID = 3422733298735932933L;
