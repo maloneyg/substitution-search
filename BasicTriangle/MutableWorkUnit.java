@@ -215,4 +215,10 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         return "job " + hashCode();
     }
 
+    // destroy this method! It is unsafe
+    public MutablePatch getPatch()
+    {
+        return patch;
+    }
+
 } // end of class MutableWorkUnit

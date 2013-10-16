@@ -407,4 +407,33 @@ public class MutablePatch implements Serializable {
         return true;
     }
 
+    // big String
+    public String toString() {
+        String output = "MutablePatch " + hashCode() + ":\n";
+        output += "Triangles:\n";
+        for (BasicTriangle t : triangles) output += t.toString() + "\n";
+        output += "Open edges:\n";
+        for (BasicEdge e : edges.open()) output += e.toString() + "\n";
+        output += "Closed edges:\n";
+        for (BasicEdge e : edges.closed()) output += e.toString() + "\n";
+        output += "Partition:\n";
+        output += partition.toString() + "\n";
+        output += "Number Completed:" + numCompleted + "\n";
+        output += "Count:" + count.get() + "\n";
+        output += "Tile List:\n";
+        output += tileList.toString() + "\n";
+        output += "The big triangle:\n";
+        for (BytePoint p : bigVertices) output += p.toString() + " ";
+        output += "\n";
+        output += "currentEdge: " + currentEdge.toString() + "\n";
+        output += "currentPrototile: " + currentPrototile.toString() + "\n";
+        output += "initialPrototile: " + initialPrototile.toString() + "\n";
+        output += "secondEdge: " + secondEdge + "\n";
+        output += "initialSecondEdge: " + initialSecondEdge + "\n";
+        output += "flip: " + flip + "\n";
+        output += "initialFlip: " + initialFlip + "\n";
+        output += "end of MutablePatch " + hashCode() + ":\n";
+        return output;
+    }
+
 } // end of class MutablePatch

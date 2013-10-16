@@ -15,6 +15,9 @@ import java.util.Scanner;
 public class MutableSerializationTest
 {
 
+    // the guy who pauses the program for us
+    private static Scanner kbd = new Scanner(System.in);
+
     // the number of the triangle we're searching
     private static final int myTile = Preinitializer.MY_TILE;
     
@@ -138,6 +141,12 @@ public class MutableSerializationTest
     }
 
 
+    // pause the action
+    private static void pause() {
+        System.out.println("Press ENTER");
+        kbd.nextLine();
+    }
+
     public static void main(String[] args)
     {
         // this is the thread executor service (a singleton)
@@ -147,7 +156,6 @@ public class MutableSerializationTest
 
         ConcurrentLinkedQueue<WorkUnit> initialWorkUnits = new ConcurrentLinkedQueue<WorkUnit>();
 
-        Scanner kbd = new Scanner(System.in);
 
         // start monitoring thread
         double monitorInterval = 1.0; //seconds
@@ -157,6 +165,8 @@ public class MutableSerializationTest
         while (notDoneYet)
             {
                 WorkUnit thisUnit = nextWorkUnit();
+                System.out.println(((MutableWorkUnit)thisUnit).getPatch().toString());
+                pause();
 
                 // serialization test: serialize workunit to disk
                 String filename = "workunit.tmp";
@@ -181,6 +191,8 @@ public class MutableSerializationTest
                         FileInputStream fileIn = new FileInputStream(filename);
                         ObjectInputStream in = new ObjectInputStream(fileIn);
                         reconstitutedUnit = (WorkUnit)in.readObject();
+                        System.out.println(((MutableWorkUnit)reconstitutedUnit).getPatch().toString());
+                        pause();
                         in.close();
                         fileIn.close();
                     }
@@ -316,4 +328,4 @@ public class MutableSerializationTest
     }
 
 
-} // end of SimpleTest
+} // end of MutableSerializationTest
