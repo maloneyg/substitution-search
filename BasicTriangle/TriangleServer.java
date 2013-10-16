@@ -124,10 +124,9 @@ public class TriangleServer
 
         public void run()
         {
-            int i=-1;
+            int i=0;
             while (true)
                 {
-                    i++;
                     try
                         {
                             Object incomingObject = incomingObjectStream.readObject();
@@ -135,25 +134,33 @@ public class TriangleServer
                                 {
                                     // this is an incoming result
                                     TestResult result = (TestResult)incomingObject;
-                                    System.out.println(result);
+                                    System.out.println("received " + result);
                                 }
                             else if ( incomingObject instanceof Integer )
                                 {
                                     // this is a request for new jobs
                                     int numberOfNewJobs = (Integer)incomingObject;
-                                    for (i=0; i < numberOfNewJobs; i++)
+                                    System.out.println("received request for " + numberOfNewJobs + " new jobs");
+                                    for (int j=i; j < i+numberOfNewJobs; j++)
                                         {
                                             // get next work unit
-                                            WorkUnit thisUnit = TestWorkUnit.getTestWorkUnit(i+1);
+                                            WorkUnit thisUnit = TestWorkUnit.getTestWorkUnit(j+1);
 
                                             // send work unit
                                             outgoingObjectStream.writeObject(thisUnit);
                                             outgoingObjectStream.flush();
                                             outgoingObjectStream.reset();
+                                            System.out.println("sent job " + (j+1));
                                         }
+                                    i += numberOfNewJobs;
                                 }
                             else
                                 break;
+                        }
+                    catch (EOFException e)
+                        {
+                            System.out.println("Connection lost.");
+                            break;
                         }
                     catch (Exception e)
                         {

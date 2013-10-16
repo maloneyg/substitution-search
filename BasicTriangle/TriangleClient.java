@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 public final class TriangleClient
 {
     public static final int LISTENING_PORT = 32007;
-    public static String HOST_NAME = "enj02.rc.fas.harvard.edu";  // name of the server
+    public static String HOST_NAME = "localhost";  // name of the server
 
     public static final double MONITOR_INTERVAL = 0.5; // seconds
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
@@ -21,6 +21,8 @@ public final class TriangleClient
     private static OutputStream outputStream;
     private static ObjectOutputStream outgoingObjectStream;
 
+    private static ThreadService executorService = ThreadService.INSTANCE;
+    
     // prevent instantiation
     private TriangleClient()
     {
@@ -124,26 +126,26 @@ public final class TriangleClient
         else
             throw new ConnectException("Error handshaking (wrong object type).");
 
-        // run jobs
+        // get ready to run jobs
         ThreadService executorService = ThreadService.INSTANCE;
         System.out.println("Connected and ready to run jobs.");
+
+        // ask for initial batch of jobs
+        Integer numberOfNewJobsNeeded = executorService.NUMBER_OF_THREADS - executorService.getExecutor().getNumberOfRunningJobs() + 1;
+        outgoingObjectStream.writeObject(numberOfNewJobsNeeded);
+        outgoingObjectStream.flush();
+        outgoingObjectStream.reset();
+
         while (true)
             {
                 try
                     {
-                        // ask for new jobs
-                        if ( executorService.getExecutor().getQueue().size() == 0 )
-                            {
-                                Integer numberOfNewJobsNeeded = executorService.NUMBER_OF_THREADS - executorService.getExecutor().getNumberOfRunningJobs() + 1;
-                                outgoingObjectStream.writeObject(numberOfNewJobsNeeded);
-                                outgoingObjectStream.flush();
-                                outgoingObjectStream.reset();
-                            }
                         incomingObject = incomingObjectStream.readObject();
                         if ( incomingObject instanceof TestWorkUnit )
                             {
                                 TestWorkUnit thisUnit = (TestWorkUnit)incomingObject;
                                 Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
+                                System.out.println("received job " + thisUnit.getID());
                             }
                         else
                             break;
@@ -156,13 +158,21 @@ public final class TriangleClient
             }
     }
 
-    public static void sendResult(TestResult result)
+    public synchronized static void sendResult(TestResult result)
     {
         System.out.println("sending: " + result.toString());
         try
             {
+                // send result
                 outgoingObjectStream.writeObject(result);
                 outgoingObjectStream.flush();
+                outgoingObjectStream.reset();
+
+                // ask for one new job
+                outgoingObjectStream.writeObject(new Integer(1));
+                outgoingObjectStream.flush();
+                outgoingObjectStream.reset();
+                System.out.println("requested 1 more job");
             }
         catch (Exception e)
             {
@@ -173,6 +183,10 @@ public final class TriangleClient
     private static class ThreadMonitor
     {
         private Timer timer;
+        private double updateInterval;
+        private static ThreadService executorService = ThreadService.INSTANCE;
+        private Date lastUpdateTime = null;
+        private LinkedList<Double> throughputs = new LinkedList<Double>();
 
         public ThreadMonitor()
         {
@@ -184,6 +198,7 @@ public final class TriangleClient
         {
             public void run()
             {
+                // check for kill file
                 File killFile = new File("kill.txt");
                 if ( killFile.isFile() )
                     {
@@ -200,6 +215,32 @@ public final class TriangleClient
                             }
                         System.exit(1);
                     }
+
+                // number of jobs run in the last monitorInterval; simultaneously resets counter
+                long jobsRun = executorService.getExecutor().getNumberOfSolveCalls();
+
+                // this accounts for the fact that the timer might be occasionally delayed
+                Date currentTime = new Date();
+                if ( lastUpdateTime == null )
+                    {
+                        lastUpdateTime = currentTime;
+                        return;
+                    }
+                double elapsedTime = ( currentTime.getTime() - lastUpdateTime.getTime() ) / 1000.0;
+                double throughput = jobsRun / elapsedTime;
+
+                // keep track of how many jobs have been finished
+                throughputs.add(throughput);
+
+                // calculate moving average
+                double average = 0.0;
+                for (Double d : throughputs)
+                    average += d;
+                average = average / throughputs.size();
+
+                // print statistics
+                lastUpdateTime = currentTime;
+                ThreadService.INSTANCE.getExecutor().printQueues(throughput, average, elapsedTime);
             }
         }
     }

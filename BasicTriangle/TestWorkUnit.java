@@ -22,7 +22,7 @@ public class TestWorkUnit implements WorkUnit, Callable<Result>, Serializable
                 if ( ID == 10 )
                     throw new IllegalArgumentException("oops");
 
-                Thread.sleep(10*1000);
+                Thread.sleep(5*1000);
 
                 TestResult result = new TestResult("result for ID " + ID);
                 TriangleClient.sendResult(result);
@@ -37,5 +37,10 @@ public class TestWorkUnit implements WorkUnit, Callable<Result>, Serializable
     public String toString()
     {
         return "job " + ID;
+    }
+
+    public int getID()
+    {
+        return ID;
     }
 }
