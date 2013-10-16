@@ -223,7 +223,7 @@ public class MutablePatch implements Serializable {
         if (obj == null || getClass() != obj.getClass())
             return false;
         MutablePatch x = (MutablePatch) obj;
-        return (this.triangles.equals(x.triangles)&&this.edges.equals(x.edges)&&this.partition.equals(x.partition));
+        return (this.triangles.equals(x.triangles)&&this.edges.equals(x.edges)&&this.partition.equals(x.partition)&&this.numCompleted==x.numCompleted&&this.tileList.equals(x.tileList)&&this.bigVertices.equals(x.bigVertices)&&this.currentEdge.equals(x.currentEdge)&&this.currentPrototile.equals(x.currentPrototile)&&this.secondEdge==x.secondEdge&&this.flip==x.flip&&this.initialPrototile.equals(x.initialPrototile)&&this.initialSecondEdge==x.initialSecondEdge&&this.initialFlip==x.initialFlip);
     }
 
     // hashCode method

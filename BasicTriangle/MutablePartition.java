@@ -240,11 +240,12 @@ public class MutablePartition<E> implements Serializable {
         MutablePartition l = (MutablePartition) obj;
         PartitionNode n1 = this.head;
         PartitionNode n2 = l.head;
-        while (n1 != null) {
+        while (n1 != null && n2 != null) {
             if (!n1.getData().equals(n2.getData())) return false;
             n1 = n1.getNext();
             n2 = n2.getNext();
         }
+        if (n1 != null || n2 != null) return false;
         return true;
     }
 
