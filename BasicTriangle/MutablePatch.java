@@ -224,22 +224,26 @@ public class MutablePatch implements Serializable {
             return false;
         MutablePatch x = (MutablePatch) obj;
 
-          System.out.println( this.triangles.equals(x.triangles));
-          System.out.println( this.edges.equals(x.edges) );
-          System.out.println(this.partition.equals(x.partition));
-          System.out.println(this.tileList.equals(x.tileList));
-          System.out.println(this.bigVertices.equals(x.bigVertices));
-          System.out.println(this.currentEdge.equals(x.currentEdge));
-          System.out.println(this.currentPrototile.equals(x.currentPrototile));
-          System.out.println(this.initialPrototile.equals(x.initialPrototile));
+/*          System.out.println("triangles: " + this.triangles.equals(x.triangles));
+          System.out.println("edges: " + this.edges.equals(x.edges) );
+          System.out.println("partition: " + this.partition.equals(x.partition));
+          System.out.println("tileList: " + this.tileList.equals(x.tileList));
+          System.out.println("bigVertices: " + Arrays.equals(this.bigVertices, x.bigVertices));
+          System.out.println("currentEdge: " + this.currentEdge.equals(x.currentEdge));
+          System.out.println("currentPrototile: " + this.currentPrototile.equals(x.currentPrototile));
+          System.out.println("initialPrototile: " + this.initialPrototile.equals(x.initialPrototile));
 
+System.out.println(currentPrototile);
+System.out.println(x.currentPrototile);
+System.out.println("\n"+initialPrototile);
+System.out.println(x.initialPrototile);*/
         return (
           this.triangles.equals(x.triangles)
           &&this.edges.equals(x.edges)
           &&this.partition.equals(x.partition)
           &&this.numCompleted==x.numCompleted
           &&this.tileList.equals(x.tileList)
-          &&this.bigVertices.equals(x.bigVertices)
+          &&Arrays.equals(this.bigVertices, x.bigVertices)
           &&this.currentEdge.equals(x.currentEdge)
           &&this.currentPrototile.equals(x.currentPrototile)
           &&this.secondEdge==x.secondEdge
@@ -433,31 +437,23 @@ public class MutablePatch implements Serializable {
 
     // big String
     public String toString() {
-        System.out.println("1");
-        String output = "MutablePatch:\n";
-        System.out.println("1a");
+        String output = "==MutablePatch==\n";
+        
         output = output + "Triangles:\n";
-        System.out.println("1b\n");
-
         for (BasicTriangle t : triangles)
-            {
-                System.out.println("1c");
-                output += t.toString() + "\n";
-            }
+            output += t.toString() + "\n";
         
-        System.out.println("2");
         output += "Open edges:\n";
+        for (BasicEdge e : edges.open())
+            output += e.toString() + "\n";
         
-        for (BasicEdge e : edges.open()) output += e.toString() + "\n";
         output += "Closed edges:\n";
-        
-        System.out.println("6");
-        for (BasicEdge e : edges.closed()) output += e.toString() + "\n";
+        for (BasicEdge e : edges.closed())
+            output += e.toString() + "\n";
         
         output += "Partition:\n";
-        System.out.println("7");
-        
         output += partition.toString() + "\n";
+
         output += "Number Completed:" + numCompleted + "\n";
         output += "Count:" + count.get() + "\n";
         output += "Tile List:\n";
