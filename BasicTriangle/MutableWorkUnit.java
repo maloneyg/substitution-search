@@ -173,7 +173,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         patch.setCount(count);
         patch.solve();
         threadService.getExecutor().deregisterCounter(count);
-        return new TestResult("completed " + patch.getNumCompleted() + " puzzles");
+        return new PatchResult(this);
     } // method call() ends here
 
     public int getCount()

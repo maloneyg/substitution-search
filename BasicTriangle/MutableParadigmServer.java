@@ -11,6 +11,8 @@ public class MutableParadigmServer
     public static final double MONITOR_INTERVAL = 1.0; // seconds
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
 
+    public static final List<BasicPatch> allCompletedPatches = new ArrayList<BasicPatch>();
+
     private static AtomicInteger LIVE_CONNECTIONS = new AtomicInteger(0);
     private static List<ConnectionThread> ALL_CONNECTIONS = Collections.synchronizedList(new ArrayList<ConnectionThread>()); 
 
@@ -39,6 +41,14 @@ public class MutableParadigmServer
                         connectionThread.checkConnection();
                         System.out.println("Handshake successful.\n");
                         connectionThread.start();
+                    }
+                catch (BindException e)
+                    {
+                        if (e.getMessage().equals("Address already in use"))
+                            System.out.println("A triangle server is already running on this port!");
+                        else
+                            e.printStackTrace();
+                        System.exit(1);
                     }
                 catch (SocketTimeoutException e)
                     {
@@ -105,7 +115,6 @@ public class MutableParadigmServer
             incomingStream = connection.getInputStream();
             incomingObjectStream = new ObjectInputStream(incomingStream);
 
-
             // receive handshake
             Object incomingObject = incomingObjectStream.readObject();
             if ( incomingObject instanceof String )
@@ -124,24 +133,31 @@ public class MutableParadigmServer
 
         public void run()
         {
-            int i=0;
             while (true)
                 {
                     try
                         {
                             Object incomingObject = incomingObjectStream.readObject();
-                            if ( incomingObject instanceof TestResult )
+                            if ( incomingObject instanceof PatchResult )
                                 {
                                     // this is an incoming result
-                                    TestResult result = (TestResult)incomingObject;
-                                    System.out.println("received " + result);
+                                    PatchResult result = (PatchResult)incomingObject;
+                                    List<BasicPatch> localCompletedPatches = result.getCompletedUnit().getPatch().getLocalCompletedPatches();
+                                    if ( localCompletedPatches.size() > 0 )
+                                        {
+                                            allCompletedPatches.addAll( localCompletedPatches );
+                                            System.out.println( localCompletedPatches.size() + " completed patches received from " + connection.getInetAddress() + " (" + allCompletedPatches.size() + " total patches).");
+                                        }
+                                    else
+                                        System.out.println("Null result received from " + connection.getInetAddress() + ".");
+
                                 }
                             else if ( incomingObject instanceof Integer )
                                 {
                                     // this is a request for new jobs
                                     int numberOfNewJobs = (Integer)incomingObject;
-                                    System.out.println("received request for " + numberOfNewJobs + " new jobs");
-                                    for (int j=i; j < i+numberOfNewJobs; j++)
+                                    System.out.println("received request for " + numberOfNewJobs + " new jobs from " + connection.getInetAddress());
+                                    for (int i=0; i < numberOfNewJobs; i++)
                                         {
                                             // get next work unit
                                             WorkUnit thisUnit = MutableWorkUnit.nextWorkUnit();
@@ -150,9 +166,8 @@ public class MutableParadigmServer
                                             outgoingObjectStream.writeObject(thisUnit);
                                             outgoingObjectStream.flush();
                                             outgoingObjectStream.reset();
-                                            System.out.println("sent job " + (j+1));
                                         }
-                                    i += numberOfNewJobs;
+                                    System.out.println(numberOfNewJobs + " have been sent to " + connection.getInetAddress());
                                 }
                             else
                                 break;

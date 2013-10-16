@@ -145,7 +145,7 @@ public final class MutableParadigmClient
                             {
                                 MutableWorkUnit thisUnit = (MutableWorkUnit)incomingObject;
                                 Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
-                                System.out.println("received job " + thisUnit.getID());
+                                System.out.println("received job " + thisUnit.hashCode());
                             }
                         else
                             break;
@@ -158,9 +158,9 @@ public final class MutableParadigmClient
             }
     }
 
-    public synchronized static void sendResult(TestResult result)
+    public synchronized static void sendResult(PatchResult result)
     {
-        System.out.println("sending: " + result.toString());
+        System.out.println("sending a result (" + result.getCompletedUnit().getPatch().getLocalCompletedPatches().size() + " completed puzzles)");
         try
             {
                 // send result

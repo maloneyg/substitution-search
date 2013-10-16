@@ -23,6 +23,9 @@ public class MutablePatch implements Serializable {
     // the completed patches that have been found
     private static List<BasicPatch> completedPatches;
 
+    // a list of completed patches for this particular puzzle
+    private List<BasicPatch> localCompletedPatches = new ArrayList<BasicPatch>();
+
     private AtomicInteger count = new AtomicInteger(0);
 
     static { // initialize completedPatches
@@ -130,6 +133,12 @@ public class MutablePatch implements Serializable {
         return completedPatches;
     }
 
+    // get all the patches for this puzzle
+    public List<BasicPatch> getLocalCompletedPatches()
+    {
+        return localCompletedPatches;
+    }
+
     // dump the contents of this as a BasicPatch
     public BasicPatch dumpBasicPatch() {
         BasicTriangle[] t = new BasicTriangle[triangles.size()];
@@ -196,7 +205,9 @@ public class MutablePatch implements Serializable {
     public void solve() {
         do {
             if (tileList.empty()) {
-                completedPatches.add(dumpBasicPatch());
+                BasicPatch thisPatch = dumpBasicPatch();
+                completedPatches.add(thisPatch);
+                localCompletedPatches.add(thisPatch);
                 numCompleted++;
                 break;
             }
