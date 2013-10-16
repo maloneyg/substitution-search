@@ -59,6 +59,13 @@ public class MutablePrototileList implements Serializable {
         return result;
     }
 
+    // string
+    public String toString() {
+        String output = "PrototileList:\n";
+        for (int i = 0; i < tileCount.length; i++) output += tileCount[i] + " of " + ALL_PROTOTILES.get(i) + "\n";
+        return output;
+    }
+
     // remove the prototile p
     public void remove(BasicPrototile p) {
         int position = ALL_PROTOTILES.indexOf(p);
