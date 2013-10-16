@@ -59,7 +59,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
     private static boolean flip = false;
 
     // true if we haven't created all edge breakdowns yet
-    private static boolean notDoneYet = true;
+    public static boolean notDoneYet = true;
 
     static { // initialize the edge breakdown iterators
         ImmutableList<Integer> first0 = P0.getLengths()[0].getBreakdown();
@@ -109,7 +109,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         }
     }
 
-    public static WorkUnit nextWorkUnit() {
+    public static MutableWorkUnit nextWorkUnit() {
 
         if (P0.isosceles()) {
         // how we submit BasicWorkUnits
@@ -146,6 +146,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
     // the main data on which MutableWorkUnit works
     private final MutablePatch patch;
     private final AtomicInteger count = new AtomicInteger(0);
+    private int originalHashCode = -1;
 
     private static final ThreadService threadService;
 
@@ -161,6 +162,16 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         patch = p;
     }
 
+    public int getOriginalHashCode()
+    {
+        return originalHashCode;
+    }
+
+    public void setOriginalHashCode(int originalHashCode)
+    {
+        this.originalHashCode = originalHashCode;
+    }
+
     // public static factory method
     public static MutableWorkUnit createMutableWorkUnit(MutablePatch p) {
         return new MutableWorkUnit(p);
@@ -173,7 +184,10 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         patch.setCount(count);
         patch.solve();
         threadService.getExecutor().deregisterCounter(count);
-        return new PatchResult(this);
+        PatchResult thisResult = new PatchResult(this);
+        MutableParadigmClient.sendResult(thisResult);
+        System.out.println("finished work unit " + originalHashCode);
+        return thisResult;
     } // method call() ends here
 
     public int getCount()

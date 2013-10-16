@@ -14,6 +14,7 @@ public final class MutableParadigmClient
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
     public static final int MAX_ATTEMPTS = 300; // how many time to try connecting before giving up
     public static final String HANDSHAKE = "TriangleHandshake";
+    public static final String CLOSE = "TriangleClose";
 
     private static Socket connection;
     private static InputStream inputStream;
@@ -98,7 +99,7 @@ public final class MutableParadigmClient
         //System.out.println("Client has shut down.");
     }
 
-    private static void connect() throws IOException, InterruptedException, ConnectException, ClassNotFoundException
+    private static void connect() throws IOException, InterruptedException, ConnectException, ClassNotFoundException, SocketException
     {
         // establish connection
         connection = new Socket(HOST_NAME, LISTENING_PORT);
@@ -145,10 +146,23 @@ public final class MutableParadigmClient
                             {
                                 MutableWorkUnit thisUnit = (MutableWorkUnit)incomingObject;
                                 Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
-                                System.out.println("received job " + thisUnit.hashCode());
+                                System.out.println("received job " + thisUnit.getOriginalHashCode());
+                            }
+                        else if ( incomingObject instanceof String )
+                            {
+                                String incomingString = (String)incomingObject;
+                                if ( incomingString.equals(CLOSE) )
+                                    {
+                                        System.out.println("Close request received.");
+                                        break;
+                                    }
                             }
                         else
                             break;
+                    }
+                catch (SocketException e)
+                    {
+                        throw new SocketException(e.getMessage());
                     }
                 catch (Exception e)
                     {
@@ -156,11 +170,21 @@ public final class MutableParadigmClient
                         break;
                     }
             }
+
+        try
+            {
+                connection.close();
+            }
+        catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        System.out.println("Connection to server closed.");
     }
 
     public synchronized static void sendResult(PatchResult result)
     {
-        System.out.println("sending a result (" + result.getCompletedUnit().getPatch().getLocalCompletedPatches().size() + " completed puzzles)");
+        System.out.println("\nsending a result for job " + result.getCompletedUnit().getOriginalHashCode() + " (" + result.getCompletedUnit().getPatch().getLocalCompletedPatches().size() + " completed puzzles)");
         try
             {
                 // send result

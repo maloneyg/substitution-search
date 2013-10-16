@@ -89,6 +89,7 @@ public class MutableParadigmServer
         private ObjectOutputStream outgoingObjectStream;
     
         public static final String HANDSHAKE = "TriangleHandshake";
+        public static final String CLOSE = "TriangleClose";
 
         public ConnectionThread(Socket connection)
         {
@@ -133,7 +134,10 @@ public class MutableParadigmServer
 
         public void run()
         {
-            while (true)
+            int jobCount = 0;
+            int numberOfReceivedResults = 0;
+            main:
+            while ( (jobCount==0 || numberOfReceivedResults != jobCount) && MutableWorkUnit.notDoneYet == true )
                 {
                     try
                         {
@@ -142,6 +146,7 @@ public class MutableParadigmServer
                                 {
                                     // this is an incoming result
                                     PatchResult result = (PatchResult)incomingObject;
+                                    numberOfReceivedResults++;
                                     List<BasicPatch> localCompletedPatches = result.getCompletedUnit().getPatch().getLocalCompletedPatches();
                                     if ( localCompletedPatches.size() > 0 )
                                         {
@@ -159,15 +164,22 @@ public class MutableParadigmServer
                                     System.out.println("received request for " + numberOfNewJobs + " new jobs from " + connection.getInetAddress());
                                     for (int i=0; i < numberOfNewJobs; i++)
                                         {
+                                            // break out if done
+                                            if (MutableWorkUnit.notDoneYet == false)
+                                                break;
+
                                             // get next work unit
-                                            WorkUnit thisUnit = MutableWorkUnit.nextWorkUnit();
+                                            MutableWorkUnit thisUnit = MutableWorkUnit.nextWorkUnit();
+                                            jobCount++;
+                                            thisUnit.setOriginalHashCode(jobCount);
 
                                             // send work unit
                                             outgoingObjectStream.writeObject(thisUnit);
                                             outgoingObjectStream.flush();
                                             outgoingObjectStream.reset();
+                                            System.out.println("sent job " + jobCount);
                                         }
-                                    System.out.println(numberOfNewJobs + " have been sent to " + connection.getInetAddress());
+                                    System.out.println(numberOfNewJobs + " new jobs have been sent to " + connection.getInetAddress());
                                 }
                             else
                                 break;
@@ -183,8 +195,15 @@ public class MutableParadigmServer
                             break;
                         }
                 }
+
+            // close connections
             try
                 {
+                    // send close signal
+                    outgoingObjectStream.writeObject(CLOSE);
+                    outgoingObjectStream.flush();
+
+                    // close socket
                     if ( connection != null )
                         connection.close();
                 }
@@ -195,6 +214,8 @@ public class MutableParadigmServer
         
             MutableParadigmServer.LIVE_CONNECTIONS.getAndDecrement();
             MutableParadigmServer.ALL_CONNECTIONS.remove(this);
+            System.out.println("Program complete.  " + numberOfReceivedResults + " results were received, comprising " + allCompletedPatches.size() + " completed puzzles.");
+            System.exit(0);
         }
     }
 

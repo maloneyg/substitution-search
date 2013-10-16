@@ -160,6 +160,30 @@ public final class TriangleClient
 
     public synchronized static void sendResult(TestResult result)
     {
+        if ( connection == null )
+            return;
+        System.out.println("sending: " + result.toString());
+        try
+            {
+                // send result
+                outgoingObjectStream.writeObject(result);
+                outgoingObjectStream.flush();
+                outgoingObjectStream.reset();
+
+                // ask for one new job
+                outgoingObjectStream.writeObject(new Integer(1));
+                outgoingObjectStream.flush();
+                outgoingObjectStream.reset();
+                System.out.println("requested 1 more job");
+            }
+        catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+    }
+
+    public synchronized static void sendResult(PatchResult result)
+    {
         System.out.println("sending: " + result.toString());
         try
             {
