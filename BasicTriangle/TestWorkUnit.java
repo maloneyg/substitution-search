@@ -24,7 +24,9 @@ public class TestWorkUnit implements WorkUnit, Callable<Result>, Serializable
 
                 Thread.sleep(10*1000);
 
-                return new TestResult("result for ID " + ID);
+                TestResult result = new TestResult("result for ID " + ID);
+                TriangleClient.sendResult(result);
+                return result;
             }
         catch (InterruptedException e)
             {
