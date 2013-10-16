@@ -198,6 +198,7 @@ public class MutableSerializationTest
                         ObjectInputStream in = new ObjectInputStream(fileIn);
                         reconstitutedUnit = (WorkUnit)in.readObject();
                         System.out.println(((MutableWorkUnit)reconstitutedUnit).getPatch().toString());
+                        System.out.println("Serialized same as original? " + ((MutableWorkUnit)reconstitutedUnit).equals((MutableWorkUnit)thisUnit));
                         pause();
                         in.close();
                         fileIn.close();
