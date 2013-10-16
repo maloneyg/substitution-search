@@ -220,23 +220,37 @@ public class MutablePatch implements Serializable {
 
     // equals method
     public boolean equals(Object obj) {
+System.out.println("hello");
+System.out.println(getClass());
+System.out.println(obj.getClass());
+
         if (obj == null || getClass() != obj.getClass())
             return false;
         MutablePatch x = (MutablePatch) obj;
+
+boolean comparison = flip == x.flip;
+System.out.println("flip: " + flip + " " + x.flip + " " + comparison);
+comparison = initialFlip == x.initialFlip;
+System.out.println("initialFlip: " + initialFlip + " " + x.initialFlip + " " + comparison);
+comparison = initialSecondEdge == x.initialSecondEdge;
+System.out.println("initialSecondEdge: " + initialSecondEdge + " " + x.initialSecondEdge + " " + comparison);
+comparison = secondEdge == x.secondEdge;
+System.out.println("secondEdge: " + secondEdge + " " + x.secondEdge + " " + comparison);
+
         return (//
-            this.triangles.equals(x.triangles)//
-          &&this.edges.equals(x.edges)//
-          &&this.partition.equals(x.partition)//
-          &&this.numCompleted==x.numCompleted//
-          &&this.tileList.equals(x.tileList)//
-          &&this.bigVertices.equals(x.bigVertices)//
-          &&this.currentEdge.equals(x.currentEdge)//
-          &&this.currentPrototile.equals(x.currentPrototile)//
-          &&this.secondEdge==x.secondEdge//
-          &&this.flip==x.flip//
-          &&this.initialPrototile.equals(x.initialPrototile)//
-          &&this.initialSecondEdge==x.initialSecondEdge//
-          &&this.initialFlip==x.initialFlip//
+          //  this.triangles.equals(x.triangles)//
+          this.edges.equals(x.edges)
+          &&this.partition.equals(x.partition)
+          &&this.numCompleted==x.numCompleted
+          &&this.tileList.equals(x.tileList)
+          &&this.bigVertices.equals(x.bigVertices)
+          &&this.currentEdge.equals(x.currentEdge)
+          &&this.currentPrototile.equals(x.currentPrototile)
+          &&this.secondEdge==x.secondEdge
+          &&this.flip==x.flip
+          &&this.initialPrototile.equals(x.initialPrototile)
+          &&this.initialSecondEdge==x.initialSecondEdge
+          &&this.initialFlip==x.initialFlip
             );
     }
 
