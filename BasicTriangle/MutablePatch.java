@@ -409,14 +409,30 @@ public class MutablePatch implements Serializable {
 
     // big String
     public String toString() {
+        System.out.println("1");
         String output = "MutablePatch " + hashCode() + ":\n";
-        output += "Triangles:\n";
-        for (BasicTriangle t : triangles) output += t.toString() + "\n";
+        System.out.println("1a");
+        output = output + "Triangles:\n";
+        System.out.println("1b\n");
+
+        for (BasicTriangle t : triangles)
+            {
+                System.out.println("1c");
+                output += t.toString() + "\n";
+            }
+        
+        System.out.println("2");
         output += "Open edges:\n";
+        
         for (BasicEdge e : edges.open()) output += e.toString() + "\n";
         output += "Closed edges:\n";
+        
+        System.out.println("6");
         for (BasicEdge e : edges.closed()) output += e.toString() + "\n";
+        
         output += "Partition:\n";
+        System.out.println("7");
+        
         output += partition.toString() + "\n";
         output += "Number Completed:" + numCompleted + "\n";
         output += "Count:" + count.get() + "\n";

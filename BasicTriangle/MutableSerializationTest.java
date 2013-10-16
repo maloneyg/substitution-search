@@ -165,7 +165,13 @@ public class MutableSerializationTest
         while (notDoneYet)
             {
                 WorkUnit thisUnit = nextWorkUnit();
+                System.out.println("hello");
+                MutableWorkUnit thisMutableWorkUnit = (MutableWorkUnit)thisUnit;
+                System.out.println("a");
+                MutablePatch thisMutablePatch = thisMutableWorkUnit.getPatch();
+                System.out.println("b");
                 System.out.println(((MutableWorkUnit)thisUnit).getPatch().toString());
+                System.out.println("bye");
                 pause();
 
                 // serialization test: serialize workunit to disk
