@@ -125,7 +125,8 @@ public class MutablePartition<E> implements Serializable {
             if (current.getData().equals(data)) return output;
             current = current.getNext();
         }
-        throw new IllegalArgumentException(data + " is not in this partition: " + this + " with size " + size() + ".");
+        //throw new IllegalArgumentException(data + " is not in this partition: " + this + " with size " + size() + ".");
+        throw new IllegalArgumentException(data + " is not in this partition (size = " + size() + " ).");
     }
 
     // return the head node
