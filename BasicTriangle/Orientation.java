@@ -8,6 +8,8 @@ import java.io.Serializable;
 public final class Orientation implements Serializable {
 
     private final Orientation opposite;
+    private static int i = 0;
+    private final int ID;
 
     // make it Serializable
     static final long serialVersionUID = -8541351746816390922L;
@@ -19,9 +21,12 @@ public final class Orientation implements Serializable {
     // constructor methods.
     private Orientation(Orientation theOpposite) {
         this.opposite = theOpposite;
+        this.ID = -theOpposite.ID;
     }
 
     private Orientation() {
+        this.ID = i;
+        i++;
         this.opposite = new Orientation(this);
     }
 
@@ -35,12 +40,17 @@ public final class Orientation implements Serializable {
         if (obj == null || getClass() != obj.getClass())
             return false;
         Orientation o = (Orientation) obj;
-        return this == o;
+        return this.ID == o.ID;
     }
 
     // hashCode override.
     public int hashCode() {
-        return super.hashCode();
+        return ID;
+    }
+
+    // hashCode override.
+    public String toString() {
+        return "Orientation " + ID;
     }
 
     // return true if the two orientations are not opposites.
