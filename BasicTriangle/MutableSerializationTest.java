@@ -106,7 +106,7 @@ public class MutableSerializationTest
         }
     }
 
-    private static WorkUnit nextWorkUnit() {
+    private static MutableWorkUnit nextWorkUnit() {
 
         if (P0.isosceles()) {
         // how we submit BasicWorkUnits
@@ -154,8 +154,6 @@ public class MutableSerializationTest
         System.out.println(executorService);
         Logger log = executorService.getLogger();
 
-        ConcurrentLinkedQueue<WorkUnit> initialWorkUnits = new ConcurrentLinkedQueue<WorkUnit>();
-
 
         // start monitoring thread
         double monitorInterval = 1.0; //seconds
@@ -164,15 +162,7 @@ public class MutableSerializationTest
         // submit all jobs
         while (notDoneYet)
             {
-                WorkUnit thisUnit = nextWorkUnit();
-                System.out.println("hello");
-                MutableWorkUnit thisMutableWorkUnit = (MutableWorkUnit)thisUnit;
-                System.out.println("a");
-                MutablePatch thisMutablePatch = thisMutableWorkUnit.getPatch();
-                System.out.println("b");
-                System.out.println(((MutableWorkUnit)thisUnit).getPatch().toString());
-                System.out.println("bye");
-                pause();
+                MutableWorkUnit thisUnit = nextWorkUnit();
 
                 // serialization test: serialize workunit to disk
                 String filename = "workunit.tmp";
@@ -191,14 +181,16 @@ public class MutableSerializationTest
                     }
 
                 // serialization test: deserialize workunit from disk
-                WorkUnit reconstitutedUnit = null;
+                MutableWorkUnit reconstitutedUnit = null;
                 try
                     {
                         FileInputStream fileIn = new FileInputStream(filename);
                         ObjectInputStream in = new ObjectInputStream(fileIn);
-                        reconstitutedUnit = (WorkUnit)in.readObject();
-                        System.out.println(((MutableWorkUnit)reconstitutedUnit).getPatch().toString());
-                        System.out.println("Serialized same as original? " + ((MutableWorkUnit)reconstitutedUnit).equals((MutableWorkUnit)thisUnit));
+                        reconstitutedUnit = (MutableWorkUnit)in.readObject();
+                        //System.out.println("Serialized same as original? " + ((MutableWorkUnit)reconstitutedUnit).equals((MutableWorkUnit)thisUnit));
+                        
+                        
+                        System.out.println("Serialized same as original? " + reconstitutedUnit.getPatch().equals(thisUnit.getPatch()));
                         pause();
                         in.close();
                         fileIn.close();
