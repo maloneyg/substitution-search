@@ -12,7 +12,7 @@ import com.google.common.collect.*;
 import Jama.Matrix;
 import java.util.Scanner;
 
-public class MutableTest
+public class MutableSerializationTest
 {
 
     // the number of the triangle we're searching
@@ -157,9 +157,41 @@ public class MutableTest
         while (notDoneYet)
             {
                 WorkUnit thisUnit = nextWorkUnit();
-            
+
+                // serialization test: serialize workunit to disk
+                String filename = "workunit.tmp";
+                try
+                    {
+                        FileOutputStream fileOut = new FileOutputStream(filename);
+                        ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                        out.writeObject(thisUnit);
+                        out.close();
+                        fileOut.close();
+                    }
+                catch (IOException e)
+                    {
+                        e.printStackTrace();
+                        System.exit(1);
+                    }
+
+                // serialization test: deserialize workunit from disk
+                WorkUnit reconstitutedUnit = null;
+                try
+                    {
+                        FileInputStream fileIn = new FileInputStream(filename);
+                        ObjectInputStream in = new ObjectInputStream(fileIn);
+                        reconstitutedUnit = (WorkUnit)in.readObject();
+                        in.close();
+                        fileIn.close();
+                    }
+                catch (Exception e)
+                    {
+                        e.printStackTrace();
+                        System.exit(1);
+                    }
+
                 // submit the next work unit
-                Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
+                Future<Result> thisFuture = executorService.getExecutor().submit(reconstitutedUnit);
                 System.out.println("Job " + thisUnit.hashCode() + " submitted.\n");
                 log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
             
@@ -213,6 +245,9 @@ public class MutableTest
         if ( numberOfResults > 0 )
             {
                 List<BasicPatch> output = MutablePatch.getCompletedPatches();
+
+                // serialization test: serialize and deserialize each basicpatch
+
                 try
                     {
                         PointsDisplay display = new PointsDisplay(output,"mutable test");

@@ -21,7 +21,7 @@ public class PointsDisplay extends JPanel implements ActionListener
     private int position;
     public static final int windowSize = 500;
 
-    public PointsDisplay(List<BasicPatch> patches, String title)
+    public PointsDisplay(List<BasicPatch> patches, String title) throws java.awt.HeadlessException
     {
         this.patches = patches;
         this.position = 0;
