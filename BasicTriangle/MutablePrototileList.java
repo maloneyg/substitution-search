@@ -47,7 +47,8 @@ public class MutablePrototileList implements Serializable {
         if (obj == null || getClass() != obj.getClass())
             return false;
         MutablePrototileList o = (MutablePrototileList) obj;
-        return this.tileCount.equals(o.tileCount);
+        for (int i = 0; i < tileCount.length; i++) if (tileCount[i]!=o.tileCount[i]) return false;
+        return true;
     }
 
     // hashCode implementation.

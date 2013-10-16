@@ -114,7 +114,8 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
         if (obj == null || getClass() != obj.getClass())
             return false;
         BasicPrototile p = (BasicPrototile) obj;
-        return this.angles.equals(p.angles);
+        for (int i = 0; i < 3; i++) if (angles[i].equals(p.angles[i])) return false;
+        return true;
     }
 
     // hashCode method
