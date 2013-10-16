@@ -220,26 +220,22 @@ public class MutablePatch implements Serializable {
 
     // equals method
     public boolean equals(Object obj) {
-System.out.println("hello");
-System.out.println(getClass());
-System.out.println(obj.getClass());
-
         if (obj == null || getClass() != obj.getClass())
             return false;
         MutablePatch x = (MutablePatch) obj;
 
-boolean comparison = flip == x.flip;
-System.out.println("flip: " + flip + " " + x.flip + " " + comparison);
-comparison = initialFlip == x.initialFlip;
-System.out.println("initialFlip: " + initialFlip + " " + x.initialFlip + " " + comparison);
-comparison = initialSecondEdge == x.initialSecondEdge;
-System.out.println("initialSecondEdge: " + initialSecondEdge + " " + x.initialSecondEdge + " " + comparison);
-comparison = secondEdge == x.secondEdge;
-System.out.println("secondEdge: " + secondEdge + " " + x.secondEdge + " " + comparison);
+          System.out.println( this.triangles.equals(x.triangles));
+          System.out.println( this.edges.equals(x.edges) );
+          System.out.println(this.partition.equals(x.partition));
+          System.out.println(this.tileList.equals(x.tileList));
+          System.out.println(this.bigVertices.equals(x.bigVertices));
+          System.out.println(this.currentEdge.equals(x.currentEdge));
+          System.out.println(this.currentPrototile.equals(x.currentPrototile));
+          System.out.println(this.initialPrototile.equals(x.initialPrototile));
 
-        return (//
-          //  this.triangles.equals(x.triangles)//
-          this.edges.equals(x.edges)
+        return (
+          this.triangles.equals(x.triangles)
+          &&this.edges.equals(x.edges)
           &&this.partition.equals(x.partition)
           &&this.numCompleted==x.numCompleted
           &&this.tileList.equals(x.tileList)
