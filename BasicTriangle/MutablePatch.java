@@ -23,7 +23,7 @@ public class MutablePatch implements Serializable {
     // the completed patches that have been found
     private static List<BasicPatch> completedPatches;
 
-    private AtomicInteger count;
+    private AtomicInteger count = new AtomicInteger(0);
 
     static { // initialize completedPatches
         ArrayList<BasicPatch> tempList = new ArrayList<>();
@@ -410,7 +410,7 @@ public class MutablePatch implements Serializable {
     // big String
     public String toString() {
         System.out.println("1");
-        String output = "MutablePatch " + hashCode() + ":\n";
+        String output = "MutablePatch:\n";
         System.out.println("1a");
         output = output + "Triangles:\n";
         System.out.println("1b\n");
@@ -448,7 +448,7 @@ public class MutablePatch implements Serializable {
         output += "initialSecondEdge: " + initialSecondEdge + "\n";
         output += "flip: " + flip + "\n";
         output += "initialFlip: " + initialFlip + "\n";
-        output += "end of MutablePatch " + hashCode() + ":\n";
+        output += "end of MutablePatch\n";
         return output;
     }
 
