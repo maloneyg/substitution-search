@@ -180,6 +180,7 @@ public final class MutableParadigmClient
                 e.printStackTrace();
             }
         System.out.println("Connection to server closed.");
+        System.exit(0);
     }
 
     public synchronized static void sendResult(PatchResult result)
