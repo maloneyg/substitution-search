@@ -137,8 +137,10 @@ public class MutableParadigmServer
             int jobCount = 0;
             int numberOfReceivedResults = 0;
             main:
-            while ( (jobCount==0 || numberOfReceivedResults != jobCount) && MutableWorkUnit.notDoneYet == true )
+            while ( true )
                 {
+                    if ( jobCount > 0 && numberOfReceivedResults == jobCount )
+                        break;
                     try
                         {
                             Object incomingObject = incomingObjectStream.readObject();
@@ -157,17 +159,13 @@ public class MutableParadigmServer
                                         System.out.println("Null result received from " + connection.getInetAddress() + ".");
 
                                 }
-                            else if ( incomingObject instanceof Integer )
+                            else if ( incomingObject instanceof Integer && MutableWorkUnit.notDoneYet )
                                 {
                                     // this is a request for new jobs
                                     int numberOfNewJobs = (Integer)incomingObject;
                                     System.out.println("received request for " + numberOfNewJobs + " new jobs from " + connection.getInetAddress());
                                     for (int i=0; i < numberOfNewJobs; i++)
                                         {
-                                            // break out if done
-                                            if (MutableWorkUnit.notDoneYet == false)
-                                                break;
-
                                             // get next work unit
                                             MutableWorkUnit thisUnit = MutableWorkUnit.nextWorkUnit();
                                             jobCount++;
@@ -181,8 +179,6 @@ public class MutableParadigmServer
                                         }
                                     System.out.println(numberOfNewJobs + " new jobs have been sent to " + connection.getInetAddress());
                                 }
-                            else
-                                break;
                         }
                     catch (EOFException e)
                         {
