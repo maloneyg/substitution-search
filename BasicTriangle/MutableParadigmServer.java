@@ -12,6 +12,8 @@ public class MutableParadigmServer
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
 
     public static final List<BasicPatch> allCompletedPatches = new ArrayList<BasicPatch>();
+    public static final String RESULT_FILENAME = "results.chk";
+
     public static AtomicInteger numberOfResultsReceived = new AtomicInteger(0);
     public static volatile boolean finished = false;
 
@@ -86,7 +88,26 @@ public class MutableParadigmServer
                     }
             }
 
-        System.out.println("Program complete.  " + numberOfResultsReceived + " results were received, comprising " + allCompletedPatches.   size() + " completed puzzles.");
+        System.out.println("Program complete.  " + numberOfResultsReceived + " results were received, comprising " + allCompletedPatches.size() + " completed puzzles.");
+        
+        // write results to file 
+        if (allCompletedPatches.size() > 0)
+            {
+                TriangleResults triangleResults = new TriangleResults(allCompletedPatches);
+                try
+                    {
+                        FileOutputStream fileOut = new FileOutputStream(RESULT_FILENAME);
+                        ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                        out.writeObject(triangleResults);
+                        out.close();
+                        fileOut.close();
+                        System.out.println("Wrote results to " + RESULT_FILENAME + ".");
+                    }
+                catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+            }
         System.exit(0);
     }
 
