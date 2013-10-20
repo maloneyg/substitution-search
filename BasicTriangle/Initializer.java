@@ -4,7 +4,7 @@
  *
  *  Initializes the various integers and matrices associated 
  *  with a search for n-fold symmetry.
- *  I don't want to have all of these constants doubleing 
+ *  I don't want to have all of these constants floating 
  *  around in different classes; I'd rather collect them all
  *  in one place and then take them from here when I need them.  
  *
@@ -22,10 +22,10 @@ class Initializer {
     public static final int N = Preinitializer.N;     // the order of symmetry
 
 //    public static final double COS = Math.cos(Math.PI/(double)N);// 2cos(pi/N)
-    public static final double COS = Math.cos(Math.PI/(double)N);
-    public static final double[] COS_LIST; // powers of COS
+    public static final float COS = (float)Math.cos(Math.PI/(double)N);
+    public static final float[] COS_LIST; // powers of COS
 
-    public static final double EP = Preinitializer.EP;  // threshold value
+    public static final float EP = Preinitializer.EP;  // threshold value
 
     public static final ByteMatrix A;           // 2cos[pi/N], as a matrix
 
@@ -68,8 +68,8 @@ class Initializer {
 
     static { // initialize COS_LIST
 
-        double[] preCos = new double[N];
-        for (int i = 0; i < preCos.length; i++) preCos[i] = Math.pow(COS,i);
+        float[] preCos = new float[N];
+        for (int i = 0; i < preCos.length; i++) preCos[i] = (float)Math.pow(COS,i);
         COS_LIST = preCos;
 
     } // COS_LIST has been initialized

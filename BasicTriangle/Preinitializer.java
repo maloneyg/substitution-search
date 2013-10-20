@@ -16,14 +16,14 @@ class Preinitializer {
 
     public static final int MY_TILE = 0;        // the tile we're searching
 
-    public static final double EP = 0.000001;  // threshold value
+    public static final float EP = 0.000001f;  // threshold value
 
     // the inflation factor, represented as coefficients of
     // 1, a, a^2, etc., where a = 2*cos(pi/N).
 
 //    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search
-//    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search
+//    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search
 
     public static final ImmutableList<ImmutableList<Integer>> PROTOTILES = ImmutableList.of( 
                              //    ImmutableList.of( 1, 2, 4 ),  //

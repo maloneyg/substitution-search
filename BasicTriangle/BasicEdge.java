@@ -253,9 +253,9 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
 //        double d0 = Math.sqrt(u0.dotProduct(u0).evaluate(Initializer.COS));
 //        double d1 = Math.sqrt(u1.dotProduct(u1).evaluate(Initializer.COS));
 //        double d2 = Math.sqrt(u2.dotProduct(u2).evaluate(Initializer.COS));
-        double d0 = Math.sqrt(u0.dotProduct(u0));
-        double d1 = Math.sqrt(u1.dotProduct(u1));
-        double d2 = Math.sqrt(u2.dotProduct(u2));
+        float d0 = (float)Math.sqrt(u0.dotProduct(u0));
+        float d1 = (float)Math.sqrt(u1.dotProduct(u1));
+        float d2 = (float)Math.sqrt(u2.dotProduct(u2));
         return (-Initializer.EP < d0 + d1 - d2 && d0 + d1 - d2 < Initializer.EP);
     }
 

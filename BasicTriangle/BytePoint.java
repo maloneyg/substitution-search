@@ -30,7 +30,7 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
 
     public static final BytePoint UNIT_VECTOR;
 
-    public static final double[] COS_POWERS = Initializer.COS_LIST;
+    public static final float[] COS_POWERS = Initializer.COS_LIST;
 
     // a pool containing all the BytePoints that have been created
     //private static final BytePointPool POOL = BytePointPool.getInstance();
@@ -272,12 +272,12 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     *
     * WARNING: this only works for odd N right now.
     */
-    public double crossProduct(BytePoint p) {
+    public float crossProduct(BytePoint p) {
         int l = length/2;
         byte[] p0 = this.point;
         byte[] p1 = p.point;
         // here we store the shoelace products
-        double coeffs = 0.0;
+        float coeffs = 0.0f;
         for (int i = 0; i < l; i++) {
             for (int j = 0; j < length; j++) {
                 if (j+i != length-1)
@@ -329,13 +329,13 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     * WARNING: this only works for prime N right now.
     * WARNING: this only works for odd N right now.
     */
-    public double dotProduct(BytePoint p) {
+    public float dotProduct(BytePoint p) {
         int l = length/2+1;
         byte[] p0 = point;
         byte[] p1 = p.point;
         
         // here we store the shoelace products
-        double coeffs = 0.0;
+        float coeffs = 0.0f;
         for (int i = 0; i < l; i++) {
             for (int j = 0; j < length; j++) {
                 if (j+i != length)
