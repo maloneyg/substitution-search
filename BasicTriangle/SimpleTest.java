@@ -22,8 +22,8 @@ public class SimpleTest
     // the numbers of the different prototiles that fit in INFL.P0
     private static final PrototileList tiles = PrototileList.createPrototileList(BasicPrototile.getPrototileList(Initializer.SUBSTITUTION_MATRIX.getColumn(myTile)));
     // vertices of INFL.P0
-    private static final BytePoint[] vertices = P0.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
-    private static final BytePoint[] bigVertices = new BytePoint[] {vertices[0].inflate(),vertices[1].inflate(),vertices[2].inflate()};
+    private static final AbstractPoint[] vertices = P0.place(Preinitializer.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
+    private static final AbstractPoint[] bigVertices = new AbstractPoint[] {vertices[0].inflate(),vertices[1].inflate(),vertices[2].inflate()};
     // iterators for producing new edge breakdowns
     private static MultiSetLinkedList edge0;
     private static MultiSetLinkedList edge1;
@@ -134,6 +134,7 @@ public class SimpleTest
 
     public static void main(String[] args)
     {
+
         // this is the thread executor service (a singleton)
         ThreadService executorService = ThreadService.INSTANCE;
         System.out.println(executorService);

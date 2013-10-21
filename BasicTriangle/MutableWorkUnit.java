@@ -31,8 +31,8 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
     private static final PrototileList tiles = PrototileList.createPrototileList(BasicPrototile.getPrototileList(Initializer.SUBSTITUTION_MATRIX.getColumn(myTile)));
     
     // vertices of INFL.P0
-    private static final BytePoint[] vertices = P0.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
-    private static final BytePoint[] bigVertices = new BytePoint[] {vertices[0].inflate(),vertices[1].inflate(),vertices[2].inflate()};
+    private static final AbstractPoint[] vertices = P0.place(Preinitializer.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
+    private static final AbstractPoint[] bigVertices = new AbstractPoint[] {vertices[0].inflate(),vertices[1].inflate(),vertices[2].inflate()};
     
     // iterators for producing new edge breakdowns
     private static MultiSetLinkedList edge0;
@@ -235,5 +235,16 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         return patch;
     }
 
-} // end of class MutableWorkUnit
+    public static void main(String[] args) {
 
+        for (Integer i : BD0) System.out.print(i + " ");
+        System.out.println();
+        for (Integer i : BD1) System.out.print(i + " ");
+        System.out.println();
+        for (Integer i : BD2) System.out.print(i + " ");
+        System.out.println();
+        System.out.println(2*180*1260);
+
+    }
+
+} // end of class MutableWorkUnit

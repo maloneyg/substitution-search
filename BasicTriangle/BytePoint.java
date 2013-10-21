@@ -78,11 +78,6 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
         return new BytePoint(vector);
     }
 
-    // public static factory method for creating a brand new point
-    //static protected BytePoint createExNihilo(int[] vector) {
-   //     return new BytePoint(vector);
-    //}
-
     // toString method.
     public String toString() {
         String outString = "(";
@@ -165,7 +160,7 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
         return createBytePoint(INFL.rowTimes(this.pointAsArray()));
     }
 
-    protected BytePoint timesA() {
+    public BytePoint timesA() {
         return createBytePoint(A.rowTimes(this.pointAsArray()));
     }
 

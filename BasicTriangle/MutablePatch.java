@@ -57,7 +57,7 @@ public class MutablePatch implements Serializable {
     private MutablePrototileList tileList;
 
     // vertices of the big triangle
-    private final BytePoint[] bigVertices;
+    private final AbstractPoint[] bigVertices;
 
     /*
     * The step variables.
@@ -97,7 +97,7 @@ public class MutablePatch implements Serializable {
     private final boolean initialFlip = false;
 
     // initial constructor
-    private MutablePatch(BasicEdge[] e, BytePoint[] v, MutablePrototileList TL) {
+    private MutablePatch(BasicEdge[] e, AbstractPoint[] v, MutablePrototileList TL) {
         tileList = TL;
         triangles = new Stack<>();
         edges = MutableEdgeList.createMutableEdgeList(e);
@@ -117,14 +117,14 @@ public class MutablePatch implements Serializable {
             }
         }
 
-        BytePoint[] tempVertices = new BytePoint[v.length];
+        AbstractPoint[] tempVertices = new AbstractPoint[v.length];
         for (int j = 0; j < v.length; j++) tempVertices[j] = v[j];
         bigVertices = tempVertices;
         resetSteps();
     }
 
     // public static factory method
-    public static MutablePatch createMutablePatch(BasicEdge[] e, BytePoint[] v, MutablePrototileList TL) {
+    public static MutablePatch createMutablePatch(BasicEdge[] e, AbstractPoint[] v, MutablePrototileList TL) {
         return new MutablePatch(e,v,TL);
     }
 
@@ -285,8 +285,8 @@ System.out.println(x.initialPrototile);*/
     */
     public ArrayList<OrderedTriple> graphicsDump() {
         ArrayList<OrderedTriple> output = new ArrayList<OrderedTriple>(triangles.size());
-        BytePoint p0;
-        BytePoint p1;
+        AbstractPoint p0;
+        AbstractPoint p1;
         ArrayList<RealMatrix> edgeList = new ArrayList<RealMatrix>(3);
         int counter = 0;
         for (BasicTriangle t : triangles)
@@ -365,8 +365,8 @@ System.out.println(x.initialPrototile);*/
     * called in the execution of this one.  
     */
     public boolean compatible(BasicTriangle t) {
-        BytePoint[] ends = currentEdge.getEnds();
-        BytePoint other = t.getOtherVertex(ends[0],ends[1]);
+        AbstractPoint[] ends = currentEdge.getEnds();
+        AbstractPoint other = t.getOtherVertex(ends[0],ends[1]);
 
         // test to see if other is new or already there.
         // if it's on an openEdge but not equal to one 
@@ -431,10 +431,10 @@ System.out.println(x.initialPrototile);*/
     * vector is the same as taking the 2d cross product with the 
     * original vector.
     */
-    public boolean contains(BytePoint p) {
-        BytePoint m; // the direction vector for a side
-        BytePoint v; // the other vertex
-        BytePoint t; // vertex on the given side, used to test cross product
+    public boolean contains(AbstractPoint p) {
+        AbstractPoint m; // the direction vector for a side
+        AbstractPoint v; // the other vertex
+        AbstractPoint t; // vertex on the given side, used to test cross product
         for (int i = 0; i < 3; i++) {
             m = bigVertices[(i+2)%3].subtract(bigVertices[(i+1)%3]);
             v = bigVertices[i];
@@ -470,7 +470,7 @@ System.out.println(x.initialPrototile);*/
         output += "Tile List:\n";
         output += tileList.toString() + "\n";
         output += "The big triangle:\n";
-        for (BytePoint p : bigVertices) output += p.toString() + " ";
+        for (AbstractPoint p : bigVertices) output += p.toString() + " ";
         output += "\n";
         output += "currentEdge: " + currentEdge.toString() + "\n";
         output += "currentPrototile: " + currentPrototile.toString() + "\n";

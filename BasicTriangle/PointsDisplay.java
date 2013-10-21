@@ -160,12 +160,12 @@ public class PointsDisplay extends JPanel implements ActionListener
         BasicPrototile P1 = BasicPrototile.createBasicPrototile(new int[] { 1, 2, 4 });
         BasicPrototile P2 = BasicPrototile.createBasicPrototile(new int[] { 2, 2, 3 });
 
-        BasicTriangle T2 = P2.place(BytePoint.createBytePoint(new byte[] {Z,Z,Z,Z,Z,Z}),BasicAngle.createBasicAngle(1),false);
-        BasicTriangle T1 = P1.place(BytePoint.createBytePoint(new byte[] {Z,Z,Z,Z,Z,Z}),BasicAngle.createBasicAngle(3),true);
+//        BasicTriangle T2 = P2.place(BytePoint.createBytePoint(new byte[] {Z,Z,Z,Z,Z,Z}),BasicAngle.createBasicAngle(1),false);
+//        BasicTriangle T1 = P1.place(BytePoint.createBytePoint(new byte[] {Z,Z,Z,Z,Z,Z}),BasicAngle.createBasicAngle(3),true);
 
-        ArrayList<OrderedTriple> triplesList = new ArrayList<OrderedTriple>(3);
-        triplesList.add(new OrderedTriple(T1.toArray()));
-        triplesList.add(new OrderedTriple(T2.toArray()));
+//        ArrayList<OrderedTriple> triplesList = new ArrayList<OrderedTriple>(3);
+//        triplesList.add(new OrderedTriple(T1.toArray()));
+//        triplesList.add(new OrderedTriple(T2.toArray()));
 
 //        PointsDisplay theseData = new PointsDisplay(triplesList, "TriangleDraw");
 

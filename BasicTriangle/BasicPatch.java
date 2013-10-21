@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Arrays;
 import org.apache.commons.math3.linear.*;
 
-public class BasicPatch implements AbstractPatch<BasicAngle, BytePoint, BasicEdgeLength, BasicEdge, BasicTriangle, BasicPatch>, Serializable {
+public class BasicPatch implements AbstractPatch<BasicAngle, BasicEdgeLength, BasicEdge, BasicTriangle, BasicPatch>, Serializable {
 
     // make it Serializable
     static final long serialVersionUID = 3422733298735932933L;
@@ -27,10 +27,10 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BytePoint, BasicEdg
     private final OrientationPartition partition;
 
     // vertices of the big triangle
-    private final BytePoint[] bigVertices;
+    private final AbstractPoint[] bigVertices;
 
     // private constructor
-    private BasicPatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, BytePoint[] v) {
+    private BasicPatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, AbstractPoint[] v) {
         triangles = t;
         openEdges = e1;
         closedEdges = e2;
@@ -39,7 +39,7 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BytePoint, BasicEdg
     }
 
     // initial constructor
-    private BasicPatch(BasicEdge[] e, BytePoint[] v) {
+    private BasicPatch(BasicEdge[] e, AbstractPoint[] v) {
         Orientation[] o = new Orientation[e.length + 6 * BasicPrototile.ALL_PROTOTILES.size()];
         int i = 0;
         for (i = 0; i < e.length; i++) o[i] = e[i].getOrientation();
@@ -57,18 +57,18 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BytePoint, BasicEdg
         openEdges = tempEdges;
         closedEdges = new BasicEdge[0];
         partition = OrientationPartition.createOrientationPartition(o);
-        BytePoint[] tempVertices = new BytePoint[v.length];
+        AbstractPoint[] tempVertices = new AbstractPoint[v.length];
         for (int j = 0; j < v.length; j++) tempVertices[j] = v[j];
         bigVertices = tempVertices;
     }
 
     // public static factory method
-    public static BasicPatch createBasicPatch(BasicEdge[] e, BytePoint[] v) {
+    public static BasicPatch createBasicPatch(BasicEdge[] e, AbstractPoint[] v) {
         return new BasicPatch(e,v);
     }
 
     // public static factory method 
-    public static BasicPatch createBasicPatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, BytePoint[] v) {
+    public static BasicPatch createBasicPatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, AbstractPoint[] v) {
         return new BasicPatch(t,e1,e2,o,v);
     }
 
@@ -107,8 +107,8 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BytePoint, BasicEdg
     */
     public ArrayList<OrderedTriple> graphicsDump() {
         ArrayList<OrderedTriple> output = new ArrayList<OrderedTriple>(triangles.length);
-        BytePoint p0;
-        BytePoint p1;
+        AbstractPoint p0;
+        AbstractPoint p1;
         ArrayList<RealMatrix> edgeList = new ArrayList<RealMatrix>(3);
         int counter = 0;
         for (BasicTriangle t : triangles)
@@ -268,8 +268,8 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BytePoint, BasicEdg
     * called in the execution of this one.  
     */
     public boolean compatible(BasicTriangle t) {
-        BytePoint[] ends = getNextEdge().getEnds();
-        BytePoint other = t.getOtherVertex(ends[0],ends[1]);
+        AbstractPoint[] ends = getNextEdge().getEnds();
+        AbstractPoint other = t.getOtherVertex(ends[0],ends[1]);
 
         // test to see if other is new or already there.
         // if it's on an openEdge but not equal to one 
@@ -334,10 +334,10 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BytePoint, BasicEdg
     * vector is the same as taking the 2d cross product with the 
     * original vector.
     */
-    public boolean contains(BytePoint p) {
-        BytePoint m; // the direction vector for a side
-        BytePoint v; // the other vertex
-        BytePoint t; // vertex on the given side, used to test cross product
+    public boolean contains(AbstractPoint p) {
+        AbstractPoint m; // the direction vector for a side
+        AbstractPoint v; // the other vertex
+        AbstractPoint t; // vertex on the given side, used to test cross product
         for (int i = 0; i < 3; i++) {
             m = bigVertices[(i+2)%3].subtract(bigVertices[(i+1)%3]);
             v = bigVertices[i];

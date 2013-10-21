@@ -6,7 +6,7 @@
 */
 
 
-public interface AbstractPrototile<A extends AbstractAngle, P extends AbstractPoint<P,A>, L extends AbstractEdgeLength, E extends AbstractEdge<A,P,L,E>, T extends AbstractTriangle> {
+public interface AbstractPrototile<A extends AbstractAngle, L extends AbstractEdgeLength, E extends AbstractEdge<A,L,E>, T extends AbstractTriangle> {
 
     /*
     * return true if this has an edge with length l

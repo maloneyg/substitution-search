@@ -22,6 +22,9 @@ public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle>, 
     // the rotation matrix associated to this angle
     private final ByteMatrix rot;
 
+    // the rotation matrix associated to this angle
+    private final IntMatrix intRot;
+
     static { // initialize ALL_ANGLES
 
         BasicAngle[] preAllAngles = new BasicAngle[2*ANGLE_SUM];
@@ -36,9 +39,13 @@ public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle>, 
         int shift = (i < 0)?(2*ANGLE_SUM):0;
         a = i % (2*ANGLE_SUM) + shift;
         ByteMatrix preRot = ByteMatrix.identity(ANGLE_SUM-1);
-        for (int k = 0; k < i; k++)
+        IntMatrix preIRot = IntMatrix.identity(ANGLE_SUM-1);
+        for (int k = 0; k < i; k++) {
             preRot = preRot.times(Initializer.ROT);
+            preIRot = preIRot.times(Initializer.iROT);
+        }
         rot = preRot;
+        intRot = preIRot;
     }
 
     // static public factory method.
@@ -78,6 +85,11 @@ public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle>, 
     // return the rotation matrix associated to this angle
     public ByteMatrix getRotation() {
         return this.rot;
+    }
+
+    // return the rotation matrix associated to this angle
+    public IntMatrix getIntRotation() {
+        return this.intRot;
     }
 
     // return this angle plus a

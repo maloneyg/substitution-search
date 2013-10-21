@@ -25,7 +25,7 @@ public class ObjectEfficiency
     public static void main(String[] args)
     {
         Date startTime = new Date();
-        List<BytePoint> objectList = new ArrayList<BytePoint>(LIST_LENGTH);
+        List<AbstractPoint> objectList = new ArrayList<AbstractPoint>(LIST_LENGTH);
         Random generator = new Random();
         Date endTime = null;
         double elapsedTime = 0.0;
@@ -40,23 +40,23 @@ public class ObjectEfficiency
                         // create a new point at random
                         for ( int j=0; j < ARRAY_LENGTH; j++ )
                             randomIntArray[j] = generator.nextInt(MAX_INTEGER);
-                        BytePoint newPoint = BytePoint.createBytePoint(randomIntArray);
+                        AbstractPoint newPoint = BytePoint.createBytePoint(randomIntArray);
                         objectList.add(newPoint);
                     }
                 else
                     {
                         // add an old point to the list
                         int randomOldIndex = generator.nextInt(objectList.size());
-                        BytePoint oldPoint = objectList.get(randomOldIndex);
+                        AbstractPoint oldPoint = objectList.get(randomOldIndex);
                         int[] oldPointArray = oldPoint.pointAsArray();
-                        BytePoint newPoint = BytePoint.createBytePoint(oldPointArray);
+                        AbstractPoint newPoint = BytePoint.createBytePoint(oldPointArray);
                         objectList.add(newPoint);
                     }
             } // end of BytePoints
 
         endTime = new Date();
         elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
-        System.out.println(String.format("\nBytePoint List created.  Elapsed time: %.3f s", elapsedTime));
+        System.out.println(String.format("\nAbstractPoint List created.  Elapsed time: %.3f s", elapsedTime));
 
         // time for BasicTriangles
         promptEnter();
@@ -84,8 +84,8 @@ public class ObjectEfficiency
             ImmutableList<Integer> BD2 = p.getLengths()[2].getBreakdown();
             BasicEdge[] edgeList = p.createSkeleton(BD0, BD1, BD2);
             ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD1, BD2);
-            BytePoint[] vertices = p.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
-            BytePoint[] bigVertices = new BytePoint[] {vertices[0].inflate(),vertices[1].inflate(),vertices[2].inflate()};
+            AbstractPoint[] vertices = p.place(Preinitializer.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
+            AbstractPoint[] bigVertices = new AbstractPoint[] {vertices[0].inflate(),vertices[1].inflate(),vertices[2].inflate()};
             BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
             pl.add(patch);
         }
@@ -132,7 +132,7 @@ public class ObjectEfficiency
                 // create a new point at random
                 for ( int j=0; j < ARRAY_LENGTH; j++ ) {
                     randomIntArray[j] = generator.nextInt(MAX_INTEGER);
-                    BytePoint newPoint = BytePoint.createBytePoint(randomIntArray);
+                    AbstractPoint newPoint = BytePoint.createBytePoint(randomIntArray);
                     tempList.add(newPoint);
                 }
             }
@@ -140,7 +140,7 @@ public class ObjectEfficiency
         }
         endTime = new Date();
         elapsedTime = (double)(endTime.getTime() - startTime.getTime())/1000; // seconds
-        System.out.println(String.format("\nImmutableList<BytePoint> List created (copyOf).  Elapsed time: %.3f s", elapsedTime));
+        System.out.println(String.format("\nImmutableList<AbstractPoint> List created (copyOf).  Elapsed time: %.3f s", elapsedTime));
 
         promptEnter();
         System.out.println(bp1.size() + " ImmutableList<BytePoint>.");
