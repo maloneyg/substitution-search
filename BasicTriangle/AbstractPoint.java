@@ -19,8 +19,8 @@ public interface AbstractPoint<T extends AbstractPoint, A extends AbstractAngle>
 
     public boolean colinear(T p);
     public boolean parallel(T p);
-    public float crossProduct(T p);
-    public float dotProduct(T p);
+    public double crossProduct(T p);
+    public double dotProduct(T p);
 
     // it must override equals.
     public boolean equals(Object obj);
