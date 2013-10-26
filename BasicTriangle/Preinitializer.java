@@ -42,25 +42,25 @@ class Preinitializer {
     public static final AbstractPoint UNIT_VECTOR;
 
     static {
-        byte[] preZero = new byte[N-1];
-        byte[] preUnit = new byte[N-1];
-        preUnit[0] = (byte)1;
-        ZERO_VECTOR = BytePoint.createBytePoint(preZero);
-        UNIT_VECTOR = BytePoint.createBytePoint(preUnit);
+//        byte[] preZero = new byte[N-1];
+//        byte[] preUnit = new byte[N-1];
+//        preUnit[0] = (byte)1;
+//        ZERO_VECTOR = BytePoint.createBytePoint(preZero);
+//        UNIT_VECTOR = BytePoint.createBytePoint(preUnit);
 
-//        int[] preIZero = new int[N-1];
-//        int[] preIUnit = new int[N-1];
-//        preIUnit[0] = 1;
-//        ZERO_VECTOR = IntPoint.createIntPoint(preIZero);
-//        UNIT_VECTOR = IntPoint.createIntPoint(preIUnit);
+        int[] preIZero = new int[N-1];
+        int[] preIUnit = new int[N-1];
+        preIUnit[0] = 1;
+        ZERO_VECTOR = IntPoint.createIntPoint(preIZero);
+        UNIT_VECTOR = IntPoint.createIntPoint(preIUnit);
     }
 
     // method for creating AbstractPoints.
     // we want to be able to toggle between BytePoint and IntPoint
     // just by modifying this file.
     public static AbstractPoint createPoint(AbstractPoint p, boolean flip, BasicAngle a, AbstractPoint shift) {
-        return BytePoint.createBytePoint((BytePoint)p,flip,a,(BytePoint)shift);
-//        return IntPoint.createIntPoint((IntPoint)p,flip,a,(IntPoint)shift);
+//        return BytePoint.createBytePoint((BytePoint)p,flip,a,(BytePoint)shift);
+        return IntPoint.createIntPoint((IntPoint)p,flip,a,(IntPoint)shift);
     }
 
 } // end of class Preinitializer

@@ -22,8 +22,9 @@ class Initializer {
     public static final int N = Preinitializer.N;     // the order of symmetry
 
 //    public static final double COS = Math.cos(Math.PI/(double)N);// 2cos(pi/N)
-    public static final float COS = (float)Math.cos(Math.PI/(double)N);
-    public static final float[] COS_LIST; // powers of COS
+    public static final double COS = Math.cos(Math.PI/(double)N);
+    public static final double[] COS_LIST; // powers of COS
+    public static final double[] SIN_LIST; // sin((k+1)pi/N)/sin(pi/N)
 
     public static final float EP = Preinitializer.EP;  // threshold value
 
@@ -72,9 +73,16 @@ class Initializer {
 
     static { // initialize COS_LIST
 
-        float[] preCos = new float[N];
-        for (int i = 0; i < preCos.length; i++) preCos[i] = (float)Math.pow(COS,i);
+        double[] preCos = new double[N/2+1];
+        double[] preSin = new double[N/2];
+        for (int i = 0; i < preSin.length; i++) {
+//            preCos[i] = (float)Math.pow(COS,i);
+            preCos[i] = LengthAndAreaCalculator.COS_LIST.get(i).evaluate(COS);
+            preSin[i] = LengthAndAreaCalculator.SIN_LIST.get(i).evaluate(COS);
+        }
+        preCos[N/2] = LengthAndAreaCalculator.COS_LIST.get(N/2).evaluate(COS);
         COS_LIST = preCos;
+        SIN_LIST = preSin;
 
     } // COS_LIST has been initialized
 

@@ -27,7 +27,8 @@ final public class IntPoint implements AbstractPoint<IntPoint, BasicAngle>, Seri
 
     public static final IntPoint UNIT_VECTOR;
 
-    public static final float[] COS_POWERS = Initializer.COS_LIST;
+    public static final double[] COS_POWERS = Initializer.COS_LIST;
+    public static final double[] SIN_POWERS = Initializer.SIN_LIST;
 
     // a pool containing all the IntPoints that have been created
     //private static final IntPointPool POOL = IntPointPool.getInstance();
@@ -227,23 +228,90 @@ final public class IntPoint implements AbstractPoint<IntPoint, BasicAngle>, Seri
     * using the standard projection (i.e., the ith
     * standard basis vector goes to (cos(i pi/N), sin(i pi/N))).
     *
+    * the output is a polynomial P such that the cross product is
+    * sin(x) * P(cos(x)).
+    * so if we just want to compare signs of cross products
+    * we can just plug in COS and ignore the factor of sin(x).
+    *
     * WARNING: this only works for odd N right now.
     */
-    public float crossProduct(IntPoint p) {
+    public double crossProduct(IntPoint p) {
         int l = length/2;
         int[] p0 = this.point;
         int[] p1 = p.point;
         // here we store the shoelace products
-        float coeffs = 0.0f;
+        int[] coeffs = new int[l];
         for (int i = 0; i < l; i++) {
+            coeffs[i] = (int)0;
             for (int j = 0; j < length; j++) {
                 if (j+i != length-1)
-                    coeffs += COS_POWERS[i]*(p0[j] * p1[(j+i+1)%(length+1)] * ((j+i+1>length)? -1 : 1));
+                    coeffs[i] += (int)(p0[j] * p1[(j+i+1)%(length+1)] * ((j+i+1>length)? -1 : 1));
                 if (j != i)
-                    coeffs -= COS_POWERS[i]*(p0[j] * p1[(j-i-1 < 0)? length+j-i : j-i-1] * ((j-i-1<0)? -1 : 1));
+                    coeffs[i] -= (int)(p0[j] * p1[(j-i-1 < 0)? length+j-i : j-i-1] * ((j-i-1<0)? -1 : 1));
             }
         }
-        return coeffs;
+        ShortPolynomial output = ShortPolynomial.ZERO;
+        for (int i = 0; i < l; i++)
+            output = output.plus(LengthAndAreaCalculator.SIN_LIST.get(i).scalarMultiple((short)coeffs[i]));
+        return output.evaluate(Initializer.COS);
+    }
+
+    /*
+    * calculate the 2d cross-product of this with p, after 
+    * they have both been projected down to the plane
+    * using the standard projection (i.e., the ith
+    * standard basis vector goes to (cos(i pi/N), sin(i pi/N))).
+    *
+    * WARNING: this only works for odd N right now.
+    */
+//    public double crossProduct(IntPoint p) {
+//        int l = length/2;
+//        int[] p0 = this.point;
+//        int[] p1 = p.point;
+//        // here we store the shoelace products
+//        double coeffs = 0.0;
+//        for (int i = 0; i < l; i++) {
+//            for (int j = 0; j < length; j++) {
+//                if (j+i != length-1)
+////                    coeffs += COS_POWERS[i]*(p0[j] * p1[(j+i+1)%(length+1)] * ((j+i+1>length)? -1 : 1));
+//                    coeffs += SIN_POWERS[i]*(p0[j] * p1[(j+i+1)%(length+1)] * ((j+i+1>length)? -1 : 1));
+//                if (j != i)
+////                    coeffs -= COS_POWERS[i]*(p0[j] * p1[(j-i-1 < 0)? length+j-i : j-i-1] * ((j-i-1<0)? -1 : 1));
+//                    coeffs -= SIN_POWERS[i]*(p0[j] * p1[(j-i-1 < 0)? length+j-i : j-i-1] * ((j-i-1<0)? -1 : 1));
+//            }
+//        }
+//        return coeffs;
+//    }
+
+    /*
+    * calculate the 2d dot-product of this with p, after 
+    * they have both been projected down to the plane
+    * using the standard projection (i.e., the ith
+    * standard basis vector goes to (cos(i pi/N), sin(i pi/N))).
+    *
+    * WARNING: this only works for prime N right now.
+    * WARNING: this only works for odd N right now.
+    */
+    public double dotProduct(IntPoint p) {
+        int l = length/2+1;
+        int[] p0 = point;
+        int[] p1 = p.point;
+        
+        // here we store the shoelace products
+        int[] coeffs = new int[l];
+        for (int i = 0; i < l; i++) {
+            coeffs[i] = (int)0;
+            for (int j = 0; j < length; j++) {
+                if (j+i != length)
+                    coeffs[i] += (int)( p0[j] *p1[(j+i)%(length+1)] * ((j+i>length)? -1 : 1) );
+                if (i != 0 && j-i != -1)
+                    coeffs[i] += (int)( p0[j] *p1[(j-i < 0)? length+1+j-i : j-i] * ((j-i<0)? -1 : 1) );
+            }
+        }
+        ShortPolynomial output = ShortPolynomial.ZERO;
+        for (int i = 0; i < l; i++)
+            output = output.plus(LengthAndAreaCalculator.COS_LIST.get(i).scalarMultiple((short)coeffs[i]));
+        return output.evaluate(Initializer.COS);
     }
 
     /*
@@ -255,22 +323,22 @@ final public class IntPoint implements AbstractPoint<IntPoint, BasicAngle>, Seri
     * WARNING: this only works for prime N right now.
     * WARNING: this only works for odd N right now.
     */
-    public float dotProduct(IntPoint p) {
-        int l = length/2+1;
-        int[] p0 = point;
-        int[] p1 = p.point;
-        
-        // here we store the shoelace products
-        float coeffs = 0.0f;
-        for (int i = 0; i < l; i++) {
-            for (int j = 0; j < length; j++) {
-                if (j+i != length)
-                    coeffs += COS_POWERS[i]*( p0[j] *p1[(j+i)%(length+1)] * ((j+i>length)? -1 : 1) );
-                if (i != 0 && j-i != -1)
-                    coeffs += COS_POWERS[i]*( p0[j] *p1[(j-i < 0)? length+1+j-i : j-i] * ((j-i<0)? -1 : 1) );
-            }
-        }
-        return coeffs;
-    }
+//    public double dotProduct(IntPoint p) {
+//        int l = length/2+1;
+//        int[] p0 = point;
+//        int[] p1 = p.point;
+//        
+//        // here we store the shoelace products
+//        double coeffs = 0.0;
+//        for (int i = 0; i < l; i++) {
+//            for (int j = 0; j < length; j++) {
+//                if (j+i != length)
+//                    coeffs += COS_POWERS[i]*( p0[j] *p1[(j+i)%(length+1)] * ((j+i>length)? -1 : 1) );
+//                if (i != 0 && j-i != -1)
+//                    coeffs += COS_POWERS[i]*( p0[j] *p1[(j-i < 0)? length+1+j-i : j-i] * ((j-i<0)? -1 : 1) );
+//            }
+//        }
+//        return coeffs;
+//    }
 
 } // end of class IntPoint
