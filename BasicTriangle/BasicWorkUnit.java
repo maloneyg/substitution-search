@@ -64,6 +64,7 @@ public class BasicWorkUnit implements WorkUnit, Serializable {
             log.log(Level.INFO, Thread.currentThread().getName() + " found a hit while working on BasicWorkUnit " + hashCode());
             // presumably we'll eventually want to return a BasicPatch as part of this result instead.  So this next line is temporary.
             completedPatches.put(patch,edgeBreakdown);
+            System.out.println("total hits: " + completedPatches.size());
             return TestResult.JOB_COMPLETE;
         } else {
             // log.log(Level.INFO, Thread.currentThread().getName() + " BasicWorkUnit " + hashCode() + " doing work");

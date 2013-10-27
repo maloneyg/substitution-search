@@ -151,12 +151,22 @@ public class SimpleTest
         nextUnit:
         while (notDoneYet)
             {
-                WorkUnit thisUnit = nextWorkUnit();
+                WorkUnit thisUnit = null;
+                Future<Result> thisFuture = null;
 
                 // submit the next work unit
-                Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
-                System.out.println("Job " + thisUnit.hashCode() + " submitted.\n");
-                log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
+                for (int i=0; i < 10000; i++)
+                    {
+                        if ( !notDoneYet )
+                            break;
+                        thisUnit = nextWorkUnit();
+                        thisFuture = executorService.getExecutor().submit(thisUnit);
+                        //System.out.println("Job " + thisUnit.hashCode() + " submitted.\n");
+                        //log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
+                    }
+
+                if ( thisFuture == null )
+                    break;
 
                 // wait until the result is available
                 Result thisResult = null;
@@ -203,15 +213,15 @@ public class SimpleTest
                     }
 
                 // job is complete
-                String reportString = String.format("\nJob %010d complete ( %15s ).  %5d patches have been completed.\n", thisUnit.hashCode(), thisResult.toString(), BasicWorkUnit.output().size());
-                System.out.println(reportString);
+                //String reportString = String.format("\nJob %010d complete ( %15s ).  %5d patches have been completed.\n", thisUnit.hashCode(), thisResult.toString(), BasicWorkUnit.output().size());
+                //System.out.println(reportString);
 
                 // for monitoring purposes:
                 //System.out.println("Press ENTER");
                 //kbd.nextLine();
-                System.out.print("Garbage collection initiated...");
+                //System.out.print("Garbage collection initiated...");
                 System.gc();
-                System.out.println("complete.\n");
+                //System.out.println("complete.\n");
                 //System.out.println("Press ENTER\n");
                 //kbd.nextLine();
             }
