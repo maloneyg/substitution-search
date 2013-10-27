@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 public final class MutableParadigmClient
 {
     public static final int LISTENING_PORT = 32007;
-    public static String HOST_NAME = "ubuntu";  // name of the server
+    public static String HOST_NAME = "localhost";  // name of the server
 
     public static final double MONITOR_INTERVAL = 0.5; // seconds
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
@@ -23,7 +23,9 @@ public final class MutableParadigmClient
     private static ObjectOutputStream outgoingObjectStream;
 
     private static ThreadService executorService = ThreadService.INSTANCE;
-    
+
+    private static Object mutableParadigmClientLock = new Object();
+
     // prevent instantiation
     private MutableParadigmClient()
     {
@@ -183,25 +185,31 @@ public final class MutableParadigmClient
         System.exit(0);
     }
 
-    public synchronized static void sendResult(PatchResult result)
+    public static void sendResult(PatchResult result)
     {
-        System.out.println("\nsending a result for job " + result.getCompletedUnit().getOriginalHashCode() + " (" + result.getCompletedUnit().getPatch().getLocalCompletedPatches().size() + " completed puzzles)");
-        try
-            {
-                // send result
-                outgoingObjectStream.writeObject(result);
-                outgoingObjectStream.flush();
-                outgoingObjectStream.reset();
+        if ( connection == null )
+            return;
 
-                // ask for one new job
-                outgoingObjectStream.writeObject(new Integer(1));
-                outgoingObjectStream.flush();
-                outgoingObjectStream.reset();
-                System.out.println("requested 1 more job");
-            }
-        catch (Exception e)
+        synchronized(mutableParadigmClientLock)
             {
-                e.printStackTrace();
+                System.out.println("\nsending a result for job " + result.getCompletedUnit().getOriginalHashCode() + " (" + result.getCompletedUnit().getPatch().getLocalCompletedPatches().size() + " completed puzzles)");
+                try
+                    {
+                        // send result
+                        outgoingObjectStream.writeObject(result);
+                        outgoingObjectStream.flush();
+                        outgoingObjectStream.reset();
+
+                        // ask for one new job
+                        outgoingObjectStream.writeObject(new Integer(1));
+                        outgoingObjectStream.flush();
+                        outgoingObjectStream.reset();
+                        System.out.println("requested 1 more job");
+                    }
+                catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
             }
     }
 
