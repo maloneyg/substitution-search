@@ -172,8 +172,13 @@ public class MutablePatch implements Serializable {
     }
 
     // return true if the step variables are at the start, else false
-    private boolean backToStart() {
+    public boolean backToStart() {
         return (flip == initialFlip && secondEdge == initialSecondEdge && currentPrototile.equals(initialPrototile));
+    }
+
+    // return true if the search is done
+    public boolean allDone() {
+        return (backToStart()&&triangles.empty());
     }
 
     // reset the step variables to their initial states
@@ -228,6 +233,34 @@ public class MutablePatch implements Serializable {
         } while (!backToStart()); // stop when we've tried all prototiles
 
     } // solve ends here
+
+    // a solve method that stops for debugging purposes.
+    public BasicPatch debugSolve() {
+
+        BasicPatch output = dumpBasicPatch();
+        if (tileList.empty()) {
+            removeTriangle();
+            step();
+        }
+
+        if (tileList.contains(currentPrototile) && currentPrototile.compatible(currentEdge,secondEdge,flip,partition.equivalenceClass(currentEdge.getOrientation()))) {
+            BasicTriangle t = currentPrototile.place(currentEdge,secondEdge,flip);
+            if (compatible(t)) {
+                placeTriangle(t);
+                if (!partition.valid()) {
+                    removeTriangle();
+                }
+            }
+        }
+        step();
+        if (backToStart()&&!triangles.empty()) {
+            removeTriangle();
+            step();
+        }
+        return output;
+
+
+    } // debugSolve ends here
 
     // equals method
     public boolean equals(Object obj) {
