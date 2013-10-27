@@ -238,8 +238,25 @@ public class SimpleTest
                 ArrayList<BasicPatch> preList = new ArrayList<>();
                 while (output.hasMoreElements())
                     preList.add(output.nextElement());
-                PointsDisplay display = new PointsDisplay(ImmutableList.copyOf(preList),"BigTest");
+                //PointsDisplay display = new PointsDisplay(ImmutableList.copyOf(preList),"BigTest");
+                
+                // serialize list of results
+                try
+                    {
+                        FileOutputStream fileOut =new FileOutputStream("results_812.chk");
+                        ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                        out.writeObject(preList);
+                        out.close();
+                        fileOut.close();
+                        System.out.println("Results saved.");
+                    }
+                catch (IOException e)
+                    {
+                        System.out.println("Unable to serialize!");
+                        e.printStackTrace();
+                    }
             }
+        System.exit(0);
     }
 
     private static class ThreadMonitor
