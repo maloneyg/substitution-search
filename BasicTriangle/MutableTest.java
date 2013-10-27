@@ -156,13 +156,26 @@ public class MutableTest
         // submit all jobs
         while (notDoneYet)
             {
-                WorkUnit thisUnit = nextWorkUnit();
+                WorkUnit thisUnit = null;
+                Future<Result> thisFuture = null;
+
+                // submit in batches
+                for (int i=0; i < 10000; i++)
+                    {
+                        if (!notDoneYet)
+                            break;
+
+                        thisUnit = nextWorkUnit();
             
-                // submit the next work unit
-                Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
-                System.out.println("Job " + thisUnit.hashCode() + " submitted.\n");
-                log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
-            
+                        // submit the next work unit
+                        thisFuture = executorService.getExecutor().submit(thisUnit);
+                        //System.out.println("Job " + thisUnit.hashCode() + " submitted.\n");
+                        //log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
+                    }
+                
+                if ( thisFuture == null )
+                    break;
+
                 // if the queue is full, wait
                 while (true)
                     {

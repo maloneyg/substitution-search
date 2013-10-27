@@ -15,13 +15,6 @@ public interface AbstractPoint<T extends AbstractPoint, A extends AbstractAngle>
 
     public T inflate();
 
-    public T timesA();
-
-    public boolean colinear(T p);
-    public boolean parallel(T p);
-    public double crossProduct(T p);
-    public double dotProduct(T p);
-    
     // it must override equals.
     public boolean equals(Object obj);
 
