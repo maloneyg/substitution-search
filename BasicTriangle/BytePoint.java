@@ -30,7 +30,8 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
 
     public static final BytePoint UNIT_VECTOR;
 
-    public static final float[] COS_POWERS = Initializer.COS_LIST;
+    public static final double[] COS_POWERS = Initializer.COS_LIST;
+    public static final double[] SIN_POWERS = Initializer.SIN_LIST;
 
     // a pool containing all the BytePoints that have been created
     //private static final BytePointPool POOL = BytePointPool.getInstance();
@@ -272,18 +273,20 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     *
     * WARNING: this only works for odd N right now.
     */
-    public float crossProduct(BytePoint p) {
+    public double crossProduct(BytePoint p) {
         int l = length/2;
         byte[] p0 = this.point;
         byte[] p1 = p.point;
         // here we store the shoelace products
-        float coeffs = 0.0f;
+        double coeffs = 0.0f;
         for (int i = 0; i < l; i++) {
             for (int j = 0; j < length; j++) {
                 if (j+i != length-1)
-                    coeffs += COS_POWERS[i]*(p0[j] * p1[(j+i+1)%(length+1)] * ((j+i+1>length)? -1 : 1));
+//                    coeffs += COS_POWERS[i]*(p0[j] * p1[(j+i+1)%(length+1)] * ((j+i+1>length)? -1 : 1));
+                    coeffs += SIN_POWERS[i]*(p0[j] * p1[(j+i+1)%(length+1)] * ((j+i+1>length)? -1 : 1));
                 if (j != i)
-                    coeffs -= COS_POWERS[i]*(p0[j] * p1[(j-i-1 < 0)? length+j-i : j-i-1] * ((j-i-1<0)? -1 : 1));
+//                    coeffs -= COS_POWERS[i]*(p0[j] * p1[(j-i-1 < 0)? length+j-i : j-i-1] * ((j-i-1<0)? -1 : 1));
+                    coeffs -= SIN_POWERS[i]*(p0[j] * p1[(j-i-1 < 0)? length+j-i : j-i-1] * ((j-i-1<0)? -1 : 1));
             }
         }
         return coeffs;
@@ -329,13 +332,13 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     * WARNING: this only works for prime N right now.
     * WARNING: this only works for odd N right now.
     */
-    public float dotProduct(BytePoint p) {
+    public double dotProduct(BytePoint p) {
         int l = length/2+1;
         byte[] p0 = point;
         byte[] p1 = p.point;
         
         // here we store the shoelace products
-        float coeffs = 0.0f;
+        double coeffs = 0.0f;
         for (int i = 0; i < l; i++) {
             for (int j = 0; j < length; j++) {
                 if (j+i != length)

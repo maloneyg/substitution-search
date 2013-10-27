@@ -208,6 +208,14 @@ public class ShortPolynomial implements Serializable {
         return p;
     }
 
+    // use Horner's method to compute and return the polynomial evaluated at x
+    public float evaluate(float x) {
+        float p = 0.0f;
+        for (int i = (int)deg; i >= 0; i--)
+            p = (float)(coef[i] + (x * p));
+        return p;
+    }
+
     // make the companion matrix of a polynomial
     public Matrix companionMatrix() {
         int n = (int)this.deg;
