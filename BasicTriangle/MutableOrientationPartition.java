@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.*;
 
 public class MutableOrientationPartition extends MutablePartition<Orientation> implements Serializable {
 
@@ -20,6 +21,11 @@ public class MutableOrientationPartition extends MutablePartition<Orientation> i
     // constructor 
     private MutableOrientationPartition(Orientation o) {
         super(o);
+    }
+
+    public int hashCode()
+    {
+        return Objects.hash(instructions1, instructions2);
     }
 
     // public static factory method.

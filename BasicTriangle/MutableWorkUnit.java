@@ -164,6 +164,11 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         this.originalHashCode = originalHashCode;
     }
 
+    public int hashCode()
+    {
+        return Objects.hash(patch, count);
+    }
+
     // public static factory method
     public static MutableWorkUnit createMutableWorkUnit(MutablePatch p) {
         return new MutableWorkUnit(p);
