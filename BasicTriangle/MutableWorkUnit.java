@@ -175,7 +175,8 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         threadService.getExecutor().registerCounter(count);
         patch.setCount(count);
         patch.solve();
-        System.out.println("finished work unit " + originalHashCode);
+        if ( originalHashCode != -1 )
+            System.out.println("finished work unit " + originalHashCode);
         threadService.getExecutor().deregisterCounter(count);
         PatchResult thisResult = new PatchResult(this);
         MutableParadigmClient.sendResult(thisResult);
