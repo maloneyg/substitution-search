@@ -22,11 +22,9 @@ public class DebugDisplay extends JPanel implements ActionListener
     private int position;
     public static final int windowSize = 500;
 
-    public DebugDisplay(int i, String title) throws java.awt.HeadlessException
+    public DebugDisplay(List<List<Integer>> l, String title) throws java.awt.HeadlessException
     {
-        for (int k = 0; k < i; k++) {
-            MutableWorkUnit.nextWorkUnit();
-        }
+        MutableWorkUnit.advanceToBreakdown(l);
 
         this.patch = MutableWorkUnit.nextWorkUnit().getPatch();
         this.patchesSoFar = new ArrayList<>();
@@ -162,7 +160,35 @@ public class DebugDisplay extends JPanel implements ActionListener
 
     public static void main(String[] args) {
 
-        DebugDisplay display = new DebugDisplay(1000,"debugging");
+
+        List<List<Integer>> l = new ArrayList<>();
+        List<Integer> l0 = new ArrayList<>();
+        List<Integer> l1 = new ArrayList<>();
+        List<Integer> l2 = new ArrayList<>();
+
+        l0.add((Integer)4);
+        l0.add((Integer)1);
+
+        l1.add((Integer)2);
+        l1.add((Integer)4);
+        l1.add((Integer)2);
+        l1.add((Integer)1);
+        l1.add((Integer)3);
+        l1.add((Integer)4);
+
+        l2.add((Integer)3);
+        l2.add((Integer)4);
+        l2.add((Integer)2);
+        l2.add((Integer)3);
+        l2.add((Integer)4);
+        l2.add((Integer)0);
+        l2.add((Integer)1);
+
+        l.add(l0);
+        l.add(l1);
+        l.add(l2);
+
+        DebugDisplay display = new DebugDisplay(l,"debugging");
 
     }
 
