@@ -27,7 +27,7 @@ public class DebugDisplay extends JPanel implements ActionListener
     {
         MutableWorkUnit.advanceToBreakdown(l);
 
-        this.keepSolving = false;
+        this.keepSolving = true;
         this.patch = MutableWorkUnit.nextWorkUnit().getPatch();
         this.patchesSoFar = new ArrayList<>();
         this.position = 0;
