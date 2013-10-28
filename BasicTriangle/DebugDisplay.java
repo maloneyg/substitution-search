@@ -162,7 +162,7 @@ public class DebugDisplay extends JPanel implements ActionListener
 
     public static void main(String[] args) {
 
-        DebugDisplay display = new DebugDisplay(1000,"debugging");
+        DebugDisplay display = new DebugDisplay(95000,"debugging");
 
     }
 
