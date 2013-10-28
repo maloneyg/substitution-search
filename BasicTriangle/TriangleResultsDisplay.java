@@ -35,31 +35,31 @@ public class TriangleResultsDisplay
                 }
 
             // deserialize data
-            TriangleResults triangleResults = null;
-            filename = MutableParadigmServer.RESULT_FILENAME;
-            if ( ! new File(filename).isFile() )
-                return;
-            try
-                {
-                    FileInputStream fileIn = new FileInputStream(filename);
-                    ObjectInputStream in = new ObjectInputStream(fileIn);
-                    triangleResults = (TriangleResults)in.readObject();
-                    System.out.println(triangleResults.getPatches().size() + " completed patches have been read.");
-                }
-            catch (Exception e)
-                {
-                    e.printStackTrace();
-                    System.exit(1);
-                }
-
-            // display data
-            try
-                {
-                    PointsDisplay display = new PointsDisplay(triangleResults.getPatches(),"mutable test");
-                }
-            catch ( java.awt.HeadlessException e )
-                {
-                    System.out.println("X11 display not supported on this terminal.");
-                }
+//            TriangleResults triangleResults = null;
+//            filename = MutableParadigmServer.RESULT_FILENAME;
+//            if ( ! new File(filename).isFile() )
+//                return;
+//            try
+//                {
+//                    FileInputStream fileIn = new FileInputStream(filename);
+//                    ObjectInputStream in = new ObjectInputStream(fileIn);
+//                    triangleResults = (TriangleResults)in.readObject();
+//                    System.out.println(triangleResults.getPatches().size() + " completed patches have been read.");
+//                }
+//            catch (Exception e)
+//                {
+//                    e.printStackTrace();
+//                    System.exit(1);
+//                }
+//
+//            // display data
+//            try
+//                {
+//                    PointsDisplay display = new PointsDisplay(triangleResults.getPatches(),"mutable test");
+//                }
+//            catch ( java.awt.HeadlessException e )
+//                {
+//                    System.out.println("X11 display not supported on this terminal.");
+//                }
         }
 }
