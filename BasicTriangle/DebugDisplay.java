@@ -20,24 +20,30 @@ public class DebugDisplay extends JPanel implements ActionListener
     private JButton next;
     private JButton previous;
     private int position;
+    private boolean keepSolving;
     public static final int windowSize = 500;
 
     public DebugDisplay(List<List<Integer>> l, String title) throws java.awt.HeadlessException
     {
         MutableWorkUnit.advanceToBreakdown(l);
 
+        this.keepSolving = false;
         this.patch = MutableWorkUnit.nextWorkUnit().getPatch();
         this.patchesSoFar = new ArrayList<>();
-        patchesSoFar.add(patch.debugSolve());
         this.position = 0;
+
+        //patchesSoFar.add(patch.debugSolve());
+        //this.data = this.patchesSoFar.get(position).graphicsDump();
+        patchesSoFar.add(patch.dumpBasicPatch());
         this.data = this.patchesSoFar.get(position).graphicsDump();
 
         next = new JButton("next");
-        if (position+1 >= patchesSoFar.size()&&patch.allDone()) {
-            next.setEnabled(false);
-        } else {
-            next.setEnabled(true);
-        }
+        next.setEnabled(true);
+//        if (position+1 >= patchesSoFar.size()&&patch.allDone()) {
+//            next.setEnabled(false);
+//        } else {
+//            next.setEnabled(true);
+//        }
         next.setActionCommand("advance");
         next.setMnemonic(KeyEvent.VK_A);
         next.addActionListener(this);
@@ -66,12 +72,35 @@ public class DebugDisplay extends JPanel implements ActionListener
 
         add(previous);
         add(next);
+
+        patch.debugSolve(this);
+    }
+
+    public void update(BasicPatch p) {
+        patchesSoFar.add(p);
+        while (!keepSolving) {
+            try {
+                Thread.sleep(1000);
+            } catch(InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        keepSolving = false;
     }
 
     public void actionPerformed(ActionEvent e) {
         if ("advance".equals(e.getActionCommand())) {
             position++;
-            if (position==patchesSoFar.size()) patchesSoFar.add(patch.debugSolve());
+            if (position==patchesSoFar.size()) {
+                keepSolving = true;
+                while (keepSolving) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch(InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            }
             this.data = patchesSoFar.get(position).graphicsDump();
             if (position+1==patchesSoFar.size()&&patch.allDone()) next.setEnabled(false);
             if (position > 0) previous.setEnabled(true);
@@ -84,6 +113,23 @@ public class DebugDisplay extends JPanel implements ActionListener
             this.updateUI();
         }
     }
+
+//    public void actionPerformed(ActionEvent e) {
+//        if ("advance".equals(e.getActionCommand())) {
+//            position++;
+//            if (position==patchesSoFar.size()) patchesSoFar.add(patch.debugSolve());
+//            this.data = patchesSoFar.get(position).graphicsDump();
+//            if (position+1==patchesSoFar.size()&&patch.allDone()) next.setEnabled(false);
+//            if (position > 0) previous.setEnabled(true);
+//            this.updateUI();
+//        } else if ("retreat".equals(e.getActionCommand())) {
+//            position--;
+//            this.data = patchesSoFar.get(position).graphicsDump();
+//            if (position+1 < patchesSoFar.size()) next.setEnabled(true);
+//            if (position == 0) previous.setEnabled(false);
+//            this.updateUI();
+//        }
+//    }
 
     public void paintComponent(Graphics g)
     {

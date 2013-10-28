@@ -235,32 +235,62 @@ public class MutablePatch implements Serializable {
     } // solve ends here
 
     // a solve method that stops for debugging purposes.
-    public BasicPatch debugSolve() {
+//    public BasicPatch debugSolve() {
+//
+//        BasicPatch output = dumpBasicPatch();
+//        if (tileList.empty()) {
+//            removeTriangle();
+//            step();
+//        }
+//
+//        if (tileList.contains(currentPrototile) && currentPrototile.compatible(currentEdge,secondEdge,flip,partition.equivalenceClass(currentEdge.getOrientation()))) {
+//            BasicTriangle t = currentPrototile.place(currentEdge,secondEdge,flip);
+//            if (compatible(t)) {
+//                placeTriangle(t);
+//                if (!partition.valid()) {
+//                    removeTriangle();
+//                }
+//            }
+//        }
+//        step();
+//        if (backToStart()&&!triangles.empty()) {
+//            removeTriangle();
+//            step();
+//        }
+//        return output;
+//
+//
+//    } // debugSolve ends here
 
-        BasicPatch output = dumpBasicPatch();
-        if (tileList.empty()) {
-            removeTriangle();
-            step();
-        }
 
-        if (tileList.contains(currentPrototile) && currentPrototile.compatible(currentEdge,secondEdge,flip,partition.equivalenceClass(currentEdge.getOrientation()))) {
-            BasicTriangle t = currentPrototile.place(currentEdge,secondEdge,flip);
-            if (compatible(t)) {
-                placeTriangle(t);
-                if (!partition.valid()) {
+    // place a single tile, then call this method recursively.
+    public void debugSolve(DebugDisplay d) {
+        d.update(dumpBasicPatch());
+
+        do {
+            if (tileList.empty()) {
+                BasicPatch thisPatch = dumpBasicPatch();
+                completedPatches.add(thisPatch);
+                localCompletedPatches.add(thisPatch);
+                numCompleted++;
+                break;
+            }
+            if (tileList.contains(currentPrototile) && currentPrototile.compatible(currentEdge,secondEdge,flip,partition.equivalenceClass(currentEdge.getOrientation()))) {
+                BasicTriangle t = currentPrototile.place(currentEdge,secondEdge,flip);
+                if (compatible(t)) {
+                    placeTriangle(t);
+                    if (partition.valid())
+                        {
+                            debugSolve(d);
+                            count.getAndIncrement();
+                        }
                     removeTriangle();
                 }
             }
-        }
-        step();
-        if (backToStart()&&!triangles.empty()) {
-            removeTriangle();
+
             step();
-        }
-        return output;
-
-
-    } // debugSolve ends here
+        } while (!backToStart()); // stop when we've tried all prototiles
+    } // solve ends here
 
     // equals method
     public boolean equals(Object obj) {
