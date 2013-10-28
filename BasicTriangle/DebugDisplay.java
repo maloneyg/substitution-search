@@ -234,6 +234,8 @@ public class DebugDisplay extends JPanel implements ActionListener
         l.add(l1);
         l.add(l2);
 
+//        for (int k : Initializer.SUBSTITUTION_MATRIX.getColumn(Preinitializer.MY_TILE)) System.out.print(k+" ");
+
         DebugDisplay display = new DebugDisplay(l,"debugging");
 
     }

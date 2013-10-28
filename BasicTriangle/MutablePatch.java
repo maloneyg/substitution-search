@@ -265,9 +265,9 @@ public class MutablePatch implements Serializable {
 
     // place a single tile, then call this method recursively.
     public void debugSolve(DebugDisplay d) {
-        d.update(dumpBasicPatch());
-
         do {
+            d.update(dumpBasicPatch());
+
             if (tileList.empty()) {
                 BasicPatch thisPatch = dumpBasicPatch();
                 completedPatches.add(thisPatch);
