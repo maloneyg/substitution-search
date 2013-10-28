@@ -101,6 +101,39 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         }
     }
 
+    // for debug purposes
+    public static String breakdownString() {
+        String output = "";
+        for (Integer i : BD0) output += i + " ";
+        output += "\n";
+        for (Integer i : BD1) output += i + " ";
+        output += "\n";
+        for (Integer i : BD2) output += i + " ";
+        output += "\n";
+        return output;
+    }
+
+    // compare a list of lists of integers to BD0, Bd1, and BD2 for equality
+    public static boolean compareBreakdown(List<List<Integer>> breakdown) {
+        if (breakdown.size()!=3) throw new IllegalArgumentException("An edge breakdown requires 3 lists of integers; we have " + breakdown.size() + " lists of integers.");
+        for (int i = 0; i < 3; i++) {
+            List<Integer> intList = (i==0)? BD0 : ((i==1)? BD1 : BD2);
+            if (breakdown.get(i).size()!=intList.size()) throw new IllegalArgumentException("We are comparing edge breakdowns of different sizes: " + breakdown.get(i).size() + " and " + intList.size() + ".");
+            for (int j = 0; j < intList.size(); j++) {
+                if (intList.get(j)!=breakdown.get(i).get(j)) return false;
+            }
+        }
+        return true;
+    }
+
+    // advance to the work unit matching this edge breakdown
+    public static void advanceToBreakdown(List<List<Integer>> breakdown) {
+        while (notDoneYet) {
+            if (compareBreakdown(breakdown)) break;
+            iterateEdgeBreakdown();
+        }
+    } 
+
     public static MutableWorkUnit nextWorkUnit() {
 
         if (P0.isosceles()) {
