@@ -22,6 +22,8 @@ public class DebugDisplay extends JPanel implements ActionListener
     private int position;
     private boolean keepSolving;
     public static final int windowSize = 500;
+    private JTextArea currentIndexArea;
+    private String positionString;
 
     public DebugDisplay(List<List<Integer>> l, String title) throws java.awt.HeadlessException
     {
@@ -36,6 +38,12 @@ public class DebugDisplay extends JPanel implements ActionListener
         //this.data = this.patchesSoFar.get(position).graphicsDump();
         patchesSoFar.add(patch.dumpBasicPatch());
         this.data = this.patchesSoFar.get(position).graphicsDump();
+
+        positionString = "---";
+        currentIndexArea = new JTextArea(positionString, 2, 2);
+        currentIndexArea.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        currentIndexArea.setEditable(false);
+        add(currentIndexArea);        
 
         next = new JButton("next");
         next.setEnabled(true);
@@ -76,13 +84,18 @@ public class DebugDisplay extends JPanel implements ActionListener
         patch.debugSolve(this);
     }
 
+    private void updatePositionString()
+    {
+        positionString = (position+1) + "/" + patchesSoFar.size();
+        currentIndexArea.setText(positionString);
+    }
+
     public void update(BasicPatch p) {
         patchesSoFar.add(p);
         while (!keepSolving) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(50);
             } catch(InterruptedException ex) {
-                Thread.currentThread().interrupt();
             }
         }
         keepSolving = false;
@@ -95,18 +108,29 @@ public class DebugDisplay extends JPanel implements ActionListener
                 keepSolving = true;
                 while (keepSolving) {
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(50);
                     } catch(InterruptedException ex) {
-                        Thread.currentThread().interrupt();
                     }
                 }
             }
+
+            // prevent position from getting out of range
+            if ( position > patchesSoFar.size() - 1 )
+                position = patchesSoFar.size() - 1;
+
+            updatePositionString();
             this.data = patchesSoFar.get(position).graphicsDump();
             if (position+1==patchesSoFar.size()&&patch.allDone()) next.setEnabled(false);
             if (position > 0) previous.setEnabled(true);
             this.updateUI();
         } else if ("retreat".equals(e.getActionCommand())) {
             position--;
+
+            // prevent position from getting out of range
+            if ( position < 0 )
+                position = 0;
+
+            updatePositionString();
             this.data = patchesSoFar.get(position).graphicsDump();
             if (position+1 < patchesSoFar.size()) next.setEnabled(true);
             if (position == 0) previous.setEnabled(false);
