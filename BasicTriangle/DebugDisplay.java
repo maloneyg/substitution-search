@@ -69,7 +69,7 @@ public class DebugDisplay extends JPanel implements ActionListener
         messageArea.setFont(new Font("SansSerif", Font.PLAIN, 10));
         messageArea.setEditable(false);
         messageArea.setLineWrap(true);
-        messageArea.setBounds(350,75,350,350);
+        messageArea.setBounds(350,75,400,150);
         add(messageArea);
 
         next = new JButton("next");
@@ -230,7 +230,7 @@ public class DebugDisplay extends JPanel implements ActionListener
                             keepSolving = true;
                             while (keepSolving) {
                                 try {
-                                    Thread.sleep(50);
+                                    Thread.sleep(5);
                                 } catch(InterruptedException ex) {
                                 }
                             }
