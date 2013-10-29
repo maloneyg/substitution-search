@@ -20,6 +20,12 @@ public class MutablePatch implements Serializable {
     // the number of completed patches this has found
     private int numCompleted = 0;
 
+    // a String for debugging purposes
+    private String message = DebugMessage.NONE.toString();
+
+    // set to true if we're debugging
+    private boolean debug = false;
+
     // the completed patches that have been found
     private static List<BasicPatch> completedPatches;
 
@@ -131,6 +137,21 @@ public class MutablePatch implements Serializable {
     // get all the completed patches
     public static List<BasicPatch> getCompletedPatches() {
         return completedPatches;
+    }
+
+    // set the message
+    public void setMessage(String s) {
+        message = s;
+    }
+
+    // get the message
+    public String getMessage() {
+        return message;
+    }
+
+    // toggle the debug status
+    public void setDebug(boolean tf) {
+        debug = tf;
     }
 
     // get all the patches for this puzzle
@@ -266,6 +287,7 @@ public class MutablePatch implements Serializable {
     // place a single tile, then call this method recursively.
     public void debugSolve(DebugDisplay d) {
         do {
+            d.updateMessage(message);
             d.update(dumpBasicPatch());
 
             if (tileList.empty()) {
@@ -273,6 +295,7 @@ public class MutablePatch implements Serializable {
                 completedPatches.add(thisPatch);
                 localCompletedPatches.add(thisPatch);
                 numCompleted++;
+                setMessage(DebugMessage.FOUND.toString());
                 break;
             }
             if (tileList.contains(currentPrototile) && currentPrototile.compatible(currentEdge,secondEdge,flip,partition.equivalenceClass(currentEdge.getOrientation()))) {
@@ -281,11 +304,17 @@ public class MutablePatch implements Serializable {
                     placeTriangle(t);
                     if (partition.valid())
                         {
+                            setMessage(DebugMessage.PLACING.toString()+"\n"+t);
                             debugSolve(d);
                             count.getAndIncrement();
+                        } else
+                        {
+                            setMessage(t+"\n"+DebugMessage.ORIENTATION.toString()+"\n"+partition);
                         }
                     removeTriangle();
                 }
+            } else {
+                setMessage(currentPrototile+"\n"+DebugMessage.NONE_OR_PROTOTILE.toString()+"\n"+currentEdge);
             }
 
             step();
@@ -440,24 +469,34 @@ System.out.println(x.initialPrototile);*/
                 newVertex = false;
                 break;
             } else if (e.incident(other)) {
+                if (debug) setMessage(t+"\n"+DebugMessage.INCIDENT_OPEN.toString());
                 return false;
             }
         }
 
         // make sure the new vertex is in the inflated prototile
-        if (newVertex && !contains(other)) return false;
+        if (newVertex && !contains(other)) {
+            if (debug) setMessage(t +"\n"+ DebugMessage.NON_CONTAINMENT.toString());
+            return false;
+        }
 
         // make sure the new vertex doesn't overlap any closed edges
         if (newVertex) {
             for (BasicEdge e : edges.closed()) {
-                if (e.incident(other)) return false;
+                if (e.incident(other)) {
+                    if (debug) setMessage(t +"\n"+ DebugMessage.INCIDENT_CLOSED.toString());
+                    return false;
+                }
             }
         }
 
         // make sure the new vertex isn't inside any placed triangles
         if (newVertex) {
             for (BasicTriangle tr : triangles) {
-                if (tr.contains(other)) return false;
+                if (tr.contains(other)) {
+                    if (debug) setMessage(t +"\n"+ DebugMessage.OVERLAP.toString() +"\n"+ tr);
+                    return false;
+                }
             }
         }
 
@@ -477,10 +516,16 @@ System.out.println(x.initialPrototile);*/
         // return false if a new edge crosses any old one
         for (BasicEdge e : newEdges) {
             for (BasicEdge open : edges.open()) {
-                if (e.cross(open)) return false;
+                if (e.cross(open)) {
+                    if (debug) setMessage(e +"\n"+ DebugMessage.CROSS_OPEN.toString() +"\n"+ open);
+                    return false;
+                }
             }
             for (BasicEdge closed : edges.closed()) {
-                if (e.cross(closed)) return false;
+                if (e.cross(closed)) {
+                    if (debug) setMessage(e +"\n"+ DebugMessage.CROSS_CLOSED.toString() +"\n"+ closed);
+                    return false;
+                }
             }
         }
 

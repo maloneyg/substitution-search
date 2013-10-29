@@ -16,13 +16,16 @@ public class DebugDisplay extends JPanel implements ActionListener
 
     private MutablePatch patch;
     private final List<BasicPatch> patchesSoFar;
+    private final List<String> messages;
+    private String message = "";
     private ArrayList<OrderedTriple> data;
     private JButton next;
     private JButton previous;
     private int position;
     private boolean keepSolving;
-    public static final int windowSize = 500;
+    public static final int windowSize = 700;
     private JTextArea currentIndexArea;
+    private JTextArea messageArea;
     private String positionString;
 
     public DebugDisplay(List<List<Integer>> l, String title) throws java.awt.HeadlessException
@@ -32,11 +35,13 @@ public class DebugDisplay extends JPanel implements ActionListener
         this.keepSolving = true;
         this.patch = MutableWorkUnit.nextWorkUnit().getPatch();
         this.patchesSoFar = new ArrayList<>();
+        this.messages = new ArrayList<>();
         this.position = 0;
 
         //patchesSoFar.add(patch.debugSolve());
         //this.data = this.patchesSoFar.get(position).graphicsDump();
         patchesSoFar.add(patch.dumpBasicPatch());
+        messages.add(patch.getMessage());
         this.data = this.patchesSoFar.get(position).graphicsDump();
 
         this.setLayout(null);
@@ -47,6 +52,12 @@ public class DebugDisplay extends JPanel implements ActionListener
         currentIndexArea.setEditable(false);
         currentIndexArea.setBounds(250,15,80,15);
         add(currentIndexArea);        
+
+        messageArea = new JTextArea(messages.get(0));
+        messageArea.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        messageArea.setEditable(false);
+        messageArea.setBounds(350,250,350,350);
+        add(messageArea);
 
         next = new JButton("next");
         next.setEnabled(true);
@@ -95,6 +106,15 @@ public class DebugDisplay extends JPanel implements ActionListener
         currentIndexArea.setText(positionString);
     }
 
+    private void updateMessageArea()
+    {
+        messageArea.setText(messages.get(position));
+    }
+
+    public void updateMessage(String p) {
+        messages.add(p);
+    }
+
     public void update(BasicPatch p) {
         patchesSoFar.add(p);
         while (!keepSolving) {
@@ -125,6 +145,7 @@ public class DebugDisplay extends JPanel implements ActionListener
 
             updatePositionString();
             this.data = patchesSoFar.get(position).graphicsDump();
+            updateMessageArea();
             if (position+1==patchesSoFar.size()&&patch.allDone()) next.setEnabled(false);
             if (position > 0) previous.setEnabled(true);
             this.updateUI();
@@ -137,6 +158,7 @@ public class DebugDisplay extends JPanel implements ActionListener
 
             updatePositionString();
             this.data = patchesSoFar.get(position).graphicsDump();
+            updateMessageArea();
             if (position+1 < patchesSoFar.size()) next.setEnabled(true);
             if (position == 0) previous.setEnabled(false);
             this.updateUI();
