@@ -10,6 +10,7 @@ import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.Timer;
 
 public class DebugDisplay extends JPanel implements ActionListener
 {
@@ -27,6 +28,17 @@ public class DebugDisplay extends JPanel implements ActionListener
     private JTextArea currentIndexArea;
     private JTextArea messageArea;
     private String positionString;
+
+    // animation stuff
+    private boolean playing = false;
+    private boolean forward = true;
+    private static final int ANIMATION_DELAY = 30; // ms
+    private JButton playButton;
+    private JButton stopButton;
+    private JButton reverseButton;
+    private JButton rewindButton;
+    private static final int MAX_SIZE = 1000000; // max size of patchesSoFar
+    private Timer animationTimer; 
 
     public DebugDisplay(List<List<Integer>> l, String title) throws java.awt.HeadlessException
     {
@@ -50,13 +62,14 @@ public class DebugDisplay extends JPanel implements ActionListener
         currentIndexArea = new JTextArea(positionString);
         currentIndexArea.setFont(new Font("SansSerif", Font.PLAIN, 10));
         currentIndexArea.setEditable(false);
-        currentIndexArea.setBounds(250,15,80,15);
+        currentIndexArea.setBounds(5,50,80,15);
         add(currentIndexArea);        
 
         messageArea = new JTextArea(messages.get(0));
         messageArea.setFont(new Font("SansSerif", Font.PLAIN, 10));
         messageArea.setEditable(false);
-        messageArea.setBounds(350,250,350,350);
+        messageArea.setLineWrap(true);
+        messageArea.setBounds(350,75,350,350);
         add(messageArea);
 
         next = new JButton("next");
@@ -70,6 +83,34 @@ public class DebugDisplay extends JPanel implements ActionListener
         next.setMnemonic(KeyEvent.VK_A);
         next.addActionListener(this);
         next.setBounds(120,10,90,20);
+
+        playButton = new JButton("play");
+        playButton.setEnabled(true);
+        playButton.setActionCommand("play");
+        playButton.addActionListener(this);
+        playButton.setBounds(220,10,90,20);
+        add(playButton);
+
+        stopButton = new JButton("stop");
+        stopButton.setEnabled(true);
+        stopButton.setActionCommand("stop");
+        stopButton.addActionListener(this);
+        stopButton.setBounds(310,10,90,20);
+        add(stopButton);
+
+        reverseButton = new JButton("reverse");
+        reverseButton.setEnabled(true);
+        reverseButton.setActionCommand("reverse");
+        reverseButton.addActionListener(this);
+        reverseButton.setBounds(400,10,90,20);
+        add(reverseButton);
+
+        rewindButton = new JButton("rewind");
+        rewindButton.setEnabled(true);
+        rewindButton.setActionCommand("rewind");
+        rewindButton.addActionListener(this);
+        rewindButton.setBounds(490,10,90,20);
+        add(rewindButton);
 
         previous = new JButton("previous");
         if (position == 0) {
@@ -96,6 +137,10 @@ public class DebugDisplay extends JPanel implements ActionListener
 
         add(previous);
         add(next);
+
+        animationTimer = new Timer(ANIMATION_DELAY,this);
+        animationTimer.setActionCommand("animation");
+        animationTimer.start();
 
         patch.debugSolve(this);
     }
@@ -162,9 +207,43 @@ public class DebugDisplay extends JPanel implements ActionListener
             if (position+1 < patchesSoFar.size()) next.setEnabled(true);
             if (position == 0) previous.setEnabled(false);
             this.updateUI();
-        }
+        } else if ("play".equals(e.getActionCommand())) {
+            playing = true;
+        } else if ("stop".equals(e.getActionCommand())) {
+            playing = false;
+        } else if ("reverse".equals(e.getActionCommand())) {
+            if (forward == true)
+                forward = false;
+            else
+                forward = true;
+        } else if ("rewind".equals(e.getActionCommand())) {
+            position = 0;
+        } else if ("animation".equals(e.getActionCommand())) {
+            if ( playing == true )
+                {
+                    if ( position < patchesSoFar.size() - 1 && forward == true )
+                        position++;
+                    else if ( position > 0 && forward == false )
+                        position--;
+                    else if ( position == patchesSoFar.size() - 1 && patchesSoFar.size() < MAX_SIZE )
+                        {
+                            keepSolving = true;
+                            while (keepSolving) {
+                                try {
+                                    Thread.sleep(50);
+                                } catch(InterruptedException ex) {
+                                }
+                            }
+                        }
+                }
+            updatePositionString();
+            this.data = patchesSoFar.get(position).graphicsDump();
+            updateMessageArea();
+            if (position+1 < patchesSoFar.size()) next.setEnabled(true);
+            if (position == 0) previous.setEnabled(false);
+            this.updateUI();
     }
-
+    }
 //    public void actionPerformed(ActionEvent e) {
 //        if ("advance".equals(e.getActionCommand())) {
 //            position++;
