@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 public final class MutableParadigmClient
 {
     public static final int LISTENING_PORT = 32007;
-    public static String HOST_NAME = "localhost";  // name of the server
+    public static String HOST_NAME = "bessel";//"localhost";  // name of the server
 
     public static final double MONITOR_INTERVAL = 0.5; // seconds
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
