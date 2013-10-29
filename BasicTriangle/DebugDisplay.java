@@ -39,10 +39,13 @@ public class DebugDisplay extends JPanel implements ActionListener
         patchesSoFar.add(patch.dumpBasicPatch());
         this.data = this.patchesSoFar.get(position).graphicsDump();
 
+        this.setLayout(null);
+
         positionString = "---";
-        currentIndexArea = new JTextArea(positionString, 2, 2);
+        currentIndexArea = new JTextArea(positionString);
         currentIndexArea.setFont(new Font("SansSerif", Font.PLAIN, 10));
         currentIndexArea.setEditable(false);
+        currentIndexArea.setBounds(250,15,80,15);
         add(currentIndexArea);        
 
         next = new JButton("next");
@@ -55,6 +58,7 @@ public class DebugDisplay extends JPanel implements ActionListener
         next.setActionCommand("advance");
         next.setMnemonic(KeyEvent.VK_A);
         next.addActionListener(this);
+        next.setBounds(120,10,90,20);
 
         previous = new JButton("previous");
         if (position == 0) {
@@ -65,6 +69,7 @@ public class DebugDisplay extends JPanel implements ActionListener
         previous.setActionCommand("retreat");
         previous.setMnemonic(KeyEvent.VK_B);
         previous.addActionListener(this);
+        previous.setBounds(10,10,90,20);
 
         JPanel content = new JPanel();
         content.setLayout(new BorderLayout());
