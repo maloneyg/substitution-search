@@ -228,12 +228,12 @@ public class DebugDisplay extends JPanel implements ActionListener
                     else if ( position == patchesSoFar.size() - 1 && patchesSoFar.size() < MAX_SIZE )
                         {
                             keepSolving = true;
-                            while (keepSolving) {
+                           /* while (keepSolving) {
                                 try {
                                     Thread.sleep(5);
                                 } catch(InterruptedException ex) {
                                 }
-                            }
+                            }*/
                         }
                 }
             updatePositionString();
