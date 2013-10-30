@@ -129,7 +129,7 @@ public class WorkUnitFactory implements Serializable {
     }
 
     // for debug purposes
-    public String breakdownString() {
+    private String breakdownString() {
         String output = "";
         for (Integer i : BD0) output += i + " ";
         output += "\n";
@@ -141,7 +141,7 @@ public class WorkUnitFactory implements Serializable {
     }
 
     // compare a list of lists of integers to BD0, BD1, and BD2 for equality
-    public boolean compareBreakdown(List<List<Integer>> breakdown) {
+    private boolean compareBreakdown(List<List<Integer>> breakdown) {
         if (breakdown.size()!=3) throw new IllegalArgumentException("An edge breakdown requires 3 lists of integers; we have " + breakdown.size() + " lists of integers.");
         for (int i = 0; i < 3; i++) {
             List<Integer> intList = (i==0)? BD0 : ((i==1)? BD1 : BD2);
@@ -154,14 +154,14 @@ public class WorkUnitFactory implements Serializable {
     }
 
     // advance to the work unit matching this edge breakdown
-    public void advanceToBreakdown(List<List<Integer>> breakdown) {
+    private void advanceToBreakdown(List<List<Integer>> breakdown) {
         while (notDoneYet) {
             if (compareBreakdown(breakdown)) break;
             iterateEdgeBreakdown();
         }
     } 
 
-    public WorkUnit nextWorkUnit() {
+    private WorkUnit nextWorkUnit() {
 
         if (P0.isosceles()) {
         // how we submit BasicWorkUnits
