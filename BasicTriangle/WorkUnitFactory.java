@@ -96,13 +96,16 @@ public class WorkUnitFactory implements Serializable {
 
     // follow a set of instructions, adding 
     // the resulting work units to the list l.
-    public void followInstructions(WorkUnitInstructions i, List<WorkUnit> l) {
+    public List<WorkUnit> followInstructions(WorkUnitInstructions i) {
+        ArrayList<WorkUnit> l =  new ArrayList<WorkUnit>();
         advanceToBreakdown(ImmutableList.of(i.getZero(),i.getOne(),i.getTwo()));
-        if (flip != i.getFlip()) iterateEdgeBreakdown();
+        if (flip != i.getFlip())
+            iterateEdgeBreakdown();
         for (int k = 0; k < i.getNum(); k++) {
             l.add(nextWorkUnit());
             iterateEdgeBreakdown();
         }
+        return l;
     }
 
     private void iterateEdgeBreakdown() {

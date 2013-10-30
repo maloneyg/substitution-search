@@ -17,10 +17,10 @@ public class WorkUnitInstructions implements Serializable {
 
     // a boolean that tells us if o1 = o2 or o1 = -o2.
     // only relevant for isosceles triangles
-    private boolean flip;
+    private final boolean flip;
 
     // the number of work units to be made
-    private int num;
+    private final int num;
 
     // private constructor
     private WorkUnitInstructions(ImmutableList<Integer> b0, ImmutableList<Integer> b1, ImmutableList<Integer> b2, boolean tf, int i) {
