@@ -32,7 +32,7 @@ public class DebugDisplay extends JPanel implements ActionListener
     // animation stuff
     private boolean playing = false;
     private boolean forward = true;
-    private static final int ANIMATION_DELAY = 30; // ms
+    private static final int ANIMATION_DELAY = 1; // ms
     private JButton playButton;
     private JButton stopButton;
     private JButton reverseButton;
@@ -164,7 +164,7 @@ public class DebugDisplay extends JPanel implements ActionListener
         patchesSoFar.add(p);
         while (!keepSolving) {
             try {
-                Thread.sleep(50);
+                Thread.sleep(5);
             } catch(InterruptedException ex) {
             }
         }
