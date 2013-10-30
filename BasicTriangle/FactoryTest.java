@@ -14,6 +14,8 @@ import java.util.Scanner;
 
 public class FactoryTest
 {
+    // how many jobs to make per set of instructions
+    public static final int BATCH_SIZE = 100;
 
     // the guy who pauses the program for us
     private static Scanner kbd = new Scanner(System.in);
@@ -159,18 +161,20 @@ public class FactoryTest
         double monitorInterval = 1.0; //seconds
         ThreadMonitor threadMonitor = new ThreadMonitor(monitorInterval);
 
-        // submit all jobs
-        while (notDoneYet)
-            {
-                MutableWorkUnit thisUnit = nextWorkUnit();
+        WorkUnitFactory workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
 
-                // serialization test: serialize workunit to disk
-                String filename = "workunit.tmp";
+        // submit all jobs
+        while (workUnitFactory.notDone())
+            {
+                WorkUnitInstructions instructions = workUnitFactory.getInstructions(BATCH_SIZE);
+
+                // serialization test: serialize instructions to disk
+                String filename = "instructions.tmp";
                 try
                     {
                         FileOutputStream fileOut = new FileOutputStream(filename);
                         ObjectOutputStream out = new ObjectOutputStream(fileOut);
-                        out.writeObject(thisUnit);
+                        out.writeObject(instructions);
                         out.close();
                         fileOut.close();
                     }
@@ -180,16 +184,13 @@ public class FactoryTest
                         System.exit(1);
                     }
 
-                // serialization test: deserialize workunit from disk
-                MutableWorkUnit reconstitutedUnit = null;
+                // serialization test: deserialize instructions from disk
+                WorkUnitInstructions reconstitutedInstructions = null;
                 try
                     {
                         FileInputStream fileIn = new FileInputStream(filename);
                         ObjectInputStream in = new ObjectInputStream(fileIn);
-                        reconstitutedUnit = (MutableWorkUnit)in.readObject();
-                        //System.out.println("Serialized same as original? " + ((MutableWorkUnit)reconstitutedUnit).equals((MutableWorkUnit)thisUnit));
-                        //System.out.println("Serialized same as original? " + reconstitutedUnit.getPatch().equals(thisUnit.getPatch()));
-                        //pause();
+                        reconstitutedInstructions = (WorkUnitInstructions)in.readObject();
                         in.close();
                         fileIn.close();
                     }
@@ -200,27 +201,32 @@ public class FactoryTest
                     }
 
                 // submit the next work unit
-                Future<Result> thisFuture = executorService.getExecutor().submit(reconstitutedUnit);
-                System.out.println("Job " + thisUnit.hashCode() + " submitted.\n");
-                log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
-            
-                // if the queue is full, wait
-                while (true)
+                List<WorkUnit> theseUnits = workUnitFactory.followInstructions(reconstitutedInstructions);
+                
+                for (WorkUnit thisUnit : theseUnits)
                     {
-                        int queueSize = executorService.getExecutor().getQueue().size();
-                        if ( queueSize > 0 )
+                        Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
+                        System.out.println("Job " + thisUnit.hashCode() + " submitted.\n");
+                        log.log(Level.INFO,"Job " + thisUnit.hashCode() + " submitted.");
+                    
+                        // if the queue is full, wait
+                        while (true)
                             {
-                                try
+                                int queueSize = executorService.getExecutor().getQueue().size();
+                                if ( queueSize > 0 )
                                     {
-                                        Thread.sleep(1000);
+                                        try
+                                            {
+                                                Thread.sleep(1000);
+                                            }
+                                        catch ( InterruptedException e )
+                                            {
+                                                continue;
+                                            }
                                     }
-                                catch ( InterruptedException e )
-                                    {
-                                        continue;
-                                    }
+                                else
+                                    break;
                             }
-                        else
-                            break;
                     }
             }
 

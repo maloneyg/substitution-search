@@ -51,6 +51,11 @@ public class WorkUnitFactory implements Serializable {
     // true if we haven't created all edge breakdowns yet
     private boolean notDoneYet = true;
 
+    public boolean notDone()
+    {
+        return notDoneYet;
+    }
+
     // private constructor
     private WorkUnitFactory() { // initialize the edge breakdown iterators
         ImmutableList<Integer> first0 = P0.getLengths()[0].getBreakdown();
@@ -196,7 +201,7 @@ public class WorkUnitFactory implements Serializable {
     }
 
     // public factory method
-    public WorkUnitFactory createWorkUnitFactory() {
+    public static WorkUnitFactory createWorkUnitFactory() {
         return new WorkUnitFactory();
     }
 
