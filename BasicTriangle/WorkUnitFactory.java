@@ -108,26 +108,29 @@ public class WorkUnitFactory implements Serializable {
             iterateEdgeBreakdown();
         for (int k = 0; k < i.getNum(); k++) {
             l.add(nextWorkUnit());
-            iterateEdgeBreakdown();
+//            iterateEdgeBreakdown();
         }
         return l;
     }
 
     private void iterateEdgeBreakdown() {
-        edge0.iterate();
-        BD0 = edge0.getImmutableList();
-        if (BD0.equals(start0)) {
-            if (P0.isosceles()) { // then we only need two breakdowns
-                edge2.iterate();
-                BD2 = edge2.getImmutableList();
-                if (BD2.equals(start2)) notDoneYet = false;
-            } else { // if it's not isosceles, use all three breakdowns
-                edge1.iterate();
-                BD1 = edge1.getImmutableList();
-                if (BD1.equals(start1)) {
+        if (P0.isosceles()) flip = !flip;
+        if (flip==false) {
+            edge0.iterate();
+            BD0 = edge0.getImmutableList();
+            if (BD0.equals(start0)) {
+                if (P0.isosceles()) { // then we only need two breakdowns
                     edge2.iterate();
                     BD2 = edge2.getImmutableList();
                     if (BD2.equals(start2)) notDoneYet = false;
+                } else { // if it's not isosceles, use all three breakdowns
+                    edge1.iterate();
+                    BD1 = edge1.getImmutableList();
+                    if (BD1.equals(start1)) {
+                        edge2.iterate();
+                        BD2 = edge2.getImmutableList();
+                        if (BD2.equals(start2)) notDoneYet = false;
+                    }
                 }
             }
         }
@@ -181,8 +184,7 @@ public class WorkUnitFactory implements Serializable {
                 patch.addInstructions(o1,o2);
             }
 
-            if (flip) iterateEdgeBreakdown();
-            flip = !flip;
+            iterateEdgeBreakdown();
 
             // create a new unit of work
             return MutableWorkUnit.createMutableWorkUnit(patch);
