@@ -229,9 +229,8 @@ public final class MutableParadigmClient
         synchronized(mutableParadigmClientLock)
             {
                 HashMap<WorkUnit,Future<Result>> currentBatch = MutableParadigmClient.currentBatch;
-                for (WorkUnit w : currentBatch.keySet())
+                for (Future f : currentBatch.values())
                     {
-                        Future f = currentBatch.get(w);
                         if ( ! f.isDone() )
                             unfinished++;
                     }
