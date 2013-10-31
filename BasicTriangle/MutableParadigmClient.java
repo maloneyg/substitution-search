@@ -29,7 +29,7 @@ public final class MutableParadigmClient
 
     private static WorkUnitFactory workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
 
-    protected static ConcurrentHashMap<WorkUnit,Future<Result>> currentBatch = new ConcurrentHashMap<>();
+    protected static HashMap<WorkUnit,Future<Result>> currentBatch = new HashMap<>();
     protected static WorkUnitInstructions currentInstructions;
 
     // prevent instantiation
@@ -145,8 +145,9 @@ public final class MutableParadigmClient
         System.out.println("Connected and ready to run jobs.");
 
         // ask for initial batch of jobs
-        Integer numberOfNewJobsNeeded = executorService.NUMBER_OF_THREADS - executorService.getExecutor().getNumberOfRunningJobs() + 1;
-        outgoingObjectStream.writeObject(numberOfNewJobsNeeded);
+        //Integer numberOfNewJobsNeeded = executorService.NUMBER_OF_THREADS - executorService.getExecutor().getNumberOfRunningJobs() + 1;
+        //outgoingObjectStream.writeObject(numberOfNewJobsNeeded);
+        outgoingObjectStream.writeObject(Integer.valueOf(1));
         outgoingObjectStream.flush();
         outgoingObjectStream.reset();
 
@@ -224,7 +225,7 @@ public final class MutableParadigmClient
         int unfinished = 0;
         synchronized(mutableParadigmClientLock)
             {
-                ConcurrentHashMap<WorkUnit,Future<Result>> currentBatch = MutableParadigmClient.currentBatch;
+                HashMap<WorkUnit,Future<Result>> currentBatch = MutableParadigmClient.currentBatch;
                 for (WorkUnit w : currentBatch.keySet())
                     {
                         Future f = currentBatch.get(w);
