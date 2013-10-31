@@ -30,7 +30,7 @@ public final class MutableParadigmClient
     private static WorkUnitFactory workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
 
     protected static ConcurrentHashMap<WorkUnit,Future<Result>> currentBatch = new ConcurrentHashMap<>();
-    protected static AtomicBoolean currentBatchSent = new AtomicBoolean();
+    protected static AtomicBoolean currentBatchSent = new AtomicBoolean(true);
     protected static WorkUnitInstructions currentInstructions;
 
     // prevent instantiation
@@ -167,19 +167,21 @@ public final class MutableParadigmClient
                                     {
                                         try
                                             {
+                                                //System.out.print("waiting " + currentBatchIsComplete() + " " + currentBatchSent.get() + "\r");
                                                 Thread.sleep(100);
                                             }
                                         catch (InterruptedException e)
                                             {
                                             }
                                     }
-                                
+                                System.out.println();
                                 MutableParadigmClient.currentBatch.clear();
                                 MutableParadigmClient.currentBatchSent.set(false);
                                 MutableParadigmClient.currentInstructions = instructions;
                                 for (WorkUnit thisUnit : theseUnits)
                                     {
                                         Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
+                                        System.out.println("submitted unit " + thisUnit.hashCode());
                                         currentBatch.put(thisUnit, thisFuture);
                                     }
                             }
@@ -236,7 +238,7 @@ public final class MutableParadigmClient
         // this makes this compatible with single-node tests
         if ( connection == null )
             return;
-
+System.out.println(currentBatchIsComplete() + " "  + MutableParadigmClient.currentBatchSent.get());
         // if the latest batch of job is complete send back the results
         if ( currentBatchIsComplete() && MutableParadigmClient.currentBatchSent.get() == false)
             {

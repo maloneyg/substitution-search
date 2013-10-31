@@ -168,6 +168,7 @@ public class MutableParadigmServer
 
         public void run()
         {
+            boolean sendClose = true;
             main:
             while ( Thread.interrupted() == false )
                 {
@@ -211,9 +212,10 @@ public class MutableParadigmServer
                                         System.out.println(jobsSent + " new jobs have been sent to " + address);
                                 }
                         }
-                    catch (EOFException e)
+                    catch (EOFException | SocketException e)
                         {
                             System.out.println("Connection lost.");
+                            sendClose = false;
                             break;
                         }
                     catch (Exception e)
@@ -227,8 +229,11 @@ public class MutableParadigmServer
             try
                 {
                     // send close signal
-                    outgoingObjectStream.writeObject(CLOSE);
-                    outgoingObjectStream.flush();
+                    if ( sendClose == true )
+                        {
+                            outgoingObjectStream.writeObject(CLOSE);
+                            outgoingObjectStream.flush();
+                        }
 
                     // close socket
                     if ( connection != null )
