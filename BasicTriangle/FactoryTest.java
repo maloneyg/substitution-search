@@ -161,12 +161,13 @@ public class FactoryTest
         double monitorInterval = 1.0; //seconds
         ThreadMonitor threadMonitor = new ThreadMonitor(monitorInterval);
 
-        WorkUnitFactory workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
+        WorkUnitFactory workUnitFactory1 = WorkUnitFactory.createWorkUnitFactory();
+        WorkUnitFactory workUnitFactory2 = WorkUnitFactory.createWorkUnitFactory();
 
         // submit all jobs
-        while (workUnitFactory.notDone())
+        while (workUnitFactory1.notDone())
             {
-                WorkUnitInstructions instructions = workUnitFactory.getInstructions(BATCH_SIZE, 1);
+                WorkUnitInstructions instructions = workUnitFactory1.getInstructions(BATCH_SIZE, 1);
 
                 // serialization test: serialize instructions to disk
                 String filename = "instructions.tmp";
@@ -201,7 +202,7 @@ public class FactoryTest
                     }
 
                 // submit the next work unit
-                List<WorkUnit> theseUnits = workUnitFactory.followInstructions(reconstitutedInstructions);
+                List<WorkUnit> theseUnits = workUnitFactory2.followInstructions(reconstitutedInstructions);
                 
                 for (WorkUnit thisUnit : theseUnits)
                     {
