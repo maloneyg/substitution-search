@@ -162,6 +162,15 @@ public final class MutableParadigmClient
                                 System.out.println("received instruction ID = " + instructions.getID());
                                 List<WorkUnit> theseUnits = workUnitFactory.followInstructions(instructions);
                                 
+                                MutableParadigmClient.currentInstructions = instructions;
+                                
+                                for (WorkUnit thisUnit : theseUnits)
+                                    {
+                                        Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
+                                        System.out.println("submitted unit " + thisUnit.hashCode());
+                                        currentBatch.put(thisUnit, thisFuture);
+                                    }
+                                
                                 // wait for current batch to complete
                                 while ( currentBatchIsComplete() == false )
                                     {
@@ -174,16 +183,10 @@ public final class MutableParadigmClient
                                             {
                                             }
                                     }
-
+                                
                                 sendResult();
                                 MutableParadigmClient.currentBatch.clear();
-                                MutableParadigmClient.currentInstructions = instructions;
-                                for (WorkUnit thisUnit : theseUnits)
-                                    {
-                                        Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
-                                        System.out.println("submitted unit " + thisUnit.hashCode());
-                                        currentBatch.put(thisUnit, thisFuture);
-                                    }
+
                             }
                         else if ( incomingObject instanceof String )
                             {
