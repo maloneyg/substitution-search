@@ -2,13 +2,14 @@ import java.util.*;
 import java.net.*;
 import java.io.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 
 // This class will serve up work units to remote clients. 
 
 public final class MutableParadigmClient
 {
     public static final int LISTENING_PORT = 32007;
-    public static String HOST_NAME = "bessel";//"localhost";  // name of the server
+    public static String HOST_NAME = "localhost";  // name of the server
 
     public static final double MONITOR_INTERVAL = 0.5; // seconds
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
@@ -25,6 +26,12 @@ public final class MutableParadigmClient
     private static ThreadService executorService = ThreadService.INSTANCE;
 
     private static Object mutableParadigmClientLock = new Object();
+
+    private static WorkUnitFactory workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
+
+    protected static ConcurrentHashMap<WorkUnit,Future<Result>> currentBatch = new ConcurrentHashMap<>();
+    protected static AtomicBoolean currentBatchSent = new AtomicBoolean();
+    protected static WorkUnitInstructions currentInstructions;
 
     // prevent instantiation
     private MutableParadigmClient()
@@ -73,6 +80,11 @@ public final class MutableParadigmClient
                     {
                         System.out.println("Unable to connect, retrying.");
                     }
+                catch (UnknownHostException e)
+                    {
+                        System.out.println("unknown host name...aborting!");
+                        System.exit(1);
+                    }
                 catch (Exception e)
                     {
                         e.printStackTrace();
@@ -101,7 +113,7 @@ public final class MutableParadigmClient
         //System.out.println("Client has shut down.");
     }
 
-    private static void connect() throws IOException, InterruptedException, ConnectException, ClassNotFoundException, SocketException
+    private static void connect() throws IOException, InterruptedException, ConnectException, ClassNotFoundException, SocketException, UnknownHostException
     {
         // establish connection
         connection = new Socket(HOST_NAME, LISTENING_PORT);
@@ -144,11 +156,32 @@ public final class MutableParadigmClient
                 try
                     {
                         incomingObject = incomingObjectStream.readObject();
-                        if ( incomingObject instanceof MutableWorkUnit )
+                        if ( incomingObject instanceof WorkUnitInstructions )
                             {
-                                MutableWorkUnit thisUnit = (MutableWorkUnit)incomingObject;
-                                Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
-                                System.out.println("received job " + thisUnit.getOriginalHashCode());
+                                WorkUnitInstructions instructions = (WorkUnitInstructions)incomingObject;
+                                System.out.println("received instruction ID = " + instructions.getID());
+                                List<WorkUnit> theseUnits = workUnitFactory.followInstructions(instructions);
+                                
+                                // wait for current batch to complete
+                                while ( currentBatchIsComplete() == false || currentBatchSent.get() == false )
+                                    {
+                                        try
+                                            {
+                                                Thread.sleep(100);
+                                            }
+                                        catch (InterruptedException e)
+                                            {
+                                            }
+                                    }
+                                
+                                MutableParadigmClient.currentBatch.clear();
+                                MutableParadigmClient.currentBatchSent.set(false);
+                                MutableParadigmClient.currentInstructions = instructions;
+                                for (WorkUnit thisUnit : theseUnits)
+                                    {
+                                        Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
+                                        currentBatch.put(thisUnit, thisFuture);
+                                    }
                             }
                         else if ( incomingObject instanceof String )
                             {
@@ -185,30 +218,76 @@ public final class MutableParadigmClient
         System.exit(0);
     }
 
-    public static void sendResult(PatchResult result)
+    public static boolean currentBatchIsComplete()
     {
+        ConcurrentHashMap<WorkUnit,Future<Result>> currentBatch = MutableParadigmClient.currentBatch;
+        for (WorkUnit w : currentBatch.keySet())
+            {
+                Future f = currentBatch.get(w);
+                if ( ! f.isDone() )
+                    return false;
+            }
+        return true;
+    }
+
+    public static void sendResult()
+    {
+        // if there is no connection, do nothing
+        // this makes this compatible with single-node tests
         if ( connection == null )
             return;
 
-        synchronized(mutableParadigmClientLock)
+        // if the latest batch of job is complete send back the results
+        if ( currentBatchIsComplete() && MutableParadigmClient.currentBatchSent.get() == false)
             {
-                System.out.println("\nsending a result for job " + result.getCompletedUnit().getOriginalHashCode() + " (" + result.getCompletedUnit().getPatch().getLocalCompletedPatches().size() + " completed puzzles)");
-                try
+                synchronized(mutableParadigmClientLock)
                     {
-                        // send result
-                        outgoingObjectStream.writeObject(result);
-                        outgoingObjectStream.flush();
-                        outgoingObjectStream.reset();
+                        // create PatchResult to send
+                        int ID = MutableParadigmClient.currentInstructions.getID();
+                        LinkedList<BasicPatch> completedPatches = new LinkedList<>();
+                        for (WorkUnit w : MutableParadigmClient.currentBatch.keySet())
+                            {
+                                Future f = MutableParadigmClient.currentBatch.get(w);
+                                WorkUnitResult r = null;
+                                List<BasicPatch> thesePatches = null;
+                                try
+                                    {
+                                        // cast Result to WorkUnitResult
+                                        r = (WorkUnitResult)f.get();
+                                        thesePatches = r.getLocalCompletedPatches();
+                                    }
+                                catch (Exception e)
+                                    {
+                                        // ignore work units that were cancelled, died from
+                                        // an exception, or were interrupted
+                                    }
+                                if ( thesePatches != null )
+                                    completedPatches.addAll(thesePatches);
+                            }
+                        int numberOfUnits = MutableParadigmClient.currentBatch.size();
 
-                        // ask for one new job
-                        outgoingObjectStream.writeObject(new Integer(1));
-                        outgoingObjectStream.flush();
-                        outgoingObjectStream.reset();
-                        System.out.println("requested 1 more job");
-                    }
-                catch (Exception e)
-                    {
-                        e.printStackTrace();
+                        PatchResult result = new PatchResult(ID, completedPatches, numberOfUnits);
+
+                        try
+                            {
+                                // send result
+                                outgoingObjectStream.writeObject(result);
+                                outgoingObjectStream.flush();
+                                outgoingObjectStream.reset();
+
+                                // ask for one new job
+                                outgoingObjectStream.writeObject(new Integer(1));
+                                outgoingObjectStream.flush();
+                                outgoingObjectStream.reset();
+                                System.out.println("requested 1 more job");
+                            }
+                        catch (Exception e)
+                            {
+                                e.printStackTrace();
+                            }
+
+                        System.out.println("\nsent " + result.toString());
+                        currentBatchSent.set(true);
                     }
             }
     }
@@ -248,6 +327,10 @@ public final class MutableParadigmClient
                             }
                         System.exit(1);
                     }
+
+                // only do stuff if the connection is alive
+                if ( connection == null )
+                    return;
 
                 // number of jobs run in the last monitorInterval; simultaneously resets counter
                 long jobsRun = executorService.getExecutor().getNumberOfSolveCalls();

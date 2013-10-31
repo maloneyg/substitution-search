@@ -15,7 +15,7 @@ import java.util.Scanner;
 public class FactoryTest
 {
     // how many jobs to make per set of instructions
-    public static final int BATCH_SIZE = 100;
+    public static final int BATCH_SIZE = Preinitializer.BATCH_SIZE;
 
     // the guy who pauses the program for us
     private static Scanner kbd = new Scanner(System.in);
@@ -166,7 +166,7 @@ public class FactoryTest
         // submit all jobs
         while (workUnitFactory.notDone())
             {
-                WorkUnitInstructions instructions = workUnitFactory.getInstructions(BATCH_SIZE);
+                WorkUnitInstructions instructions = workUnitFactory.getInstructions(BATCH_SIZE, 1);
 
                 // serialization test: serialize instructions to disk
                 String filename = "instructions.tmp";

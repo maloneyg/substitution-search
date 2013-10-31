@@ -19,6 +19,8 @@ public class MutableParadigmServer
 
     private static List<ConnectionThread> LIVE_CONNECTIONS = Collections.synchronizedList(new ArrayList<ConnectionThread>()); 
 
+    private static WorkUnitFactory workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
+
     private MutableParadigmServer()
     {
         throw new RuntimeException("this should not be instantiated!");
@@ -127,6 +129,8 @@ public class MutableParadigmServer
         private static AtomicInteger jobCount = new AtomicInteger(0);
         private static Set<Integer> outstandingResults = Collections.synchronizedSet(new HashSet<Integer>());
 
+        public static final int BATCH_SIZE = Preinitializer.BATCH_SIZE;
+
         public ConnectionThread(Socket connection)
         {
             this.connection = connection;
@@ -181,12 +185,12 @@ public class MutableParadigmServer
                                 {
                                     // this is an incoming result
                                     PatchResult result = (PatchResult)incomingObject;
-                                    numberOfResultsReceived.getAndIncrement();
-                                    int jobID = result.getCompletedUnit().getOriginalHashCode();
+                                    numberOfResultsReceived.addAndGet(result.getNumberOfUnits());
+                                    int jobID = result.getID();
                                     boolean success = outstandingResults.remove(Integer.valueOf(jobID));
                                     if ( success == false )
                                         System.out.println("Warning, problem in the job database!");
-                                    List<BasicPatch> localCompletedPatches = result.getCompletedUnit().getPatch().getLocalCompletedPatches();
+                                    List<BasicPatch> localCompletedPatches = result.getCompletedPatches();
                                     if ( localCompletedPatches.size() > 0 )
                                         {
                                             allCompletedPatches.addAll( localCompletedPatches );
@@ -248,28 +252,25 @@ public class MutableParadigmServer
         public int provideJobs(int numberOfNewJobs) throws IOException
         {
             int jobsSent = 0;
-            synchronized(sendLock)
+            for (int i=0; i < numberOfNewJobs; i++)
                 {
-                    for (int i=0; i < numberOfNewJobs; i++)
+                    synchronized (sendLock)
                         {
-                            // check to see if we've run out of jobs to sent
-                            if ( !MutableWorkUnit.notDoneYet )
-                                {
-                                    System.out.println("unable to provide any new jobs because we are done");
-                                    break;
-                                }
+                            // check to see if we've run out of jobs to send
+                            if (!workUnitFactory.notDone())
+                                break;
 
-                            // get next work unit
-                            MutableWorkUnit thisUnit = MutableWorkUnit.nextWorkUnit();
-                            jobsSent++;
+                            // create the next set of instructions
                             int jobID = jobCount.addAndGet(1);
-                            thisUnit.setOriginalHashCode(jobID);
+                            WorkUnitInstructions theseInstructions = workUnitFactory.getInstructions(BATCH_SIZE,jobID);
 
-                            // send work unit
-                            outgoingObjectStream.writeObject(thisUnit);
+                            // send instructions
+                            outgoingObjectStream.writeObject(theseInstructions);
                             outgoingObjectStream.flush();
                             outgoingObjectStream.reset();
-                            System.out.println("created job " + jobCount);
+
+                            System.out.println("created instructions ID = " + jobCount);
+                            jobsSent++;
 
                             // mark job as unfinished
                             outstandingResults.add(Integer.valueOf(jobID));

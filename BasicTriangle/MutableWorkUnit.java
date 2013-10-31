@@ -171,7 +171,6 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
     // the main data on which MutableWorkUnit works
     private final MutablePatch patch;
     private final AtomicInteger count = new AtomicInteger(0);
-    private int originalHashCode = -1;
 
     private static final ThreadService threadService;
 
@@ -185,16 +184,6 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
     // private constructor
     private MutableWorkUnit(MutablePatch p) {
         patch = p;
-    }
-
-    public int getOriginalHashCode()
-    {
-        return originalHashCode;
-    }
-
-    public void setOriginalHashCode(int originalHashCode)
-    {
-        this.originalHashCode = originalHashCode;
     }
 
     public int hashCode()
@@ -213,19 +202,17 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         threadService.getExecutor().registerCounter(count);
         patch.setCount(count);
         patch.solve();
-        if ( originalHashCode != -1 )
-            System.out.println("finished work unit " + originalHashCode);
+        System.out.println("finished work unit " + hashCode());
         threadService.getExecutor().deregisterCounter(count);
-        PatchResult thisResult = new PatchResult(this);
-        MutableParadigmClient.sendResult(thisResult);
-        return thisResult;
+        MutableParadigmClient.sendResult();
+        return new WorkUnitResult(patch.getLocalCompletedPatches());
     } // method call() ends here
 
     public int getCount()
     {
         return count.get();
     }
-
+/*
     // pause if the queue is getting too full
     private static void checkIfBusy()
     {
@@ -247,7 +234,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
                     }
                 else
                     break;
-            }*/
+            }
     }
 
     public String toString()
@@ -261,6 +248,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
     }
 
     // destroy this method! It is unsafe
+*/
     public MutablePatch getPatch()
     {
         return patch;
