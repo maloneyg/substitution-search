@@ -7,15 +7,17 @@ public class TriangleResultsDisplay
     public static void main(String[] args)
         {
             // deserialize data
-            String filename = "results_812.chk";
-            ArrayList<BasicPatch> patches = null;
+            String filename = "results/tile0superhuge.chk";
+//            ArrayList<BasicPatch> patches = null;
+            List<BasicPatch> patches = null;
             if ( ! new File(filename).isFile() )
                 return;
             try
                 {
                     FileInputStream fileIn = new FileInputStream(filename);
                     ObjectInputStream in = new ObjectInputStream(fileIn);
-                    patches = (ArrayList<BasicPatch>)in.readObject();
+//                    patches = (ArrayList<BasicPatch>)in.readObject();
+                    patches = ((TriangleResults)in.readObject()).getPatches();
                     System.out.println(patches.size() + " completed patches have been read.");
                 }
             catch (Exception e)
@@ -27,7 +29,7 @@ public class TriangleResultsDisplay
             // display data
             try
                 {
-                    PointsDisplay display = new PointsDisplay(patches,"the 812 results");
+                    PointsDisplay display = new PointsDisplay(patches,filename);
                 }
             catch ( java.awt.HeadlessException e )
                 {
