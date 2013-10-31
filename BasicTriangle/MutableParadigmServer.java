@@ -169,11 +169,12 @@ public class MutableParadigmServer
         public void run()
         {
             boolean sendClose = true;
+            int jobsSent = 0;
             main:
             while ( Thread.interrupted() == false )
                 {
                     // check if all results have been received
-                    if ( numberOfResultsReceived.get() > 0 && outstandingResults.size() == 0 )
+                    if ( numberOfResultsReceived.get() > 0 && outstandingResults.size() == 0 && jobsSent == 0)
                         {
                             closeAllConnections();
                             finished = true;
@@ -207,9 +208,11 @@ public class MutableParadigmServer
                                     int numberOfNewJobs = (Integer)incomingObject;
                                     System.out.println("received request for " + numberOfNewJobs + " new jobs from " + address);
                                     
-                                    int jobsSent = provideJobs(numberOfNewJobs);
+                                    jobsSent = provideJobs(numberOfNewJobs);
                                     if (jobsSent > 0 )
                                         System.out.println(jobsSent + " new jobs have been sent to " + address);
+                                    else if (jobsSent == 0)
+                                        System.out.println("No more instructions to create.");
                                 }
                         }
                     catch (EOFException | SocketException e)
@@ -231,6 +234,7 @@ public class MutableParadigmServer
                     // send close signal
                     if ( sendClose == true )
                         {
+                            System.out.println("Signalling remote client to close.");
                             outgoingObjectStream.writeObject(CLOSE);
                             outgoingObjectStream.flush();
                         }

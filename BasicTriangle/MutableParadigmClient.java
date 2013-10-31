@@ -187,6 +187,10 @@ public final class MutableParadigmClient
                                 sendResult();
                                 MutableParadigmClient.currentBatch.clear();
 
+                                // ask for another piece of work
+                                outgoingObjectStream.writeObject(Integer.valueOf(1));
+                                outgoingObjectStream.flush();
+                                outgoingObjectStream.reset();
                             }
                         else if ( incomingObject instanceof String )
                             {
@@ -225,19 +229,15 @@ public final class MutableParadigmClient
 
     public static boolean currentBatchIsComplete()
     {
-        int unfinished = 0;
         synchronized(mutableParadigmClientLock)
             {
                 HashMap<WorkUnit,Future<Result>> currentBatch = MutableParadigmClient.currentBatch;
                 for (Future f : currentBatch.values())
                     {
                         if ( ! f.isDone() )
-                            unfinished++;
+                            return false;
                     }
-                System.out.println("unfinished: " + unfinished);
             }
-        if ( unfinished > 0 )
-            return false;
         return true;
     }
 
