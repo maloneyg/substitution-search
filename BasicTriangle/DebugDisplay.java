@@ -32,7 +32,7 @@ public class DebugDisplay extends JPanel implements ActionListener
     // animation stuff
     private boolean playing = false;
     private boolean forward = true;
-    private static final int ANIMATION_DELAY = 30; // ms
+    private static final int ANIMATION_DELAY = 1; // ms
     private JButton playButton;
     private JButton stopButton;
     private JButton reverseButton;
@@ -69,7 +69,7 @@ public class DebugDisplay extends JPanel implements ActionListener
         messageArea.setFont(new Font("SansSerif", Font.PLAIN, 10));
         messageArea.setEditable(false);
         messageArea.setLineWrap(true);
-        messageArea.setBounds(350,75,350,350);
+        messageArea.setBounds(350,75,400,150);
         add(messageArea);
 
         next = new JButton("next");
@@ -164,7 +164,7 @@ public class DebugDisplay extends JPanel implements ActionListener
         patchesSoFar.add(p);
         while (!keepSolving) {
             try {
-                Thread.sleep(50);
+                Thread.sleep(5);
             } catch(InterruptedException ex) {
             }
         }
@@ -228,12 +228,12 @@ public class DebugDisplay extends JPanel implements ActionListener
                     else if ( position == patchesSoFar.size() - 1 && patchesSoFar.size() < MAX_SIZE )
                         {
                             keepSolving = true;
-                            while (keepSolving) {
+                           /* while (keepSolving) {
                                 try {
-                                    Thread.sleep(50);
+                                    Thread.sleep(5);
                                 } catch(InterruptedException ex) {
                                 }
-                            }
+                            }*/
                         }
                 }
             updatePositionString();
