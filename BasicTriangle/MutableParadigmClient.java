@@ -30,7 +30,6 @@ public final class MutableParadigmClient
     private static WorkUnitFactory workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
 
     protected static ConcurrentHashMap<WorkUnit,Future<Result>> currentBatch = new ConcurrentHashMap<>();
-    protected static AtomicBoolean currentBatchSent = new AtomicBoolean(true);
     protected static WorkUnitInstructions currentInstructions;
 
     // prevent instantiation
@@ -163,7 +162,7 @@ public final class MutableParadigmClient
                                 List<WorkUnit> theseUnits = workUnitFactory.followInstructions(instructions);
                                 
                                 // wait for current batch to complete
-                                while ( currentBatchIsComplete() == false || currentBatchSent.get() == false )
+                                while ( currentBatchIsComplete() == false )
                                     {
                                         try
                                             {
@@ -174,9 +173,9 @@ public final class MutableParadigmClient
                                             {
                                             }
                                     }
-                                System.out.println();
+
+                                sendResult();
                                 MutableParadigmClient.currentBatch.clear();
-                                MutableParadigmClient.currentBatchSent.set(false);
                                 MutableParadigmClient.currentInstructions = instructions;
                                 for (WorkUnit thisUnit : theseUnits)
                                     {
@@ -222,76 +221,77 @@ public final class MutableParadigmClient
 
     public static boolean currentBatchIsComplete()
     {
-        ConcurrentHashMap<WorkUnit,Future<Result>> currentBatch = MutableParadigmClient.currentBatch;
-        for (WorkUnit w : currentBatch.keySet())
+        int unfinished = 0;
+        synchronized(mutableParadigmClientLock)
             {
-                Future f = currentBatch.get(w);
-                if ( ! f.isDone() )
-                    return false;
+                ConcurrentHashMap<WorkUnit,Future<Result>> currentBatch = MutableParadigmClient.currentBatch;
+                for (WorkUnit w : currentBatch.keySet())
+                    {
+                        Future f = currentBatch.get(w);
+                        if ( ! f.isDone() )
+                            unfinished++;
+                    }
+                System.out.println("unfinished: " + unfinished);
             }
+        if ( unfinished > 0 )
+            return false;
         return true;
     }
 
     public static void sendResult()
     {
-        // if there is no connection, do nothing
-        // this makes this compatible with single-node tests
-        if ( connection == null )
+        if (MutableParadigmClient.currentBatch.size() == 0 || MutableParadigmClient.currentInstructions == null)
             return;
-System.out.println(currentBatchIsComplete() + " "  + MutableParadigmClient.currentBatchSent.get());
-        // if the latest batch of job is complete send back the results
-        if ( currentBatchIsComplete() && MutableParadigmClient.currentBatchSent.get() == false)
+
+        System.out.println("sending");
+        synchronized(mutableParadigmClientLock)
             {
-                synchronized(mutableParadigmClientLock)
+                // create PatchResult to send
+                int ID = MutableParadigmClient.currentInstructions.getID();
+                LinkedList<BasicPatch> completedPatches = new LinkedList<>();
+                for (WorkUnit w : MutableParadigmClient.currentBatch.keySet())
                     {
-                        // create PatchResult to send
-                        int ID = MutableParadigmClient.currentInstructions.getID();
-                        LinkedList<BasicPatch> completedPatches = new LinkedList<>();
-                        for (WorkUnit w : MutableParadigmClient.currentBatch.keySet())
-                            {
-                                Future f = MutableParadigmClient.currentBatch.get(w);
-                                WorkUnitResult r = null;
-                                List<BasicPatch> thesePatches = null;
-                                try
-                                    {
-                                        // cast Result to WorkUnitResult
-                                        r = (WorkUnitResult)f.get();
-                                        thesePatches = r.getLocalCompletedPatches();
-                                    }
-                                catch (Exception e)
-                                    {
-                                        // ignore work units that were cancelled, died from
-                                        // an exception, or were interrupted
-                                    }
-                                if ( thesePatches != null )
-                                    completedPatches.addAll(thesePatches);
-                            }
-                        int numberOfUnits = MutableParadigmClient.currentBatch.size();
-
-                        PatchResult result = new PatchResult(ID, completedPatches, numberOfUnits);
-
+                        Future f = MutableParadigmClient.currentBatch.get(w);
+                        WorkUnitResult r = null;
+                        List<BasicPatch> thesePatches = null;
                         try
                             {
-                                // send result
-                                outgoingObjectStream.writeObject(result);
-                                outgoingObjectStream.flush();
-                                outgoingObjectStream.reset();
-
-                                // ask for one new job
-                                outgoingObjectStream.writeObject(new Integer(1));
-                                outgoingObjectStream.flush();
-                                outgoingObjectStream.reset();
-                                System.out.println("requested 1 more job");
+                                // cast Result to WorkUnitResult
+                                r = (WorkUnitResult)f.get();
+                                thesePatches = r.getLocalCompletedPatches();
                             }
                         catch (Exception e)
                             {
-                                e.printStackTrace();
+                                // ignore work units that were cancelled, died from
+                                // an exception, or were interrupted
                             }
-
-                        System.out.println("\nsent " + result.toString());
-                        currentBatchSent.set(true);
+                        if ( thesePatches != null )
+                            completedPatches.addAll(thesePatches);
                     }
-            }
+                int numberOfUnits = MutableParadigmClient.currentBatch.size();
+
+                PatchResult result = new PatchResult(ID, completedPatches, numberOfUnits);
+
+                try
+                    {
+                        // send result
+                        outgoingObjectStream.writeObject(result);
+                        outgoingObjectStream.flush();
+                        outgoingObjectStream.reset();
+
+                        // ask for one new job
+                        outgoingObjectStream.writeObject(new Integer(1));
+                        outgoingObjectStream.flush();
+                        outgoingObjectStream.reset();
+                        System.out.println("requested 1 more job");
+                    }
+                catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+
+                System.out.println("\nsent " + result.toString());
+        }
     }
 
     private static class ThreadMonitor
