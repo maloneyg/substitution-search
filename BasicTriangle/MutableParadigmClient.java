@@ -13,7 +13,7 @@ public final class MutableParadigmClient
 
     public static final double MONITOR_INTERVAL = 0.5; // seconds
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
-    public static final int MAX_ATTEMPTS = 300; // how many time to try connecting before giving up
+    public static final int MAX_ATTEMPTS = 5; // how many time to try connecting before giving up
     public static final String HANDSHAKE = "TriangleHandshake";
     public static final String CLOSE = "TriangleClose";
 
@@ -91,6 +91,7 @@ public final class MutableParadigmClient
                 if ( attempts > MAX_ATTEMPTS )
                     {
                         System.out.println("Maximum number of connection attempts exceeded.");
+                        System.exit(1);
                         break;
                     }
 
@@ -158,8 +159,9 @@ public final class MutableParadigmClient
                             {
                                 WorkUnitInstructions instructions = (WorkUnitInstructions)incomingObject;
                                 System.out.println("received instruction ID = " + instructions.getID());
+                                workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
                                 List<MutableWorkUnit> theseUnits = workUnitFactory.followInstructions(instructions);
-                                
+
                                 AtomicInteger counter = new AtomicInteger(0);
                                 LinkedList<BasicPatch> completedPuzzles = new LinkedList<BasicPatch>();
                                 
@@ -168,6 +170,8 @@ public final class MutableParadigmClient
                                         thisUnit.setCounter(counter);
                                         thisUnit.setResultTarget(completedPuzzles);
                                         Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
+                                        //thisUnit.debugCall();
+                                        
                                         //System.out.println("submitted unit " + thisUnit.hashCode());
                                     }
                                 
@@ -184,7 +188,7 @@ public final class MutableParadigmClient
                                     }
                                 
                                 sendResult(instructions.getID(), completedPuzzles, theseUnits.size());
-
+                                
                                 // ask for another piece of work
                                 outgoingObjectStream.writeObject(Integer.valueOf(1));
                                 outgoingObjectStream.flush();
@@ -240,13 +244,16 @@ public final class MutableParadigmClient
                 outgoingObjectStream.writeObject(result);
                 outgoingObjectStream.flush();
                 outgoingObjectStream.reset();
+                System.out.println("\nsent " + result.toString());
+            }
+        catch (SocketException e)
+            {
+                System.out.println("Broken pipe!  Unable to send result!");
             }
         catch (Exception e)
             {
                 e.printStackTrace();
             }
-
-        System.out.println("\nsent " + result.toString());
     }
 
     private static class ThreadMonitor

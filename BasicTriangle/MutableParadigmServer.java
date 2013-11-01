@@ -17,7 +17,7 @@ public class MutableParadigmServer
     public static AtomicLong numberOfResultsReceived = new AtomicLong(0L);
     public static volatile boolean finished = false;
 
-    private static List<ConnectionThread> LIVE_CONNECTIONS = Collections.synchronizedList(new ArrayList<ConnectionThread>()); 
+    private static List<ConnectionThread> LIVE_CONNECTIONS = new ArrayList<ConnectionThread>(); 
 
     private static WorkUnitFactory workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
 
@@ -80,7 +80,10 @@ public class MutableParadigmServer
                 catch (EOFException e)
                     {
                         System.out.println("Connection to " + connection.getInetAddress() + " closed unexpectedly.");
-                        LIVE_CONNECTIONS.remove(connectionThread);
+                        synchronized(LIVE_CONNECTIONS)
+                            {
+                                LIVE_CONNECTIONS.remove(connectionThread);
+                            }
                     }
                 catch (Exception e)
                     {
@@ -125,9 +128,8 @@ public class MutableParadigmServer
         public static final String CLOSE = "TriangleClose";
         public static Object sendLock = new Object();
         public final String address;
-        private volatile boolean sendClose = false;
 
-        private static AtomicInteger jobCount = new AtomicInteger(0);
+        private static int jobCount = 0;
         private static Set<Integer> outstandingResults = Collections.synchronizedSet(new HashSet<Integer>());
 
         public static final int BATCH_SIZE = Preinitializer.BATCH_SIZE;
@@ -164,9 +166,13 @@ public class MutableParadigmServer
             outgoingObjectStream.flush();
             
             // keep track of the live connections
-            MutableParadigmServer.LIVE_CONNECTIONS.add(this);
+            synchronized(LIVE_CONNECTIONS)
+                {
+                    MutableParadigmServer.LIVE_CONNECTIONS.add(this);
+                }
         }
 
+        @SuppressWarnings("deprecation")
         public void run()
         {
             int jobsSent = 0;
@@ -196,7 +202,9 @@ public class MutableParadigmServer
                                         System.out.println("Warning, problem in the job database!");
                                     List<BasicPatch> localCompletedPatches = result.getCompletedPatches();
                                     allCompletedPatches.addAll( localCompletedPatches );
-                                    System.out.println(new Date() + " ] Received " + result + " (" + allCompletedPatches.size() + " finished puzzles total)");
+                                    Date currentDate = new Date();
+                                    String dateString = String.format("%02d:%02d:%02d", currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
+                                    System.out.println("[ " + dateString + " ] Received " + result + " (" + allCompletedPatches.size() + " finished puzzles total) from " + address);
 
                                 }
                             else if ( incomingObject instanceof Integer )
@@ -211,7 +219,6 @@ public class MutableParadigmServer
                                     if (jobsSent == 0)
                                         {
                                             System.out.println("No more instructions to create.");
-                                            sendClose = true;
                                         }
                                 }
                         }
@@ -230,17 +237,8 @@ public class MutableParadigmServer
             // close connection
             try
                 {
-                    // send close signal
-                    if ( sendClose == true )
-                        {
-                            System.out.println("Signalling remote client to close.");
-                            outgoingObjectStream.writeObject(CLOSE);
-                            outgoingObjectStream.flush();
-                            closeAllConnections();
-                        }
-
                     // close socket
-                    if ( connection != null )
+                    if ( connection != null && connection.isConnected() )
                         connection.close();
                 }
             catch (IOException e)
@@ -248,14 +246,35 @@ public class MutableParadigmServer
                     e.printStackTrace();
                 }
         
-            MutableParadigmServer.LIVE_CONNECTIONS.remove(this);
+            synchronized(LIVE_CONNECTIONS)
+                {
+                    MutableParadigmServer.LIVE_CONNECTIONS.remove(this);
+                }
             System.out.println("Connection to " + address + " closed.");
         }
 
         public static void closeAllConnections()
         {
-            for (ConnectionThread t : LIVE_CONNECTIONS)
-                t.interrupt();
+            synchronized(LIVE_CONNECTIONS)
+                {
+                    for (ConnectionThread t : LIVE_CONNECTIONS)
+                        {
+                            if ( t.connection.isConnected() )
+                                {
+                                    System.out.println("Signalling " + t.address + " to close.");
+                                    try
+                                        {
+                                            t.outgoingObjectStream.writeObject(CLOSE);
+                                            t.outgoingObjectStream.flush();
+                                            t.outgoingObjectStream.close();
+                                        }
+                                    catch (Exception e)
+                                        {
+                                            e.printStackTrace();
+                                        }
+                                }
+                        }
+                }
         }
 
         public int provideJobs(int numberOfNewJobs) throws IOException
@@ -270,19 +289,19 @@ public class MutableParadigmServer
                                 break;
 
                             // create the next set of instructions
-                            int jobID = jobCount.addAndGet(1);
-                            WorkUnitInstructions theseInstructions = workUnitFactory.getInstructions(BATCH_SIZE,jobID);
-
+                            jobCount++;
+                            WorkUnitInstructions theseInstructions = workUnitFactory.getInstructions(BATCH_SIZE,jobCount);
+                            
                             // send instructions
+                            outgoingObjectStream.writeObject(theseInstructions);
                             outgoingObjectStream.writeObject(theseInstructions);
                             outgoingObjectStream.flush();
                             outgoingObjectStream.reset();
 
-                            //System.out.println("created instructions ID = " + jobID);
                             jobsSent++;
 
                             // mark job as unfinished
-                            outstandingResults.add(Integer.valueOf(jobID));
+                            outstandingResults.add(Integer.valueOf(jobCount));
                         }
                 }
             return jobsSent;

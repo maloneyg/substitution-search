@@ -35,6 +35,11 @@ public class WorkUnitInstructions implements Serializable {
         this.ID = ID;
     } // constructor
 
+    public String toString()
+    {
+        return BD0.toString() + " / " + BD1.toString() + " / " + BD2.toString() + " / " + flip + " / " + num + " / " + flip;
+    }
+
     // getter methods
     public List<Integer> getZero() {
         return BD0;

@@ -206,17 +206,23 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         patch.solve();
         //System.out.println("finished work unit " + hashCode());
         threadService.getExecutor().deregisterCounter(count);
-        if ( counter != null )
-            counter.getAndIncrement();
         if ( resultTarget != null )
             {
                 synchronized(resultTarget)
                     {
                         resultTarget.addAll(patch.getLocalCompletedPatches());
                     }
+                counter.getAndIncrement();
             }
         return new WorkUnitResult(patch.getLocalCompletedPatches());
     } // method call() ends here
+
+    public void debugCall()
+    {
+        patch.solve();
+        resultTarget.addAll(patch.getLocalCompletedPatches());
+        counter.getAndIncrement();
+    }
 
     public void setCounter(AtomicInteger counter)
     {
