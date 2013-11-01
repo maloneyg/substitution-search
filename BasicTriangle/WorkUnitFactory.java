@@ -105,9 +105,9 @@ public class WorkUnitFactory implements Serializable {
     // follow a set of instructions, returning the resulting WorkUnits in a List
     public List<MutableWorkUnit> followInstructions(WorkUnitInstructions i) {
         LinkedList<MutableWorkUnit> l = new LinkedList<MutableWorkUnit>();
-        advanceToBreakdown(ImmutableList.of(i.getZero(),i.getOne(),i.getTwo()));
-        if (flip != i.getFlip())
-            iterateEdgeBreakdown();
+        advanceToBreakdown(ImmutableList.of(i.getZero(),i.getOne(),i.getTwo()),i.getFlip());
+//        if (flip != i.getFlip())
+//            iterateEdgeBreakdown();
         for (int k = 0; k < i.getNum(); k++) {
             l.add(nextWorkUnit());
 //            iterateEdgeBreakdown();
@@ -164,11 +164,12 @@ public class WorkUnitFactory implements Serializable {
     }
 
     // advance to the work unit matching this edge breakdown
-    private void advanceToBreakdown(List<List<Integer>> breakdown) {
+    private void advanceToBreakdown(List<List<Integer>> breakdown, boolean f) {
         while (notDoneYet) {
             if (compareBreakdown(breakdown)) break;
             iterateEdgeBreakdown();
         }
+        flip = f;
     } 
 
     private MutableWorkUnit nextWorkUnit() {
