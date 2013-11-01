@@ -14,9 +14,6 @@ import java.util.concurrent.atomic.*;
 public class MutableWorkUnit implements WorkUnit, Serializable {
 
     // the number of the triangle we're searching
-    private static final boolean checkIsosceles = Preinitializer.CHECK_ISOSCELES;
-
-    // the number of the triangle we're searching
     private static final int myTile = Preinitializer.MY_TILE;
     
     // the triangle we're searching
@@ -84,11 +81,11 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         }
     } // initialization of o1 and o2 ends here
 
-    private static void iterateEdgeBreakdown() {
+    public static void iterateEdgeBreakdown() {
         edge0.iterate();
         BD0 = edge0.getImmutableList();
         if (BD0.equals(start0)) {
-            if (checkIsosceles&&P0.isosceles()) { // then we only need two breakdowns
+            if (P0.isosceles()) { // then we only need two breakdowns
                 edge2.iterate();
                 BD2 = edge2.getImmutableList();
                 if (BD2.equals(start2)) notDoneYet = false;
@@ -139,7 +136,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
 
     public static MutableWorkUnit nextWorkUnit() {
 
-        if (checkIsosceles&&P0.isosceles()) {
+        if (P0.isosceles()) {
         // how we submit BasicWorkUnits
         // depends on whether P0 is isosceles.
 
@@ -152,8 +149,8 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
                 patch.addInstructions(o1,o2);
             }
 
-            if (flip||!checkIsosceles) iterateEdgeBreakdown();
-            if (checkIsosceles) flip = !flip;
+            if (flip) iterateEdgeBreakdown();
+            flip = !flip;
 
             // create a new unit of work
             return MutableWorkUnit.createMutableWorkUnit(patch);
