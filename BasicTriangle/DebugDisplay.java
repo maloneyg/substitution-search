@@ -74,11 +74,108 @@ public class DebugDisplay extends JPanel implements ActionListener
 
         next = new JButton("next");
         next.setEnabled(true);
-//        if (position+1 >= patchesSoFar.size()&&patch.allDone()) {
-//            next.setEnabled(false);
-//        } else {
-//            next.setEnabled(true);
-//        }
+
+        next.setActionCommand("advance");
+        next.setMnemonic(KeyEvent.VK_A);
+        next.addActionListener(this);
+        next.setBounds(120,10,90,20);
+
+        playButton = new JButton("play");
+        playButton.setEnabled(true);
+        playButton.setActionCommand("play");
+        playButton.addActionListener(this);
+        playButton.setBounds(220,10,90,20);
+        add(playButton);
+
+        stopButton = new JButton("stop");
+        stopButton.setEnabled(true);
+        stopButton.setActionCommand("stop");
+        stopButton.addActionListener(this);
+        stopButton.setBounds(310,10,90,20);
+        add(stopButton);
+
+        reverseButton = new JButton("reverse");
+        reverseButton.setEnabled(true);
+        reverseButton.setActionCommand("reverse");
+        reverseButton.addActionListener(this);
+        reverseButton.setBounds(400,10,90,20);
+        add(reverseButton);
+
+        rewindButton = new JButton("rewind");
+        rewindButton.setEnabled(true);
+        rewindButton.setActionCommand("rewind");
+        rewindButton.addActionListener(this);
+        rewindButton.setBounds(490,10,90,20);
+        add(rewindButton);
+
+        previous = new JButton("previous");
+        if (position == 0) {
+            previous.setEnabled(false);
+        } else {
+            previous.setEnabled(true);
+        }
+        previous.setActionCommand("retreat");
+        previous.setMnemonic(KeyEvent.VK_B);
+        previous.addActionListener(this);
+        previous.setBounds(10,10,90,20);
+
+        JPanel content = new JPanel();
+        content.setLayout(new BorderLayout());
+        content.add(this, BorderLayout.CENTER);
+        setBackground(Color.WHITE);
+
+        JFrame window = new JFrame(title);
+        window.setContentPane(content);
+        window.setSize(windowSize,windowSize);
+        window.setLocation(10,10);
+        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        window.setVisible(true);
+
+        add(previous);
+        add(next);
+
+        animationTimer = new Timer(ANIMATION_DELAY,this);
+        animationTimer.setActionCommand("animation");
+        animationTimer.start();
+
+        patch.debugSolve(this);
+    }
+
+    public DebugDisplay(int l, String title) throws java.awt.HeadlessException
+    {
+        for (int j = 0; j < l; j++) MutableWorkUnit.iterateEdgeBreakdown();
+
+        this.keepSolving = true;
+        this.patch = MutableWorkUnit.nextWorkUnit().getPatch();
+        this.patchesSoFar = new ArrayList<>();
+        this.messages = new ArrayList<>();
+        this.position = 0;
+
+        //patchesSoFar.add(patch.debugSolve());
+        //this.data = this.patchesSoFar.get(position).graphicsDump();
+        patchesSoFar.add(patch.dumpBasicPatch());
+        messages.add(patch.getMessage());
+        this.data = this.patchesSoFar.get(position).graphicsDump();
+
+        this.setLayout(null);
+
+        positionString = "---";
+        currentIndexArea = new JTextArea(positionString);
+        currentIndexArea.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        currentIndexArea.setEditable(false);
+        currentIndexArea.setBounds(5,50,80,15);
+        add(currentIndexArea);        
+
+        messageArea = new JTextArea(messages.get(0));
+        messageArea.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        messageArea.setEditable(false);
+        messageArea.setLineWrap(true);
+        messageArea.setBounds(350,75,400,150);
+        add(messageArea);
+
+        next = new JButton("next");
+        next.setEnabled(true);
+
         next.setActionCommand("advance");
         next.setMnemonic(KeyEvent.VK_A);
         next.addActionListener(this);
@@ -366,7 +463,7 @@ public class DebugDisplay extends JPanel implements ActionListener
 
 //        for (int k : Initializer.SUBSTITUTION_MATRIX.getColumn(Preinitializer.MY_TILE)) System.out.print(k+" ");
 
-        DebugDisplay display = new DebugDisplay(l,"debugging");
+        DebugDisplay display = new DebugDisplay(21,"debugging");
 
     }
 

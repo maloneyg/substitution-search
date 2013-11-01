@@ -202,7 +202,7 @@ public class FactoryTest
                     }
 
                 // submit the next work unit
-                List<WorkUnit> theseUnits = workUnitFactory2.followInstructions(reconstitutedInstructions);
+                List<MutableWorkUnit> theseUnits = workUnitFactory2.followInstructions(reconstitutedInstructions);
                 
                 for (WorkUnit thisUnit : theseUnits)
                     {

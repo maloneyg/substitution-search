@@ -14,10 +14,10 @@ public class MutableParadigmServer
     public static final List<BasicPatch> allCompletedPatches = new ArrayList<BasicPatch>();
     public static final String RESULT_FILENAME = "results.chk";
 
-    public static AtomicInteger numberOfResultsReceived = new AtomicInteger(0);
+    public static AtomicLong numberOfResultsReceived = new AtomicLong(0L);
     public static volatile boolean finished = false;
 
-    private static List<ConnectionThread> LIVE_CONNECTIONS = Collections.synchronizedList(new ArrayList<ConnectionThread>()); 
+    private static List<ConnectionThread> LIVE_CONNECTIONS = new ArrayList<ConnectionThread>(); 
 
     private static WorkUnitFactory workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
 
@@ -80,7 +80,10 @@ public class MutableParadigmServer
                 catch (EOFException e)
                     {
                         System.out.println("Connection to " + connection.getInetAddress() + " closed unexpectedly.");
-                        LIVE_CONNECTIONS.remove(connectionThread);
+                        synchronized(LIVE_CONNECTIONS)
+                            {
+                                LIVE_CONNECTIONS.remove(connectionThread);
+                            }
                     }
                 catch (Exception e)
                     {
@@ -90,7 +93,7 @@ public class MutableParadigmServer
                     }
             }
 
-        System.out.println("Program complete.  " + numberOfResultsReceived + " results were received, comprising " + allCompletedPatches.size() + " completed puzzles.");
+        System.out.println("Program complete.  " + numberOfResultsReceived + " work units were processed, comprising " + allCompletedPatches.size() + " completed puzzles.");
         
         // write results to file 
         if (allCompletedPatches.size() > 0)
@@ -126,7 +129,7 @@ public class MutableParadigmServer
         public static Object sendLock = new Object();
         public final String address;
 
-        private static AtomicInteger jobCount = new AtomicInteger(0);
+        private static int jobCount = 0;
         private static Set<Integer> outstandingResults = Collections.synchronizedSet(new HashSet<Integer>());
 
         public static final int BATCH_SIZE = Preinitializer.BATCH_SIZE;
@@ -163,17 +166,22 @@ public class MutableParadigmServer
             outgoingObjectStream.flush();
             
             // keep track of the live connections
-            MutableParadigmServer.LIVE_CONNECTIONS.add(this);
+            synchronized(LIVE_CONNECTIONS)
+                {
+                    MutableParadigmServer.LIVE_CONNECTIONS.add(this);
+                }
         }
 
+        @SuppressWarnings("deprecation")
         public void run()
         {
-            boolean sendClose = true;
             int jobsSent = 0;
             main:
             while ( Thread.interrupted() == false )
                 {
                     // check if all results have been received
+                    System.out.print("jobs finished: " + numberOfResultsReceived + "\r");
+                    //+ " outstanding: " + outstandingResults.size() + " jobsSent: " + jobsSent);
                     if ( numberOfResultsReceived.get() > 0 && outstandingResults.size() == 0 && jobsSent == 0)
                         {
                             closeAllConnections();
@@ -193,32 +201,30 @@ public class MutableParadigmServer
                                     if ( success == false )
                                         System.out.println("Warning, problem in the job database!");
                                     List<BasicPatch> localCompletedPatches = result.getCompletedPatches();
-                                    if ( localCompletedPatches.size() > 0 )
-                                        {
-                                            allCompletedPatches.addAll( localCompletedPatches );
-                                            System.out.println( localCompletedPatches.size() + " completed patches received from " + address + " (" + allCompletedPatches.size() + " total patches, jobID = " + jobID + ").");
-                                        }
-                                    else
-                                        System.out.println("Null result received from " + connection.getInetAddress() + " (jobID = " + jobID + ").");
+                                    allCompletedPatches.addAll( localCompletedPatches );
+                                    Date currentDate = new Date();
+                                    String dateString = String.format("%02d:%02d:%02d", currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
+                                    System.out.println("[ " + dateString + " ] Received " + result + " (" + allCompletedPatches.size() + " finished puzzles total) from " + address);
 
                                 }
                             else if ( incomingObject instanceof Integer )
                                 {
                                     // this is a request for new jobs
                                     int numberOfNewJobs = (Integer)incomingObject;
-                                    System.out.println("received request for " + numberOfNewJobs + " new jobs from " + address);
+                                    //System.out.println("received request for " + numberOfNewJobs + " new jobs from " + address);
                                     
                                     jobsSent = provideJobs(numberOfNewJobs);
-                                    if (jobsSent > 0 )
-                                        System.out.println(jobsSent + " new jobs have been sent to " + address);
-                                    else if (jobsSent == 0)
-                                        System.out.println("No more instructions to create.");
+                                    //if (jobsSent > 0 )
+                                    //    System.out.println(jobsSent + " new jobs have been sent to " + address);
+                                    if (jobsSent == 0)
+                                        {
+                                            System.out.println("No more instructions to create.");
+                                        }
                                 }
                         }
                     catch (EOFException | SocketException e)
                         {
                             System.out.println("Connection lost.");
-                            sendClose = false;
                             break;
                         }
                     catch (Exception e)
@@ -231,16 +237,8 @@ public class MutableParadigmServer
             // close connection
             try
                 {
-                    // send close signal
-                    if ( sendClose == true )
-                        {
-                            System.out.println("Signalling remote client to close.");
-                            outgoingObjectStream.writeObject(CLOSE);
-                            outgoingObjectStream.flush();
-                        }
-
                     // close socket
-                    if ( connection != null )
+                    if ( connection != null && connection.isConnected() )
                         connection.close();
                 }
             catch (IOException e)
@@ -248,14 +246,35 @@ public class MutableParadigmServer
                     e.printStackTrace();
                 }
         
-            MutableParadigmServer.LIVE_CONNECTIONS.remove(this);
+            synchronized(LIVE_CONNECTIONS)
+                {
+                    MutableParadigmServer.LIVE_CONNECTIONS.remove(this);
+                }
             System.out.println("Connection to " + address + " closed.");
         }
 
         public static void closeAllConnections()
         {
-            for (ConnectionThread t : LIVE_CONNECTIONS)
-                t.interrupt();
+            synchronized(LIVE_CONNECTIONS)
+                {
+                    for (ConnectionThread t : LIVE_CONNECTIONS)
+                        {
+                            if ( t.connection.isConnected() )
+                                {
+                                    System.out.println("Signalling " + t.address + " to close.");
+                                    try
+                                        {
+                                            t.outgoingObjectStream.writeObject(CLOSE);
+                                            t.outgoingObjectStream.flush();
+                                            t.outgoingObjectStream.close();
+                                        }
+                                    catch (Exception e)
+                                        {
+                                            e.printStackTrace();
+                                        }
+                                }
+                        }
+                }
         }
 
         public int provideJobs(int numberOfNewJobs) throws IOException
@@ -270,19 +289,19 @@ public class MutableParadigmServer
                                 break;
 
                             // create the next set of instructions
-                            int jobID = jobCount.addAndGet(1);
-                            WorkUnitInstructions theseInstructions = workUnitFactory.getInstructions(BATCH_SIZE,jobID);
-
+                            jobCount++;
+                            WorkUnitInstructions theseInstructions = workUnitFactory.getInstructions(BATCH_SIZE,jobCount);
+                            
                             // send instructions
+                            outgoingObjectStream.writeObject(theseInstructions);
                             outgoingObjectStream.writeObject(theseInstructions);
                             outgoingObjectStream.flush();
                             outgoingObjectStream.reset();
 
-                            System.out.println("created instructions ID = " + jobCount);
                             jobsSent++;
 
                             // mark job as unfinished
-                            outstandingResults.add(Integer.valueOf(jobID));
+                            outstandingResults.add(Integer.valueOf(jobCount));
                         }
                 }
             return jobsSent;

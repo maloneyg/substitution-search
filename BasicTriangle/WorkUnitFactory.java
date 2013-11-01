@@ -103,8 +103,8 @@ public class WorkUnitFactory implements Serializable {
     }
 
     // follow a set of instructions, returning the resulting WorkUnits in a List
-    public List<WorkUnit> followInstructions(WorkUnitInstructions i) {
-        ArrayList<WorkUnit> l =  new ArrayList<WorkUnit>();
+    public List<MutableWorkUnit> followInstructions(WorkUnitInstructions i) {
+        LinkedList<MutableWorkUnit> l = new LinkedList<MutableWorkUnit>();
         advanceToBreakdown(ImmutableList.of(i.getZero(),i.getOne(),i.getTwo()));
         if (flip != i.getFlip())
             iterateEdgeBreakdown();
@@ -171,7 +171,7 @@ public class WorkUnitFactory implements Serializable {
         }
     } 
 
-    private WorkUnit nextWorkUnit() {
+    private MutableWorkUnit nextWorkUnit() {
 
         if (P0.isosceles()) {
         // how we submit BasicWorkUnits
