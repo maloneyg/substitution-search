@@ -171,6 +171,8 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
     // the main data on which MutableWorkUnit works
     private final MutablePatch patch;
     private final AtomicInteger count = new AtomicInteger(0);
+    private AtomicInteger counter;
+    private List<BasicPatch> resultTarget;
 
     private static final ThreadService threadService;
 
@@ -188,7 +190,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
 
     public int hashCode()
     {
-        return Objects.hash(patch, count);
+        return Objects.hash(patch, count, counter, resultTarget);
     }
 
     // public static factory method
@@ -202,10 +204,29 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         threadService.getExecutor().registerCounter(count);
         patch.setCount(count);
         patch.solve();
-        System.out.println("finished work unit " + hashCode());
+        //System.out.println("finished work unit " + hashCode());
         threadService.getExecutor().deregisterCounter(count);
+        if ( counter != null )
+            counter.getAndIncrement();
+        if ( resultTarget != null )
+            {
+                synchronized(resultTarget)
+                    {
+                        resultTarget.addAll(patch.getLocalCompletedPatches());
+                    }
+            }
         return new WorkUnitResult(patch.getLocalCompletedPatches());
     } // method call() ends here
+
+    public void setCounter(AtomicInteger counter)
+    {
+        this.counter = counter;
+    }
+
+    public void setResultTarget(List<BasicPatch> resultTarget)
+    {
+        this.resultTarget = resultTarget;
+    }
 
     public int getCount()
     {

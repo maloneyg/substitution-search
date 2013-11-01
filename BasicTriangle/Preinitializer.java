@@ -18,7 +18,7 @@ class Preinitializer {
 
     public static final float EP = 0.000001f;  // threshold value
 
-    public static final int BATCH_SIZE = 1; // number of jobs to make per set of instructions
+    public static final int BATCH_SIZE = 500; // number of jobs to make per set of instructions
 
     // the inflation factor, represented as coefficients of
     // 1, a, a^2, etc., where a = 2*cos(pi/N).

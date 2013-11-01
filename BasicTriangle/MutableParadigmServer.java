@@ -90,7 +90,7 @@ public class MutableParadigmServer
                     }
             }
 
-        System.out.println("Program complete.  " + numberOfResultsReceived + " results were received, comprising " + allCompletedPatches.size() + " completed puzzles.");
+        System.out.println("Program complete.  " + numberOfResultsReceived + " work units were processed, comprising " + allCompletedPatches.size() + " completed puzzles.");
         
         // write results to file 
         if (allCompletedPatches.size() > 0)
@@ -174,6 +174,7 @@ public class MutableParadigmServer
             while ( Thread.interrupted() == false )
                 {
                     // check if all results have been received
+                    System.out.println("rcved: " + numberOfResultsReceived + " outstanding: " + outstandingResults.size() + " jobsSent: " + jobsSent);
                     if ( numberOfResultsReceived.get() > 0 && outstandingResults.size() == 0 && jobsSent == 0)
                         {
                             closeAllConnections();
@@ -193,13 +194,8 @@ public class MutableParadigmServer
                                     if ( success == false )
                                         System.out.println("Warning, problem in the job database!");
                                     List<BasicPatch> localCompletedPatches = result.getCompletedPatches();
-                                    if ( localCompletedPatches.size() > 0 )
-                                        {
-                                            allCompletedPatches.addAll( localCompletedPatches );
-                                            System.out.println( localCompletedPatches.size() + " completed patches received from " + address + " (" + allCompletedPatches.size() + " total patches, jobID = " + jobID + ").");
-                                        }
-                                    else
-                                        System.out.println("Null result received from " + connection.getInetAddress() + " (jobID = " + jobID + ").");
+                                    allCompletedPatches.addAll( localCompletedPatches );
+                                    System.out.println( localCompletedPatches.size() + " completed patches received from " + address + " (" + allCompletedPatches.size() + " total patches, jobID = " + jobID + ").");
 
                                 }
                             else if ( incomingObject instanceof Integer )
@@ -278,7 +274,7 @@ public class MutableParadigmServer
                             outgoingObjectStream.flush();
                             outgoingObjectStream.reset();
 
-                            System.out.println("created instructions ID = " + jobCount);
+                            System.out.println("created instructions ID = " + jobID);
                             jobsSent++;
 
                             // mark job as unfinished
