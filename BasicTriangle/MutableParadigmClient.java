@@ -2,13 +2,14 @@ import java.util.*;
 import java.net.*;
 import java.io.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 
 // This class will serve up work units to remote clients. 
 
 public final class MutableParadigmClient
 {
     public static final int LISTENING_PORT = 32007;
-    public static String HOST_NAME = "bessel";//"localhost";  // name of the server
+    public static String HOST_NAME = "enj10.rc.fas.harvard.edu";  // name of the server
 
     public static final double MONITOR_INTERVAL = 0.5; // seconds
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
@@ -25,6 +26,8 @@ public final class MutableParadigmClient
     private static ThreadService executorService = ThreadService.INSTANCE;
 
     private static Object mutableParadigmClientLock = new Object();
+
+    private static WorkUnitFactory workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
 
     // prevent instantiation
     private MutableParadigmClient()
@@ -73,6 +76,11 @@ public final class MutableParadigmClient
                     {
                         System.out.println("Unable to connect, retrying.");
                     }
+                catch (UnknownHostException e)
+                    {
+                        System.out.println("unknown host name...aborting!");
+                        System.exit(1);
+                    }
                 catch (Exception e)
                     {
                         e.printStackTrace();
@@ -101,7 +109,7 @@ public final class MutableParadigmClient
         //System.out.println("Client has shut down.");
     }
 
-    private static void connect() throws IOException, InterruptedException, ConnectException, ClassNotFoundException, SocketException
+    private static void connect() throws IOException, InterruptedException, ConnectException, ClassNotFoundException, SocketException, UnknownHostException, EOFException
     {
         // establish connection
         connection = new Socket(HOST_NAME, LISTENING_PORT);
@@ -134,21 +142,53 @@ public final class MutableParadigmClient
         System.out.println("Connected and ready to run jobs.");
 
         // ask for initial batch of jobs
-        Integer numberOfNewJobsNeeded = executorService.NUMBER_OF_THREADS - executorService.getExecutor().getNumberOfRunningJobs() + 1;
-        outgoingObjectStream.writeObject(numberOfNewJobsNeeded);
+        //Integer numberOfNewJobsNeeded = executorService.NUMBER_OF_THREADS - executorService.getExecutor().getNumberOfRunningJobs() + 1;
+        //outgoingObjectStream.writeObject(numberOfNewJobsNeeded);
+        outgoingObjectStream.writeObject(Integer.valueOf(1));
         outgoingObjectStream.flush();
         outgoingObjectStream.reset();
+        System.out.println("Initial job request made.");
 
         while (true)
             {
                 try
                     {
                         incomingObject = incomingObjectStream.readObject();
-                        if ( incomingObject instanceof MutableWorkUnit )
+                        if ( incomingObject instanceof WorkUnitInstructions )
                             {
-                                MutableWorkUnit thisUnit = (MutableWorkUnit)incomingObject;
-                                Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
-                                System.out.println("received job " + thisUnit.getOriginalHashCode());
+                                WorkUnitInstructions instructions = (WorkUnitInstructions)incomingObject;
+                                System.out.println("received instruction ID = " + instructions.getID());
+                                List<MutableWorkUnit> theseUnits = workUnitFactory.followInstructions(instructions);
+                                
+                                AtomicInteger counter = new AtomicInteger(0);
+                                LinkedList<BasicPatch> completedPuzzles = new LinkedList<BasicPatch>();
+                                
+                                for (MutableWorkUnit thisUnit : theseUnits)
+                                    {
+                                        thisUnit.setCounter(counter);
+                                        thisUnit.setResultTarget(completedPuzzles);
+                                        Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
+                                        //System.out.println("submitted unit " + thisUnit.hashCode());
+                                    }
+                                
+                                // wait for current batch to complete
+                                while ( counter.get() < theseUnits.size() )
+                                    {
+                                        try
+                                            {
+                                                Thread.sleep(100);
+                                            }
+                                        catch (InterruptedException e)
+                                            {
+                                            }
+                                    }
+                                
+                                sendResult(instructions.getID(), completedPuzzles, theseUnits.size());
+
+                                // ask for another piece of work
+                                outgoingObjectStream.writeObject(Integer.valueOf(1));
+                                outgoingObjectStream.flush();
+                                outgoingObjectStream.reset();
                             }
                         else if ( incomingObject instanceof String )
                             {
@@ -165,6 +205,10 @@ public final class MutableParadigmClient
                 catch (SocketException e)
                     {
                         throw new SocketException(e.getMessage());
+                    }
+                catch (EOFException e)
+                    {
+                        throw new EOFException(e.getMessage());
                     }
                 catch (Exception e)
                     {
@@ -185,32 +229,24 @@ public final class MutableParadigmClient
         System.exit(0);
     }
 
-    public static void sendResult(PatchResult result)
+    public static void sendResult(int ID, List<BasicPatch> completedPatches, int numberOfUnits )
     {
-        if ( connection == null )
-            return;
+        // create PatchResult to send
+        PatchResult result = new PatchResult(ID, completedPatches, numberOfUnits);
 
-        synchronized(mutableParadigmClientLock)
+        // send result
+        try
             {
-                System.out.println("\nsending a result for job " + result.getCompletedUnit().getOriginalHashCode() + " (" + result.getCompletedUnit().getPatch().getLocalCompletedPatches().size() + " completed puzzles)");
-                try
-                    {
-                        // send result
-                        outgoingObjectStream.writeObject(result);
-                        outgoingObjectStream.flush();
-                        outgoingObjectStream.reset();
-
-                        // ask for one new job
-                        outgoingObjectStream.writeObject(new Integer(1));
-                        outgoingObjectStream.flush();
-                        outgoingObjectStream.reset();
-                        System.out.println("requested 1 more job");
-                    }
-                catch (Exception e)
-                    {
-                        e.printStackTrace();
-                    }
+                outgoingObjectStream.writeObject(result);
+                outgoingObjectStream.flush();
+                outgoingObjectStream.reset();
             }
+        catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+        System.out.println("\nsent " + result.toString());
     }
 
     private static class ThreadMonitor
@@ -248,6 +284,10 @@ public final class MutableParadigmClient
                             }
                         System.exit(1);
                     }
+
+                // only do stuff if the connection is alive
+                if ( connection == null )
+                    return;
 
                 // number of jobs run in the last monitorInterval; simultaneously resets counter
                 long jobsRun = executorService.getExecutor().getNumberOfSolveCalls();

@@ -86,23 +86,25 @@ public class WorkUnitFactory implements Serializable {
     // iterate through instructions to make sure we don't hit the end.
     // then return the instructions, along with an int representing
     // the number of work units to be produced.  
-    public WorkUnitInstructions getInstructions(int i) {
+    //
+    // BATCH_SIZE: how many WorkUnits to try and make from this set of instructions
+    // ID: a number identifynig how many instructions have been parceled out
+    public WorkUnitInstructions getInstructions(int BATCH_SIZE, int ID) {
         ImmutableList<Integer> output0 = BD0;
         ImmutableList<Integer> output1 = BD1;
         ImmutableList<Integer> output2 = BD2;
         boolean reflect = flip;
         int j = 0;
-        while(notDoneYet&&j<i) {
+        while (notDoneYet && j<BATCH_SIZE) {
             iterateEdgeBreakdown();
             j++;
         }
-        return WorkUnitInstructions.createWorkUnitInstructions(output0,output1,output2,reflect,j);
+        return WorkUnitInstructions.createWorkUnitInstructions(output0,output1,output2,reflect,j,ID);
     }
 
-    // follow a set of instructions, adding 
-    // the resulting work units to the list l.
-    public List<WorkUnit> followInstructions(WorkUnitInstructions i) {
-        ArrayList<WorkUnit> l =  new ArrayList<WorkUnit>();
+    // follow a set of instructions, returning the resulting WorkUnits in a List
+    public List<MutableWorkUnit> followInstructions(WorkUnitInstructions i) {
+        LinkedList<MutableWorkUnit> l = new LinkedList<MutableWorkUnit>();
         advanceToBreakdown(ImmutableList.of(i.getZero(),i.getOne(),i.getTwo()));
         if (flip != i.getFlip())
             iterateEdgeBreakdown();
@@ -169,7 +171,7 @@ public class WorkUnitFactory implements Serializable {
         }
     } 
 
-    private WorkUnit nextWorkUnit() {
+    private MutableWorkUnit nextWorkUnit() {
 
         if (P0.isosceles()) {
         // how we submit BasicWorkUnits

@@ -22,13 +22,17 @@ public class WorkUnitInstructions implements Serializable {
     // the number of work units to be made
     private final int num;
 
+    // a unique identifier
+    private final int ID;
+
     // private constructor
-    private WorkUnitInstructions(ImmutableList<Integer> b0, ImmutableList<Integer> b1, ImmutableList<Integer> b2, boolean tf, int i) {
+    private WorkUnitInstructions(ImmutableList<Integer> b0, ImmutableList<Integer> b1, ImmutableList<Integer> b2, boolean tf, int i, int ID) {
         BD0 = b0;
         BD1 = b1;
         BD2 = b2;
         flip = tf;
         num = i;
+        this.ID = ID;
     } // constructor
 
     // getter methods
@@ -51,11 +55,20 @@ public class WorkUnitInstructions implements Serializable {
     public int getNum() {
         return num;
     }
+
+    public int getID() {
+        return ID;
+    }
     // end of getter methods
 
+    public int hashCode()
+    {
+        return Objects.hash(BD0, BD1, BD2);
+    }
+
     // public static factory method
-    public static WorkUnitInstructions createWorkUnitInstructions(ImmutableList<Integer> b0, ImmutableList<Integer> b1, ImmutableList<Integer> b2, boolean tf, int i) {
-        return new WorkUnitInstructions(b0,b1,b2,tf,i);
+    public static WorkUnitInstructions createWorkUnitInstructions(ImmutableList<Integer> b0, ImmutableList<Integer> b1, ImmutableList<Integer> b2, boolean tf, int i, int ID) {
+        return new WorkUnitInstructions(b0,b1,b2,tf,i,ID);
     }
 
 } // end of class WorkUnitInstructions

@@ -174,7 +174,8 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
     // the main data on which MutableWorkUnit works
     private final MutablePatch patch;
     private final AtomicInteger count = new AtomicInteger(0);
-    private int originalHashCode = -1;
+    private AtomicInteger counter;
+    private List<BasicPatch> resultTarget;
 
     private static final ThreadService threadService;
 
@@ -190,19 +191,9 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         patch = p;
     }
 
-    public int getOriginalHashCode()
-    {
-        return originalHashCode;
-    }
-
-    public void setOriginalHashCode(int originalHashCode)
-    {
-        this.originalHashCode = originalHashCode;
-    }
-
     public int hashCode()
     {
-        return Objects.hash(patch, count);
+        return Objects.hash(patch, count, counter, resultTarget);
     }
 
     // public static factory method
@@ -216,19 +207,35 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         threadService.getExecutor().registerCounter(count);
         patch.setCount(count);
         patch.solve();
-        if ( originalHashCode != -1 )
-            System.out.println("finished work unit " + originalHashCode);
+        //System.out.println("finished work unit " + hashCode());
         threadService.getExecutor().deregisterCounter(count);
-        PatchResult thisResult = new PatchResult(this);
-        MutableParadigmClient.sendResult(thisResult);
-        return thisResult;
+        if ( counter != null )
+            counter.getAndIncrement();
+        if ( resultTarget != null )
+            {
+                synchronized(resultTarget)
+                    {
+                        resultTarget.addAll(patch.getLocalCompletedPatches());
+                    }
+            }
+        return new WorkUnitResult(patch.getLocalCompletedPatches());
     } // method call() ends here
+
+    public void setCounter(AtomicInteger counter)
+    {
+        this.counter = counter;
+    }
+
+    public void setResultTarget(List<BasicPatch> resultTarget)
+    {
+        this.resultTarget = resultTarget;
+    }
 
     public int getCount()
     {
         return count.get();
     }
-
+/*
     // pause if the queue is getting too full
     private static void checkIfBusy()
     {
@@ -250,7 +257,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
                     }
                 else
                     break;
-            }*/
+            }
     }
 
     public String toString()
@@ -264,6 +271,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
     }
 
     // destroy this method! It is unsafe
+*/
     public MutablePatch getPatch()
     {
         return patch;
