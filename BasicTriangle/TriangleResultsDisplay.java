@@ -7,7 +7,7 @@ public class TriangleResultsDisplay
     public static void main(String[] args)
         {
             // deserialize data
-            String filename = "results/tile0superhuge.chk";
+            String filename = "results/tile1big.chk";
 //            ArrayList<BasicPatch> patches = null;
             List<BasicPatch> patches = null;
             if ( ! new File(filename).isFile() )
