@@ -70,7 +70,7 @@ public class ThreadService
         //private List<Callable<?>> currentlyPendingJobs = Collections.synchronizedList(new ArrayList<Callable<?>>());
         //private Map<Callable<?>,Date> startTimes = Collections.synchronizedMap(new HashMap<Callable<?>,Date>());
 
-        private List<AtomicInteger> listOfCounters = Collections.synchronizedList(new ArrayList<AtomicInteger>());
+        private List<AtomicInteger> listOfCounters = new ArrayList<AtomicInteger>();
         private AtomicInteger numberOfJobsRun = new AtomicInteger();
         private AtomicInteger numberOfRunningJobs = new AtomicInteger();
         public static final double GB = 1073741824.0; // bytes per GB
@@ -83,20 +83,29 @@ public class ThreadService
 
         public void registerCounter(AtomicInteger counter)
         {
-            listOfCounters.add(counter);
+            synchronized(listOfCounters)
+                {
+                    listOfCounters.add(counter);
+                }
         }
 
         public void deregisterCounter(AtomicInteger counter)
         {
-            listOfCounters.remove(counter);
+            synchronized(listOfCounters)
+                {
+                    listOfCounters.remove(counter);
+                }
         }
 
         // resets all counters and returns the total number of solve calls since the last reset
         public long getNumberOfSolveCalls()
         {
             long numberOfCalls = 0L;
-            for (AtomicInteger i : listOfCounters)
-                numberOfCalls += (long)i.getAndSet(0);
+            synchronized (listOfCounters)
+                {
+                    for (AtomicInteger i : listOfCounters)
+                        numberOfCalls += (long)i.getAndSet(0);
+                }
             return numberOfCalls;
         }
 

@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.*;
 public final class MutableParadigmClient
 {
     public static final int LISTENING_PORT = 32007;
-    public static String HOST_NAME = "localhost";  // name of the server
+    public static String HOST_NAME = "enj10.rc.fas.harvard.edu";  // name of the server
 
     public static final double MONITOR_INTERVAL = 0.5; // seconds
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
@@ -109,7 +109,7 @@ public final class MutableParadigmClient
         //System.out.println("Client has shut down.");
     }
 
-    private static void connect() throws IOException, InterruptedException, ConnectException, ClassNotFoundException, SocketException, UnknownHostException
+    private static void connect() throws IOException, InterruptedException, ConnectException, ClassNotFoundException, SocketException, UnknownHostException, EOFException
     {
         // establish connection
         connection = new Socket(HOST_NAME, LISTENING_PORT);
@@ -205,6 +205,10 @@ public final class MutableParadigmClient
                 catch (SocketException e)
                     {
                         throw new SocketException(e.getMessage());
+                    }
+                catch (EOFException e)
+                    {
+                        throw new EOFException(e.getMessage());
                     }
                 catch (Exception e)
                     {
