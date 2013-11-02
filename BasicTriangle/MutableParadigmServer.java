@@ -294,7 +294,6 @@ public class MutableParadigmServer
                             
                             // send instructions
                             outgoingObjectStream.writeObject(theseInstructions);
-                            outgoingObjectStream.writeObject(theseInstructions);
                             outgoingObjectStream.flush();
                             outgoingObjectStream.reset();
 
