@@ -40,9 +40,9 @@ public class DebugDisplay extends JPanel implements ActionListener
     private static final int MAX_SIZE = 1000000; // max size of patchesSoFar
     private Timer animationTimer; 
 
-    public DebugDisplay(List<List<Integer>> l, String title) throws java.awt.HeadlessException
+    public DebugDisplay(List<List<Integer>> l1, String title) throws java.awt.HeadlessException
     {
-        MutableWorkUnit.advanceToBreakdown(l);
+        MutableWorkUnit.advanceToBreakdown(l1);
 
         this.keepSolving = true;
         this.patch = MutableWorkUnit.nextWorkUnit().getPatch();

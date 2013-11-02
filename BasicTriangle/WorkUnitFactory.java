@@ -105,7 +105,7 @@ public class WorkUnitFactory implements Serializable {
     // follow a set of instructions, returning the resulting WorkUnits in a List
     public List<MutableWorkUnit> followInstructions(WorkUnitInstructions i) {
         LinkedList<MutableWorkUnit> l = new LinkedList<MutableWorkUnit>();
-        advanceToBreakdown(ImmutableList.of(i.getZero(),i.getOne(),i.getTwo()),i.getFlip());
+        advanceToBreakdown(i.getZero(),i.getOne(),i.getTwo(),i.getFlip());
 //        if (flip != i.getFlip())
 //            iterateEdgeBreakdown();
         for (int k = 0; k < i.getNum(); k++) {
@@ -151,22 +151,22 @@ public class WorkUnitFactory implements Serializable {
     }
 
     // compare a list of lists of integers to BD0, BD1, and BD2 for equality
-    private boolean compareBreakdown(List<List<Integer>> breakdown) {
-        if (breakdown.size()!=3) throw new IllegalArgumentException("An edge breakdown requires 3 lists of integers; we have " + breakdown.size() + " lists of integers.");
+    private boolean compareBreakdown(List<Integer> b0, List<Integer> b1, List<Integer> b2) {
         for (int i = 0; i < 3; i++) {
             List<Integer> intList = (i==0)? BD0 : ((i==1)? BD1 : BD2);
-            if (breakdown.get(i).size()!=intList.size()) throw new IllegalArgumentException("We are comparing edge breakdowns of different sizes: " + breakdown.get(i).size() + " and " + intList.size() + ".");
+            List<Integer> nother = (i==0)? b0 : ((i==1)? b1 : b2);
+            if (nother.size()!=intList.size()) throw new IllegalArgumentException("We are comparing edge breakdowns of different sizes: " + nother.size() + " and " + intList.size() + ".");
             for (int j = 0; j < intList.size(); j++) {
-                if (intList.get(j)!=breakdown.get(i).get(j)) return false;
+                if (intList.get(j).intValue()!=nother.get(j).intValue()) return false;
             }
         }
         return true;
     }
 
     // advance to the work unit matching this edge breakdown
-    private void advanceToBreakdown(List<List<Integer>> breakdown, boolean f) {
+    private void advanceToBreakdown(List<Integer> b0, List<Integer> b1, List<Integer> b2, boolean f) {
         while (notDoneYet) {
-            if (compareBreakdown(breakdown)) break;
+            if (compareBreakdown(b0,b1,b2)) break;
             iterateEdgeBreakdown();
         }
         flip = f;
