@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.*;
 public final class MutableParadigmClient
 {
     public static final int LISTENING_PORT = 32007;
-    public static String HOST_NAME = "corbridge";//"enj10.rc.fas.harvard.edu";  // name of the server
+    public static String HOST_NAME = "enj10.rc.fas.harvard.edu";  // name of the server
 
     public static final double MONITOR_INTERVAL = 0.5; // seconds
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
@@ -159,7 +159,6 @@ public final class MutableParadigmClient
                             {
                                 WorkUnitInstructions instructions = (WorkUnitInstructions)incomingObject;
                                 System.out.println("received instruction ID = " + instructions.getID());
-                                workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
                                 List<MutableWorkUnit> theseUnits = workUnitFactory.followInstructions(instructions);
 
                                 AtomicInteger counter = new AtomicInteger(0);
@@ -180,7 +179,7 @@ public final class MutableParadigmClient
                                     {
                                         try
                                             {
-                                                Thread.sleep(100);
+                                                Thread.sleep(50);
                                             }
                                         catch (InterruptedException e)
                                             {
