@@ -18,6 +18,7 @@ public class MutableParadigmServer
     public static volatile boolean finished = false;
 
     private static List<ConnectionThread> LIVE_CONNECTIONS = new ArrayList<ConnectionThread>(); 
+    private static List<ConnectionThread> ALL_CONNECTIONS = new ArrayList<ConnectionThread>(); 
 
     private static WorkUnitFactory workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
 
@@ -130,7 +131,8 @@ public class MutableParadigmServer
         public final String address;
 
         private static int jobCount = 0;
-        private static Set<Integer> outstandingResults = Collections.synchronizedSet(new HashSet<Integer>());
+        protected static HashMap<WorkUnitInstructions,ConnectionThread> dispatched = new HashMap<>();
+        protected static LinkedList<WorkUnitInstructions> toBeResent = new LinkedList<>();
 
         public static final int BATCH_SIZE = Preinitializer.BATCH_SIZE;
 
@@ -169,6 +171,7 @@ public class MutableParadigmServer
             synchronized(LIVE_CONNECTIONS)
                 {
                     MutableParadigmServer.LIVE_CONNECTIONS.add(this);
+                    MutableParadigmServer.ALL_CONNECTIONS.add(this);
                 }
         }
 
@@ -182,7 +185,8 @@ public class MutableParadigmServer
                     // check if all results have been received
                     System.out.print("jobs finished: " + numberOfResultsReceived + "\r");
                     //+ " outstanding: " + outstandingResults.size() + " jobsSent: " + jobsSent);
-                    if ( numberOfResultsReceived.get() > 0 && outstandingResults.size() == 0 && jobsSent == 0)
+                    if ( numberOfResultsReceived.get() > 0 && dispatched.size() == 0 &&
+                         toBeResent.size() == 0 && jobsSent == 0 )
                         {
                             closeAllConnections();
                             finished = true;
@@ -197,15 +201,30 @@ public class MutableParadigmServer
                                     PatchResult result = (PatchResult)incomingObject;
                                     numberOfResultsReceived.addAndGet(result.getNumberOfUnits());
                                     int jobID = result.getID();
-                                    boolean success = outstandingResults.remove(Integer.valueOf(jobID));
-                                    if ( success == false )
-                                        System.out.println("Warning, problem in the job database!");
+                                    
                                     List<BasicPatch> localCompletedPatches = result.getCompletedPatches();
                                     allCompletedPatches.addAll( localCompletedPatches );
                                     Date currentDate = new Date();
                                     String dateString = String.format("%02d:%02d:%02d", currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
                                     System.out.println("[ " + dateString + " ] Received " + result + " (" + allCompletedPatches.size() + " finished puzzles total) from " + address);
 
+                                    // mark job as finished
+                                    WorkUnitInstructions toBeRemoved = null;
+                                    synchronized (sendLock)
+                                        {
+                                            for (WorkUnitInstructions i : dispatched.keySet())
+                                                {
+                                                    if (i.getID() == jobID)
+                                                        {
+                                                            toBeRemoved = i;
+                                                            break;
+                                                        }
+                                                }
+                                            if ( toBeRemoved == null )
+                                                System.out.println("Warning, problem in the job database!");
+                                            else
+                                                dispatched.remove(toBeRemoved);
+                                        }
                                 }
                             else if ( incomingObject instanceof Integer )
                                 {
@@ -253,6 +272,18 @@ public class MutableParadigmServer
             System.out.println("Connection to " + address + " closed.");
         }
 
+        public boolean isConnected()
+        {
+            if ( connection == null | connection.isClosed() )
+                return false;
+            return true;
+        }
+
+        public String getHostName()
+        {
+            return address;
+        }
+
         public static void closeAllConnections()
         {
             synchronized(LIVE_CONNECTIONS)
@@ -280,7 +311,30 @@ public class MutableParadigmServer
         public int provideJobs(int numberOfNewJobs) throws IOException
         {
             int jobsSent = 0;
-            for (int i=0; i < numberOfNewJobs; i++)
+            synchronized(sendLock)
+                {
+                    while (true)
+                        {
+                            if (toBeResent.size() == 0 || jobsSent == numberOfNewJobs)
+                                break;
+                            
+                            WorkUnitInstructions theseInstructions = toBeResent.removeFirst();
+
+                            // send instructions
+                            outgoingObjectStream.writeObject(theseInstructions);
+                            outgoingObjectStream.flush();
+                            outgoingObjectStream.reset();
+
+                            // make a note of which instructions have gone out
+                            dispatched.put(theseInstructions, this);
+                            System.out.println("Re-dispatched job " + theseInstructions.getID() + " to " + address + ".");
+
+                            // keep track of how many jobs got sent in this function call
+                            jobsSent++;
+                        }
+                }
+
+            while (jobsSent < numberOfNewJobs)
                 {
                     synchronized (sendLock)
                         {
@@ -297,10 +351,11 @@ public class MutableParadigmServer
                             outgoingObjectStream.flush();
                             outgoingObjectStream.reset();
 
-                            jobsSent++;
+                            // make a note of which instructions have gone out
+                            dispatched.put(theseInstructions, this);
 
-                            // mark job as unfinished
-                            outstandingResults.add(Integer.valueOf(jobCount));
+                            // keep track of how many jobs got sent in this function call
+                            jobsSent++;
                         }
                 }
             return jobsSent;
@@ -310,6 +365,9 @@ public class MutableParadigmServer
     private static class ThreadMonitor
     {
         private Timer timer;
+        private static HashMap<WorkUnitInstructions,ConnectionThread> dispatched = MutableParadigmServer.ConnectionThread.dispatched; 
+        private static LinkedList<WorkUnitInstructions> toBeResent = MutableParadigmServer.ConnectionThread.toBeResent;
+        private static Object sendLock = MutableParadigmServer.ConnectionThread.sendLock;
 
         public ThreadMonitor()
         {
@@ -327,6 +385,32 @@ public class MutableParadigmServer
                     {
                         System.out.println("\nKill file detected.  Shutting down...");
                         System.exit(1);
+                    }
+
+                // re-queue any missed instructions
+                synchronized(sendLock)
+                    {
+                        for (ConnectionThread t : MutableParadigmServer.ALL_CONNECTIONS)
+                            {
+                                if (!t.isConnected())
+                                    {
+                                        LinkedList<WorkUnitInstructions> resend = new LinkedList<>();
+                                        for (WorkUnitInstructions i : dispatched.keySet())
+                                            {
+                                                ConnectionThread t2 = dispatched.get(i);
+                                                if ( t == t2 )
+                                                    {
+                                                        resend.add(i);
+                                                        System.out.println("Marked instruction number " + i.getID() + " for re-dispatch (originally sent to " + t.getHostName() + ")");
+                                                    }
+                                            }
+                                        for (WorkUnitInstructions i : resend)
+                                            {
+                                                dispatched.remove(i);
+                                                toBeResent.add(i);
+                                            }
+                                    }
+                            }
                     }
             }
         }

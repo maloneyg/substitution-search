@@ -567,7 +567,7 @@ System.out.println(x.initialPrototile);*/
                     if (Math.abs(open.cross(other))<newMin) newMin = Math.abs(open.cross(other));
                 if (open.tooClose(other)) {
                     if (debug) {setMessage(open.cross(other)+ " hit");break;}
-                    System.out.println("hit");
+                    //System.out.println("hit");
 //                    return false;
                 }
                 setMessage(""+newMin);
