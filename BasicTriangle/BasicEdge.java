@@ -9,6 +9,12 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
     // make it Serializable
     static final long serialVersionUID = -6778708319703245773L;
 
+    // the unit edge length
+    public static final BasicEdgeLength UNIT_LENGTH = BasicEdgeLength.createBasicEdgeLength(0);
+
+    // A threshold value that says if a point is too close to this segment
+    public static final float TOO_CLOSE = 0.9f;
+
     // Member variables. 
     private final BasicEdgeLength length;
 
@@ -253,10 +259,18 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
 //        double d0 = Math.sqrt(u0.dotProduct(u0).evaluate(Initializer.COS));
 //        double d1 = Math.sqrt(u1.dotProduct(u1).evaluate(Initializer.COS));
 //        double d2 = Math.sqrt(u2.dotProduct(u2).evaluate(Initializer.COS));
-        float d0 = (float)Math.sqrt(u0.dotProduct(u0));
-        float d1 = (float)Math.sqrt(u1.dotProduct(u1));
-        float d2 = (float)Math.sqrt(u2.dotProduct(u2));
+        float d0 = (float) Math.sqrt(u0.dotProduct(u0));
+        float d1 = (float) Math.sqrt(u1.dotProduct(u1));
+        float d2 = (float) Math.sqrt(u2.dotProduct(u2));
         return (-Initializer.EP < d0 + d1 - d2 && d0 + d1 - d2 < Initializer.EP);
+    }
+
+    // check to see if the BytePoint p is too close to this edge
+    public float tooClose(BytePoint p) {
+        // project p onto the line segment orthogonal to this and get magnitude
+        float c = (float) p.subtract(ends[0]).crossProduct(UNIT_LENGTH.getAsVector(angle()));
+//        return (-TOO_CLOSE < c && c < TOO_CLOSE);
+        return c;
     }
 
     // check to see if the BytePoint p is one of the ends

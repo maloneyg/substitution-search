@@ -53,6 +53,9 @@ public class MutablePatch implements Serializable {
     // the triangles in this patch
     private Stack<BasicTriangle> triangles;
 
+    // the vertices in this patch, purely for testing triangles
+    private Stack<BytePoint> vertices;
+
     // the edges in this patch
     private MutableEdgeList edges;
 
@@ -107,6 +110,10 @@ public class MutablePatch implements Serializable {
         tileList = TL;
         triangles = new Stack<>();
         edges = MutableEdgeList.createMutableEdgeList(e);
+        // now we assume the edges in e are given in a particular order.
+        // (so we only need to add the second end of each one.)
+        vertices = new Stack<>();
+        for (BasicEdge ee : e) vertices.push(ee.getEnds()[1]);
 
         // fill up the partition
         partition = MutableOrientationPartition.createMutableOrientationPartition(e[0].getOrientation());
@@ -304,7 +311,7 @@ public class MutablePatch implements Serializable {
                     placeTriangle(t);
                     if (partition.valid())
                         {
-                            setMessage(DebugMessage.PLACING.toString()+"\n"+t);
+                            //setMessage(DebugMessage.PLACING.toString()+"\n"+t);
                             debugSolve(d);
                             count.getAndIncrement();
                         } else
@@ -406,6 +413,9 @@ System.out.println(x.initialPrototile);*/
     * This is what we do after compatible(t) returns true.
     */
     private void placeTriangle(BasicTriangle t) {
+        BytePoint[] ends = currentEdge.getEnds();
+        BytePoint other = t.getOtherVertex(ends[0],ends[1]);
+        if (!vertices.contains(other)) vertices.push(other);
         tileList.remove(currentPrototile);
         edges.place(t,partition);
         resetSteps();
@@ -426,6 +436,19 @@ System.out.println(x.initialPrototile);*/
         flip = t.getFlip();
         tileList.add(currentPrototile);
         secondEdge = t.isSecondEdge(currentEdge);
+        BytePoint p = vertices.pop();
+        for (BasicEdge e : edges.open()) {
+            if (e.hasVertex(p)) {
+                vertices.push(p);
+                return;
+            }
+        }
+        for (BasicEdge e : edges.closed()) {
+            if (e.hasVertex(p)) {
+                vertices.push(p);
+                return;
+            }
+        }
     }
 
     /*
@@ -460,24 +483,22 @@ System.out.println(x.initialPrototile);*/
         BytePoint[] ends = currentEdge.getEnds();
         BytePoint other = t.getOtherVertex(ends[0],ends[1]);
 
-        // test to see if other is new or already there.
-        // if it's on an openEdge but not equal to one 
-        // of its endpoints, return false immediately.
-        boolean newVertex = true;
-        for (BasicEdge e : edges.open()) {
-            if (e.hasVertex(other)) {
-                newVertex = false;
-                break;
-            } else if (e.incident(other)) {
-                if (debug) setMessage(t+"\n"+DebugMessage.INCIDENT_OPEN.toString());
-                return false;
-            }
-        }
+        boolean newVertex = !vertices.contains(other);
 
         // make sure the new vertex is in the inflated prototile
         if (newVertex && !contains(other)) {
             if (debug) setMessage(t +"\n"+ DebugMessage.NON_CONTAINMENT.toString());
             return false;
+        }
+
+        // make sure the new vertex doesn't overlap any open edges
+        if (newVertex) {
+            for (BasicEdge e : edges.open()) {
+                if (e.incident(other)) {
+                    if (debug) setMessage(t+"\n"+DebugMessage.INCIDENT_OPEN.toString());
+                    return false;
+                }
+            }
         }
 
         // make sure the new vertex doesn't overlap any closed edges

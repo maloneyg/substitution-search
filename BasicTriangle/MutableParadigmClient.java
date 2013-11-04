@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.*;
 public final class MutableParadigmClient
 {
     public static final int LISTENING_PORT = 32007;
-    public static String HOST_NAME = "enj10.rc.fas.harvard.edu";  // name of the server
+    public static String HOST_NAME = Preinitializer.HOST_NAME;
 
     public static final double MONITOR_INTERVAL = 0.5; // seconds
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
@@ -169,8 +169,6 @@ public final class MutableParadigmClient
                                         thisUnit.setCounter(counter);
                                         thisUnit.setResultTarget(completedPuzzles);
                                         Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
-                                        //thisUnit.debugCall();
-                                        
                                         //System.out.println("submitted unit " + thisUnit.hashCode());
                                     }
                                 

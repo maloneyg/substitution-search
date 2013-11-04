@@ -463,6 +463,7 @@ public class DebugDisplay extends JPanel implements ActionListener
 
 //        for (int k : Initializer.SUBSTITUTION_MATRIX.getColumn(Preinitializer.MY_TILE)) System.out.print(k+" ");
 
+        System.out.println(""+BasicEdge.TOO_CLOSE);
         DebugDisplay display = new DebugDisplay(21,"debugging");
 
     }
