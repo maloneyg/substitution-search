@@ -20,6 +20,8 @@ class Preinitializer {
 
     public static final int BATCH_SIZE = 500; // number of jobs to make per set of instructions
 
+    public static final String HOST_NAME = "corbridge"; // the server
+
     // the inflation factor, represented as coefficients of
     // 1, a, a^2, etc., where a = 2*cos(pi/N).
 
