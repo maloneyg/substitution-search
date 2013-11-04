@@ -16,6 +16,8 @@ public interface DebugMessage extends Serializable
         public String toString() { return "finished a puzzle"; } };
     public static final DebugMessage NONE_OR_PROTOTILE = new DebugMessage() {
         public String toString() { return " rejected because we're out, or because of incompatibility with "; } };
+    public static final DebugMessage TOO_CLOSE = new DebugMessage() {
+        public String toString() { return " is too close to point "; } };
     public static final DebugMessage NON_CONTAINMENT = new DebugMessage() {
         public String toString() { return " rejected for non-containment in the big tile"; } };
     public static final DebugMessage OVERLAP = new DebugMessage() {

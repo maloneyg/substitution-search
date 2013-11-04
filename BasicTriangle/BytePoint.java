@@ -33,6 +33,9 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     public static final double[] COS_POWERS = Initializer.COS_LIST;
     public static final double[] SIN_POWERS = Initializer.SIN_LIST;
 
+    // a threshold value that says when two points are too close
+    public static final double TOO_CLOSE = 0.95;
+
     // a pool containing all the BytePoints that have been created
     //private static final BytePointPool POOL = BytePointPool.getInstance();
 
@@ -168,6 +171,12 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
 
     protected BytePoint timesA() {
         return createBytePoint(A.rowTimes(this.pointAsArray()));
+    }
+
+    // return true if this is too close to p
+    public boolean tooClose(BytePoint p) {
+        BytePoint diff = subtract(p);
+        return (diff.dotProduct(diff) < TOO_CLOSE);
     }
 
     /*

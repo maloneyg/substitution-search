@@ -12,8 +12,8 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
     // the unit edge length
     public static final BasicEdgeLength UNIT_LENGTH = BasicEdgeLength.createBasicEdgeLength(0);
 
-    // A threshold value that says if a point is too close to this segment
-    public static final float TOO_CLOSE = 0.9f;
+    // a threshold value indicating that a point is too close to an edge
+    public static final double TOO_CLOSE = 0.95;//UNIT_LENGTH.getAsVector(BasicAngle.createBasicAngle(1)).dotProduct(UNIT_LENGTH.getAsVector(BasicAngle.createBasicAngle(0)));
 
     // Member variables. 
     private final BasicEdgeLength length;
@@ -266,11 +266,19 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
     }
 
     // check to see if the BytePoint p is too close to this edge
-    public float tooClose(BytePoint p) {
-        // project p onto the line segment orthogonal to this and get magnitude
-        float c = (float) p.subtract(ends[0]).crossProduct(UNIT_LENGTH.getAsVector(angle()));
-//        return (-TOO_CLOSE < c && c < TOO_CLOSE);
-        return c;
+    public boolean tooClose(BytePoint p) {
+        BytePoint u = UNIT_LENGTH.getAsVector(angle());
+        BytePoint v = p.subtract(ends[0]);
+        double d = v.crossProduct(u);
+        return (-TOO_CLOSE < d && d < TOO_CLOSE);
+    }
+
+    // check to see if the BytePoint p is too close to this edge
+    public double cross(BytePoint p) {
+        BytePoint u = UNIT_LENGTH.getAsVector(angle());
+        BytePoint v = p.subtract(ends[0]);
+        double d = v.crossProduct(u);
+        return d;
     }
 
     // check to see if the BytePoint p is one of the ends

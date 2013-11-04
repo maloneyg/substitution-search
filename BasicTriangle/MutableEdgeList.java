@@ -109,7 +109,7 @@ public class MutableEdgeList implements Serializable {
         Collections.sort(indexList);
 
         // the last open edge is the first to be added to closedEdges
-        for (int j = indexList.size()-1; j >= 0; j--) { // new
+        for (int j = indexList.size()-1; j >= 0; j--) {
             int k = indexList.get(j); // important: k is not an Integer
             BasicEdge e = openEdges.get(k);
             for (BasicEdge m : matches) {
@@ -119,14 +119,8 @@ public class MutableEdgeList implements Serializable {
                 }
             }
             closedEdges.push(new IndexAndEdge(k,e));
-            openEdges.remove(k); // new
+            openEdges.remove(k);
         }
-        // but the last to be removed from openEdges
-//        for (int j = indexList.size()-1; j >= 0; j--) {
-//            int k = indexList.get(j);
-//            openEdges.remove(indexList.get(j));
-//            openEdges.remove(k);
-//        }
 
     }
 

@@ -302,7 +302,7 @@ public class MutablePatch implements Serializable {
                 completedPatches.add(thisPatch);
                 localCompletedPatches.add(thisPatch);
                 numCompleted++;
-                setMessage(DebugMessage.FOUND.toString());
+                if (debug) setMessage(DebugMessage.FOUND.toString());
                 break;
             }
             if (tileList.contains(currentPrototile) && currentPrototile.compatible(currentEdge,secondEdge,flip,partition.equivalenceClass(currentEdge.getOrientation()))) {
@@ -311,17 +311,17 @@ public class MutablePatch implements Serializable {
                     placeTriangle(t);
                     if (partition.valid())
                         {
-                            //setMessage(DebugMessage.PLACING.toString()+"\n"+t);
+//                            if (debug) setMessage(DebugMessage.PLACING.toString()+"\n"+t);
                             debugSolve(d);
                             count.getAndIncrement();
                         } else
                         {
-                            setMessage(t+"\n"+DebugMessage.ORIENTATION.toString()+"\n"+partition);
+                            if (debug) setMessage(t+"\n"+DebugMessage.ORIENTATION.toString()+"\n"+partition);
                         }
                     removeTriangle();
                 }
             } else {
-                setMessage(currentPrototile+"\n"+DebugMessage.NONE_OR_PROTOTILE.toString()+"\n"+currentEdge);
+                if (debug) setMessage(currentPrototile+"\n"+DebugMessage.NONE_OR_PROTOTILE.toString()+"\n"+currentEdge);
             }
 
             step();
@@ -547,6 +547,30 @@ System.out.println(x.initialPrototile);*/
                     if (debug) setMessage(e +"\n"+ DebugMessage.CROSS_CLOSED.toString() +"\n"+ closed);
                     return false;
                 }
+            }
+        }
+
+        // return false if the new vertex is too close to any existing vertex
+        if (newVertex) {
+            for (BytePoint p : vertices) {
+                if (other.tooClose(p)) {
+                    if (debug) setMessage(other +"\n"+ DebugMessage.TOO_CLOSE.toString() +"\n"+ p);
+                    return false;
+                }
+            }
+        }
+
+        double newMin = 100.0;
+        // return false if the new vertex is too close to any open edge
+        if (newVertex) {
+            for (BasicEdge open : edges.open()) {
+                    if (Math.abs(open.cross(other))<newMin) newMin = Math.abs(open.cross(other));
+                if (open.tooClose(other)) {
+                    if (debug) {setMessage(open.cross(other)+ " hit");break;}
+                    System.out.println("hit");
+//                    return false;
+                }
+                setMessage(""+newMin);
             }
         }
 
