@@ -159,7 +159,6 @@ public final class MutableParadigmClient
                             {
                                 WorkUnitInstructions instructions = (WorkUnitInstructions)incomingObject;
                                 System.out.println("received instruction ID = " + instructions.getID());
-                                workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
                                 List<MutableWorkUnit> theseUnits = workUnitFactory.followInstructions(instructions);
 
                                 AtomicInteger counter = new AtomicInteger(0);
@@ -170,8 +169,6 @@ public final class MutableParadigmClient
                                         thisUnit.setCounter(counter);
                                         thisUnit.setResultTarget(completedPuzzles);
                                         Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
-                                        //thisUnit.debugCall();
-                                        
                                         //System.out.println("submitted unit " + thisUnit.hashCode());
                                     }
                                 
@@ -180,7 +177,7 @@ public final class MutableParadigmClient
                                     {
                                         try
                                             {
-                                                Thread.sleep(100);
+                                                Thread.sleep(50);
                                             }
                                         catch (InterruptedException e)
                                             {
