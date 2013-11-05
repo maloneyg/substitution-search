@@ -2,6 +2,7 @@ import java.util.*;
 import java.net.*;
 import java.io.*;
 import java.util.concurrent.atomic.*;
+import java.nio.file.*;
 
 // This class will serve up work units to remote clients. 
 
@@ -9,9 +10,10 @@ public class MutableParadigmServer
 {
     public static final int LISTENING_PORT = 32007;
     public static final double MONITOR_INTERVAL = 1.0; // seconds
+    public static final double CHECKPOINT_INTERVAL = 1.0; // seconds, how often to checkpoint progress to disk
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
 
-    public static final List<BasicPatch> allCompletedPatches = new ArrayList<BasicPatch>();
+    public static List<BasicPatch> allCompletedPatches = new LinkedList<BasicPatch>();
     public static final String RESULT_FILENAME = "results.chk";
 
     public static AtomicLong numberOfResultsReceived = new AtomicLong(0L);
@@ -22,6 +24,9 @@ public class MutableParadigmServer
 
     private static WorkUnitFactory workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
 
+    public static final String PRIMARY_CHECKPOINT_FILENAME = "primary_server_checkpoint.chk";
+    public static final String SECONDARY_CHECKPOINT_FILENAME = "secondary_server_checkpoint.chk";
+
     private MutableParadigmServer()
     {
         throw new RuntimeException("this should not be instantiated!");
@@ -29,8 +34,50 @@ public class MutableParadigmServer
 
     public static void main(String[] args)
     {
+        // check to see if we should resume from a checkpoint
+        if (args.length > 0)
+            {
+                if ( args[0].toLowerCase().equals("-resume") )
+                    {
+                        System.out.print("Attempting to read checkpoint...");
+
+                        // try to read primary checkpoint from disk
+                        ServerCheckpoint checkpoint = null;
+                        checkpoint = readCheckpoint(PRIMARY_CHECKPOINT_FILENAME);
+                        if ( checkpoint != null )
+                            System.out.println("read from primary file succesfully.");
+
+                        // if the primary checkpoint is a dud, switch to secondary checkpoint
+                        if ( checkpoint == null )
+                            {
+                                System.out.print("primary failed...trying secondary...");
+                                checkpoint = readCheckpoint(SECONDARY_CHECKPOINT_FILENAME);
+                                if ( checkpoint != null )
+                                    System.out.println("successful!");
+                                else
+                                    System.out.println("failed!");
+                            }
+
+                        // re-create the WorkUnitFactory state
+                        if ( checkpoint != null )
+                            {
+                                allCompletedPatches = checkpoint.getAllCompletedPatches();
+                                workUnitFactory = checkpoint.getWorkUnitFactory();
+                                ConnectionThread.setToCheckpoint(checkpoint);
+                            }
+                    }
+                else
+                    {
+                        System.out.println("Invalid command-line arguments.  Use -resume to restart calculations.");
+                        System.exit(1);
+                    }
+            }
+        
         // launch the thread that will give periodic reports
         ThreadMonitor threadMonitor = new ThreadMonitor();
+
+        // launch the thread that will periodically checkpoint progress to disk
+        CheckpointMonitor checkpointMonitor = new CheckpointMonitor();
 
         // listen for connections
         ServerSocket listener = null;
@@ -117,7 +164,46 @@ public class MutableParadigmServer
         System.exit(0);
     }
 
-    private static class ConnectionThread extends Thread
+    private static ServerCheckpoint readCheckpoint(String filename)
+    {
+        // check to see if checkpoint file exists
+        File file = new File(filename);
+        if ( ! file.isFile() )
+            return null;
+
+        // read checkpoint from disk
+        ServerCheckpoint checkpoint = null;
+        FileInputStream fileIn = null;
+        ObjectInputStream in = null;
+        try
+            {
+                fileIn = new FileInputStream(filename);
+                in = new ObjectInputStream(fileIn);
+                checkpoint = (ServerCheckpoint)in.readObject();
+            }
+        catch (Exception e)
+            {
+                System.out.println("Error while reading in checkpoint!");
+                e.printStackTrace();
+            }
+        finally
+            {
+                try
+                    {
+                        if ( in != null )
+                            in.close();
+                        if ( fileIn != null )
+                            fileIn.close();
+                    }
+                catch (IOException e2)
+                    {
+                        e2.printStackTrace();
+                    }
+            }
+        return checkpoint;
+    }
+
+    public static class ConnectionThread extends Thread
     {
         private Socket connection = null;
         private InputStream incomingStream;
@@ -140,6 +226,17 @@ public class MutableParadigmServer
         {
             this.connection = connection;
             address = connection.getInetAddress().getCanonicalHostName();
+        }
+
+        public static void setToCheckpoint(ServerCheckpoint checkpoint)
+        {
+            jobCount = checkpoint.getJobCount();
+            toBeResent = checkpoint.getResent();
+        }
+
+        public static int getJobCount()
+        {
+            return jobCount;
         }
 
         // set streams and handshake
@@ -359,6 +456,80 @@ public class MutableParadigmServer
                         }
                 }
             return jobsSent;
+        }
+    }
+
+    private static class CheckpointMonitor
+    {
+        private Timer timer;
+
+        public CheckpointMonitor()
+        {
+            timer = new Timer();
+            timer.schedule(new CustomTimerTask(), (int)(MutableParadigmServer.CHECKPOINT_INTERVAL*1000), (int)(MutableParadigmServer.CHECKPOINT_INTERVAL*1000));
+        }
+
+        private class CustomTimerTask extends TimerTask
+        {
+            public void run()
+            {
+                // don't do anything if there aren't any live connections
+                if ( MutableParadigmServer.LIVE_CONNECTIONS.size() == 0 )
+                    return;
+
+                // create checkpoint
+                ServerCheckpoint serverCheckpoint = new ServerCheckpoint(ConnectionThread.getJobCount(), ConnectionThread.dispatched,
+                                                                         ConnectionThread.toBeResent, ConnectionThread.sendLock,
+                                                                         MutableParadigmServer.allCompletedPatches,
+                                                                         MutableParadigmServer.workUnitFactory);
+
+                // back up old checkpoint
+                File from = new File(MutableParadigmServer.PRIMARY_CHECKPOINT_FILENAME);
+                File to   = new File(MutableParadigmServer.SECONDARY_CHECKPOINT_FILENAME);
+                if ( from.isFile() ) // only copy if there is a source file
+                    {
+                        try
+                            {
+                                Files.copy(from.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                            }
+                        catch (IOException e)
+                            {
+                                System.out.println("Error while backing up checkpoint!  Aborting operation.");
+                                e.printStackTrace();
+                                return;
+                            }
+                    }
+
+                // serialize checkpoint
+                FileOutputStream fileOut = null;
+                ObjectOutputStream out = null;
+                try
+                    {
+                        fileOut = new FileOutputStream(MutableParadigmServer.PRIMARY_CHECKPOINT_FILENAME);
+                        out = new ObjectOutputStream(fileOut);
+                        out.writeObject(serverCheckpoint);
+                        out.flush();
+                    }
+                catch (IOException e)
+                    {
+                        System.out.println("Error while writing checkpoint!");
+                        e.printStackTrace();
+                    }
+                finally
+                    {
+                        try
+                            {
+                                if ( out != null )
+                                    out.close();
+                                if ( fileOut != null )
+                                    fileOut.close();
+                            }
+                        catch (IOException e2)
+                            {
+                                e2.printStackTrace();
+                            }
+                    }
+            }
         }
     }
 
