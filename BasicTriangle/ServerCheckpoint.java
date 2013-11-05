@@ -17,7 +17,7 @@ public class ServerCheckpoint implements Serializable
                 this.jobCount = jobCount;
                 this.toBeResent = new LinkedList<WorkUnitInstructions>(toBeResent);
                 for (WorkUnitInstructions i : dispatched.keySet())
-                    toBeResent.add(i);
+                    this.toBeResent.add(i);
                 this.allCompletedPatches = new LinkedList<BasicPatch>(allCompletedPatches);
                 this.workUnitFactory = workUnitFactory;
             }
