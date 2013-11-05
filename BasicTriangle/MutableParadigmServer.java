@@ -58,13 +58,19 @@ public class MutableParadigmServer
                                     System.out.println("failed!");
                             }
 
-                        // re-create the WorkUnitFactory state
+                        // load the previous state
                         if ( checkpoint != null )
                             {
                                 allCompletedPatches = checkpoint.getAllCompletedPatches();
                                 workUnitFactory = checkpoint.getWorkUnitFactory();
                                 ConnectionThread.setToCheckpoint(checkpoint);
+                                numberOfResultsReceived = checkpoint.getNumberOfResultsReceived();
+                                System.out.println(allCompletedPatches.size() + " previously completed puzzles have been read.");
+                                System.out.println(ConnectionThread.toBeResent.size() + " pending jobs have been re-entered into the queue for re-dispatching.");
+                                System.out.println("Successfully restored old state (" + numberOfResultsReceived + " work unit results received).\n");
                             }
+                        else
+                            System.out.println("Error: unable to resume, so starting over.");
                     }
                 else
                     {
@@ -462,6 +468,7 @@ public class MutableParadigmServer
     private static class CheckpointMonitor
     {
         private Timer timer;
+        private static ServerCheckpoint lastCheckpoint = null;
 
         public CheckpointMonitor()
         {
@@ -474,14 +481,19 @@ public class MutableParadigmServer
             public void run()
             {
                 // don't do anything if there aren't any live connections
-                if ( MutableParadigmServer.LIVE_CONNECTIONS.size() == 0 )
+                if ( MutableParadigmServer.LIVE_CONNECTIONS.size() == 0 || MutableParadigmServer.finished == true )
                     return;
 
-                // create checkpoint
-                ServerCheckpoint serverCheckpoint = new ServerCheckpoint(ConnectionThread.getJobCount(), ConnectionThread.dispatched,
-                                                                         ConnectionThread.toBeResent, ConnectionThread.sendLock,
-                                                                         MutableParadigmServer.allCompletedPatches,
-                                                                         MutableParadigmServer.workUnitFactory);
+                // don't do anything if we haven't received any new results since the last checkpoint
+                if ( lastCheckpoint != null )
+                    {
+                        if ( MutableParadigmServer.numberOfResultsReceived.get() <= lastCheckpoint.getNumberOfResultsReceived().get() )
+                            {
+                                //System.out.println( MutableParadigmServer.numberOfResultsReceived.get() + " <= " + lastCheckpoint.getNumberOfResultsReceived().get() );
+                                //System.out.println("skipped");
+                                return;
+                            }
+                    }
 
                 // back up old checkpoint
                 File from = new File(MutableParadigmServer.PRIMARY_CHECKPOINT_FILENAME);
@@ -500,6 +512,13 @@ public class MutableParadigmServer
                             }
                     }
 
+                // create checkpoint
+                ServerCheckpoint serverCheckpoint = new ServerCheckpoint(ConnectionThread.getJobCount(), ConnectionThread.dispatched,
+                                                                         ConnectionThread.toBeResent, ConnectionThread.sendLock,
+                                                                         MutableParadigmServer.allCompletedPatches,
+                                                                         MutableParadigmServer.workUnitFactory,
+                                                                         MutableParadigmServer.numberOfResultsReceived);
+
                 // serialize checkpoint
                 FileOutputStream fileOut = null;
                 ObjectOutputStream out = null;
@@ -509,6 +528,13 @@ public class MutableParadigmServer
                         out = new ObjectOutputStream(fileOut);
                         out.writeObject(serverCheckpoint);
                         out.flush();
+                        lastCheckpoint = serverCheckpoint;
+                        File checkFile = new File(MutableParadigmServer.PRIMARY_CHECKPOINT_FILENAME);
+                        double size = (double)(checkFile.length()/1048576L);
+                        if ( size > 0.01 )
+                            System.out.println(String.format("Wrote checkpoint (%.2f MB, %d%n results received).\n", (double)(checkFile.length()/1048576L), serverCheckpoint.getNumberOfResultsReceived()));
+                        else
+                            System.out.println("Wrote checkpoint (" + checkFile.length() + " bytes, " + serverCheckpoint.getNumberOfResultsReceived() + " results received).\n");
                     }
                 catch (IOException e)
                     {

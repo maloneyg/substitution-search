@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.atomic.*;
 
 public class ServerCheckpoint implements Serializable
 {
@@ -7,10 +8,11 @@ public class ServerCheckpoint implements Serializable
     private final LinkedList<WorkUnitInstructions> toBeResent;
     private final List<BasicPatch> allCompletedPatches;
     private final WorkUnitFactory workUnitFactory;
+    private final AtomicLong numberOfResultsReceived;
 
     public ServerCheckpoint(int jobCount, HashMap<WorkUnitInstructions,MutableParadigmServer.ConnectionThread> dispatched,
                             LinkedList<WorkUnitInstructions> toBeResent, Object sendLock,
-                            List<BasicPatch> allCompletedPatches, WorkUnitFactory workUnitFactory)
+                            List<BasicPatch> allCompletedPatches, WorkUnitFactory workUnitFactory, AtomicLong numberOfResultsReceived)
     {
         synchronized(sendLock)
             {
@@ -20,7 +22,13 @@ public class ServerCheckpoint implements Serializable
                     this.toBeResent.add(i);
                 this.allCompletedPatches = new LinkedList<BasicPatch>(allCompletedPatches);
                 this.workUnitFactory = workUnitFactory;
+                this.numberOfResultsReceived = new AtomicLong(numberOfResultsReceived.get());
             }
+    }
+
+    public AtomicLong getNumberOfResultsReceived()
+    {
+        return numberOfResultsReceived;
     }
 
     public int getJobCount()
