@@ -564,14 +564,14 @@ System.out.println(x.initialPrototile);*/
         // return false if the new vertex is too close to any open edge
         if (newVertex) {
             for (BasicEdge open : edges.open()) {
-                    if (Math.abs(open.cross(other))<newMin) newMin = Math.abs(open.cross(other));
+                if (Math.abs(open.cross(other))<newMin) newMin = Math.abs(open.cross(other));
                 if (open.tooClose(other)) {
                     if (debug) {setMessage(open.cross(other)+ " hit");break;}
                     System.out.println("hit");
 //                    return false;
                 }
-                setMessage(""+newMin);
             }
+            setMessage(""+newMin);
         }
 
         return true;

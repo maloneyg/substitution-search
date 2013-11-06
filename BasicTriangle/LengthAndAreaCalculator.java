@@ -240,4 +240,8 @@ final public class LengthAndAreaCalculator {
 
     } // initialization of area polynomials ends here
 
+    public static void main(String[] args) {
+        for (int i = 0; i < SIN_LIST.size(); i++) System.out.println(SIN_LIST.get(i));
+    }
+
 } // end of class LengthAndAreaCalculator
