@@ -158,7 +158,7 @@ public final class MutableParadigmClient
                         if ( incomingObject instanceof WorkUnitInstructions )
                             {
                                 WorkUnitInstructions instructions = (WorkUnitInstructions)incomingObject;
-                                System.out.println("received instruction ID = " + instructions.getID());
+                                System.out.println("Received instruction ID = " + instructions.getID());
                                 List<MutableWorkUnit> theseUnits = workUnitFactory.followInstructions(instructions);
 
                                 AtomicInteger counter = new AtomicInteger(0);
@@ -241,7 +241,7 @@ public final class MutableParadigmClient
                 outgoingObjectStream.writeObject(result);
                 outgoingObjectStream.flush();
                 outgoingObjectStream.reset();
-                System.out.println("\nsent " + result.toString());
+                System.out.println("\nSent " + result.toString());
             }
         catch (SocketException e)
             {

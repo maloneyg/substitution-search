@@ -2,6 +2,7 @@ import java.util.*;
 import java.net.*;
 import java.io.*;
 import java.util.concurrent.atomic.*;
+import java.nio.file.*;
 
 // This class will serve up work units to remote clients. 
 
@@ -9,17 +10,22 @@ public class MutableParadigmServer
 {
     public static final int LISTENING_PORT = 32007;
     public static final double MONITOR_INTERVAL = 1.0; // seconds
+    public static final double CHECKPOINT_INTERVAL = 1.0; // seconds, how often to checkpoint progress to disk
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
 
-    public static final List<BasicPatch> allCompletedPatches = new ArrayList<BasicPatch>();
+    public static List<BasicPatch> allCompletedPatches = new LinkedList<BasicPatch>();
     public static final String RESULT_FILENAME = "results.chk";
 
     public static AtomicLong numberOfResultsReceived = new AtomicLong(0L);
     public static volatile boolean finished = false;
 
     private static List<ConnectionThread> LIVE_CONNECTIONS = new ArrayList<ConnectionThread>(); 
+    private static List<ConnectionThread> ALL_CONNECTIONS = new ArrayList<ConnectionThread>(); 
 
     private static WorkUnitFactory workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
+
+    public static final String PRIMARY_CHECKPOINT_FILENAME = "primary_server_checkpoint.chk";
+    public static final String SECONDARY_CHECKPOINT_FILENAME = "secondary_server_checkpoint.chk";
 
     private MutableParadigmServer()
     {
@@ -28,8 +34,56 @@ public class MutableParadigmServer
 
     public static void main(String[] args)
     {
+        // check to see if we should resume from a checkpoint
+        if (args.length > 0)
+            {
+                if ( args[0].toLowerCase().equals("-resume") )
+                    {
+                        System.out.print("Attempting to read checkpoint...");
+
+                        // try to read primary checkpoint from disk
+                        ServerCheckpoint checkpoint = null;
+                        checkpoint = readCheckpoint(PRIMARY_CHECKPOINT_FILENAME);
+                        if ( checkpoint != null )
+                            System.out.println("read from primary file succesfully.");
+
+                        // if the primary checkpoint is a dud, switch to secondary checkpoint
+                        if ( checkpoint == null )
+                            {
+                                System.out.print("primary failed...trying secondary...");
+                                checkpoint = readCheckpoint(SECONDARY_CHECKPOINT_FILENAME);
+                                if ( checkpoint != null )
+                                    System.out.println("successful!");
+                                else
+                                    System.out.println("failed!");
+                            }
+
+                        // load the previous state
+                        if ( checkpoint != null )
+                            {
+                                allCompletedPatches = checkpoint.getAllCompletedPatches();
+                                workUnitFactory = checkpoint.getWorkUnitFactory();
+                                ConnectionThread.setToCheckpoint(checkpoint);
+                                numberOfResultsReceived = checkpoint.getNumberOfResultsReceived();
+                                System.out.println(allCompletedPatches.size() + " previously completed puzzles have been read.");
+                                System.out.println(ConnectionThread.toBeResent.size() + " pending jobs have been re-entered into the queue for re-dispatching.");
+                                System.out.println("Successfully restored old state (" + numberOfResultsReceived + " work unit results received).\n");
+                            }
+                        else
+                            System.out.println("Error: unable to resume, so starting over.");
+                    }
+                else
+                    {
+                        System.out.println("Invalid command-line arguments.  Use -resume to restart calculations.");
+                        System.exit(1);
+                    }
+            }
+        
         // launch the thread that will give periodic reports
         ThreadMonitor threadMonitor = new ThreadMonitor();
+
+        // launch the thread that will periodically checkpoint progress to disk
+        CheckpointMonitor checkpointMonitor = new CheckpointMonitor();
 
         // listen for connections
         ServerSocket listener = null;
@@ -116,7 +170,46 @@ public class MutableParadigmServer
         System.exit(0);
     }
 
-    private static class ConnectionThread extends Thread
+    private static ServerCheckpoint readCheckpoint(String filename)
+    {
+        // check to see if checkpoint file exists
+        File file = new File(filename);
+        if ( ! file.isFile() )
+            return null;
+
+        // read checkpoint from disk
+        ServerCheckpoint checkpoint = null;
+        FileInputStream fileIn = null;
+        ObjectInputStream in = null;
+        try
+            {
+                fileIn = new FileInputStream(filename);
+                in = new ObjectInputStream(fileIn);
+                checkpoint = (ServerCheckpoint)in.readObject();
+            }
+        catch (Exception e)
+            {
+                System.out.println("Error while reading in checkpoint!");
+                e.printStackTrace();
+            }
+        finally
+            {
+                try
+                    {
+                        if ( in != null )
+                            in.close();
+                        if ( fileIn != null )
+                            fileIn.close();
+                    }
+                catch (IOException e2)
+                    {
+                        e2.printStackTrace();
+                    }
+            }
+        return checkpoint;
+    }
+
+    public static class ConnectionThread extends Thread
     {
         private Socket connection = null;
         private InputStream incomingStream;
@@ -130,7 +223,8 @@ public class MutableParadigmServer
         public final String address;
 
         private static int jobCount = 0;
-        private static Set<Integer> outstandingResults = Collections.synchronizedSet(new HashSet<Integer>());
+        protected static HashMap<WorkUnitInstructions,ConnectionThread> dispatched = new HashMap<>();
+        protected static LinkedList<WorkUnitInstructions> toBeResent = new LinkedList<>();
 
         public static final int BATCH_SIZE = Preinitializer.BATCH_SIZE;
 
@@ -138,6 +232,17 @@ public class MutableParadigmServer
         {
             this.connection = connection;
             address = connection.getInetAddress().getCanonicalHostName();
+        }
+
+        public static void setToCheckpoint(ServerCheckpoint checkpoint)
+        {
+            jobCount = checkpoint.getJobCount();
+            toBeResent = checkpoint.getResent();
+        }
+
+        public static int getJobCount()
+        {
+            return jobCount;
         }
 
         // set streams and handshake
@@ -169,6 +274,7 @@ public class MutableParadigmServer
             synchronized(LIVE_CONNECTIONS)
                 {
                     MutableParadigmServer.LIVE_CONNECTIONS.add(this);
+                    MutableParadigmServer.ALL_CONNECTIONS.add(this);
                 }
         }
 
@@ -182,7 +288,8 @@ public class MutableParadigmServer
                     // check if all results have been received
                     System.out.print("jobs finished: " + numberOfResultsReceived + "\r");
                     //+ " outstanding: " + outstandingResults.size() + " jobsSent: " + jobsSent);
-                    if ( numberOfResultsReceived.get() > 0 && outstandingResults.size() == 0 && jobsSent == 0)
+                    if ( numberOfResultsReceived.get() > 0 && dispatched.size() == 0 &&
+                         toBeResent.size() == 0 && jobsSent == 0 )
                         {
                             closeAllConnections();
                             finished = true;
@@ -197,15 +304,30 @@ public class MutableParadigmServer
                                     PatchResult result = (PatchResult)incomingObject;
                                     numberOfResultsReceived.addAndGet(result.getNumberOfUnits());
                                     int jobID = result.getID();
-                                    boolean success = outstandingResults.remove(Integer.valueOf(jobID));
-                                    if ( success == false )
-                                        System.out.println("Warning, problem in the job database!");
+                                    
                                     List<BasicPatch> localCompletedPatches = result.getCompletedPatches();
                                     allCompletedPatches.addAll( localCompletedPatches );
                                     Date currentDate = new Date();
                                     String dateString = String.format("%02d:%02d:%02d", currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
                                     System.out.println("[ " + dateString + " ] Received " + result + " (" + allCompletedPatches.size() + " finished puzzles total) from " + address);
 
+                                    // mark job as finished
+                                    WorkUnitInstructions toBeRemoved = null;
+                                    synchronized (sendLock)
+                                        {
+                                            for (WorkUnitInstructions i : dispatched.keySet())
+                                                {
+                                                    if (i.getID() == jobID)
+                                                        {
+                                                            toBeRemoved = i;
+                                                            break;
+                                                        }
+                                                }
+                                            if ( toBeRemoved == null )
+                                                System.out.println("Warning, problem in the job database!");
+                                            else
+                                                dispatched.remove(toBeRemoved);
+                                        }
                                 }
                             else if ( incomingObject instanceof Integer )
                                 {
@@ -253,6 +375,18 @@ public class MutableParadigmServer
             System.out.println("Connection to " + address + " closed.");
         }
 
+        public boolean isConnected()
+        {
+            if ( connection == null | connection.isClosed() )
+                return false;
+            return true;
+        }
+
+        public String getHostName()
+        {
+            return address;
+        }
+
         public static void closeAllConnections()
         {
             synchronized(LIVE_CONNECTIONS)
@@ -280,7 +414,30 @@ public class MutableParadigmServer
         public int provideJobs(int numberOfNewJobs) throws IOException
         {
             int jobsSent = 0;
-            for (int i=0; i < numberOfNewJobs; i++)
+            synchronized(sendLock)
+                {
+                    while (true)
+                        {
+                            if (toBeResent.size() == 0 || jobsSent == numberOfNewJobs)
+                                break;
+                            
+                            WorkUnitInstructions theseInstructions = toBeResent.removeFirst();
+
+                            // send instructions
+                            outgoingObjectStream.writeObject(theseInstructions);
+                            outgoingObjectStream.flush();
+                            outgoingObjectStream.reset();
+
+                            // make a note of which instructions have gone out
+                            dispatched.put(theseInstructions, this);
+                            System.out.println("Re-dispatched job " + theseInstructions.getID() + " to " + address + ".");
+
+                            // keep track of how many jobs got sent in this function call
+                            jobsSent++;
+                        }
+                }
+
+            while (jobsSent < numberOfNewJobs)
                 {
                     synchronized (sendLock)
                         {
@@ -297,19 +454,117 @@ public class MutableParadigmServer
                             outgoingObjectStream.flush();
                             outgoingObjectStream.reset();
 
-                            jobsSent++;
+                            // make a note of which instructions have gone out
+                            dispatched.put(theseInstructions, this);
 
-                            // mark job as unfinished
-                            outstandingResults.add(Integer.valueOf(jobCount));
+                            // keep track of how many jobs got sent in this function call
+                            jobsSent++;
                         }
                 }
             return jobsSent;
         }
     }
 
+    private static class CheckpointMonitor
+    {
+        private Timer timer;
+        private static ServerCheckpoint lastCheckpoint = null;
+
+        public CheckpointMonitor()
+        {
+            timer = new Timer();
+            timer.schedule(new CustomTimerTask(), (int)(MutableParadigmServer.CHECKPOINT_INTERVAL*1000), (int)(MutableParadigmServer.CHECKPOINT_INTERVAL*1000));
+        }
+
+        private class CustomTimerTask extends TimerTask
+        {
+            public void run()
+            {
+                // don't do anything if there aren't any live connections
+                if ( MutableParadigmServer.LIVE_CONNECTIONS.size() == 0 || MutableParadigmServer.finished == true )
+                    return;
+
+                // don't do anything if we haven't received any new results since the last checkpoint
+                if ( lastCheckpoint != null )
+                    {
+                        if ( MutableParadigmServer.numberOfResultsReceived.get() <= lastCheckpoint.getNumberOfResultsReceived().get() )
+                            {
+                                //System.out.println( MutableParadigmServer.numberOfResultsReceived.get() + " <= " + lastCheckpoint.getNumberOfResultsReceived().get() );
+                                //System.out.println("skipped");
+                                return;
+                            }
+                    }
+
+                // back up old checkpoint
+                File from = new File(MutableParadigmServer.PRIMARY_CHECKPOINT_FILENAME);
+                File to   = new File(MutableParadigmServer.SECONDARY_CHECKPOINT_FILENAME);
+                if ( from.isFile() ) // only copy if there is a source file
+                    {
+                        try
+                            {
+                                Files.copy(from.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                            }
+                        catch (IOException e)
+                            {
+                                System.out.println("Error while backing up checkpoint!  Aborting operation.");
+                                e.printStackTrace();
+                                return;
+                            }
+                    }
+
+                // create checkpoint
+                ServerCheckpoint serverCheckpoint = new ServerCheckpoint(ConnectionThread.getJobCount(), ConnectionThread.dispatched,
+                                                                         ConnectionThread.toBeResent, ConnectionThread.sendLock,
+                                                                         MutableParadigmServer.allCompletedPatches,
+                                                                         MutableParadigmServer.workUnitFactory,
+                                                                         MutableParadigmServer.numberOfResultsReceived);
+
+                // serialize checkpoint
+                FileOutputStream fileOut = null;
+                ObjectOutputStream out = null;
+                try
+                    {
+                        fileOut = new FileOutputStream(MutableParadigmServer.PRIMARY_CHECKPOINT_FILENAME);
+                        out = new ObjectOutputStream(fileOut);
+                        out.writeObject(serverCheckpoint);
+                        out.flush();
+                        lastCheckpoint = serverCheckpoint;
+                        File checkFile = new File(MutableParadigmServer.PRIMARY_CHECKPOINT_FILENAME);
+                        double size = (double)(checkFile.length()/1048576L);
+                        if ( size > 0.01 )
+                            System.out.println(String.format("Wrote checkpoint (%.2f MB, %d%n results received).\n", (double)(checkFile.length()/1048576L), serverCheckpoint.getNumberOfResultsReceived()));
+                        else
+                            System.out.println("Wrote checkpoint (" + checkFile.length() + " bytes, " + serverCheckpoint.getNumberOfResultsReceived() + " results received).\n");
+                    }
+                catch (IOException e)
+                    {
+                        System.out.println("Error while writing checkpoint!");
+                        e.printStackTrace();
+                    }
+                finally
+                    {
+                        try
+                            {
+                                if ( out != null )
+                                    out.close();
+                                if ( fileOut != null )
+                                    fileOut.close();
+                            }
+                        catch (IOException e2)
+                            {
+                                e2.printStackTrace();
+                            }
+                    }
+            }
+        }
+    }
+
     private static class ThreadMonitor
     {
         private Timer timer;
+        private static HashMap<WorkUnitInstructions,ConnectionThread> dispatched = MutableParadigmServer.ConnectionThread.dispatched; 
+        private static LinkedList<WorkUnitInstructions> toBeResent = MutableParadigmServer.ConnectionThread.toBeResent;
+        private static Object sendLock = MutableParadigmServer.ConnectionThread.sendLock;
 
         public ThreadMonitor()
         {
@@ -327,6 +582,32 @@ public class MutableParadigmServer
                     {
                         System.out.println("\nKill file detected.  Shutting down...");
                         System.exit(1);
+                    }
+
+                // re-queue any missed instructions
+                synchronized(sendLock)
+                    {
+                        for (ConnectionThread t : MutableParadigmServer.ALL_CONNECTIONS)
+                            {
+                                if (!t.isConnected())
+                                    {
+                                        LinkedList<WorkUnitInstructions> resend = new LinkedList<>();
+                                        for (WorkUnitInstructions i : dispatched.keySet())
+                                            {
+                                                ConnectionThread t2 = dispatched.get(i);
+                                                if ( t == t2 )
+                                                    {
+                                                        resend.add(i);
+                                                        System.out.println("Marked instruction number " + i.getID() + " for re-dispatch (originally sent to " + t.getHostName() + ")");
+                                                    }
+                                            }
+                                        for (WorkUnitInstructions i : resend)
+                                            {
+                                                dispatched.remove(i);
+                                                toBeResent.add(i);
+                                            }
+                                    }
+                            }
                     }
             }
         }

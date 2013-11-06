@@ -9,8 +9,9 @@
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.io.*;
 
-class LinkNode {
+class LinkNode implements Serializable {
 
     private int data;
     private LinkNode next;
@@ -43,7 +44,7 @@ class LinkNode {
 
 } // end of class LinkNode
 
-public class MultiSetLinkedList {
+public class MultiSetLinkedList implements Serializable {
 
     private LinkNode head;
     private LinkNode i;
