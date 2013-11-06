@@ -269,7 +269,7 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
     public boolean tooClose(BytePoint p) {
         BytePoint u = UNIT_LENGTH.getAsVector(angle());
         BytePoint v = p.subtract(ends[0]);
-        double d = v.crossProduct(u);
+        double d = v.testCross(u);
         return (-TOO_CLOSE < d && d < TOO_CLOSE);
     }
 
@@ -295,12 +295,6 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
         BasicEdgeLength l4 = BasicEdgeLength.createBasicEdgeLength(4);
 
         BytePoint testPoint = l2.getAsVector(BasicAngle.createBasicAngle(1)).subtract(l1.getAsVector(BasicAngle.createBasicAngle(1)));
-
-//        for (int i = 0; i < 22; i++) {
-            for (int j = 0; j < 22; j++) {
-                System.out.println("testPoint cross l0 "   + j + " " + testPoint.crossProduct(l0.getAsVector(BasicAngle.createBasicAngle(j))));
-            }
-//        }
 
 
         BytePoint p1 = BytePoint.createBytePoint(new byte[] { //
@@ -345,6 +339,18 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
         BytePoint aPoint = UNIT_LENGTH.getAsVector(BasicAngle.createBasicAngle(6));
         System.out.println(aPoint.crossProduct(q.subtract(p2)));
         System.out.println(aPoint.crossProduct(q.subtract(p1)));
+
+//        for (int i = 0; i < 22; i++) {
+            for (int j = 0; j < 22; j++) {
+                System.out.println("testPoint cross l0 "   + j + " " + testPoint.crossProduct(l0.getAsVector(BasicAngle.createBasicAngle(j))));
+            }
+//        }
+
+//        for (int i = 0; i < 22; i++) {
+            for (int j = 0; j < 22; j++) {
+                System.out.println("testPoint testCross l0 "   + j + " " + testPoint.testCross(l0.getAsVector(BasicAngle.createBasicAngle(j))));
+            }
+//        }
 
     }
 
