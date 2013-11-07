@@ -14,14 +14,14 @@ class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 4;        // the tile we're searching
+    public static final int MY_TILE = 0;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
     public static final int BATCH_SIZE = 10000; // number of jobs to make per set of instructions
 
-    public static final String HOST_NAME = "corbridge"; // the server
-    //public static final String HOST_NAME = "enj10.rc.fas.harvard.edu"; // the server
+    //public static final String HOST_NAME = "corbridge"; // the server
+    public static final String HOST_NAME = "enj10.rc.fas.harvard.edu"; // the server
 
     public static final int NUMBER_OF_THREADS = 24; // number of threads per client
 

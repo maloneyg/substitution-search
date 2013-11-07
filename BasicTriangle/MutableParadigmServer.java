@@ -423,7 +423,7 @@ public class MutableParadigmServer
                                 break;
                             
                             WorkUnitInstructions theseInstructions = toBeResent.removeFirst();
-                            System.out.println("resend instructions " + theseInstructions.getID() + " : " + theseInstructions.toString());
+                            //System.out.println("resend instructions " + theseInstructions.getID() + " : " + theseInstructions.toString());
 
                             // send instructions
                             outgoingObjectStream.writeObject(theseInstructions);
@@ -450,11 +450,9 @@ public class MutableParadigmServer
                             // create the next set of instructions
                             jobCount++;
                             WorkUnitInstructions theseInstructions = workUnitFactory.getInstructions(BATCH_SIZE,jobCount);
-                            System.out.println("original instructions " + theseInstructions.getID() + " : " + theseInstructions.toString());
+                            //System.out.println("original instructions " + theseInstructions.getID() + " : " + theseInstructions.toString());
                             
                             // send instructions
-                            outgoingObjectStream.writeObject(theseInstructions);
-                            outgoingObjectStream.writeObject(theseInstructions);
                             outgoingObjectStream.writeObject(theseInstructions);
                             outgoingObjectStream.flush();
                             outgoingObjectStream.reset();
