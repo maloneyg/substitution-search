@@ -10,7 +10,7 @@ public class MutableParadigmServer
 {
     public static final int LISTENING_PORT = 32007;
     public static final double MONITOR_INTERVAL = 1.0; // seconds
-    public static final double CHECKPOINT_INTERVAL = 1.0; // seconds, how often to checkpoint progress to disk
+    public static final double CHECKPOINT_INTERVAL = 10.0; // seconds, how often to checkpoint progress to disk
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
 
     public static List<BasicPatch> allCompletedPatches = new LinkedList<BasicPatch>();
