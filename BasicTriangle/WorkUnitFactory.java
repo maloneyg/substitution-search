@@ -81,7 +81,28 @@ public class WorkUnitFactory implements Serializable {
         } else {
             o2 = o[2];
         }
+
     } // constructor
+
+    // private constructor
+    private WorkUnitFactory(MultiSetLinkedList e0,MultiSetLinkedList e1,MultiSetLinkedList e2,ImmutableList<Integer> i0,ImmutableList<Integer> i1,ImmutableList<Integer> i2,ImmutableList<Integer> s0,ImmutableList<Integer> s1,ImmutableList<Integer> s2,Orientation oo1,Orientation oo2) { // initialize the edge breakdown iterators
+        edge0 = e0;
+        edge1 = e1;
+        edge2 = e2;
+        start0 = s0;
+        start1 = s1;
+        start2 = s2;
+        BD0 = i0;
+        BD1 = i1;
+        BD2 = i2;
+        o1 = oo1;
+        o2 = oo2;
+    } // constructor
+
+    // deep copy
+    public WorkUnitFactory deepCopy() {
+        return new WorkUnitFactory(edge0.deepCopy(),edge1.deepCopy(),edge2.deepCopy(),BD0,BD1,BD2,start0,start1,start2,o1,o2);
+    } // deep copy
 
     // iterate through instructions to make sure we don't hit the end.
     // then return the instructions, along with an int representing
@@ -165,7 +186,8 @@ public class WorkUnitFactory implements Serializable {
 
     // advance to the work unit matching this edge breakdown
     private void advanceToBreakdown(List<Integer> b0, List<Integer> b1, List<Integer> b2, boolean f) {
-        while (notDoneYet) {
+        //while (notDoneYet) {
+        while (true) {
             if (compareBreakdown(b0,b1,b2)) break;
             iterateEdgeBreakdown();
         }

@@ -7,7 +7,7 @@ import java.io.Serializable;
 import com.google.common.collect.*;
 import com.google.common.base.*;
 
-final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, BytePoint, BasicEdgeLength>, Serializable {
+final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, BytePoint, BasicEdgeLength>, Comparable<BasicEdgeLength>, Serializable {
 
     // make it Serializable
     static final long serialVersionUID = -3774381761787701530L;
@@ -114,6 +114,11 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
         if (i < 0 || i > ALL_EDGE_LENGTHS.size()-1)
             throw new IllegalArgumentException("Incorrect edge length index.");
         return ALL_EDGE_LENGTHS.get(i);
+    }
+
+    // compare based on the length field
+    public int compareTo(BasicEdgeLength l) {
+        return this.length.compareTo(l.length);
     }
 
     public boolean equals(Object obj) {

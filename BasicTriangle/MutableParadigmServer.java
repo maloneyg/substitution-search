@@ -10,7 +10,7 @@ public class MutableParadigmServer
 {
     public static final int LISTENING_PORT = 32007;
     public static final double MONITOR_INTERVAL = 1.0; // seconds
-    public static final double CHECKPOINT_INTERVAL = 1.0; // seconds, how often to checkpoint progress to disk
+    public static final double CHECKPOINT_INTERVAL = 10.0; // seconds, how often to checkpoint progress to disk
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
 
     public static List<BasicPatch> allCompletedPatches = new LinkedList<BasicPatch>();
@@ -99,7 +99,8 @@ public class MutableParadigmServer
                         listener = new ServerSocket(LISTENING_PORT);
                         listener.setSoTimeout(TIMEOUT*1000);
                         connection = listener.accept();
-                        System.out.print("[ " + new Date().toString() + " ] Opened a socket to " + connection.getInetAddress() + ".\n");
+                        System.out.print("[ " + new Date().toString() + " ] Opened a socket to " + 
+                        connection.getInetAddress().getCanonicalHostName() + " (" + connection.getInetAddress() + ").\n");
                         listener.close();
                         connectionThread = new ConnectionThread(connection);
                         connectionThread.checkConnection();
@@ -422,6 +423,7 @@ public class MutableParadigmServer
                                 break;
                             
                             WorkUnitInstructions theseInstructions = toBeResent.removeFirst();
+                            //System.out.println("resend instructions " + theseInstructions.getID() + " : " + theseInstructions.toString());
 
                             // send instructions
                             outgoingObjectStream.writeObject(theseInstructions);
@@ -448,6 +450,7 @@ public class MutableParadigmServer
                             // create the next set of instructions
                             jobCount++;
                             WorkUnitInstructions theseInstructions = workUnitFactory.getInstructions(BATCH_SIZE,jobCount);
+                            //System.out.println("original instructions " + theseInstructions.getID() + " : " + theseInstructions.toString());
                             
                             // send instructions
                             outgoingObjectStream.writeObject(theseInstructions);
@@ -469,6 +472,7 @@ public class MutableParadigmServer
     {
         private Timer timer;
         private static ServerCheckpoint lastCheckpoint = null;
+        private static Object sendLock = MutableParadigmServer.ConnectionThread.sendLock;
 
         public CheckpointMonitor()
         {
@@ -513,46 +517,49 @@ public class MutableParadigmServer
                     }
 
                 // create checkpoint
-                ServerCheckpoint serverCheckpoint = new ServerCheckpoint(ConnectionThread.getJobCount(), ConnectionThread.dispatched,
-                                                                         ConnectionThread.toBeResent, ConnectionThread.sendLock,
-                                                                         MutableParadigmServer.allCompletedPatches,
-                                                                         MutableParadigmServer.workUnitFactory,
-                                                                         MutableParadigmServer.numberOfResultsReceived);
+                synchronized(sendLock)
+                    {
+                        ServerCheckpoint serverCheckpoint = new ServerCheckpoint(ConnectionThread.getJobCount(), ConnectionThread.dispatched,
+                                                                                 ConnectionThread.toBeResent, ConnectionThread.sendLock,
+                                                                                 MutableParadigmServer.allCompletedPatches,
+                                                                                 MutableParadigmServer.workUnitFactory,
+                                                                                 MutableParadigmServer.numberOfResultsReceived);
 
-                // serialize checkpoint
-                FileOutputStream fileOut = null;
-                ObjectOutputStream out = null;
-                try
-                    {
-                        fileOut = new FileOutputStream(MutableParadigmServer.PRIMARY_CHECKPOINT_FILENAME);
-                        out = new ObjectOutputStream(fileOut);
-                        out.writeObject(serverCheckpoint);
-                        out.flush();
-                        lastCheckpoint = serverCheckpoint;
-                        File checkFile = new File(MutableParadigmServer.PRIMARY_CHECKPOINT_FILENAME);
-                        double size = (double)(checkFile.length()/1048576L);
-                        if ( size > 0.01 )
-                            System.out.println(String.format("Wrote checkpoint (%.2f MB, %d%n results received).\n", (double)(checkFile.length()/1048576L), serverCheckpoint.getNumberOfResultsReceived()));
-                        else
-                            System.out.println("Wrote checkpoint (" + checkFile.length() + " bytes, " + serverCheckpoint.getNumberOfResultsReceived() + " results received).\n");
-                    }
-                catch (IOException e)
-                    {
-                        System.out.println("Error while writing checkpoint!");
-                        e.printStackTrace();
-                    }
-                finally
-                    {
+                        // serialize checkpoint
+                        FileOutputStream fileOut = null;
+                        ObjectOutputStream out = null;
                         try
                             {
-                                if ( out != null )
-                                    out.close();
-                                if ( fileOut != null )
-                                    fileOut.close();
+                                fileOut = new FileOutputStream(MutableParadigmServer.PRIMARY_CHECKPOINT_FILENAME);
+                                out = new ObjectOutputStream(fileOut);
+                                out.writeObject(serverCheckpoint);
+                                out.flush();
+                                lastCheckpoint = serverCheckpoint;
+                                File checkFile = new File(MutableParadigmServer.PRIMARY_CHECKPOINT_FILENAME);
+                                double size = (double)(checkFile.length()/1048576L);
+                                if ( size > 0.01 )
+                                    System.out.println(String.format("Wrote checkpoint (%.2f MB, %d results received).\n", (double)(checkFile.length()/1048576L), serverCheckpoint.getNumberOfResultsReceived().get()));
+                                else
+                                    System.out.println("Wrote checkpoint (" + checkFile.length() + " bytes, " + serverCheckpoint.getNumberOfResultsReceived() + " results received).\n");
                             }
-                        catch (IOException e2)
+                        catch (IOException e)
                             {
-                                e2.printStackTrace();
+                                System.out.println("Error while writing checkpoint!");
+                                e.printStackTrace();
+                            }
+                        finally
+                            {
+                                try
+                                    {
+                                        if ( out != null )
+                                            out.close();
+                                        if ( fileOut != null )
+                                            fileOut.close();
+                                    }
+                                catch (IOException e2)
+                                    {
+                                        e2.printStackTrace();
+                                    }
                             }
                     }
             }
