@@ -560,21 +560,30 @@ System.out.println(x.initialPrototile);*/
             }
         }
 
-        double newMin = 100.0;
-        // return false if the new vertex is too close to any open edge
-        if (newVertex) {
-            for (BasicEdge open : edges.open()) {
-                    if (Math.abs(open.cross(other))<newMin) newMin = Math.abs(open.cross(other));
-                if (open.tooClose(other)) {
-                    if (debug) {setMessage(open.cross(other)+ " hit");break;}
-                    //System.out.println("hit");
+//        double newMin = 100.0;
+//        BasicEdge newEdge = currentEdge;
+//        // return false if the new vertex is too close to any open edge
+//        if (newVertex) {
+//            for (BasicEdge open : edges.open()) {
+//                if (Math.abs(open.cross(other))<newMin) {// debug output
+//                    newMin = Math.abs(open.cross(other));// delete later
+//                    newEdge = open;// we won't need this
+//                }// or this
+//                if (open.tooClose(other)) {
+//                    if (debug) {setMessage(open.cross(other)+ " hit");break;}
+//                    //System.out.println("hit");
 //                    return false;
-                }
-                setMessage(""+newMin);
-            }
-        }
+//                }
+//                setMessage(newEdge+"\n"+newMin+"\n"+other);
+//            }
+//        }
 
         return true;
+    }
+
+    // temporary--destroy this method when you don't need it anymore!
+    public void edgeDump() {
+        for (BasicEdge e: edges.open()) System.out.println(""+e);
     }
 
     /*

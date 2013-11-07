@@ -302,6 +302,24 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     }
 
     /*
+    * a test version of the cross product
+    */
+    public double testCross(BytePoint p) {
+        int l = length/2;
+        byte[] p0 = this.point;
+        byte[] p1 = p.point;
+        // here we store the shoelace products
+        double coeffs = 0.0;
+        for (int i = 0; i < length; i++) {
+            for (int j = 0; j < length; j++) {
+                if (j != i)
+                    coeffs += SIN_POWERS[((Math.abs(i-j)<l+1)? Math.abs(i-j) : length + 1 - Math.abs(i-j))-1]*(p0[j] * p1[i] * ((j<i)? -1 : 1));
+            }
+        }
+        return coeffs;
+    }
+
+    /*
     * calculate the 2d dot-product of this with p, after 
     * they have both been projected down to the plane
     * using the standard projection (i.e., the ith

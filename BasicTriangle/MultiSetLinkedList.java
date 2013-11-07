@@ -78,6 +78,24 @@ public class MultiSetLinkedList implements Serializable {
         return new MultiSetLinkedList(d);
     }
 
+    // make a deep copy
+    public MultiSetLinkedList deepCopy() {
+        MultiSetLinkedList output = new MultiSetLinkedList(this.head.getData());
+        output.size = this.size;
+        output.i = output.head;
+        output.afteri = output.head;
+        LinkNode currentNode = head.getNext();
+        LinkNode newCurrent = output.head;
+        while (currentNode != null) {
+            newCurrent.setNext(LinkNode.createLinkNode(currentNode.getData()));
+            newCurrent = newCurrent.getNext();
+            if (this.afteri.equals(currentNode)) output.afteri = newCurrent;
+            if (this.i.equals(currentNode)) output.i = newCurrent;
+            currentNode = currentNode.getNext();
+        }
+        return output;
+    }
+
     // output a String
     public String toString() {
         String output = "( ";
