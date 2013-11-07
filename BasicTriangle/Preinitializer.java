@@ -20,8 +20,8 @@ class Preinitializer {
 
     public static final int BATCH_SIZE = 500; // number of jobs to make per set of instructions
 
-    //public static final String HOST_NAME = "localhost"; // the server
-    public static final String HOST_NAME = "enj10.rc.fas.harvard.edu"; // the server
+    public static final String HOST_NAME = "localhost"; // the server
+    //public static final String HOST_NAME = "enj10.rc.fas.harvard.edu"; // the server
 
     public static final int NUMBER_OF_THREADS = 24; // number of threads per client
 
