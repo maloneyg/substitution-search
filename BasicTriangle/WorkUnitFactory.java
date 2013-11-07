@@ -186,7 +186,8 @@ public class WorkUnitFactory implements Serializable {
 
     // advance to the work unit matching this edge breakdown
     private void advanceToBreakdown(List<Integer> b0, List<Integer> b1, List<Integer> b2, boolean f) {
-        while (notDoneYet) {
+        //while (notDoneYet) {
+        while (true) {
             if (compareBreakdown(b0,b1,b2)) break;
             iterateEdgeBreakdown();
         }
