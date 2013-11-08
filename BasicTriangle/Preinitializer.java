@@ -29,7 +29,8 @@ class Preinitializer {
 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
 
     public static final ImmutableList<ImmutableList<Integer>> PROTOTILES = ImmutableList.of( 
                              //    ImmutableList.of( 1, 2, 4 ),  //
