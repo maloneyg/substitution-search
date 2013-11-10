@@ -103,7 +103,7 @@ public class SimpleTest
 
             BasicEdge[] edgeList = P0.createSkeleton(BD0, BD2, flip);
             ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD2);
-            BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
+            BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices,BD0,BD1,BD2);
             // identify the Orientations on the two equal edges
             if (flip) {
                 patch = patch.identify(o1,o2.getOpposite());
@@ -122,7 +122,7 @@ public class SimpleTest
             BasicEdge[] edgeList = P0.createSkeleton(BD0, BD1, BD2);
             ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD1, BD2);
 
-            BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
+            BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices,BD0,BD1,BD2);
 
             iterateEdgeBreakdown();
 

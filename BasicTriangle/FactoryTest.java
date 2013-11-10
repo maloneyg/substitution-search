@@ -115,7 +115,7 @@ public class FactoryTest
         // depends on whether P0 is isosceles.
 
             BasicEdge[] edgeList = P0.createSkeleton(BD0, BD2, flip);
-            MutablePatch patch = MutablePatch.createMutablePatch(edgeList,bigVertices,tiles.dumpMutablePrototileList());
+            MutablePatch patch = MutablePatch.createMutablePatch(edgeList,bigVertices,tiles.dumpMutablePrototileList(),BD0,BD1,BD2);
             // identify the Orientations on the two equal edges
             if (flip) {
                 patch.addInstructions(o1,o2.getOpposite());
@@ -133,7 +133,7 @@ public class FactoryTest
 
             BasicEdge[] edgeList = P0.createSkeleton(BD0, BD1, BD2);
 
-            MutablePatch patch = MutablePatch.createMutablePatch(edgeList,bigVertices,tiles.dumpMutablePrototileList());
+            MutablePatch patch = MutablePatch.createMutablePatch(edgeList,bigVertices,tiles.dumpMutablePrototileList(),BD0,BD1,BD2);
 
             iterateEdgeBreakdown();
 

@@ -26,6 +26,11 @@ public class MutablePatch implements Serializable {
     // set to true if we're debugging
     private boolean debug = false;
 
+    // the edge breakdown
+    private ImmutableList<Integer> edge0;
+    private ImmutableList<Integer> edge1;
+    private ImmutableList<Integer> edge2;
+
     // the completed patches that have been found
     private static List<BasicPatch> completedPatches;
 
@@ -106,7 +111,10 @@ public class MutablePatch implements Serializable {
     private final boolean initialFlip = false;
 
     // initial constructor
-    private MutablePatch(BasicEdge[] e, BytePoint[] v, MutablePrototileList TL) {
+    private MutablePatch(BasicEdge[] e, BytePoint[] v, MutablePrototileList TL,ImmutableList<Integer> bd0,ImmutableList<Integer> bd1,ImmutableList<Integer> bd2) {
+        edge0 = bd0;
+        edge1 = bd1;
+        edge2 = bd2;
         tileList = TL;
         triangles = new Stack<>();
         edges = MutableEdgeList.createMutableEdgeList(e);
@@ -137,8 +145,8 @@ public class MutablePatch implements Serializable {
     }
 
     // public static factory method
-    public static MutablePatch createMutablePatch(BasicEdge[] e, BytePoint[] v, MutablePrototileList TL) {
-        return new MutablePatch(e,v,TL);
+    public static MutablePatch createMutablePatch(BasicEdge[] e, BytePoint[] v, MutablePrototileList TL,ImmutableList<Integer> bd0,ImmutableList<Integer> bd1,ImmutableList<Integer> bd2) {
+        return new MutablePatch(e,v,TL,bd0,bd1,bd2);
     }
 
     // get all the completed patches
@@ -184,7 +192,7 @@ public class MutablePatch implements Serializable {
             j++;
         }
         OrientationPartition o = partition.dumpOrientationPartition();
-        return BasicPatch.createBasicPatch(t,e1,e2,o,bigVertices);
+        return BasicPatch.createBasicPatch(t,e1,e2,o,bigVertices,edge0,edge1,edge2);
     }
 
     // advance the step variables by one step

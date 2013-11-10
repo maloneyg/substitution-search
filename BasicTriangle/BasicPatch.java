@@ -29,17 +29,28 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BytePoint, BasicEdg
     // vertices of the big triangle
     private final BytePoint[] bigVertices;
 
+    // the edge breakdown data
+    private final ImmutableList<Integer> edge0;
+    private final ImmutableList<Integer> edge1;
+    private final ImmutableList<Integer> edge2;
+
     // private constructor
-    private BasicPatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, BytePoint[] v) {
+    private BasicPatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, BytePoint[] v,ImmutableList<Integer> bd0,ImmutableList<Integer> bd1,ImmutableList<Integer> bd2) {
         triangles = t;
         openEdges = e1;
         closedEdges = e2;
         partition = o;
         bigVertices = v;
+        edge0 = bd0;
+        edge1 = bd1;
+        edge2 = bd2;
     }
 
     // initial constructor
-    private BasicPatch(BasicEdge[] e, BytePoint[] v) {
+    private BasicPatch(BasicEdge[] e, BytePoint[] v,ImmutableList<Integer> bd0,ImmutableList<Integer> bd1,ImmutableList<Integer> bd2) {
+        edge0 = bd0;
+        edge1 = bd1;
+        edge2 = bd2;
         Orientation[] o = new Orientation[e.length + 6 * BasicPrototile.ALL_PROTOTILES.size()];
         int i = 0;
         for (i = 0; i < e.length; i++) o[i] = e[i].getOrientation();
@@ -63,13 +74,13 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BytePoint, BasicEdg
     }
 
     // public static factory method
-    public static BasicPatch createBasicPatch(BasicEdge[] e, BytePoint[] v) {
-        return new BasicPatch(e,v);
+    public static BasicPatch createBasicPatch(BasicEdge[] e, BytePoint[] v,ImmutableList<Integer> bd0,ImmutableList<Integer> bd1,ImmutableList<Integer> bd2) {
+        return new BasicPatch(e,v,bd0,bd1,bd2);
     }
 
     // public static factory method 
-    public static BasicPatch createBasicPatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, BytePoint[] v) {
-        return new BasicPatch(t,e1,e2,o,v);
+    public static BasicPatch createBasicPatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, BytePoint[] v,ImmutableList<Integer> bd0,ImmutableList<Integer> bd1,ImmutableList<Integer> bd2) {
+        return new BasicPatch(t,e1,e2,o,v,bd0,bd1,bd2);
     }
 
     // return partition (for testing only)
@@ -154,7 +165,7 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BytePoint, BasicEdg
     *
     */
     public BasicPatch identify(Orientation o1, Orientation o2) {
-        return new BasicPatch(triangles,openEdges,closedEdges,partition.identify(o1,o2),bigVertices);
+        return new BasicPatch(triangles,openEdges,closedEdges,partition.identify(o1,o2),bigVertices,edge0,edge1,edge2);
     }
 
     /*
@@ -236,7 +247,10 @@ public class BasicPatch implements AbstractPatch<BasicAngle, BytePoint, BasicEdg
                                  newOpenEdges, //
                                  newClosedEdges, //
                                  newOrientationPartition(t), //
-                                 bigVertices //
+                                 bigVertices, //
+                                 edge0, //
+                                 edge0, //
+                                 edge0 //
                              );
     }
 

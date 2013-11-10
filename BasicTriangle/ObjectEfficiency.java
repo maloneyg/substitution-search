@@ -86,7 +86,7 @@ public class ObjectEfficiency
             ImmutableList<ImmutableList<Integer>> testBD = ImmutableList.of(BD0, BD1, BD2);
             BytePoint[] vertices = p.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
             BytePoint[] bigVertices = new BytePoint[] {vertices[0].inflate(),vertices[1].inflate(),vertices[2].inflate()};
-            BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices);
+            BasicPatch patch = BasicPatch.createBasicPatch(edgeList,bigVertices,BD0,BD1,BD2);
             pl.add(patch);
         }
         ImmutableList<BasicPatch> PL = ImmutableList.copyOf(pl);
