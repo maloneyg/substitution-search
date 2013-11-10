@@ -3,6 +3,7 @@
 */
 
 import java.io.Serializable;
+import java.lang.Math.*;
 
 public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, BasicEdgeLength, BasicEdge>, Serializable {
 
@@ -13,7 +14,7 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
     public static final BasicEdgeLength UNIT_LENGTH = BasicEdgeLength.createBasicEdgeLength(0);
 
     // a threshold value indicating that a point is too close to an edge
-    public static final double TOO_CLOSE = 0.95;//UNIT_LENGTH.getAsVector(BasicAngle.createBasicAngle(1)).dotProduct(UNIT_LENGTH.getAsVector(BasicAngle.createBasicAngle(0)));
+    public static final double TOO_CLOSE;
 
     // Member variables. 
     private final BasicEdgeLength length;
@@ -21,6 +22,20 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
     private final Orientation orientation;
 
     private final BytePoint[] ends;
+
+    static { // initialize TOO_CLOSE
+        double smallest = 1.0;
+        for (BasicPrototile p : BasicPrototile.ALL_PROTOTILES) {
+            BasicTriangle t = p.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false);
+            BasicEdge[] edges = t.getEdges();
+            BytePoint[] vertices = t.getVertices();
+            for (int i = 0; i < 3; i++) {
+                double d = Math.abs(edges[i].cross(vertices[i]));
+                if (d < smallest) smallest = d;
+            }
+        }
+        TOO_CLOSE = 0.95*smallest;
+    }
 
     // Constructor methods.  
     private BasicEdge(BasicEdgeLength length, Orientation orientation, BytePoint[] ends) {
@@ -270,7 +285,10 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
         BytePoint u = UNIT_LENGTH.getAsVector(angle());
         BytePoint v = p.subtract(ends[0]);
         double d = v.testCross(u);
-        return (-TOO_CLOSE < d && d < TOO_CLOSE);
+        if (-TOO_CLOSE < d && d < TOO_CLOSE) {
+            if (Math.signum(v.dotProduct(u)) != Math.signum(p.subtract(ends[1]).dotProduct(u))) return true;
+        }
+        return false;
     }
 
     // check to see if the BytePoint p is too close to this edge

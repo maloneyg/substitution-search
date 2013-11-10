@@ -149,7 +149,7 @@ public class DebugDisplay extends JPanel implements ActionListener
         this.keepSolving = true;
         this.patch = MutableWorkUnit.nextWorkUnit().getPatch();
         patch.setDebug(true);
-        patch.edgeDump();
+        //patch.edgeDump();
         this.patchesSoFar = new ArrayList<>();
         this.messages = new ArrayList<>();
         this.position = 0;
@@ -466,9 +466,9 @@ public class DebugDisplay extends JPanel implements ActionListener
 
 //        for (int k : Initializer.SUBSTITUTION_MATRIX.getColumn(Preinitializer.MY_TILE)) System.out.print(k+" ");
 
-        System.out.println(BasicEdge.TOO_CLOSE);
+        //System.out.println(BasicEdge.TOO_CLOSE);
         //DebugDisplay display = new DebugDisplay(21,"debugging");
-        DebugDisplay display = new DebugDisplay(15,"debugging");
+        DebugDisplay display = new DebugDisplay(1151,"debugging");
 
     }
 

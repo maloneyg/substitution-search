@@ -550,33 +550,25 @@ System.out.println(x.initialPrototile);*/
             }
         }
 
-        // return false if the new vertex is too close to any existing vertex
+//        // return false if the new vertex is too close to any existing vertex
+//        if (newVertex) {
+//            for (BytePoint p : vertices) {
+//                if (other.tooClose(p)) {
+//                    if (debug) setMessage(other +"\n"+ DebugMessage.TOO_CLOSE.toString() +"\n"+ p);
+//                    return false;
+//                }
+//            }
+//        }
+
+        // return false if the new vertex is too close to any open edge
         if (newVertex) {
-            for (BytePoint p : vertices) {
-                if (other.tooClose(p)) {
-                    if (debug) setMessage(other +"\n"+ DebugMessage.TOO_CLOSE.toString() +"\n"+ p);
+            for (BasicEdge open : edges.open()) {
+                if (open.tooClose(other)) {
+                    if (debug) setMessage(open.cross(other)+ " hit");
                     return false;
                 }
             }
         }
-
-//        double newMin = 100.0;
-//        BasicEdge newEdge = currentEdge;
-//        // return false if the new vertex is too close to any open edge
-//        if (newVertex) {
-//            for (BasicEdge open : edges.open()) {
-//                if (Math.abs(open.cross(other))<newMin) {// debug output
-//                    newMin = Math.abs(open.cross(other));// delete later
-//                    newEdge = open;// we won't need this
-//                }// or this
-//                if (open.tooClose(other)) {
-//                    if (debug) {setMessage(open.cross(other)+ " hit");break;}
-//                    //System.out.println("hit");
-//                    return false;
-//                }
-//                setMessage(newEdge+"\n"+newMin+"\n"+other);
-//            }
-//        }
 
         return true;
     }

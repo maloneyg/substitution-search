@@ -34,6 +34,8 @@ class Initializer {
     public static final ByteMatrix REF;
     public static final ByteMatrix INFL;
 
+    public static final int TOTAL_EDGE_BREAKDOWNS;
+
     /*
     * A list representing edge lengths.  
     * When we initialize we take a subset of these.
@@ -189,6 +191,16 @@ class Initializer {
         INFLATED_LENGTHS = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.LENGTH_MATRIX.inverse()).times(otherInfl).times(LengthAndAreaCalculator.LENGTH_MATRIX));
         SUBSTITUTION_MATRIX = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.AREA_MATRIX.inverse()).times(otherInfl).times(otherInfl).times(LengthAndAreaCalculator.AREA_MATRIX));
 
+        int total = 1;
+        for (Integer jj : Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE)) {
+            ImmutableList<Integer> totals = INFLATED_LENGTHS.getColumn((jj-1<(N/2))? jj-1 : N-jj-1);
+            int subtotal = 0;
+            for (Integer ii : totals) subtotal += ii;
+            subtotal = factorial(subtotal);
+            for (Integer ii : totals) subtotal /= (int)factorial(ii);
+            total *= subtotal;
+        }
+        TOTAL_EDGE_BREAKDOWNS = total;
 
     } // end of static initialization
 
@@ -196,7 +208,15 @@ class Initializer {
     private Initializer() {
     }
 
-
+    // factorial function. Couldn't find an (easy) implementation online.
+    // returns 1 for negative numbers (lazy).
+    private static int factorial(int n) {
+        if (n < 1) {
+            return 1;
+        } else {
+            return n*factorial(n-1);
+        }
+    }
 
 
     public static void main(String[] args) {
@@ -213,6 +233,7 @@ class Initializer {
         System.out.println(INFLATED_LENGTHS);
         System.out.println("SUBSTITUTION_MATRIX");
         System.out.println(SUBSTITUTION_MATRIX);
+        System.out.println(TOTAL_EDGE_BREAKDOWNS);
 
     }
 
