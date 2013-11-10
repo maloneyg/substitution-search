@@ -172,7 +172,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
     private final MutablePatch patch;
     private final AtomicInteger count = new AtomicInteger(0);
     private AtomicInteger counter;
-    private List<BasicPatch> resultTarget;
+    private List<ImmutablePatch> resultTarget;
 
     private static final ThreadService threadService;
 
@@ -229,7 +229,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         this.counter = counter;
     }
 
-    public void setResultTarget(List<BasicPatch> resultTarget)
+    public void setResultTarget(List<ImmutablePatch> resultTarget)
     {
         this.resultTarget = resultTarget;
     }

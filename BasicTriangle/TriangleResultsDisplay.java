@@ -8,15 +8,15 @@ public class TriangleResultsDisplay
         {
             // deserialize data
             String filename = "results.chk";//"results/tile0superhuge.chk";
-//            ArrayList<BasicPatch> patches = null;
-            List<BasicPatch> patches = null;
+//            ArrayList<ImmutablePatch> patches = null;
+            List<ImmutablePatch> patches = null;
             if ( ! new File(filename).isFile() )
                 return;
             try
                 {
                     FileInputStream fileIn = new FileInputStream(filename);
                     ObjectInputStream in = new ObjectInputStream(fileIn);
-//                    patches = (ArrayList<BasicPatch>)in.readObject();
+//                    patches = (ArrayList<ImmutablePatch>)in.readObject();
                     patches = ((TriangleResults)in.readObject()).getPatches();
                     System.out.println(patches.size() + " completed patches have been read.");
                 }

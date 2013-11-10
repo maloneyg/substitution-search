@@ -16,7 +16,7 @@ public class DebugDisplay extends JPanel implements ActionListener
 {
 
     private MutablePatch patch;
-    private final List<BasicPatch> patchesSoFar;
+    private final List<ImmutablePatch> patchesSoFar;
     private final List<String> messages;
     private String message = "";
     private ArrayList<OrderedTriple> data;
@@ -53,7 +53,7 @@ public class DebugDisplay extends JPanel implements ActionListener
 
         //patchesSoFar.add(patch.debugSolve());
         //this.data = this.patchesSoFar.get(position).graphicsDump();
-        patchesSoFar.add(patch.dumpBasicPatch());
+        patchesSoFar.add(patch.dumpImmutablePatch());
         messages.add(patch.getMessage());
         this.data = this.patchesSoFar.get(position).graphicsDump();
 
@@ -156,7 +156,7 @@ public class DebugDisplay extends JPanel implements ActionListener
 
         //patchesSoFar.add(patch.debugSolve());
         //this.data = this.patchesSoFar.get(position).graphicsDump();
-        patchesSoFar.add(patch.dumpBasicPatch());
+        patchesSoFar.add(patch.dumpImmutablePatch());
         messages.add(patch.getMessage());
         this.data = this.patchesSoFar.get(position).graphicsDump();
 
@@ -260,7 +260,7 @@ public class DebugDisplay extends JPanel implements ActionListener
         messages.add(p);
     }
 
-    public void update(BasicPatch p) {
+    public void update(ImmutablePatch p) {
         patchesSoFar.add(p);
         while (!keepSolving) {
             try {

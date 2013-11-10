@@ -163,7 +163,7 @@ public final class MutableParadigmClient
                                 List<MutableWorkUnit> theseUnits = workUnitFactory.followInstructions(instructions);
 
                                 AtomicInteger counter = new AtomicInteger(0);
-                                LinkedList<BasicPatch> completedPuzzles = new LinkedList<BasicPatch>();
+                                LinkedList<ImmutablePatch> completedPuzzles = new LinkedList<ImmutablePatch>();
                                 
                                 for (MutableWorkUnit thisUnit : theseUnits)
                                     {
@@ -239,10 +239,10 @@ public final class MutableParadigmClient
         private WorkUnitInstructions workUnitInstructions;
         private List<MutableWorkUnit> theseUnits;
         private AtomicInteger counter;
-        private LinkedList<BasicPatch> completedPuzzles;
+        private LinkedList<ImmutablePatch> completedPuzzles;
 
         public WorkBatch(WorkUnitInstructions workUnitInstructions, List<MutableWorkUnit> theseUnits,
-                         AtomicInteger counter, LinkedList<BasicPatch> completedPuzzles)
+                         AtomicInteger counter, LinkedList<ImmutablePatch> completedPuzzles)
         {
             this.workUnitInstructions = workUnitInstructions;
             this.theseUnits = theseUnits;
@@ -265,7 +265,7 @@ public final class MutableParadigmClient
             return counter;
         }
 
-        public LinkedList<BasicPatch> getCompletedPuzzles()
+        public LinkedList<ImmutablePatch> getCompletedPuzzles()
         {
             return completedPuzzles;
         }
@@ -293,12 +293,12 @@ public final class MutableParadigmClient
     public static void sendResult(WorkBatch b)
     {
         int ID = b.getInstructions().getID();
-        List<BasicPatch> completedPatches = b.getCompletedPuzzles();
+        List<ImmutablePatch> completedPatches = b.getCompletedPuzzles();
         int numberOfUnits = b.getList().size();
         sendResult(ID, completedPatches, numberOfUnits);
     }
 
-    public static void sendResult(int ID, List<BasicPatch> completedPatches, int numberOfUnits )
+    public static void sendResult(int ID, List<ImmutablePatch> completedPatches, int numberOfUnits )
     {
         // create PatchResult to send
         PatchResult result = new PatchResult(ID, completedPatches, numberOfUnits);

@@ -13,7 +13,7 @@ public class MutableParadigmServer
     public static final double CHECKPOINT_INTERVAL = 10.0; // seconds, how often to checkpoint progress to disk
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
 
-    public static List<BasicPatch> allCompletedPatches = new LinkedList<BasicPatch>();
+    public static List<ImmutablePatch> allCompletedPatches = new LinkedList<ImmutablePatch>();
     public static final String RESULT_FILENAME = "results.chk";
 
     public static AtomicLong numberOfResultsReceived = new AtomicLong(0L);
@@ -306,7 +306,7 @@ public class MutableParadigmServer
                                     numberOfResultsReceived.addAndGet(result.getNumberOfUnits());
                                     int jobID = result.getID();
                                     
-                                    List<BasicPatch> localCompletedPatches = result.getCompletedPatches();
+                                    List<ImmutablePatch> localCompletedPatches = result.getCompletedPatches();
                                     allCompletedPatches.addAll( localCompletedPatches );
                                     Date currentDate = new Date();
                                     String dateString = String.format("%02d:%02d:%02d", currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());

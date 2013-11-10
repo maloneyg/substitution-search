@@ -3,14 +3,14 @@ import java.util.*;
 
 public class WorkUnitResult implements Result, Serializable
 {
-    private final List<BasicPatch> localCompletedPatches;
+    private final List<ImmutablePatch> localCompletedPatches;
 
-    public WorkUnitResult(List<BasicPatch> localCompletedPatches)
+    public WorkUnitResult(List<ImmutablePatch> localCompletedPatches)
     {
         this.localCompletedPatches = localCompletedPatches;
     }
 
-    public List<BasicPatch> getLocalCompletedPatches()
+    public List<ImmutablePatch> getLocalCompletedPatches()
     {
         return localCompletedPatches;
     }

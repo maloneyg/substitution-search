@@ -5,10 +5,10 @@ import com.google.common.collect.*;
 public class PatchResult implements Result, Serializable
 {
     private final int ID; // ID of the original WorkUnitInstructions that created this PatchResult
-    private final ImmutableList<BasicPatch> completedPatches; // finished puzzles
+    private final ImmutableList<ImmutablePatch> completedPatches; // finished puzzles
     private final int numberOfUnits; // how many work units went into this result
 
-    public PatchResult(int ID, List<BasicPatch> completedPatches, int numberOfUnits)
+    public PatchResult(int ID, List<ImmutablePatch> completedPatches, int numberOfUnits)
     {
         this.ID = ID;
         this.completedPatches = ImmutableList.copyOf(completedPatches);
@@ -20,7 +20,7 @@ public class PatchResult implements Result, Serializable
         return ID;
     }
 
-    public List<BasicPatch> getCompletedPatches()
+    public List<ImmutablePatch> getCompletedPatches()
     {
         return completedPatches;
     }

@@ -32,15 +32,15 @@ public class MutablePatch implements Serializable {
     private ImmutableList<Integer> edge2;
 
     // the completed patches that have been found
-    private static List<BasicPatch> completedPatches;
+    private static List<ImmutablePatch> completedPatches;
 
     // a list of completed patches for this particular puzzle
-    private List<BasicPatch> localCompletedPatches = new ArrayList<BasicPatch>();
+    private List<ImmutablePatch> localCompletedPatches = new ArrayList<ImmutablePatch>();
 
     private AtomicInteger count = new AtomicInteger(0);
 
     static { // initialize completedPatches
-        ArrayList<BasicPatch> tempList = new ArrayList<>();
+        ArrayList<ImmutablePatch> tempList = new ArrayList<>();
         completedPatches = Collections.synchronizedList(tempList);
     }
 
@@ -150,7 +150,7 @@ public class MutablePatch implements Serializable {
     }
 
     // get all the completed patches
-    public static List<BasicPatch> getCompletedPatches() {
+    public static List<ImmutablePatch> getCompletedPatches() {
         return completedPatches;
     }
 
@@ -170,13 +170,13 @@ public class MutablePatch implements Serializable {
     }
 
     // get all the patches for this puzzle
-    public List<BasicPatch> getLocalCompletedPatches()
+    public List<ImmutablePatch> getLocalCompletedPatches()
     {
         return localCompletedPatches;
     }
 
-    // dump the contents of this as a BasicPatch
-    public BasicPatch dumpBasicPatch() {
+    // dump the contents of this as a ImmutablePatch
+    public ImmutablePatch dumpImmutablePatch() {
         BasicTriangle[] t = new BasicTriangle[triangles.size()];
         for (int i = 0; i < t.length; i++) t[i] = triangles.get(i);
         BasicEdge[] e1 = new BasicEdge[edges.openSize()];
@@ -192,7 +192,7 @@ public class MutablePatch implements Serializable {
             j++;
         }
         OrientationPartition o = partition.dumpOrientationPartition();
-        return BasicPatch.createBasicPatch(t,e1,e2,o,bigVertices,edge0,edge1,edge2);
+        return ImmutablePatch.createImmutablePatch(t,e1,e2,o,bigVertices,edge0,edge1,edge2);
     }
 
     // advance the step variables by one step
@@ -246,7 +246,7 @@ public class MutablePatch implements Serializable {
     public void solve() {
         do {
             if (tileList.empty()) {
-                BasicPatch thisPatch = dumpBasicPatch();
+                ImmutablePatch thisPatch = dumpImmutablePatch();
                 completedPatches.add(thisPatch);
                 localCompletedPatches.add(thisPatch);
                 numCompleted++;
@@ -271,9 +271,9 @@ public class MutablePatch implements Serializable {
     } // solve ends here
 
     // a solve method that stops for debugging purposes.
-//    public BasicPatch debugSolve() {
+//    public ImmutablePatch debugSolve() {
 //
-//        BasicPatch output = dumpBasicPatch();
+//        ImmutablePatch output = dumpImmutablePatch();
 //        if (tileList.empty()) {
 //            removeTriangle();
 //            step();
@@ -303,10 +303,10 @@ public class MutablePatch implements Serializable {
     public void debugSolve(DebugDisplay d) {
         do {
             d.updateMessage(message);
-            d.update(dumpBasicPatch());
+            d.update(dumpImmutablePatch());
 
             if (tileList.empty()) {
-                BasicPatch thisPatch = dumpBasicPatch();
+                ImmutablePatch thisPatch = dumpImmutablePatch();
                 completedPatches.add(thisPatch);
                 localCompletedPatches.add(thisPatch);
                 numCompleted++;
@@ -342,19 +342,6 @@ public class MutablePatch implements Serializable {
             return false;
         MutablePatch x = (MutablePatch) obj;
 
-/*          System.out.println("triangles: " + this.triangles.equals(x.triangles));
-          System.out.println("edges: " + this.edges.equals(x.edges) );
-          System.out.println("partition: " + this.partition.equals(x.partition));
-          System.out.println("tileList: " + this.tileList.equals(x.tileList));
-          System.out.println("bigVertices: " + Arrays.equals(this.bigVertices, x.bigVertices));
-          System.out.println("currentEdge: " + this.currentEdge.equals(x.currentEdge));
-          System.out.println("currentPrototile: " + this.currentPrototile.equals(x.currentPrototile));
-          System.out.println("initialPrototile: " + this.initialPrototile.equals(x.initialPrototile));
-
-System.out.println(currentPrototile);
-System.out.println(x.currentPrototile);
-System.out.println("\n"+initialPrototile);
-System.out.println(x.initialPrototile);*/
         return (
           this.triangles.equals(x.triangles)
           &&this.edges.equals(x.edges)
