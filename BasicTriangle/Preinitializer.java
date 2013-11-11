@@ -50,7 +50,7 @@ class Preinitializer {
             if ( System.getProperty("user.name").toLowerCase().equals("ekwan") )
                 HOST_NAME = "enj10.rc.fas.harvard.edu";
             else
-                HOST_NAME = "localhost";
+                HOST_NAME = "corbridge";
             System.out.println("Host name automatically set to " + HOST_NAME + ".");
 
             // determine how many threads to use
