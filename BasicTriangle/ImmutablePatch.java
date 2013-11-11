@@ -56,7 +56,7 @@ public class ImmutablePatch implements Serializable {
         if (obj == null || getClass() != obj.getClass())
             return false;
         ImmutablePatch x = (ImmutablePatch) obj;
-        return (this.triangles.equals(x.triangles)&&this.openEdges.equals(x.openEdges)&&this.partition.equals(x.partition));
+        return (Arrays.equals(this.triangles,x.triangles)&&Arrays.equals(this.openEdges,x.openEdges)&&Arrays.equals(this.closedEdges,x.closedEdges)&&this.edge0.equals(x.edge0)&&this.edge1.equals(x.edge1)&&this.edge2.equals(x.edge2));
     }
 
     // hashCode method
