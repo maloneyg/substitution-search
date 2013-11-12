@@ -16,6 +16,8 @@
 import java.lang.Math.*;
 import com.google.common.collect.ImmutableList;
 import Jama.Matrix;
+import java.util.ArrayList;
+import java.util.List;
 
 class Initializer {
 
@@ -192,15 +194,19 @@ class Initializer {
         SUBSTITUTION_MATRIX = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.AREA_MATRIX.inverse()).times(otherInfl).times(otherInfl).times(LengthAndAreaCalculator.AREA_MATRIX));
 
         int total = 1;
+        List<Integer> hitsYet = new ArrayList<>(3);
         for (Integer jj : Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE)) {
-            ImmutableList<Integer> totals = INFLATED_LENGTHS.getColumn((jj-1<(N/2))? jj-1 : N-jj-1);
-            int subtotal = 0;
-            for (Integer ii : totals) subtotal += ii;
-            subtotal = factorial(subtotal);
-            for (Integer ii : totals) subtotal /= (int)factorial(ii);
-            total *= subtotal;
+            if (!hitsYet.contains(jj)) {
+                ImmutableList<Integer> totals = INFLATED_LENGTHS.getColumn((jj-1<(N/2))? jj-1 : N-jj-1);
+                int subtotal = 0;
+                for (Integer ii : totals) subtotal += ii;
+                subtotal = factorial(subtotal);
+                for (Integer ii : totals) subtotal /= (int)factorial(ii);
+                total *= subtotal;
+            }
+            hitsYet.add(jj);
         }
-        TOTAL_EDGE_BREAKDOWNS = total;
+        TOTAL_EDGE_BREAKDOWNS = (BasicPrototile.ALL_PROTOTILES.get(Preinitializer.MY_TILE).isosceles())? 2*total : total;
 
     } // end of static initialization
 
