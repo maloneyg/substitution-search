@@ -164,6 +164,17 @@ public class MutablePatch implements Serializable {
         return message;
     }
 
+    // get edge0, edge1, and edge2
+    public ImmutableList<Integer> getEdge0() {
+        return edge0;
+    }
+    public ImmutableList<Integer> getEdge1() {
+        return edge1;
+    }
+    public ImmutableList<Integer> getEdge2() {
+        return edge2;
+    }
+
     // toggle the debug status
     public void setDebug(boolean tf) {
         debug = tf;

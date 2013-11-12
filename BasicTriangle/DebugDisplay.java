@@ -51,8 +51,6 @@ public class DebugDisplay extends JPanel implements ActionListener
         this.messages = new ArrayList<>();
         this.position = 0;
 
-        //patchesSoFar.add(patch.debugSolve());
-        //this.data = this.patchesSoFar.get(position).graphicsDump();
         patchesSoFar.add(patch.dumpImmutablePatch());
         messages.add(patch.getMessage());
         this.data = this.patchesSoFar.get(position).graphicsDump();
@@ -149,13 +147,10 @@ public class DebugDisplay extends JPanel implements ActionListener
         this.keepSolving = true;
         this.patch = MutableWorkUnit.nextWorkUnit().getPatch();
         patch.setDebug(true);
-        //patch.edgeDump();
         this.patchesSoFar = new ArrayList<>();
         this.messages = new ArrayList<>();
         this.position = 0;
 
-        //patchesSoFar.add(patch.debugSolve());
-        //this.data = this.patchesSoFar.get(position).graphicsDump();
         patchesSoFar.add(patch.dumpImmutablePatch());
         messages.add(patch.getMessage());
         this.data = this.patchesSoFar.get(position).graphicsDump();

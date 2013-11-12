@@ -128,7 +128,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
 
     // advance to the work unit matching this edge breakdown
     public static void advanceToBreakdown(List<List<Integer>> breakdown) {
-        while (notDoneYet) {
+        while (true) {
             if (compareBreakdown(breakdown)) break;
             iterateEdgeBreakdown();
         }

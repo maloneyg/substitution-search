@@ -56,7 +56,14 @@ public class ImmutablePatch implements Serializable {
         if (obj == null || getClass() != obj.getClass())
             return false;
         ImmutablePatch x = (ImmutablePatch) obj;
-        return (Arrays.equals(this.triangles,x.triangles)&&Arrays.equals(this.openEdges,x.openEdges)&&Arrays.equals(this.closedEdges,x.closedEdges)&&this.edge0.equals(x.edge0)&&this.edge1.equals(x.edge1)&&this.edge2.equals(x.edge2));
+        return (//
+            Arrays.equals(this.triangles,x.triangles)//
+          &&Arrays.equals(this.openEdges,x.openEdges)//
+          &&Arrays.equals(this.closedEdges,x.closedEdges)//
+          &&this.edge0.equals(x.edge0)//
+          &&this.edge1.equals(x.edge1)//
+          &&this.edge2.equals(x.edge2)//
+        );
     }
 
     // hashCode method
@@ -67,6 +74,17 @@ public class ImmutablePatch implements Serializable {
         result = prime*result + openEdges.hashCode();
         result = prime*result + partition.hashCode();
         return result;
+    }
+
+    // toString method
+    public String toString() {
+        String output = "ImmutablePatch:\nTriangles:\n";
+        for (BasicTriangle t : triangles) output += "\n" + t;
+        output += "Open Edges:\n";
+        for (BasicEdge e : openEdges) output += "\n" + e;
+        output += "\nClosed Edges:\n";
+        for (BasicEdge e : closedEdges) output += "\n" + e;
+        return output;
     }
 
     /*
