@@ -71,7 +71,8 @@ class DoubleEdgeLength implements Serializable {
 public class EdgeBreakdownGraph implements Serializable {
 
     private SimpleGraph<List<Integer>,DoubleEdgeLength> G = new SimpleGraph(DoubleEdgeLength.class);
-    private List<List<Integer>>[] sorted = (List<List<Integer>>[]) new ArrayList[BasicEdgeLength.ALL_EDGE_LENGTHS.size()];
+    private ImmutableList<BasicEdgeLength> ALL_EDGE_LENGTHS = BasicEdgeLength.ALL_EDGE_LENGTHS;
+    private List<List<Integer>>[] sorted = (List<List<Integer>>[]) new ArrayList[ALL_EDGE_LENGTHS.size()];
 
     // private constructor
     private EdgeBreakdownGraph() {
@@ -82,6 +83,15 @@ public class EdgeBreakdownGraph implements Serializable {
         return new EdgeBreakdownGraph();
     }
 
+    // add some edge breakdowns
+    public void add(List<Integer> b0, List<Integer> b1, List<Integer> b2, BasicEdgeLength l0, BasicEdgeLength l1, BasicEdgeLength l2) {
+        sorted[ALL_EDGE_LENGTHS.indexOf(l0)].add(b0);
+        sorted[ALL_EDGE_LENGTHS.indexOf(l1)].add(b1);
+        sorted[ALL_EDGE_LENGTHS.indexOf(l2)].add(b2);
+        G.addVertex(b0);
+        G.addVertex(b1);
+        G.addVertex(b2);
+    }
 
     // test client
     public static void main(String[] args) {
