@@ -35,6 +35,11 @@ public class PatchResult implements Result, Serializable
         return "PatchResult ID " + ID + " (" + completedPatches.size() + " completed puzzles, " + numberOfUnits + " work units)";
     }
 
+    public String toBriefString()
+    {
+        return "PatchResult ID " + ID;
+    }
+
     public int hashCode()
     {
         return completedPatches.hashCode();
