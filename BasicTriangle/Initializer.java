@@ -34,7 +34,7 @@ class Initializer {
     public static final ByteMatrix REF;
     public static final ByteMatrix INFL;
 
-    public static final int TOTAL_EDGE_BREAKDOWNS;
+    public static final int TOTAL_EDGE_BREAKDOWNS; // total number of work units
 
     /*
     * A list representing edge lengths.  

@@ -6,13 +6,15 @@ public class ServerCheckpoint implements Serializable
 {
     private final int jobCount;
     private final LinkedList<WorkUnitInstructions> toBeResent;
-    private final List<ImmutablePatch> allCompletedPatches;
     private final WorkUnitFactory workUnitFactory;
     private final AtomicLong numberOfResultsReceived;
+    private final Date dateSerialized;
+    private final int numberOfCompletedPuzzles;
 
     public ServerCheckpoint(int jobCount, HashMap<WorkUnitInstructions,MutableParadigmServer.ConnectionThread> dispatched,
                             LinkedList<WorkUnitInstructions> toBeResent, Object sendLock,
-                            List<ImmutablePatch> allCompletedPatches, WorkUnitFactory workUnitFactory, AtomicLong numberOfResultsReceived)
+                            WorkUnitFactory workUnitFactory, AtomicLong numberOfResultsReceived, Date dateSerialized,
+                            int numberOfCompletedPuzzles)
     {
         synchronized(sendLock)
             {
@@ -20,9 +22,10 @@ public class ServerCheckpoint implements Serializable
                 this.toBeResent = new LinkedList<WorkUnitInstructions>(toBeResent);
                 for (WorkUnitInstructions i : dispatched.keySet())
                     this.toBeResent.add(i);
-                this.allCompletedPatches = new LinkedList<ImmutablePatch>(allCompletedPatches);
                 this.workUnitFactory = workUnitFactory;
                 this.numberOfResultsReceived = new AtomicLong(numberOfResultsReceived.get());
+                this.dateSerialized = dateSerialized;
+                this.numberOfCompletedPuzzles = numberOfCompletedPuzzles;
             }
     }
 
@@ -41,13 +44,18 @@ public class ServerCheckpoint implements Serializable
         return toBeResent;
     }
 
-    public List<ImmutablePatch> getAllCompletedPatches()
-    {
-        return allCompletedPatches;
-    }
-
     public WorkUnitFactory getWorkUnitFactory()
     {
         return workUnitFactory;
+    }
+
+    public Date getDate()
+    {
+        return dateSerialized;
+    }
+
+    public int getNumberOfCompletedPuzzles()
+    {
+        return numberOfCompletedPuzzles;
     }
 }
