@@ -14,6 +14,8 @@ public class MutableParadigmServer
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
 
     public static List<ImmutablePatch> allCompletedPatches = new LinkedList<ImmutablePatch>();
+    private static final BasicEdgeLength[] lengths = BasicPrototile.ALL_PROTOTILES.get(Preinitializer.MY_TILE).getLengths();
+    private static EdgeBreakdownGraph G = EdgeBreakdownGraph.createEdgeBreakdownGraph();
     public static final String RESULT_FILENAME = "results.chk";
 
     public static AtomicLong numberOfResultsReceived = new AtomicLong(0L);
@@ -174,6 +176,7 @@ public class MutableParadigmServer
         if (allCompletedPatches.size() > 0)
             {
                 TriangleResults triangleResults = new TriangleResults(allCompletedPatches);
+                for (ImmutablePatch p : allCompletedPatches) G.add(p.getEdge0(),p.getEdge1(),p.getEdge2(),lengths[0],lengths[1],lengths[2]);
                 try
                     {
                         FileOutputStream fileOut = new FileOutputStream(RESULT_FILENAME);

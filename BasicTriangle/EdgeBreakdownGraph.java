@@ -117,6 +117,22 @@ public class EdgeBreakdownGraph implements Serializable {
         G.addEdge(c2,b0,DoubleEdgeLength.createDoubleEdgeLength(l2,l0));
     }
 
+    // toString method
+    // at least we can list the vertices
+    public String toString() {
+        String output = "";
+        for (int i = 0; i < sorted.length; i++) {
+            output += ALL_EDGE_LENGTHS.get(i) + "\n";
+            for (List<Integer> bd : sorted[i]) {
+                for (Integer ii : bd) {
+                    output += ii + " ";
+                }
+                output += "/n";
+            }
+        }
+        return output;
+    }
+
     // test client
     public static void main(String[] args) {
 

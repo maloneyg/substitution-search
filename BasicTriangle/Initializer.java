@@ -206,7 +206,7 @@ class Initializer {
             }
             hitsYet.add(jj);
         }
-        TOTAL_EDGE_BREAKDOWNS = (BasicPrototile.ALL_PROTOTILES.get(Preinitializer.MY_TILE).isosceles())? 2*total : total;
+        TOTAL_EDGE_BREAKDOWNS = ((BasicPrototile.ALL_PROTOTILES.get(Preinitializer.MY_TILE).isosceles())? 2*total : total);
 
     } // end of static initialization
 
