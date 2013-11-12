@@ -160,7 +160,9 @@ public final class MutableParadigmClient
                             {
                                 WorkUnitInstructions instructions = (WorkUnitInstructions)incomingObject;
                                 System.out.println("\nReceived instruction ID = " + instructions.getID());
+                                //System.out.print("Following instructions...");
                                 List<MutableWorkUnit> theseUnits = workUnitFactory.followInstructions(instructions);
+                                //System.out.println("done!");
 
                                 AtomicInteger counter = new AtomicInteger(0);
                                 LinkedList<ImmutablePatch> completedPuzzles = new LinkedList<ImmutablePatch>();
@@ -282,6 +284,16 @@ public final class MutableParadigmClient
                     outgoingObjectStream.reset();
                     //System.out.println("Requested new instructions.\n");
                 }
+            }
+        catch (SocketException e)
+            {
+                if ( e.getMessage().equals("Broken pipe") )
+                    System.out.println("Broken pipe while requesting job!");
+                else
+                    {
+                        System.out.println("Error while requesting job!");
+                        e.printStackTrace();
+                    }
             }
         catch (Exception e)
             {

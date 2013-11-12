@@ -373,7 +373,11 @@ public class MutableParadigmServer
                                     allCompletedPatches.addAll( localCompletedPatches );
                                     Date currentDate = new Date();
                                     String dateString = String.format("%02d:%02d:%02d", currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
-                                    System.out.println("[ " + dateString + " ] Received " + result + " (" + allCompletedPatches.size() + " finished puzzles total) from " + address);
+                                    String statusString = String.format("[ %s ] : Received %s ", dateString, result.toBriefString());
+                                    if ( localCompletedPatches.size() > 0 )
+                                        statusString = statusString + "(" + localCompletedPatches.size() + " new completed puzzles) ";
+                                    statusString = statusString + "from " + address;
+                                    System.out.println(statusString);
 
                                     // mark job as finished
                                     WorkUnitInstructions toBeRemoved = null;
@@ -495,7 +499,7 @@ public class MutableParadigmServer
 
                             // make a note of which instructions have gone out
                             dispatched.put(theseInstructions, this);
-                            System.out.println("Re-dispatched job " + theseInstructions.getID() + " to " + address + ".");
+                            System.out.println("Re-dispatched job " + theseInstructions.getID() + " to " + address + ".             ");
 
                             // keep track of how many jobs got sent in this function call
                             jobsSent++;
@@ -627,9 +631,9 @@ public class MutableParadigmServer
                                 File checkFile = new File(MutableParadigmServer.PRIMARY_CHECKPOINT_FILENAME);
                                 double size = (double)(checkFile.length()/1048576L);
                                 if ( size > 0.01 )
-                                    System.out.println(String.format("Wrote checkpoint (%.2f MB, %d results received).                 \n", (double)(checkFile.length()/1048576L), serverCheckpoint.getNumberOfResultsReceived().get()));
+                                    System.out.println(String.format("\nWrote checkpoint (%.2f MB, %d results received).                 \n", (double)(checkFile.length()/1048576L), serverCheckpoint.getNumberOfResultsReceived().get()));
                                 else
-                                    System.out.println("Wrote checkpoint (" + checkFile.length() + " bytes, " + serverCheckpoint.getNumberOfResultsReceived() + " results received).                         \n");
+                                    System.out.println("\nWrote checkpoint (" + checkFile.length() + " bytes, " + serverCheckpoint.getNumberOfResultsReceived() + " results received).                         \n");
                             }
                         catch (IOException e)
                             {
@@ -779,10 +783,12 @@ public class MutableParadigmServer
                         averageSpeed = SMOOTHING_FACTOR * lastSpeed + (1-SMOOTHING_FACTOR)*averageSpeed;
                         int jobsRemaining = (int)(Initializer.TOTAL_EDGE_BREAKDOWNS - jobsNow);
                         double ETA = jobsRemaining / (averageSpeed * 3600.0);
-                        if ( ! Double.isNaN(ETA) && ! Double.isInfinite(ETA) )
+                        if ( ! Double.isNaN(ETA) && ! Double.isInfinite(ETA) && ! Double.isNaN(averageSpeed) && ! Double.isInfinite(averageSpeed) )
                             MutableParadigmServer.timeString = String.format("ETA %.2f h (avg %.0f, now %.0f)", ETA, averageSpeed, lastSpeed);
-                        else
+                        else if ( ! Double.isNaN(averageSpeed) && ! Double.isInfinite(averageSpeed) )
                             MutableParadigmServer.timeString = String.format("ETA unknown (avg %.0f, now %.0f)", averageSpeed, lastSpeed);
+                        else
+                            MutableParadigmServer.timeString = "ETA unknown";
                     }
             }
         }
