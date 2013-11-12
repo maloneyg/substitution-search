@@ -347,9 +347,10 @@ public class MutableParadigmServer
             while ( Thread.interrupted() == false )
                 {
                     // check if all results have been received
-                    System.out.print(String.format("%d of %d jobs complete (%.2f%%, %s)\n", numberOfResultsReceived.get(),
-                                                  Initializer.TOTAL_EDGE_BREAKDOWNS, (double)(numberOfResultsReceived.get()/Initializer.TOTAL_EDGE_BREAKDOWNS),
-                                                  MutableParadigmServer.timeString));
+                    System.out.print(String.format("%d of %d jobs complete (%.2f%%, %s)\r", numberOfResultsReceived.get(),
+                                                   Initializer.TOTAL_EDGE_BREAKDOWNS,
+                                                   (double)(numberOfResultsReceived.get()/Initializer.TOTAL_EDGE_BREAKDOWNS),
+                                                   MutableParadigmServer.timeString));
                     //+ " outstanding: " + outstandingResults.size() + " jobsSent: " + jobsSent);
                     if ( numberOfResultsReceived.get() > 0 && dispatched.size() == 0 &&
                          toBeResent.size() == 0 && jobsSent == 0 )
@@ -626,9 +627,9 @@ public class MutableParadigmServer
                                 File checkFile = new File(MutableParadigmServer.PRIMARY_CHECKPOINT_FILENAME);
                                 double size = (double)(checkFile.length()/1048576L);
                                 if ( size > 0.01 )
-                                    System.out.println(String.format("Wrote checkpoint (%.2f MB, %d results received).\n", (double)(checkFile.length()/1048576L), serverCheckpoint.getNumberOfResultsReceived().get()));
+                                    System.out.println(String.format("Wrote checkpoint (%.2f MB, %d results received).                 \n", (double)(checkFile.length()/1048576L), serverCheckpoint.getNumberOfResultsReceived().get()));
                                 else
-                                    System.out.println("Wrote checkpoint (" + checkFile.length() + " bytes, " + serverCheckpoint.getNumberOfResultsReceived() + " results received).\n");
+                                    System.out.println("Wrote checkpoint (" + checkFile.length() + " bytes, " + serverCheckpoint.getNumberOfResultsReceived() + " results received).                         \n");
                             }
                         catch (IOException e)
                             {
@@ -712,7 +713,8 @@ public class MutableParadigmServer
         public ThreadMonitor()
         {
             timer = new Timer();
-            timer.schedule(new CustomTimerTask(), (int)(MutableParadigmServer.MONITOR_INTERVAL*1000), (int)(MutableParadigmServer.MONITOR_INTERVAL*1000));
+            // 60 second delay before this thread will start
+            timer.schedule(new CustomTimerTask(), (int)(60*MutableParadigmServer.MONITOR_INTERVAL*1000), (int)(MutableParadigmServer.MONITOR_INTERVAL*1000));
         }
 
         private class CustomTimerTask extends TimerTask
@@ -767,13 +769,20 @@ public class MutableParadigmServer
                 else
                     {
                         long jobsNow = MutableParadigmServer.numberOfResultsReceived.get();
+                        long newJobs = jobsNow - lastNumberOfResultsReceived;
+                        
                         Date currentTime = new Date();
                         double deltaT = (double)( (currentTime.getTime() - lastTime.getTime()) / 1000L );
-                        double lastSpeed = (double)( (MutableParadigmServer.numberOfResultsReceived.get() - lastNumberOfResultsReceived)/deltaT );
+                        
+                        double lastSpeed = (double)( newJobs/deltaT );
+                        
                         averageSpeed = SMOOTHING_FACTOR * lastSpeed + (1-SMOOTHING_FACTOR)*averageSpeed;
                         int jobsRemaining = (int)(Initializer.TOTAL_EDGE_BREAKDOWNS - jobsNow);
                         double ETA = jobsRemaining / (averageSpeed * 3600.0);
-                        MutableParadigmServer.timeString = String.format("ETA %.2f h (avg %.0f, now %.0f)", ETA, averageSpeed, lastSpeed);
+                        if ( ! Double.isNaN(ETA) && ! Double.isInfinite(ETA) )
+                            MutableParadigmServer.timeString = String.format("ETA %.2f h (avg %.0f, now %.0f)", ETA, averageSpeed, lastSpeed);
+                        else
+                            MutableParadigmServer.timeString = String.format("ETA unknown (avg %.0f, now %.0f)", averageSpeed, lastSpeed);
                     }
             }
         }
