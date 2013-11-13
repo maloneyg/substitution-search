@@ -195,6 +195,7 @@ class Initializer {
 
         int total = 1;
         List<Integer> hitsYet = new ArrayList<>(3);
+        int factor = 1;
         for (Integer jj : Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE)) {
             if (!hitsYet.contains(jj)) {
                 ImmutableList<Integer> totals = INFLATED_LENGTHS.getColumn((jj-1<(N/2))? jj-1 : N-jj-1);
@@ -203,10 +204,12 @@ class Initializer {
                 subtotal = factorial(subtotal);
                 for (Integer ii : totals) subtotal /= (int)factorial(ii);
                 total *= subtotal;
+            } else {
+                factor = 2;
             }
             hitsYet.add(jj);
         }
-        TOTAL_EDGE_BREAKDOWNS = ((BasicPrototile.ALL_PROTOTILES.get(Preinitializer.MY_TILE).isosceles())? 2*total : total);
+        TOTAL_EDGE_BREAKDOWNS = factor * total;
 
     } // end of static initialization
 

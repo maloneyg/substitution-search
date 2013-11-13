@@ -176,7 +176,7 @@ public class MutableParadigmServer
         if (allCompletedPatches.size() > 0)
             {
                 TriangleResults triangleResults = new TriangleResults(allCompletedPatches);
-                for (ImmutablePatch p : allCompletedPatches) G.add(p.getEdge0(),p.getEdge1(),p.getEdge2(),lengths[0],lengths[1],lengths[2]);
+                //for (ImmutablePatch p : allCompletedPatches) G.add(p.getEdge0(),p.getEdge1(),p.getEdge2(),lengths[0],lengths[1],lengths[2]); // write to the edge breakdown graph
                 try
                     {
                         FileOutputStream fileOut = new FileOutputStream(RESULT_FILENAME);

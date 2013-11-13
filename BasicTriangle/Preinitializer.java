@@ -14,7 +14,7 @@ class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 1;        // the tile we're searching
+    public static final int MY_TILE = 0;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
@@ -27,11 +27,13 @@ class Preinitializer {
     // the inflation factor, represented as coefficients of
     // 1, a, a^2, etc., where a = 2*cos(pi/N).
 
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, -2, -3, 1, 1); // even huger search (122)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, -2, 1, 1); // even huger search (124)
 
     public static final ImmutableList<ImmutableList<Integer>> PROTOTILES = ImmutableList.of( 
                              //    ImmutableList.of( 1, 2, 4 ),  // seven
@@ -49,6 +51,8 @@ class Preinitializer {
             // determine which host name to use
             if ( System.getProperty("user.name").toLowerCase().equals("ekwan") )
                 HOST_NAME = "enj10.rc.fas.harvard.edu";
+            else if ( System.getProperty("user.name").toLowerCase().equals("ngrm1") )
+                HOST_NAME = "corbridge";
             else
                 HOST_NAME = "localhost";
             System.out.println("Host name automatically set to " + HOST_NAME + ".");
