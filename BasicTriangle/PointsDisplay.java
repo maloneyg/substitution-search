@@ -13,19 +13,22 @@ import java.awt.event.ActionListener;
 
 public class PointsDisplay extends JPanel implements ActionListener
 {
-
     private final List<ImmutablePatch> patches;
     private ArrayList<OrderedTriple> data;
     private JButton next;
     private JButton previous;
     private int position;
-    public static final int windowSize = 500;
+    public static final int windowSize = 800;
+
+    private JTextArea currentStatus;
+    private JTextField userInput;
 
     public PointsDisplay(List<ImmutablePatch> patches, String title) throws java.awt.HeadlessException
     {
         this.patches = patches;
         this.position = 0;
         this.data = this.patches.get(position).graphicsDump();
+        this.setLayout(null);
 
         next = new JButton("next");
         if (position+1 >= patches.size()) {
@@ -36,6 +39,7 @@ public class PointsDisplay extends JPanel implements ActionListener
         next.setActionCommand("advance");
         next.setMnemonic(KeyEvent.VK_A);
         next.addActionListener(this);
+        next.setBounds(120,10,90,20);
 
         previous = new JButton("previous");
         if (position == 0) {
@@ -46,6 +50,7 @@ public class PointsDisplay extends JPanel implements ActionListener
         previous.setActionCommand("retreat");
         previous.setMnemonic(KeyEvent.VK_B);
         previous.addActionListener(this);
+        previous.setBounds(220,10,90,20);
 
         JPanel content = new JPanel();
         content.setLayout(new BorderLayout());
@@ -61,6 +66,27 @@ public class PointsDisplay extends JPanel implements ActionListener
 
         add(previous);
         add(next);
+
+        currentStatus = new JTextArea("---");
+        currentStatus.setFont(new Font("SansSerif", Font.PLAIN,10));
+        currentStatus.setEditable(false);
+        currentStatus.setBounds(10,10,80,15);
+        add(currentStatus);
+
+        userInput = new JTextField("enter result # and hit enter",25);
+        userInput.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        userInput.setBounds(370,10,150,20);
+        userInput.addActionListener(this);
+        userInput.setActionCommand("changed");
+        add(userInput);
+
+        updateStatusString();
+        this.updateUI();
+    }
+
+    public void updateStatusString()
+    {
+        currentStatus.setText(position+1 + "/" + patches.size());
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -69,14 +95,42 @@ public class PointsDisplay extends JPanel implements ActionListener
             this.data = patches.get(position).graphicsDump();
             if (position+1 == patches.size()) next.setEnabled(false);
             if (position > 0) previous.setEnabled(true);
-            this.updateUI();
         } else if ("retreat".equals(e.getActionCommand())) {
             position--;
             this.data = patches.get(position).graphicsDump();
             if (position+1 < patches.size()) next.setEnabled(true);
             if (position == 0) previous.setEnabled(false);
+        } else if ("changed".equals(e.getActionCommand())) {
+            String text = userInput.getText();
+            int requestedPosition = 0;
+            try
+                {
+                    requestedPosition = Integer.parseInt(text);
+                }
+            catch (NumberFormatException e2)
+                {
+                    userInput.setText("invalid entry");
+                    this.updateUI();
+                    return;
+                }
+            requestedPosition--;
+            if ( requestedPosition < 0 || requestedPosition > patches.size() - 1 )
+                {
+                    userInput.setText("out of range");
+                    this.updateUI();
+                    return;
+                }
+            position = requestedPosition;
+            this.data = patches.get(position).graphicsDump();
+            if (position+1 == patches.size()) next.setEnabled(false);
+            if (position > 0) previous.setEnabled(true);
+            if (position+1 < patches.size()) next.setEnabled(true);
+            if (position == 0) previous.setEnabled(false);
+            updateStatusString();
             this.updateUI();
         }
+        updateStatusString();
+        this.updateUI();
     }
 
     public void paintComponent(Graphics g)
