@@ -72,7 +72,7 @@ class DoubleEdgeLength implements Serializable {
 
 public class EdgeBreakdownGraph implements Serializable {
 
-    private SimpleGraph<List<Integer>,DoubleEdgeLength> G = new SimpleGraph(DoubleEdgeLength.class);
+    private SimpleGraph<List<Integer>,DoubleEdgeLength> G = new SimpleGraph<>(DoubleEdgeLength.class);
     private ImmutableList<BasicEdgeLength> ALL_EDGE_LENGTHS = BasicEdgeLength.ALL_EDGE_LENGTHS;
     private Set<List<Integer>>[] sorted = (Set<List<Integer>>[]) new HashSet[ALL_EDGE_LENGTHS.size()];
 

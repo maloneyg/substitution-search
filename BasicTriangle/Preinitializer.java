@@ -18,7 +18,7 @@ class Preinitializer {
 
     public static final float EP = 0.000001f;  // threshold value
 
-    public static final int BATCH_SIZE = 1000; // number of jobs to make per set of instructions
+    public static final int BATCH_SIZE = 200; // number of jobs to make per set of instructions
 
     public static final String HOST_NAME; // name of host clients will use; set in static initializer
 
@@ -31,7 +31,8 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2, 1); // the square of the really small search
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, 0, 1); // quite big search (110)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121)
