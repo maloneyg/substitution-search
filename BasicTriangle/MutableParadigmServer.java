@@ -352,7 +352,7 @@ public class MutableParadigmServer
                     // check if all results have been received
                     System.out.print(String.format("%d of %d jobs complete (%.2f%%, %s)\r", numberOfResultsReceived.get(),
                                                    Initializer.TOTAL_EDGE_BREAKDOWNS,
-                                                   (double)(numberOfResultsReceived.get()/Initializer.TOTAL_EDGE_BREAKDOWNS),
+                                                   (double)(100.0*numberOfResultsReceived.get()/(double)Initializer.TOTAL_EDGE_BREAKDOWNS),
                                                    MutableParadigmServer.timeString));
                     //+ " outstanding: " + outstandingResults.size() + " jobsSent: " + jobsSent);
                     if ( numberOfResultsReceived.get() > 0 && dispatched.size() == 0 &&
@@ -417,7 +417,7 @@ public class MutableParadigmServer
                         }
                     catch (EOFException | SocketException e)
                         {
-                            System.out.println("Connection lost.");
+                            System.out.println("Connection lost.               ");
                             break;
                         }
                     catch (Exception e)
