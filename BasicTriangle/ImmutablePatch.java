@@ -51,6 +51,17 @@ public class ImmutablePatch implements Serializable {
         return new ImmutablePatch(t,e1,e2,o,v,bd0,bd1,bd2);
     }
 
+    // getters
+    public ImmutableList<Integer> getEdge0() {
+        return edge0;
+    }
+    public ImmutableList<Integer> getEdge1() {
+        return edge1;
+    }
+    public ImmutableList<Integer> getEdge2() {
+        return edge2;
+    }
+
     // equals method
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())

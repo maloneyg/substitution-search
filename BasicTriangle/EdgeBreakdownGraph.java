@@ -18,6 +18,8 @@ import java.io.Serializable;
 import org.jgrapht.graph.*;
 import org.jgrapht.graph.SimpleGraph;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 // an unordered pair of edge lengths.
 class DoubleEdgeLength implements Serializable {
@@ -70,8 +72,9 @@ class DoubleEdgeLength implements Serializable {
 
 public class EdgeBreakdownGraph implements Serializable {
 
-    private SimpleGraph<List<Integer>,DoubleEdgeLength> G = new SimpleGraph(DoubleEdgeLength.class);
-    private List<List<Integer>>[] sorted = (List<List<Integer>>[]) new ArrayList[BasicEdgeLength.ALL_EDGE_LENGTHS.size()];
+    private SimpleGraph<List<Integer>,DoubleEdgeLength> G = new SimpleGraph<>(DoubleEdgeLength.class);
+    private ImmutableList<BasicEdgeLength> ALL_EDGE_LENGTHS = BasicEdgeLength.ALL_EDGE_LENGTHS;
+    private Set<List<Integer>>[] sorted = (Set<List<Integer>>[]) new HashSet[ALL_EDGE_LENGTHS.size()];
 
     // private constructor
     private EdgeBreakdownGraph() {
@@ -82,6 +85,53 @@ public class EdgeBreakdownGraph implements Serializable {
         return new EdgeBreakdownGraph();
     }
 
+    // add some edge breakdowns
+    public void add(ImmutableList<Integer> b0, ImmutableList<Integer> b1, ImmutableList<Integer> b2, BasicEdgeLength l0, BasicEdgeLength l1, BasicEdgeLength l2) {
+        sorted[ALL_EDGE_LENGTHS.indexOf(l0)].add(b0);
+        sorted[ALL_EDGE_LENGTHS.indexOf(l1)].add(b1);
+        sorted[ALL_EDGE_LENGTHS.indexOf(l2)].add(b2);
+        G.addVertex(b0);
+        G.addVertex(b1);
+        G.addVertex(b2);
+        List<Integer> c0 = b0.reverse();
+        List<Integer> c1 = b1.reverse();
+        List<Integer> c2 = b2.reverse();
+        sorted[ALL_EDGE_LENGTHS.indexOf(l0)].add(c0);
+        sorted[ALL_EDGE_LENGTHS.indexOf(l1)].add(c1);
+        sorted[ALL_EDGE_LENGTHS.indexOf(l2)].add(c2);
+        G.addVertex(c0);
+        G.addVertex(c1);
+        G.addVertex(c2);
+        // now add all the bonds
+        G.addEdge(b0,b1,DoubleEdgeLength.createDoubleEdgeLength(l0,l1));
+        G.addEdge(b1,b2,DoubleEdgeLength.createDoubleEdgeLength(l1,l2));
+        G.addEdge(b2,b0,DoubleEdgeLength.createDoubleEdgeLength(l2,l0));
+        G.addEdge(c0,c1,DoubleEdgeLength.createDoubleEdgeLength(l0,l1));
+        G.addEdge(c1,c2,DoubleEdgeLength.createDoubleEdgeLength(l1,l2));
+        G.addEdge(c2,c0,DoubleEdgeLength.createDoubleEdgeLength(l2,l0));
+        G.addEdge(b0,c1,DoubleEdgeLength.createDoubleEdgeLength(l0,l1));
+        G.addEdge(b1,c2,DoubleEdgeLength.createDoubleEdgeLength(l1,l2));
+        G.addEdge(b2,c0,DoubleEdgeLength.createDoubleEdgeLength(l2,l0));
+        G.addEdge(c0,b1,DoubleEdgeLength.createDoubleEdgeLength(l0,l1));
+        G.addEdge(c1,b2,DoubleEdgeLength.createDoubleEdgeLength(l1,l2));
+        G.addEdge(c2,b0,DoubleEdgeLength.createDoubleEdgeLength(l2,l0));
+    }
+
+    // toString method
+    // at least we can list the vertices
+    public String toString() {
+        String output = "";
+        for (int i = 0; i < sorted.length; i++) {
+            output += ALL_EDGE_LENGTHS.get(i) + "\n";
+            for (List<Integer> bd : sorted[i]) {
+                for (Integer ii : bd) {
+                    output += ii + " ";
+                }
+                output += "/n";
+            }
+        }
+        return output;
+    }
 
     // test client
     public static void main(String[] args) {

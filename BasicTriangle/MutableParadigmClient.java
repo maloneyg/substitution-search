@@ -289,6 +289,8 @@ public final class MutableParadigmClient
             {
                 if ( e.getMessage().equals("Broken pipe") )
                     System.out.println("Broken pipe while requesting job!");
+                else if ( e.getMessage().contains("reset by peer") )
+                    System.out.println("Connection reset by peer while requesting job!");
                 else
                     {
                         System.out.println("Error while requesting job!");

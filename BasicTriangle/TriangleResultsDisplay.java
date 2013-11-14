@@ -11,7 +11,10 @@ public class TriangleResultsDisplay
 //            ArrayList<ImmutablePatch> patches = null;
             List<ImmutablePatch> patches = null;
             if ( ! new File(filename).isFile() )
-                return;
+                {
+                    System.out.println(filename + " not found!");
+                    return;
+                }
             try
                 {
                     FileInputStream fileIn = new FileInputStream(filename);

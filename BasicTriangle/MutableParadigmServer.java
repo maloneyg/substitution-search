@@ -14,6 +14,8 @@ public class MutableParadigmServer
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
 
     public static List<ImmutablePatch> allCompletedPatches = new LinkedList<ImmutablePatch>();
+    private static final BasicEdgeLength[] lengths = BasicPrototile.ALL_PROTOTILES.get(Preinitializer.MY_TILE).getLengths();
+    private static EdgeBreakdownGraph G = EdgeBreakdownGraph.createEdgeBreakdownGraph();
     public static final String RESULT_FILENAME = "results.chk";
 
     public static AtomicLong numberOfResultsReceived = new AtomicLong(0L);
@@ -174,6 +176,7 @@ public class MutableParadigmServer
         if (allCompletedPatches.size() > 0)
             {
                 TriangleResults triangleResults = new TriangleResults(allCompletedPatches);
+                //for (ImmutablePatch p : allCompletedPatches) G.add(p.getEdge0(),p.getEdge1(),p.getEdge2(),lengths[0],lengths[1],lengths[2]); // write to the edge breakdown graph
                 try
                     {
                         FileOutputStream fileOut = new FileOutputStream(RESULT_FILENAME);
@@ -349,7 +352,7 @@ public class MutableParadigmServer
                     // check if all results have been received
                     System.out.print(String.format("%d of %d jobs complete (%.2f%%, %s)\r", numberOfResultsReceived.get(),
                                                    Initializer.TOTAL_EDGE_BREAKDOWNS,
-                                                   (double)(numberOfResultsReceived.get()/Initializer.TOTAL_EDGE_BREAKDOWNS),
+                                                   (double)(100.0*numberOfResultsReceived.get()/(double)Initializer.TOTAL_EDGE_BREAKDOWNS),
                                                    MutableParadigmServer.timeString));
                     //+ " outstanding: " + outstandingResults.size() + " jobsSent: " + jobsSent);
                     if ( numberOfResultsReceived.get() > 0 && dispatched.size() == 0 &&
@@ -414,7 +417,7 @@ public class MutableParadigmServer
                         }
                     catch (EOFException | SocketException e)
                         {
-                            System.out.println("Connection lost.");
+                            System.out.println("Connection to " + address + " lost.");
                             break;
                         }
                     catch (Exception e)
@@ -631,9 +634,9 @@ public class MutableParadigmServer
                                 File checkFile = new File(MutableParadigmServer.PRIMARY_CHECKPOINT_FILENAME);
                                 double size = (double)(checkFile.length()/1048576L);
                                 if ( size > 0.01 )
-                                    System.out.println(String.format("\nWrote checkpoint (%.2f MB, %d units done, %d finished puzzles).    \n", (double)(checkFile.length()/1048576L), serverCheckpoint.getNumberOfResultsReceived().get(), MutableParadigmServer.allCompletedPatches.size()));
+                                    System.out.println(String.format("\nWrote checkpoint (%.2f MB, %d results received, %d completed puzzles).                 \n", (double)(checkFile.length()/1048576L), serverCheckpoint.getNumberOfResultsReceived().get(), MutableParadigmServer.allCompletedPatches.size()));
                                 else
-                                    System.out.println(String.format("\nWrote checkpoint (%d bytes, %d units done, %d finished puzzles).    \n", checkFile.length(), serverCheckpoint.getNumberOfResultsReceived().get(), MutableParadigmServer.allCompletedPatches.size()));
+                                    System.out.println(String.format("\nWrote checkpoint (%d bytes, %d results received, %d completed puzzles).                 \n",checkFile.length(), serverCheckpoint.getNumberOfResultsReceived().get(), MutableParadigmServer.allCompletedPatches.size()));
                             }
                         catch (IOException e)
                             {

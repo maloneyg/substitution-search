@@ -37,7 +37,7 @@ public class MutablePatch implements Serializable {
     // a list of completed patches for this particular puzzle
     private List<ImmutablePatch> localCompletedPatches = new ArrayList<ImmutablePatch>();
 
-    private AtomicInteger count = new AtomicInteger(0);
+    private AtomicInteger count = null;
 
     static { // initialize completedPatches
         ArrayList<ImmutablePatch> tempList = new ArrayList<>();
@@ -255,6 +255,7 @@ public class MutablePatch implements Serializable {
     // here is where all of the work is done.
     // place a single tile, then call this method recursively.
     public void solve() {
+        count.getAndIncrement();
         do {
             if (tileList.empty()) {
                 ImmutablePatch thisPatch = dumpImmutablePatch();
@@ -270,7 +271,6 @@ public class MutablePatch implements Serializable {
                     if (partition.valid())
                         {
                             solve();
-                            count.getAndIncrement();
                         }
                     removeTriangle();
                 }
