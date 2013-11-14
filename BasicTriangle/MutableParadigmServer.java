@@ -631,9 +631,9 @@ public class MutableParadigmServer
                                 File checkFile = new File(MutableParadigmServer.PRIMARY_CHECKPOINT_FILENAME);
                                 double size = (double)(checkFile.length()/1048576L);
                                 if ( size > 0.01 )
-                                    System.out.println(String.format("\nWrote checkpoint (%.2f MB, %d results received).                 \n", (double)(checkFile.length()/1048576L), serverCheckpoint.getNumberOfResultsReceived().get()));
+                                    System.out.println(String.format("\nWrote checkpoint (%.2f MB, %d units done, %d finished puzzles).    \n", (double)(checkFile.length()/1048576L), serverCheckpoint.getNumberOfResultsReceived().get(), MutableParadigmServer.allCompletedPatches.size()));
                                 else
-                                    System.out.println("\nWrote checkpoint (" + checkFile.length() + " bytes, " + serverCheckpoint.getNumberOfResultsReceived() + " results received).                         \n");
+                                    System.out.println(String.format("\nWrote checkpoint (%d bytes, %d units done, %d finished puzzles).    \n", checkFile.length(), serverCheckpoint.getNumberOfResultsReceived().get(), MutableParadigmServer.allCompletedPatches.size()));
                             }
                         catch (IOException e)
                             {
