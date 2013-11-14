@@ -25,6 +25,8 @@ public class PointsDisplay extends JPanel implements ActionListener
 
     public PointsDisplay(List<ImmutablePatch> patches, String title) throws java.awt.HeadlessException
     {
+        if ( patches.size() == 0 || patches == null )
+            throw new IllegalArgumentException("can't make display if there aren't any patches!");
         this.patches = patches;
         this.position = 0;
         this.data = this.patches.get(position).graphicsDump();
