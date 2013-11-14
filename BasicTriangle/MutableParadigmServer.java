@@ -786,10 +786,14 @@ public class MutableParadigmServer
                         averageSpeed = SMOOTHING_FACTOR * lastSpeed + (1-SMOOTHING_FACTOR)*averageSpeed;
                         int jobsRemaining = (int)(Initializer.TOTAL_EDGE_BREAKDOWNS - jobsNow);
                         double ETA = jobsRemaining / (averageSpeed * 3600.0);
+                        if ( Double.isNaN(ETA) || Double.isInfinite(ETA) )
+                            ETA = jobsRemaining / ( lastSpeed * 3600.0 );
                         if ( ! Double.isNaN(ETA) && ! Double.isInfinite(ETA) && ! Double.isNaN(averageSpeed) && ! Double.isInfinite(averageSpeed) )
                             MutableParadigmServer.timeString = String.format("ETA %.2f h (avg %.0f, now %.0f)", ETA, averageSpeed, lastSpeed);
                         else if ( ! Double.isNaN(averageSpeed) && ! Double.isInfinite(averageSpeed) )
                             MutableParadigmServer.timeString = String.format("ETA unknown (avg %.0f, now %.0f)", averageSpeed, lastSpeed);
+                        else if ( ! Double.isNaN(lastSpeed) && ! Double.isInfinite(lastSpeed) )
+                            MutableParadigmServer.timeString = String.format("ETA unknown (now %.0f)", lastSpeed);
                         else
                             MutableParadigmServer.timeString = "ETA unknown";
                     }
