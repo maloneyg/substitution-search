@@ -24,7 +24,7 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
     private final BytePoint[] ends;
 
     static { // initialize TOO_CLOSE
-        double smallest = 1.0;
+        double smallest = 10.0;
         for (BasicPrototile p : BasicPrototile.ALL_PROTOTILES) {
             BasicTriangle t = p.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false);
             BasicEdge[] edges = t.getEdges();
@@ -35,6 +35,7 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
             }
         }
         TOO_CLOSE = 0.95*smallest;
+        System.out.println(TOO_CLOSE);
     }
 
     // Constructor methods.  

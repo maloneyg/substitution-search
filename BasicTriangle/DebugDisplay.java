@@ -24,7 +24,7 @@ public class DebugDisplay extends JPanel implements ActionListener
     private JButton previous;
     private int position;
     private boolean keepSolving;
-    public static final int windowSize = 700;
+    public static final int windowSize = 500;
     private JTextArea currentIndexArea;
     private JTextArea messageArea;
     private String positionString;
@@ -168,7 +168,7 @@ public class DebugDisplay extends JPanel implements ActionListener
         messageArea.setFont(new Font("SansSerif", Font.PLAIN, 10));
         messageArea.setEditable(false);
         messageArea.setLineWrap(true);
-        messageArea.setBounds(350,75,400,150);
+        messageArea.setBounds(10,75,200,150);
         add(messageArea);
 
         next = new JButton("next");
@@ -463,7 +463,7 @@ public class DebugDisplay extends JPanel implements ActionListener
 
         //System.out.println(BasicEdge.TOO_CLOSE);
         //DebugDisplay display = new DebugDisplay(21,"debugging");
-        DebugDisplay display = new DebugDisplay(1151,"debugging");
+        DebugDisplay display = new DebugDisplay(2,"debugging");
 
     }
 

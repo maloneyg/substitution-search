@@ -37,7 +37,7 @@ public class MutablePatch implements Serializable {
     // a list of completed patches for this particular puzzle
     private List<ImmutablePatch> localCompletedPatches = new ArrayList<ImmutablePatch>();
 
-    private AtomicInteger count = null;
+    private AtomicInteger count = new AtomicInteger(0);
 
     static { // initialize completedPatches
         ArrayList<ImmutablePatch> tempList = new ArrayList<>();
