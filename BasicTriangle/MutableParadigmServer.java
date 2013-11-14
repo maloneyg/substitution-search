@@ -32,7 +32,7 @@ public class MutableParadigmServer
     public static final String PRIMARY_RESULTS_FILENAME = "primary_results.chk";
     public static final String SECONDARY_RESULTS_FILENAME = "secondary_results.chk";
 
-    public static String timeString = "ETA unknown";
+    public static String timeString = "ETA calculating...";
 
     private MutableParadigmServer()
     {
@@ -720,8 +720,8 @@ public class MutableParadigmServer
         public ThreadMonitor()
         {
             timer = new Timer();
-            // 60 second delay before this thread will start
-            timer.schedule(new CustomTimerTask(), (int)(60*MutableParadigmServer.MONITOR_INTERVAL*1000), (int)(MutableParadigmServer.MONITOR_INTERVAL*1000));
+            // 30 second delay before this thread will start
+            timer.schedule(new CustomTimerTask(), 30*1000, (int)(MutableParadigmServer.MONITOR_INTERVAL*1000));
         }
 
         private class CustomTimerTask extends TimerTask
@@ -769,7 +769,7 @@ public class MutableParadigmServer
                         // start of run, so initialize values
                         // don't do anything if we haven't started yet
                         lastNumberOfResultsReceived = MutableParadigmServer.numberOfResultsReceived.get();
-                        if ( lastNumberOfResultsReceived < 5000L )
+                        if ( lastNumberOfResultsReceived < 1000 )
                             return;
                         lastTime = new Date();
                     }
@@ -783,19 +783,33 @@ public class MutableParadigmServer
                         
                         double lastSpeed = (double)( newJobs/deltaT );
                         
-                        averageSpeed = SMOOTHING_FACTOR * lastSpeed + (1-SMOOTHING_FACTOR)*averageSpeed;
+                        if ( averageSpeed < 1 )
+                            averageSpeed = lastSpeed;
+                        else
+                            averageSpeed = SMOOTHING_FACTOR * lastSpeed + (1-SMOOTHING_FACTOR)*averageSpeed;
                         int jobsRemaining = (int)(Initializer.TOTAL_EDGE_BREAKDOWNS - jobsNow);
                         double ETA = jobsRemaining / (averageSpeed * 3600.0);
+                        
                         if ( Double.isNaN(ETA) || Double.isInfinite(ETA) )
                             ETA = jobsRemaining / ( lastSpeed * 3600.0 );
-                        if ( ! Double.isNaN(ETA) && ! Double.isInfinite(ETA) && ! Double.isNaN(averageSpeed) && ! Double.isInfinite(averageSpeed) )
-                            MutableParadigmServer.timeString = String.format("ETA %.2f h (avg %.0f, now %.0f)", ETA, averageSpeed, lastSpeed);
-                        else if ( ! Double.isNaN(averageSpeed) && ! Double.isInfinite(averageSpeed) )
-                            MutableParadigmServer.timeString = String.format("ETA unknown (avg %.0f, now %.0f)", averageSpeed, lastSpeed);
-                        else if ( ! Double.isNaN(lastSpeed) && ! Double.isInfinite(lastSpeed) )
-                            MutableParadigmServer.timeString = String.format("ETA unknown (now %.0f)", lastSpeed);
+                        
+                        //System.out.println(jobsNow + " " + jobsRemaining + " " + ETA + " " + averageSpeed + " " + lastSpeed);
+                       
+                        String timeString = "";
+                        if ( ! Double.isNaN(ETA) && ! Double.isInfinite(ETA) )
+                            timeString = String.format("ETA %.2f h", ETA);
                         else
-                            MutableParadigmServer.timeString = "ETA unknown";
+                            timeString = "ETA unknown";
+
+                        if ( ! Double.isNaN(averageSpeed) && ! Double.isInfinite(averageSpeed) &&
+                             ! Double.isNaN(lastSpeed)    && ! Double.isInfinite(lastSpeed)       )
+                            timeString = timeString + String.format(", avg speed %.1f, now %.1f", averageSpeed, lastSpeed);
+                        else if ( ! Double.isNaN(averageSpeed) && ! Double.isInfinite(averageSpeed) )
+                            timeString = timeString + String.format(", avg speed %.1f", averageSpeed);
+                        else if ( ! Double.isNaN(lastSpeed)    && ! Double.isInfinite(lastSpeed)    )
+                            timeString = timeString + String.format(", speed now %.1f", lastSpeed);
+
+                        MutableParadigmServer.timeString = timeString;
                     }
             }
         }
