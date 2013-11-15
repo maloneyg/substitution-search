@@ -190,11 +190,25 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
 
     // Check if two edges have any end points in common
     public boolean commonEnd(BasicEdge e) {
-//        BytePoint u0 = this.ends[0];
-//        BytePoint u1 = this.ends[1];
-//        BytePoint v0 = e.ends[0];
-//        BytePoint v1 = e.ends[1];
         return (ends[0].equals(e.ends[0])||ends[0].equals(e.ends[1])||ends[1].equals(e.ends[0])||ends[1].equals(e.ends[1]));
+    }
+
+    // if the two edges are in contact, with the final point
+    // of one equal to the initial point of the other, return
+    // the first one.
+    public static BasicEdge cw(BasicEdge e1, BasicEdge e2) {
+        if (e1.ends[1].equals(e2.ends[0])) return e1;
+        if (e2.ends[1].equals(e1.ends[0])) return e2;
+        throw new IllegalArgumentException("The edges " + e1 + " and " + e2 + " are not incident head-to-tail.");
+    }
+
+    // if the two edges are in contact, with the final point
+    // of one equal to the initial point of the other, return
+    // the second one.
+    public static BasicEdge ccw(BasicEdge e1, BasicEdge e2) {
+        if (e1.ends[0].equals(e2.ends[1])) return e1;
+        if (e2.ends[0].equals(e1.ends[1])) return e2;
+        throw new IllegalArgumentException("The edges " + e1 + " and " + e2 + " are not incident head-to-tail.");
     }
 
     // return the angle that this edge makes with the positive x-axis
