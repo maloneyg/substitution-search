@@ -463,7 +463,7 @@ public class DebugDisplay extends JPanel implements ActionListener
 
         //System.out.println(BasicEdge.TOO_CLOSE);
         //DebugDisplay display = new DebugDisplay(21,"debugging");
-        DebugDisplay display = new DebugDisplay(3,"debugging");
+        DebugDisplay display = new DebugDisplay(3500,"debugging");
 
     }
 
