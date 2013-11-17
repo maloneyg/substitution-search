@@ -3,9 +3,9 @@
  *  Compilation:  javac PuzzleBoundary.java
  *  Execution:    java PuzzleBoundary
  *
- *  A class representing a partition of objects of type E.
- *  It is assumed to contain no duplicate objects, although
- *  it has no way to guarantee this. 
+ *  A class representing the boundary of an inflated triangle.
+ *  It contains static arrays with all the possible points on the 
+ *  edges where a tile might touch it.
  *
  *************************************************************************/
 
@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Stack;
 import java.io.Serializable;
 
 class PointAndLength implements Comparable<PointAndLength>, Serializable {
@@ -69,6 +70,35 @@ public class PuzzleBoundary implements Serializable {
     private static final BytePoint[] E1;
     private static final BytePoint[] E2;
 
+    // vertices of the big triangle
+    private static final BytePoint[] VERTICES;
+
+    // direction vectors of the edges of the big triangle
+    private static final BytePoint VECTOR0;
+    private static final BytePoint VECTOR1;
+    private static final BytePoint VECTOR2;
+
+    // minimum allowable distance from a point to an edge
+    public static final double TOO_CLOSE = BasicEdge.TOO_CLOSE;
+    // we need a different number for edge 1
+    // edge 1 is special because the other two edges pass through
+    // the origin, whereas edge 1 doesn't
+    public static final double EDGE_ONE_TOO_CLOSE;
+
+    // the instance variables appear here
+
+    // the blocks keep track of which points on the 
+    // boundaries have been covered by tile edges
+    boolean[] block0;
+    boolean[] block1;
+    boolean[] block2;
+
+    // lists of triangle edges that have been placed
+    // along the boundaries
+    Stack<BasicEdge> placed0 = new Stack<>();
+    Stack<BasicEdge> placed1 = new Stack<>();
+    Stack<BasicEdge> placed2 = new Stack<>();
+
     static { // figure out where the points can go on the edges
 
         int tileNum = Preinitializer.MY_TILE;
@@ -76,13 +106,17 @@ public class PuzzleBoundary implements Serializable {
         BasicAngle[] angles = placed.getAngles();
         BytePoint[] vertices = placed.getVertices();
         for (int i = 0; i < 3; i++) vertices[i] = vertices[i].inflate();
+        VERTICES = vertices;
 
         // in order to avoid a compile-time error, I can't assign
-        // E0, E1, and E2 inside a loop
-        // so I assign temps instead, and assign E0, E1, E2 to them later
+        // E0, E1, E2, VECTOR0, VECTOR1, and VECTOR2 inside a loop
+        // so I assign temps instead, and assign these constants to them later
         BytePoint[] preE0 = new BytePoint[1];
         BytePoint[] preE1 = new BytePoint[1];
         BytePoint[] preE2 = new BytePoint[1];
+        BytePoint preVECTOR0 = BytePoint.ZERO_VECTOR;
+        BytePoint preVECTOR1 = BytePoint.ZERO_VECTOR;
+        BytePoint preVECTOR2 = BytePoint.ZERO_VECTOR;
 
         // loop through the three edges
         for (int i = 0; i < 3; i++) {
@@ -96,6 +130,17 @@ public class PuzzleBoundary implements Serializable {
             List<PointAndLength> preE = new ArrayList<>();
             // the angle by which we rotate to align with each edge
             BasicAngle rot = (i==0)? BasicAngle.createBasicAngle(0) : ((i==1)? angles[2].supplement() : angles[1].piPlus());
+            BytePoint unit = BasicEdge.UNIT_LENGTH.getAsVector(rot);
+
+            // assign temps for VECTOR0, VECTOR1, VECTOR2
+            if (i==0) {
+                preVECTOR0 = unit;
+            } else if (i==1) {
+                preVECTOR1 = unit;
+            } else {
+                preVECTOR2 = unit;
+            }
+
             // get the length vectors and rotate them all
             BytePoint[] diagonals = new BytePoint[BasicEdgeLength.ALL_EDGE_LENGTHS.size()];
             for (int j = 0; j < diagonals.length; j++) 
@@ -112,6 +157,8 @@ public class PuzzleBoundary implements Serializable {
             // make an array for E0, E1, E2
             BytePoint[] almostE = new BytePoint[preE.size()];
             for (int j = 0; j < almostE.length; j++) almostE[j] = preE.get(j).getP();
+
+            // assign temps for E0, E1, E2
             if (i==0) {
                 preE0 = almostE;
             } else if (i==1) {
@@ -121,19 +168,32 @@ public class PuzzleBoundary implements Serializable {
             }
         }
 
-        // now assign values to E0, E1, E2
+        // now assign values to E0, E1, E2, VECTOR0, VECTOR1, VECTOR2
+        // Take that, java compiler! I can assign values in a loop after all!
         E0 = preE0;
         E1 = preE1;
         E2 = preE2;
+        VECTOR0 = preVECTOR0;
+        VECTOR1 = preVECTOR1;
+        VECTOR2 = preVECTOR2;
+        // compute EDGE_ONE_TOO_CLOSE
+        EDGE_ONE_TOO_CLOSE = VECTOR1.crossProduct(VERTICES[0]) + TOO_CLOSE;
 
     } // static initialization ends here
 
     // private constructor
     private PuzzleBoundary() {
-
+        block0 = new boolean[E0.length];
+        block1 = new boolean[E1.length];
+        block2 = new boolean[E2.length];
     }
 
-    // increment an array of ints, wrapping around if
+    // public static factory method
+    public static PuzzleBoundary createPuzzleBoundary() {
+        return new PuzzleBoundary();
+    }
+
+    // increment an array of bytes, wrapping around if
     // the ith entry exceeds the ith entry of maxList
     public static void odometerIncrement(byte[] digits, ImmutableList<Integer> maxList) {
         for (int i = 0; i < digits.length; i++) {
@@ -153,6 +213,131 @@ public class PuzzleBoundary implements Serializable {
             output = output.add(points[i].scalarMultiple(scalars[i]));
         }
         return output;
+    }
+
+    // return true if the given point is outside of the inflated
+    // triangle, or inside, but too close to the edge
+    // this will return true for points that are on the edge, so
+    // we need to check for incidence separately
+    public static boolean overTheEdge(BytePoint p) {
+        return (VECTOR0.crossProduct(p) < TOO_CLOSE || VECTOR2.crossProduct(p) < TOO_CLOSE || VECTOR1.crossProduct(p) < EDGE_ONE_TOO_CLOSE);
+    }
+
+    // a triple-valued function
+    // 0 if p is not on the edge at all
+    //  1 if p is on the edge, at a position that isn't covered
+    // -1 if p is on the edge, at a position that is covered
+    public int incident(BytePoint p) {
+        for (int i = 0; i < E0.length; i++) {
+            if (p.equals(E0[i])) {
+                if (block0[i]) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+        }
+        for (int i = 0; i < E1.length; i++) {
+            if (p.equals(E1[i])) {
+                if (block1[i]) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+        }
+        for (int i = 0; i < E2.length; i++) {
+            if (p.equals(E2[i])) {
+                if (block2[i]) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+        }
+        return 0;
+    }
+
+    // a triple-valued function
+    // 0 if e is not on the edge at all
+    //  1 if e is on the edge, and not already covered
+    // -1 if e is on the edge, and already covered
+    // we assume that the edge is actually inside the
+    // triangle or on its boundary; weird things happen
+    // otherwise
+    public int incident(BasicEdge e) {
+        BytePoint[] ends = e.getEnds();
+        boolean hit = false;
+        for (int i = 0; i < E0.length; i++) {
+            if (ends[0].equals(E0[i])&&i!=E0.length-1) hit = true;
+            if (hit) {
+                if (block0[i]) return -1;
+                if (ends[1].equals(E0[i])) return 1;
+            }
+        }
+        for (int i = 0; i < E1.length; i++) {
+            if (ends[0].equals(E1[i])&&i!=E1.length-1) hit = true;
+            if (hit) {
+                if (block1[i]) return -1;
+                if (ends[1].equals(E1[i])) return 1;
+            }
+        }
+        for (int i = 0; i < E2.length; i++) {
+            if (ends[0].equals(E2[i])&&i!=E2.length-1) hit = true;
+            if (hit) {
+                if (block2[i]) return -1;
+                if (ends[1].equals(E2[i])) return 1;
+            }
+        }
+        return 0;
+    }
+
+    // flip all the blocks on this boundary between
+    // the beginning and end of the given edge
+    // return true if any flips were made
+    private boolean flip(BytePoint[] boundary, boolean[] blocks, BasicEdge e) {
+        BytePoint[] ends = e.getEnds();
+        boolean hit = false;
+        for (int i = 0; i < boundary.length; i++) {
+            if (hit&&ends[1].equals(boundary[i])) {
+                return true;
+            }
+            if (ends[0].equals(boundary[i])&&i!=boundary.length-1) hit = true;
+            if (hit) blocks[i] = !blocks[i];
+        }
+        return false;
+    }
+
+    // add this edge to the appropriate list if it's incident
+    public void add(BasicEdge e) {
+        if (flip(E0,block0,e)) {
+            placed0.push(e);
+            return;
+        }
+        if (flip(E1,block1,e)) {
+            placed1.push(e);
+            return;
+        }
+        if (flip(E2,block2,e)) {
+            placed2.push(e);
+            return;
+        }
+    }
+
+    // remove this edge from the appropriate list if it's incident
+    public void remove(BasicEdge e) {
+        if (flip(E0,block0,e)) {
+            placed0.pop();
+            return;
+        }
+        if (flip(E1,block1,e)) {
+            placed1.pop();
+            return;
+        }
+        if (flip(E2,block2,e)) {
+            placed2.pop();
+            return;
+        }
     }
 
     // output a String
@@ -192,6 +377,15 @@ public class PuzzleBoundary implements Serializable {
         System.out.println(E0.length);
         System.out.println(E1.length);
         System.out.println(E2.length);
+        System.out.println(VECTOR0.crossProduct(VERTICES[0]));
+        System.out.println(VECTOR1.crossProduct(VERTICES[1]));
+        System.out.println(VECTOR2.crossProduct(VERTICES[2]));
+        System.out.println("crossProduct of edge 1.");
+        System.out.println(VECTOR1.crossProduct(VERTICES[0]));
+        System.out.println(VECTOR1.crossProduct(VERTICES[2]));
+
+        boolean[] testbool = new boolean[3];
+        for (int i = 0; i < 3; i++) System.out.println(testbool[i]);
 //        Integer i0 = 2;
 //        Integer i1 = 3;
 //        Integer i2 = 3;
