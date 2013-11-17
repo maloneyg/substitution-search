@@ -287,22 +287,10 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
         BytePoint p1 = BytePoint.ZERO_VECTOR;
         BytePoint p2 = lengths[0].getAsVector(BasicAngle.createBasicAngle(0));
         BytePoint p0 = lengths[2].getAsVector(angles[1]);
-        BytePoint[] vertices = new BytePoint[] { p0, p1, p2 };
-        BasicAngle[] newAngles = angles;
-        Orientation[] newOrientations = orientations;
-        BasicEdgeLength[] newLengths = lengths;
-        if (flip) {
-            /* 
-            * Now flip the first and last of everything
-            * to put things in ccw order.
-            */
-            BytePoint tempVertex = vertices[2];
-            vertices[2] = vertices[0];
-            vertices[0] = tempVertex;
-            newAngles = flipAngles;
-            newLengths = flipLengths;
-            newOrientations = flipOrientations;
-        }
+        BytePoint[] vertices = (flip)? new BytePoint[] { p2, p1, p0 } : new BytePoint[] { p0, p1, p2 };
+        BasicAngle[] newAngles = (flip)? flipAngles : angles;
+        Orientation[] newOrientations = (flip)? flipOrientations : orientations;
+        BasicEdgeLength[] newLengths = (flip)? flipLengths : lengths;
         for (int j = 0; j < 3; j++)
             vertices[j] = BytePoint.createBytePoint(vertices[j],flip,a,p);
         return BasicTriangle.createBasicTriangle(newAngles, vertices, newOrientations, newLengths, this, flip);

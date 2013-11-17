@@ -227,6 +227,15 @@ class Initializer {
         }
     }
 
+    // return i or N - i, depending on whether i > N/2
+    public static int acute(int n) {
+        if (n <= N/2) {
+            return n;
+        } else {
+            return N - n;
+        }
+    }
+
 
     public static void main(String[] args) {
 
