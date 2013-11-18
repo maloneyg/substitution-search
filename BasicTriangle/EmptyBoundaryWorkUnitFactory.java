@@ -32,11 +32,15 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
     // a list of starters
     private static final ImmutableList<BasicEdge> STARTERS;
 
+    // the seed for an OpenBoundaryPatch
+    // it tells us the index in STARTERS to use
+    private int starter = 0;
+
     static { // initialize starters
         start0 = P0.getLengths()[0].getBreakdown();
         start1 = P0.getLengths()[1].getBreakdown();
         start2 = P0.getLengths()[2].getBreakdown();
-        BasicAngle a = P0.getAngles[1].piPlus();
+        BasicAngle a = P0.getAngles()[1].piPlus();
         List<BasicEdge> preStarters = new ArrayList<>();
         for (int i = 0; i < BasicEdgeLength.ALL_EDGE_LENGTHS.size(); i++) {
             BasicEdgeLength l = BasicEdgeLength.ALL_EDGE_LENGTHS.get(i);
@@ -60,12 +64,13 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
     } // constructor
 
     // private constructor
-    private EmptyBoundaryWorkUnitFactory(ImmutableList<Integer> s0,ImmutableList<Integer> s1,ImmutableList<Integer> s2) { // initialize the edge breakdown iterators
+    private EmptyBoundaryWorkUnitFactory(int starter) {
+        this.starter = starter;
     } // constructor
 
     // deep copy
-    public EmptyBoundaryWorkUnitFactory deepCopy() {
-        return new EmptyBoundaryWorkUnitFactory(start0,start1,start2);
+    public EmptyBoundaryWorkUnitFactory deepCopy(int starter) {
+        return new EmptyBoundaryWorkUnitFactory(starter);
     } // deep copy
 
     // iterate through instructions to make sure we don't hit the end.
@@ -74,70 +79,37 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
     //
     // BATCH_SIZE: how many WorkUnits to try and make from this set of instructions
     // ID: a number identifynig how many instructions have been parceled out
-    public WorkUnitInstructions getInstructions(int BATCH_SIZE, int ID) {
-        ImmutableList<Integer> output0 = BD0;
-        ImmutableList<Integer> output1 = BD1;
-        ImmutableList<Integer> output2 = BD2;
-        boolean reflect = flip;
+    public EmptyBoundaryWorkUnitInstructions getInstructions(int BATCH_SIZE, int ID) {
         int j = 0;
         while (notDoneYet && j<BATCH_SIZE) {
             iterateEdgeBreakdown();
             j++;
         }
-        return WorkUnitInstructions.createWorkUnitInstructions(output0,output1,output2,reflect,j,ID);
+        return EmptyBoundaryWorkUnitInstructions.createEmptyBoundaryWorkUnitInstructions(starter,j,ID);
     }
 
     // follow a set of instructions, returning the resulting WorkUnits in a List
-    public List<EmptyBoundaryWorkUnit> followInstructions(WorkUnitInstructions i) {
+    public List<EmptyBoundaryWorkUnit> followInstructions(EmptyBoundaryWorkUnitInstructions i) {
         LinkedList<EmptyBoundaryWorkUnit> l = new LinkedList<EmptyBoundaryWorkUnit>();
-        //System.out.print("advancing to breakdown...");
-        advanceToBreakdown(i.getZero(),i.getOne(),i.getTwo(),i.getFlip());
-        //System.out.print("done...");
-//        if (flip != i.getFlip())
-//            iterateEdgeBreakdown();
+        advanceToBreakdown(i.getStarter());
         for (int k = 0; k < i.getNum(); k++) {
             l.add(nextWorkUnit());
-//            iterateEdgeBreakdown();
         }
         return l;
     }
 
     private void iterateEdgeBreakdown() {
-        if (P0.isosceles()) flip = !flip;
-        if (flip==false) {
-            edge0.iterate();
-            BD0 = edge0.getImmutableList();
-            if (BD0.equals(start0)) {
-                if (P0.isosceles()) { // then we only need two breakdowns
-                    edge2.iterate();
-                    BD2 = edge2.getImmutableList();
-                    if (BD2.equals(start2)) notDoneYet = false;
-                } else { // if it's not isosceles, use all three breakdowns
-                    edge1.iterate();
-                    BD1 = edge1.getImmutableList();
-                    if (BD1.equals(start1)) {
-                        edge2.iterate();
-                        BD2 = edge2.getImmutableList();
-                        if (BD2.equals(start2)) notDoneYet = false;
-                    }
-                }
-            }
-        }
+        starter = (starter + 1) % STARTERS.size();
     }
 
     // advance to the work unit matching this edge breakdown
-    private void advanceToBreakdown(List<Integer> b0, List<Integer> b1, List<Integer> b2, boolean f) {
-        //while (notDoneYet) {
-        while (true) {
-            if (compareBreakdown(b0,b1,b2)) break;
-            iterateEdgeBreakdown();
-        }
-        flip = f;
+    private void advanceToBreakdown(int i) {
+        starter = i;
     } 
 
     private EmptyBoundaryWorkUnit nextWorkUnit() {
 
-        EmptyBoundaryPatch patch = EmptyBoundaryPatch.createEmptyBoundaryPatch(starter,bigVertices,tiles.dumpMutablePrototileList());
+        EmptyBoundaryPatch patch = EmptyBoundaryPatch.createEmptyBoundaryPatch(STARTERS.get(starter),bigVertices,tiles.dumpMutablePrototileList());
 
         iterateEdgeBreakdown();
 

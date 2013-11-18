@@ -14,7 +14,7 @@ class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 4;        // the tile we're searching
+    public static final int MY_TILE = 0;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
@@ -30,7 +30,7 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2, 1); // the square of the really small search (1+a)^2 won't work with tile 3 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search (104)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, 0, 1); // quite big search (110)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 0, -3, 0, 1); // huge search (115)
@@ -41,7 +41,7 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, -2, -3, 1, 1); // even huger search (122)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, -2, 1, 1); // even huger search (124)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -1, 1, 1); // a + b + c 
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -1, 1, 1); // a + b + c 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -2, 0, 1); // 1 + b + d 
 
     public static final ImmutableList<ImmutableList<Integer>> PROTOTILES = ImmutableList.of( 
