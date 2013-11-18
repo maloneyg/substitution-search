@@ -62,6 +62,15 @@ public class ImmutablePatch implements Serializable {
         return edge2;
     }
 
+    // toArray method. For drawing the big triangle
+    public ArrayList<RealMatrix> toArray() {
+        ArrayList<RealMatrix> output = new ArrayList<RealMatrix>(3);
+        for (BytePoint p : bigVertices) {
+            output.add((RealMatrix)new Array2DRowRealMatrix(p.arrayToDraw()));
+        }
+        return output;
+    }
+
     // equals method
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())
@@ -107,6 +116,7 @@ public class ImmutablePatch implements Serializable {
         BytePoint p1;
         ArrayList<RealMatrix> edgeList = new ArrayList<RealMatrix>(3);
         int counter = 0;
+        output.add(new OrderedTriple(toArray()));
         for (BasicTriangle t : triangles)
             output.add(new OrderedTriple(t.toArray()));
         for (BasicEdge e : openEdges) {

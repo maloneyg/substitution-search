@@ -188,9 +188,22 @@ public class PuzzleBoundary implements Serializable {
         block2 = new boolean[E2.length];
     }
 
+    // private constructor
+    private PuzzleBoundary(BasicEdge e) {
+        block0 = new boolean[E0.length];
+        block1 = new boolean[E1.length];
+        block2 = new boolean[E2.length];
+        add(e);
+    }
+
     // public static factory method
     public static PuzzleBoundary createPuzzleBoundary() {
         return new PuzzleBoundary();
+    }
+
+    // public static factory method
+    public static PuzzleBoundary createPuzzleBoundary(BasicEdge e) {
+        return new PuzzleBoundary(e);
     }
 
     // increment an array of bytes, wrapping around if
@@ -338,6 +351,34 @@ public class PuzzleBoundary implements Serializable {
             placed2.pop();
             return;
         }
+    }
+
+    // get an edge breakdown (ImmutableList<Integer>)
+    // the int i should be 0, 1, or 2 depending on which edge we want
+    public ImmutableList<Integer> getBreakdown(int i) {
+        if (i < 0||i > 2) throw new IllegalArgumentException("Can't get breakdown number " + i + ".");
+        Stack<BasicEdge> E = (i==0)? placed0 : ((i==1)? placed1 : placed2);
+        BytePoint lastVertex = VERTICES[(i+1)%3];
+        boolean notDone = false;
+        List<Integer> output = new ArrayList<>();
+        do {
+            notDone = false;
+            for (BasicEdge e : E) {
+                if (e.getEnds()[0].equals(lastVertex)) {
+                    output.add(BasicEdgeLength.ALL_EDGE_LENGTHS.indexOf(e.getLength()));
+                    lastVertex = e.getEnds()[1];
+                    notDone = true;
+                    break;
+                }
+            }
+        } while (notDone);
+        return ImmutableList.copyOf(output);
+    }
+
+    // get an edge breakdown (ImmutableList<Integer>)
+    // the int i should be 0, 1, or 2 depending on which edge we want
+    public BytePoint[] getVertices() {
+        return VERTICES;
     }
 
     // output a String
