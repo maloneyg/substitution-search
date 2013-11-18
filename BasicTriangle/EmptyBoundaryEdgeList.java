@@ -106,8 +106,10 @@ public class EmptyBoundaryEdgeList implements Serializable {
         // check if the new edges are on the boundary
         // if they are, then file them away in the appropriate place
         for (BasicEdge e : newOpens) {
-            if (boundary.incident(e)==1) {
-                boundary.add(e);
+            System.out.println(boundary + "\n" + e.reverse());
+            if (boundary.incident(e.reverse())==1) {
+                System.out.println("oh yeah");
+                boundary.add(e.reverse());
                 newOpens.remove(e);
             }
         }

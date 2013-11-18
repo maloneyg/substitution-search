@@ -45,7 +45,7 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
         for (int i = 0; i < BasicEdgeLength.ALL_EDGE_LENGTHS.size(); i++) {
             BasicEdgeLength l = BasicEdgeLength.ALL_EDGE_LENGTHS.get(i);
             Orientation o = l.getOrientation(0);
-            if (start2.get(i) > 0) preStarters.add(BasicEdge.createBasicEdge(l,o,new BytePoint[] {bigVertices[0],bigVertices[0].add(l.getAsVector(a.piPlus()))}));
+            if (start2.get(i) > 0) preStarters.add(BasicEdge.createBasicEdge(l,o,new BytePoint[] {bigVertices[0],bigVertices[0].add(l.getAsVector(a))}));
         }
         STARTERS = ImmutableList.copyOf(preStarters);
     } // static initialization of starters ends here
@@ -98,8 +98,9 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
         return l;
     }
 
-    private void iterateEdgeBreakdown() {
+    public void iterateEdgeBreakdown() {
         starter = (starter + 1) % STARTERS.size();
+        if (starter==0) notDoneYet = false;
     }
 
     // advance to the work unit matching this edge breakdown
@@ -107,7 +108,7 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
         starter = i;
     } 
 
-    private EmptyBoundaryWorkUnit nextWorkUnit() {
+    public EmptyBoundaryWorkUnit nextWorkUnit() {
 
         EmptyBoundaryPatch patch = EmptyBoundaryPatch.createEmptyBoundaryPatch(STARTERS.get(starter),bigVertices,tiles.dumpMutablePrototileList());
 

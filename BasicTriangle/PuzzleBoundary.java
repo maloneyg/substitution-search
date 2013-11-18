@@ -315,8 +315,8 @@ public class PuzzleBoundary implements Serializable {
             if (hit&&ends[1].equals(boundary[i])) {
                 return true;
             }
-            if (ends[0].equals(boundary[i])&&i!=boundary.length-1) hit = true;
             if (hit) blocks[i] = !blocks[i];
+            if (ends[0].equals(boundary[i])&&i!=boundary.length-1) hit = true;
         }
         return false;
     }
@@ -384,11 +384,11 @@ public class PuzzleBoundary implements Serializable {
     // output a String
     public String toString() {
         String output = "Edge 0:\n";
-        for (int i = 0; i < E0.length; i++) output += E0[i] + "\n";
+        for (int i = 0; i < E0.length; i++) output += E0[i] + " " + block0[i] + "\n";
         output += "Edge 1:\n";
-        for (int i = 0; i < E1.length; i++) output += E1[i] + "\n";
+        for (int i = 0; i < E1.length; i++) output += E1[i] + " " + block1[i] + "\n";
         output += "Edge 2:\n";
-        for (int i = 0; i < E2.length; i++) output += E2[i] + "\n";
+        for (int i = 0; i < E2.length; i++) output += E2[i] + " " + block2[i] + "\n";
         return output;
     }
 

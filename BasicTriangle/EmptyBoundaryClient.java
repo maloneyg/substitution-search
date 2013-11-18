@@ -27,7 +27,7 @@ public final class EmptyBoundaryClient
 
     private static Object sendLock = new Object();
 
-    private static WorkUnitFactory workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
+    private static EmptyBoundaryWorkUnitFactory workUnitFactory = EmptyBoundaryWorkUnitFactory.createEmptyBoundaryWorkUnitFactory();
 
     // prevent instantiation
     private EmptyBoundaryClient()
@@ -156,18 +156,18 @@ public final class EmptyBoundaryClient
                 try
                     {
                         incomingObject = incomingObjectStream.readObject();
-                        if ( incomingObject instanceof WorkUnitInstructions )
+                        if ( incomingObject instanceof EmptyBoundaryWorkUnitInstructions )
                             {
-                                WorkUnitInstructions instructions = (WorkUnitInstructions)incomingObject;
+                                EmptyBoundaryWorkUnitInstructions instructions = (EmptyBoundaryWorkUnitInstructions)incomingObject;
                                 System.out.println("\nReceived instruction ID = " + instructions.getID());
                                 //System.out.print("Following instructions...");
-                                List<MutableWorkUnit> theseUnits = workUnitFactory.followInstructions(instructions);
+                                List<EmptyBoundaryWorkUnit> theseUnits = workUnitFactory.followInstructions(instructions);
                                 //System.out.println("done!");
 
                                 AtomicInteger counter = new AtomicInteger(0);
                                 LinkedList<ImmutablePatch> completedPuzzles = new LinkedList<ImmutablePatch>();
                                 
-                                for (MutableWorkUnit thisUnit : theseUnits)
+                                for (EmptyBoundaryWorkUnit thisUnit : theseUnits)
                                     {
                                         thisUnit.setCounter(counter);
                                         thisUnit.setResultTarget(completedPuzzles);
@@ -238,12 +238,12 @@ public final class EmptyBoundaryClient
 
     public static class WorkBatch
     {
-        private WorkUnitInstructions workUnitInstructions;
-        private List<MutableWorkUnit> theseUnits;
+        private EmptyBoundaryWorkUnitInstructions workUnitInstructions;
+        private List<EmptyBoundaryWorkUnit> theseUnits;
         private AtomicInteger counter;
         private LinkedList<ImmutablePatch> completedPuzzles;
 
-        public WorkBatch(WorkUnitInstructions workUnitInstructions, List<MutableWorkUnit> theseUnits,
+        public WorkBatch(EmptyBoundaryWorkUnitInstructions workUnitInstructions, List<EmptyBoundaryWorkUnit> theseUnits,
                          AtomicInteger counter, LinkedList<ImmutablePatch> completedPuzzles)
         {
             this.workUnitInstructions = workUnitInstructions;
@@ -252,12 +252,12 @@ public final class EmptyBoundaryClient
             this.completedPuzzles = completedPuzzles;
         }
 
-        public WorkUnitInstructions getInstructions()
+        public EmptyBoundaryWorkUnitInstructions getInstructions()
         {
             return workUnitInstructions;
         }
 
-        public List<MutableWorkUnit> getList()
+        public List<EmptyBoundaryWorkUnit> getList()
         {
             return theseUnits;
         }
@@ -376,7 +376,7 @@ public final class EmptyBoundaryClient
                             }*/
                     }
 
-                // if any of the WorkUnitInstructions are complete, send the result
+                // if any of the EmptyBoundaryWorkUnitInstructions are complete, send the result
                 synchronized (TaskMonitor.this)
                     {
                         for (WorkBatch b : workList)

@@ -284,7 +284,7 @@ public class EmptyBoundaryPatch implements Serializable {
 
 
     // place a single tile, then call this method recursively.
-    public void debugSolve(DebugDisplay d) {
+    public void debugSolve(EmptyBoundaryDebugDisplay d) {
         do {
             d.updateMessage(message);
             d.update(dumpImmutablePatch());
@@ -461,7 +461,7 @@ public class EmptyBoundaryPatch implements Serializable {
         BytePoint[] ends = currentEdge.getEnds();
         BytePoint other = t.getOtherVertex(ends[0],ends[1]);
 
-        boolean newVertex = !vertices.contains(other);
+        boolean newVertex = !(vertices.contains(other)||boundary.incident(other)==1);
 
         // make sure the new vertex is in the inflated prototile
         if (newVertex && boundary.overTheEdge(other)) {
