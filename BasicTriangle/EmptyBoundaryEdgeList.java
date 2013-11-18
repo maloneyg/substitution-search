@@ -97,22 +97,18 @@ public class EmptyBoundaryEdgeList implements Serializable {
         for (int i = 0; i < 3; i++) {
             int thisIndex = openEdges.indexOf(matches[i]);
             if (thisIndex == -1) {
-                newOpens.add(matches[i].reverse());
+                if (boundary.incident(matches[i])==1) {
+                    boundary.add(matches[i]);
+                } else {
+                    newOpens.add(matches[i].reverse());
+                }
             } else {
                 indexList.add(thisIndex);
             }
         }
 
-        // check if the new edges are on the boundary
-        // if they are, then file them away in the appropriate place
-        for (BasicEdge e : newOpens) {
-            System.out.println(boundary + "\n" + e.reverse());
-            if (boundary.incident(e.reverse())==1) {
-                System.out.println("oh yeah");
-                boundary.add(e.reverse());
-                newOpens.remove(e);
-            }
-        }
+        System.out.println(boundary);
+        for (BasicEdge ee : open()) System.out.println(ee);
 
         // if there are two new edges, push them in the right order
         // so that the clockwise edge is on top of the stack
