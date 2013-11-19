@@ -38,6 +38,7 @@ public class EmptyTest
             }
 
         // wait for all jobs to complete
+        int totalPatches = 0;
         for (int i=0; i < allFutures.size(); i++)
             {
                 Future<Result> thisFuture = allFutures.get(i);
@@ -47,7 +48,8 @@ public class EmptyTest
                 try
                     {
                         thisResult = thisFuture.get();
-                        System.out.println( ((WorkUnitResult)thisResult).toString() );
+                        EmptyWorkUnitResult thisEmptyResult = (EmptyWorkUnitResult)thisResult;
+                        totalPatches += thisEmptyResult.getLocalCompletedPatches().size();
                     }
                 catch (InterruptedException e)
                     {
@@ -63,7 +65,7 @@ public class EmptyTest
                         System.out.println("Job was cancelled!");
                     }
             }
-        System.out.println("All jobs complete.");
+        System.out.println("All jobs complete.  " + totalPatches + " total patches were found.");
         
         // stop monitoring thread
         threadMonitor.stop();
@@ -96,7 +98,7 @@ public class EmptyTest
         {
             public void run()
             {
-                int jobsRun = executorService.getExecutor().getNumberOfJobsRun();  // number of jobs run in the last monitorInterval; simultaneously    resets counter
+                long jobsRun = executorService.getExecutor().getNumberOfSolveCalls();  // number of jobs run in the last monitorInterval; simultaneously    resets counter
                 // this accounts for the fact that the timer might be occasionally delayed
                 Date currentTime = new Date();
                 if ( lastUpdateTime == null )
