@@ -310,13 +310,15 @@ public class PuzzleBoundary implements Serializable {
     // return true if any flips were made
     private boolean flip(BytePoint[] boundary, boolean[] blocks, BasicEdge e) {
         BytePoint[] ends = e.getEnds();
-        boolean hit = false;
+        int start = -1;
+        int end = -1;
         for (int i = 0; i < boundary.length; i++) {
-            if (hit&&ends[1].equals(boundary[i])) {
-                return true;
-            }
-            if (hit) blocks[i] = !blocks[i];
-            if (ends[0].equals(boundary[i])&&i!=boundary.length-1) hit = true;
+            if (ends[0].equals(boundary[i])) start = i;
+            if (start > -1 && ends[1].equals(boundary[i])) end = i;
+        }
+        if (start > -1 && end > -1) {
+            for (int i = start + 1; i < end; i++) blocks[i] = !blocks[i];
+            return true;
         }
         return false;
     }

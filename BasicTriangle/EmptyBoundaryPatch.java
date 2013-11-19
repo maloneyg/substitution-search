@@ -254,35 +254,6 @@ public class EmptyBoundaryPatch implements Serializable {
 
     } // solve ends here
 
-    // a solve method that stops for debugging purposes.
-//    public ImmutablePatch debugSolve() {
-//
-//        ImmutablePatch output = dumpImmutablePatch();
-//        if (tileList.empty()) {
-//            removeTriangle();
-//            step();
-//        }
-//
-//        if (tileList.contains(currentPrototile) && currentPrototile.compatible(currentEdge,secondEdge,flip,partition.equivalenceClass(currentEdge.getOrientation()))) {
-//            BasicTriangle t = currentPrototile.place(currentEdge,secondEdge,flip);
-//            if (compatible(t)) {
-//                placeTriangle(t);
-//                if (!partition.valid()) {
-//                    removeTriangle();
-//                }
-//            }
-//        }
-//        step();
-//        if (backToStart()&&!triangles.empty()) {
-//            removeTriangle();
-//            step();
-//        }
-//        return output;
-//
-//
-//    } // debugSolve ends here
-
-
     // place a single tile, then call this method recursively.
     public void debugSolve(EmptyBoundaryDebugDisplay d) {
         do {
@@ -294,7 +265,7 @@ public class EmptyBoundaryPatch implements Serializable {
                 completedPatches.add(thisPatch);
                 localCompletedPatches.add(thisPatch);
                 numCompleted++;
-                if (debug) setMessage(DebugMessage.FOUND.toString());
+                if (debug) {setMessage(DebugMessage.FOUND.toString());d.updateMessage(message);}
                 break;
             }
             if (tileList.contains(currentPrototile) && currentPrototile.compatible(currentEdge,secondEdge,flip,partition.equivalenceClass(currentEdge.getOrientation()))) {
@@ -303,7 +274,7 @@ public class EmptyBoundaryPatch implements Serializable {
                     placeTriangle(t);
                     if (partition.valid())
                         {
-//                            if (debug) setMessage(DebugMessage.PLACING.toString()+"\n"+t);
+                            if (debug) setMessage(DebugMessage.PLACING.toString()+"\n"+t);
                             debugSolve(d);
                             count.getAndIncrement();
                         } else
@@ -516,7 +487,10 @@ public class EmptyBoundaryPatch implements Serializable {
             //  1 means incident, without overlapping anything
             // -1 means incident and overlapping something
             int boundaryIncidence = boundary.incident(e);
-            if (boundaryIncidence==-1) return false;
+            if (boundaryIncidence==-1) {
+                if (debug) setMessage(e +"\n"+ DebugMessage.BOUNDARY_PROBLEM.toString() + "\n" + boundary);
+                return false;
+            }
             if (boundaryIncidence==1) break;
             for (BasicEdge open : edges.open()) {
                 if (e.cross(open)) {

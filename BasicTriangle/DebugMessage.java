@@ -13,7 +13,9 @@ public interface DebugMessage extends Serializable
     public static final DebugMessage INCIDENT_CLOSED = new DebugMessage() {
         public String toString() { return " rejected for being incident to a closed edge"; } };
     public static final DebugMessage FOUND = new DebugMessage() {
-        public String toString() { return "finished a puzzle"; } };
+        public String toString() { return "**********\nfinished a puzzle**********\n"; } };
+    public static final DebugMessage BOUNDARY_PROBLEM = new DebugMessage() {
+        public String toString() { return " rejected because of overlap with an edge already placed on the boundary"; } };
     public static final DebugMessage NONE_OR_PROTOTILE = new DebugMessage() {
         public String toString() { return " rejected because we're out, or because of incompatibility with "; } };
     public static final DebugMessage TOO_CLOSE = new DebugMessage() {

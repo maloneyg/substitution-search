@@ -69,7 +69,7 @@ public class EmptyBoundaryDebugDisplay extends JPanel implements ActionListener
         messageArea.setFont(new Font("SansSerif", Font.PLAIN, 10));
         messageArea.setEditable(false);
         messageArea.setLineWrap(true);
-        messageArea.setBounds(300,75,200,150);
+        messageArea.setBounds((Preinitializer.MY_TILE==4)? 10 : 300,75,200,150);
         add(messageArea);
 
         next = new JButton("next");

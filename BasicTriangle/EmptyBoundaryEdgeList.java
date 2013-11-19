@@ -107,9 +107,6 @@ public class EmptyBoundaryEdgeList implements Serializable {
             }
         }
 
-        System.out.println(boundary);
-        for (BasicEdge ee : open()) System.out.println(ee);
-
         // if there are two new edges, push them in the right order
         // so that the clockwise edge is on top of the stack
         if (newOpens.size()==1) {
