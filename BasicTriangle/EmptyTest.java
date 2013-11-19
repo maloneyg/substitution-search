@@ -8,6 +8,8 @@ import java.util.Scanner;
 
 public class EmptyTest
 {
+    public static final String RESULT_FILENAME = "result.chk";
+
     public static void main(String[] args)
     {
 
@@ -39,6 +41,7 @@ public class EmptyTest
 
         // wait for all jobs to complete
         int totalPatches = 0;
+        List<ImmutablePatch> allCompletedPatches = new LinkedList<>();
         for (int i=0; i < allFutures.size(); i++)
             {
                 Future<Result> thisFuture = allFutures.get(i);
@@ -49,7 +52,10 @@ public class EmptyTest
                     {
                         thisResult = thisFuture.get();
                         EmptyWorkUnitResult thisEmptyResult = (EmptyWorkUnitResult)thisResult;
-                        totalPatches += thisEmptyResult.getLocalCompletedPatches().size();
+                        int thisSize = thisEmptyResult.getLocalCompletedPatches().size();
+                        totalPatches += thisSize;
+                        if ( thisSize > 0 )
+                            allCompletedPatches.addAll( thisEmptyResult.getLocalCompletedPatches() );
                     }
                 catch (InterruptedException e)
                     {
@@ -65,8 +71,30 @@ public class EmptyTest
                         System.out.println("Job was cancelled!");
                     }
             }
-        System.out.println("All jobs complete.  " + totalPatches + " total patches were found.");
         
+        System.out.println("All jobs complete.  " + totalPatches + " completed patches were found.");
+
+
+        if (allCompletedPatches.size() > 0)
+            {
+                System.out.print("Writing completed patches to disk...");
+                TriangleResults triangleResults = new TriangleResults(allCompletedPatches);
+                //for (ImmutablePatch p : allCompletedPatches) G.add(p.getEdge0(),p.getEdge1(),p.getEdge2(),lengths[0],lengths[1],lengths[2]); // write   to the edge breakdown graph
+                try
+                    {
+                        FileOutputStream fileOut = new FileOutputStream(RESULT_FILENAME);
+                        ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                        out.writeObject(triangleResults);
+                        out.close();
+                        fileOut.close();
+                        System.out.println("wrote results to " + RESULT_FILENAME + ".");
+                    }
+                catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+            }
+
         // stop monitoring thread
         threadMonitor.stop();
         System.exit(0);

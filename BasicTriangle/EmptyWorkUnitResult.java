@@ -24,6 +24,6 @@ public class EmptyWorkUnitResult implements Result, Serializable
 
     public String toString()
     {
-        return "EmptyWorkUnitResult for job ID " + originalHashcode + ": " + localCompletedPatches.size() + " completed patches";
+        return "Result for job ID " + originalHashcode + ": " + localCompletedPatches.size() + " completed patches";
     }
 }

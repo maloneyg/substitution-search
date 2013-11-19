@@ -181,7 +181,7 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
                 counter.getAndIncrement();
             }
         EmptyWorkUnitResult thisResult = new EmptyWorkUnitResult(this.hashCode(), patch.getLocalCompletedPatches());
-        System.out.println(thisResult);
+        System.out.println("\n" + thisResult);
         return thisResult;
     } // method call() ends here
 
