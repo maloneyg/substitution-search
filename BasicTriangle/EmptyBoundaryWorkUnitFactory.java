@@ -37,9 +37,9 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
     private int starter = 0;
 
     static { // initialize starters
-        start0 = P0.getLengths()[0].getBreakdown();
-        start1 = P0.getLengths()[1].getBreakdown();
-        start2 = P0.getLengths()[2].getBreakdown();
+        start0 = Initializer.INFLATED_LENGTHS.getColumn(Initializer.acute(P0.getAngles()[0].getAsInt())-1);
+        start1 = Initializer.INFLATED_LENGTHS.getColumn(Initializer.acute(P0.getAngles()[1].getAsInt())-1);
+        start2 = Initializer.INFLATED_LENGTHS.getColumn(Initializer.acute(P0.getAngles()[2].getAsInt())-1);
         BasicAngle a = P0.getAngles()[1].piPlus();
         List<BasicEdge> preStarters = new ArrayList<>();
         for (int i = 0; i < BasicEdgeLength.ALL_EDGE_LENGTHS.size(); i++) {

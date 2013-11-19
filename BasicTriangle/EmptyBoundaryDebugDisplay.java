@@ -332,35 +332,7 @@ public class EmptyBoundaryDebugDisplay extends JPanel implements ActionListener
 
     public static void main(String[] args) {
 
-
-        List<List<Integer>> l = new ArrayList<>();
-        List<Integer> l0 = new ArrayList<>();
-        List<Integer> l1 = new ArrayList<>();
-        List<Integer> l2 = new ArrayList<>();
-
-        l0.add((Integer)4);
-        l0.add((Integer)1);
-
-        l1.add((Integer)2);
-        l1.add((Integer)4);
-        l1.add((Integer)2);
-        l1.add((Integer)1);
-        l1.add((Integer)3);
-        l1.add((Integer)4);
-
-        l2.add((Integer)3);
-        l2.add((Integer)4);
-        l2.add((Integer)2);
-        l2.add((Integer)3);
-        l2.add((Integer)4);
-        l2.add((Integer)0);
-        l2.add((Integer)1);
-
-        l.add(l0);
-        l.add(l1);
-        l.add(l2);
-
-        EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(0,"debugging");
+        EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(4,"debugging");
 
     }
 
