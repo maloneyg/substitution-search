@@ -46,11 +46,15 @@ public class EmptyBoundaryEdgeList implements Serializable {
     // the closed edges in this patch
     private Stack<IndexAndEdge> closedEdges;
 
+    // the starter edge
+    private BasicEdge starter;
+
     // initial constructor
     private EmptyBoundaryEdgeList(BasicEdge e) {
         openEdges = new Stack<>();
         closedEdges = new Stack<>();
         openEdges.push(e);
+        starter = e;
     }
 
     // public static factory method
@@ -149,7 +153,7 @@ public class EmptyBoundaryEdgeList implements Serializable {
 
         // remove edges from boundary
         // technically we don't need to know if they're incident
-        for (BasicEdge e : matches) boundary.remove(e);
+        for (BasicEdge e : matches) if (!e.compatible(starter)) boundary.remove(e);
 
         // return BasicEdges from closedEdges to openEdges
         // until you get one that isn't incident with t
