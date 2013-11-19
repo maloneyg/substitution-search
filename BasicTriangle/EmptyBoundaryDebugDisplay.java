@@ -360,7 +360,7 @@ public class EmptyBoundaryDebugDisplay extends JPanel implements ActionListener
         l.add(l1);
         l.add(l2);
 
-        EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(4,"debugging");
+        EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(0,"debugging");
 
     }
 

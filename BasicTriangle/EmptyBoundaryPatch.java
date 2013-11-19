@@ -265,7 +265,7 @@ public class EmptyBoundaryPatch implements Serializable {
                 completedPatches.add(thisPatch);
                 localCompletedPatches.add(thisPatch);
                 numCompleted++;
-                if (debug) {setMessage(DebugMessage.FOUND.toString());d.updateMessage(message);}
+                if (debug) setMessage(DebugMessage.FOUND.toString());
                 break;
             }
             if (tileList.contains(currentPrototile) && currentPrototile.compatible(currentEdge,secondEdge,flip,partition.equivalenceClass(currentEdge.getOrientation()))) {

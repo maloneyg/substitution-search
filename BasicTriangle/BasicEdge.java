@@ -35,7 +35,6 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
             }
         }
         TOO_CLOSE = 0.95*smallest;
-        System.out.println(TOO_CLOSE);
     }
 
     // Constructor methods.  
@@ -79,7 +78,7 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
     * toString method.  Just spits out the ends.
     */ 
     public String toString() {
-        return "Edge\n  " + ends[0] + "\n  " + ends[1] + " " + orientation;
+        return "Edge\n  " + ends[0] + " " + length.toString() + "\n  " + ends[1] + " " + orientation;
     }
 
     /* 

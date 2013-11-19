@@ -133,7 +133,7 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
     }
 
     public String toString() {
-        return "Edge length " + reps.get(0);
+        return "Edge length " + ALL_EDGE_LENGTHS.indexOf(this);
     }
 
     /*

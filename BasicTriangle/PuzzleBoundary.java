@@ -288,6 +288,7 @@ public class PuzzleBoundary implements Serializable {
                 if (ends[1].equals(E0[i])) return 1;
             }
         }
+        hit = false;
         for (int i = 0; i < E1.length; i++) {
             if (ends[0].equals(E1[i])&&i!=E1.length-1) hit = true;
             if (hit) {
@@ -295,6 +296,7 @@ public class PuzzleBoundary implements Serializable {
                 if (ends[1].equals(E1[i])) return 1;
             }
         }
+        hit = false;
         for (int i = 0; i < E2.length; i++) {
             if (ends[0].equals(E2[i])&&i!=E2.length-1) hit = true;
             if (hit) {
