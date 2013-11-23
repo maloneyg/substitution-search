@@ -68,6 +68,12 @@ public class EmptyBoundaryPatch implements Serializable {
     // prototiles available for placement
     private MutablePrototileList tileList;
 
+    // kill signal. set to true if we want to spawn new patches
+    private boolean die;
+
+    // a list of descendents. populate this list with spawn() calls
+    private List<EmptyBoundaryPatch> spawnList;
+
     /*
     * The step variables.
     * They tell us what we've tried most recently and what
@@ -96,17 +102,34 @@ public class EmptyBoundaryPatch implements Serializable {
     */
 
     // the first prototile
-    private final BasicPrototile initialPrototile = BasicPrototile.getFirstTile();
+    private final BasicPrototile initialPrototile;
 
     // initially, we are not on the second edge
     // in an isosceles triangle
-    private final boolean initialSecondEdge = false;
+    private final boolean initialSecondEdge;
 
     // initially we are not trying to place a reflected tile
-    private final boolean initialFlip = false;
+    private final boolean initialFlip;
+
+    // which triangles did we have in the beginning?
+    // if we started from scratch we had none, but 
+    // if we spawned then we probably had some.
+    private List<BasicTriangle> initialTriangles;
 
     // initial constructor
     private EmptyBoundaryPatch(BasicEdge e, BytePoint[] v, MutablePrototileList TL) {
+        // turn off the kill switch
+        die = false;
+
+        // make an empty list of descendents
+        spawnList = new ArrayList<>();
+
+        // set the initial step variables
+        initialPrototile = BasicPrototile.getFirstTile();
+        initialSecondEdge = false;
+        initialFlip = false;
+        initialTriangles = new ArrayList<>();
+
         tileList = TL;
         triangles = new Stack<>();
         edges = EmptyBoundaryEdgeList.createEmptyBoundaryEdgeList(e);
@@ -128,9 +151,51 @@ public class EmptyBoundaryPatch implements Serializable {
         resetSteps();
     }
 
+    // spawn constructor
+    private EmptyBoundaryPatch(BasicPrototile initialPrototile, boolean initialSecondEdge, boolean initialFlip, List<BasicTriangle> initialTriangles, Stack<BasicTriangle> triangles, PuzzleBoundary boundary, Stack<BytePoint> vertices, EmptyBoundaryEdgeList edges, MutableOrientationPartition partition, MutablePrototileList tileList) {
+        // turn off the kill switch
+        die = false;
+
+        // make an empty list of descendents
+        spawnList = new ArrayList<>();
+
+        // set the initial step variables
+        this.initialPrototile = initialPrototile;
+        this.initialSecondEdge = initialSecondEdge;
+        this.initialFlip = initialFlip;
+        this.initialTriangles = initialTriangles;
+
+        // set the state variables
+        this.triangles = triangles;
+        this.boundary = boundary;
+        this.vertices = vertices;
+        this.edges = edges;
+        this.partition = partition;
+        this.tileList = tileList;
+
+        // set the step variables
+        resetSteps();
+    }
+
     // public static factory method, single edge
     public static EmptyBoundaryPatch createEmptyBoundaryPatch(BasicEdge e, BytePoint[] v, MutablePrototileList TL) {
         return new EmptyBoundaryPatch(e,v,TL);
+    }
+
+    // spawn a new patch to pick things up from here
+    private EmptyBoundaryPatch spawn()
+    {
+        List<BasicTriangle> newInitialTriangles = new ArrayList<>();
+        Stack<BasicTriangle> newTriangles = new Stack<>();
+        for (int i = 0; i < triangles.size(); i++) {
+            newTriangles.push(triangles.get(i));
+            newInitialTriangles.add(triangles.get(i));
+        }
+        Stack<BytePoint> newVertices = new Stack<>();
+        for (int i = 0; i < vertices.size(); i++) {
+            newVertices.push(vertices.get(i));
+        }
+        return new EmptyBoundaryPatch(currentPrototile, secondEdge, flip, newInitialTriangles, newTriangles, boundary.deepCopy(), newVertices, edges.deepCopy(), partition.deepCopy(), tileList.deepCopy());
     }
 
     // get all the completed patches
@@ -151,6 +216,16 @@ public class EmptyBoundaryPatch implements Serializable {
     // toggle the debug status
     public void setDebug(boolean tf) {
         debug = tf;
+    }
+
+    // flip the kill switch
+    public void kill() {
+        die = true;
+    }
+
+    // get the descendents
+    public List<EmptyBoundaryPatch> getSpawnList() {
+        return spawnList;
     }
 
     // get all the patches for this puzzle
@@ -196,9 +271,18 @@ public class EmptyBoundaryPatch implements Serializable {
         return (flip == initialFlip && secondEdge == initialSecondEdge && currentPrototile.equals(initialPrototile));
     }
 
+    // return true if triangles and initialTriangles
+    // contain the same triangles in the same order
+    private boolean compareTriangles() {
+        if (initialTriangles.size()!=triangles.size()) return false;
+        for (int i = 0; i < triangles.size(); i++)
+            if (!initialTriangles.get(i).equals(triangles.get(i))) return false;
+        return true;
+    }
+
     // return true if the search is done
     public boolean allDone() {
-        return (backToStart()&&triangles.empty());
+        return (backToStart()&&compareTriangles());
     }
 
     // reset the step variables to their initial states
@@ -243,7 +327,11 @@ public class EmptyBoundaryPatch implements Serializable {
                     placeTriangle(t);
                     if (partition.valid())
                         {
-                            solve();
+                            if (die) {
+                                spawnList.add(spawn());
+                            } else {
+                                solve();
+                            }
                         }
                     removeTriangle();
                 }

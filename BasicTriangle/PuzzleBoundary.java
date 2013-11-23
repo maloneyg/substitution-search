@@ -196,6 +196,16 @@ public class PuzzleBoundary implements Serializable {
         add(e);
     }
 
+    // private constructor
+    private PuzzleBoundary(boolean[] b0,boolean[] b1,boolean[] b2,Stack<BasicEdge> e0,Stack<BasicEdge> e1,Stack<BasicEdge> e2) {
+        block0 = b0;
+        block1 = b1;
+        block2 = b2;
+        placed0 = e0;
+        placed1 = e1;
+        placed2 = e2;
+    }
+
     // public static factory method
     public static PuzzleBoundary createPuzzleBoundary() {
         return new PuzzleBoundary();
@@ -204,6 +214,23 @@ public class PuzzleBoundary implements Serializable {
     // public static factory method
     public static PuzzleBoundary createPuzzleBoundary(BasicEdge e) {
         return new PuzzleBoundary(e);
+    }
+
+    // deep copy
+    public PuzzleBoundary deepCopy() {
+        boolean[] b0 = new boolean[block0.length];
+        boolean[] b1 = new boolean[block1.length];
+        boolean[] b2 = new boolean[block2.length];
+        for (int i = 0; i < b0.length; i++) b0[i] = block0[i];
+        for (int i = 0; i < b1.length; i++) b1[i] = block1[i];
+        for (int i = 0; i < b2.length; i++) b2[i] = block2[i];
+        Stack<BasicEdge> e0 = new Stack<>();
+        Stack<BasicEdge> e1 = new Stack<>();
+        Stack<BasicEdge> e2 = new Stack<>();
+        for (int i = 0; i < placed0.size(); i++) e0.push(placed0.get(i));
+        for (int i = 0; i < placed1.size(); i++) e1.push(placed1.get(i));
+        for (int i = 0; i < placed2.size(); i++) e2.push(placed2.get(i));
+        return new PuzzleBoundary(b0,b1,b2,e0,e1,e2);
     }
 
     // increment an array of bytes, wrapping around if
