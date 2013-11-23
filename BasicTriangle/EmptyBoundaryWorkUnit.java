@@ -180,7 +180,9 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
                     }
                 counter.getAndIncrement();
             }
-        return new WorkUnitResult(patch.getLocalCompletedPatches());
+        EmptyWorkUnitResult thisResult = new EmptyWorkUnitResult(this.hashCode(), patch.getLocalCompletedPatches());
+        System.out.println("\n" + thisResult);
+        return thisResult;
     } // method call() ends here
 
     public void debugCall()
