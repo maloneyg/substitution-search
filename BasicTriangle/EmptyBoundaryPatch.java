@@ -69,7 +69,7 @@ public class EmptyBoundaryPatch implements Serializable {
     private MutablePrototileList tileList;
 
     // kill signal. set to true if we want to spawn new patches
-    private boolean die;
+    private AtomicBoolean die;
 
     // a list of descendents. populate this list with spawn() calls
     private List<EmptyBoundaryPatch> spawnList;
@@ -119,7 +119,7 @@ public class EmptyBoundaryPatch implements Serializable {
     // initial constructor
     private EmptyBoundaryPatch(BasicEdge e, BytePoint[] v, MutablePrototileList TL) {
         // turn off the kill switch
-        die = false;
+        die = new AtomicBoolean();
 
         // make an empty list of descendents
         spawnList = new ArrayList<>();
@@ -154,7 +154,7 @@ public class EmptyBoundaryPatch implements Serializable {
     // spawn constructor
     private EmptyBoundaryPatch(BasicPrototile initialPrototile, boolean initialSecondEdge, boolean initialFlip, List<BasicTriangle> initialTriangles, Stack<BasicTriangle> triangles, PuzzleBoundary boundary, Stack<BytePoint> vertices, EmptyBoundaryEdgeList edges, MutableOrientationPartition partition, MutablePrototileList tileList) {
         // turn off the kill switch
-        die = false;
+        die = new AtomicBoolean();
 
         // make an empty list of descendents
         spawnList = new ArrayList<>();
@@ -220,7 +220,7 @@ public class EmptyBoundaryPatch implements Serializable {
 
     // flip the kill switch
     public void kill() {
-        die = true;
+        die.lazySet(true);
     }
 
     // get the descendents
@@ -327,7 +327,7 @@ public class EmptyBoundaryPatch implements Serializable {
                     placeTriangle(t);
                     if (partition.valid())
                         {
-                            if (die) {
+                            if (die.get()) {
                                 spawnList.add(spawn());
                             } else {
                                 solve();
