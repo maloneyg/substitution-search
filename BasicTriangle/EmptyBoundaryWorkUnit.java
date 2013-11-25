@@ -5,6 +5,8 @@ import java.io.*;
 import java.util.logging.*;
 import com.google.common.collect.*;
 import java.util.concurrent.atomic.*;
+import java.util.Timer;
+import java.util.TimerTask;
 
 // this class represents a unit of work.
 // calling get() on the Future for a WorkUnit returns a TestResult.
@@ -12,6 +14,14 @@ import java.util.concurrent.atomic.*;
 // the main thing that a EmptyBoundaryWorkUnit does is put completed 
 // patches into completedPatches.
 public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
+
+    class SendKillSignal extends TimerTask {
+        public void run() {
+            timer.cancel(); //Terminate the timer thread
+        }
+    }
+
+
 
     // the main data on which EmptyBoundaryWorkUnit works
     private final EmptyBoundaryPatch patch;
@@ -48,6 +58,8 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     public Result call() {
         threadService.getExecutor().registerCounter(count);
         patch.setCount(count);
+        timer = new Timer();
+        timer.schedule(new RemindTask(), seconds*1000);
         patch.solve();
         //System.out.println("finished work unit " + hashCode());
         threadService.getExecutor().deregisterCounter(count);
