@@ -71,6 +71,12 @@ public class EmptyTest
                         System.out.println("Job was cancelled!");
                     }
             }
+
+        try {
+            while (!executorService.getExecutor().getQueue().isEmpty()||executorService.getExecutor().getNumberOfRunningJobs()>0) Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            System.out.println("Interrupted!");
+        }
         
         System.out.println("All jobs complete.  " + totalPatches + " completed patches were found.");
 
