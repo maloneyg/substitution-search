@@ -7,6 +7,7 @@ import com.google.common.collect.*;
 import java.util.concurrent.atomic.*;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.*;
 
 // this class represents a unit of work.
 // calling get() on the Future for a WorkUnit returns a TestResult.
@@ -15,19 +16,29 @@ import java.util.TimerTask;
 // patches into completedPatches.
 public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
 
-    class SendKillSignal extends TimerTask {
+    class KillSignal extends TimerTask {
+
+        private AtomicBoolean killSwitch;
+
+        public KillSignal(AtomicBoolean killSwitch) {
+            this.killSwitch = killSwitch;
+        }
+
         public void run() {
-            timer.cancel(); //Terminate the timer thread
+            killSwitch.lazySet(true);
         }
     }
 
 
 
     // the main data on which EmptyBoundaryWorkUnit works
+    private static ThreadService executorService = ThreadService.INSTANCE;
     private final EmptyBoundaryPatch patch;
     private final AtomicInteger count = new AtomicInteger(0);
     private AtomicInteger counter;
     private List<ImmutablePatch> resultTarget;
+    private AtomicBoolean die;
+    private int killTime = 30000;
 
     private static final ThreadService threadService;
 
@@ -39,8 +50,9 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     } // static initialization ends here
 
     // private constructor
-    private EmptyBoundaryWorkUnit(EmptyBoundaryPatch p) {
+    private EmptyBoundaryWorkUnit(EmptyBoundaryPatch p, AtomicBoolean die) {
         patch = p;
+        this.die = die;
     }
 
     public int hashCode()
@@ -49,8 +61,8 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     }
 
     // public static factory method
-    public static EmptyBoundaryWorkUnit createEmptyBoundaryWorkUnit(EmptyBoundaryPatch p) {
-        return new EmptyBoundaryWorkUnit(p);
+    public static EmptyBoundaryWorkUnit createEmptyBoundaryWorkUnit(EmptyBoundaryPatch p, AtomicBoolean die) {
+        return new EmptyBoundaryWorkUnit(p,die);
     }
 
     // this is the main method in EmptyBoundaryWorkUnit.
@@ -58,11 +70,11 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     public Result call() {
         threadService.getExecutor().registerCounter(count);
         patch.setCount(count);
-        timer = new Timer();
-        timer.schedule(new RemindTask(), seconds*1000);
-        patch.solve();
-        //System.out.println("finished work unit " + hashCode());
+        Timer timer = new Timer();
+        timer.schedule(new KillSignal(die), killTime);
+        List<EmptyBoundaryPatch> descendents = patch.solve();
         threadService.getExecutor().deregisterCounter(count);
+
         if ( resultTarget != null )
             {
                 synchronized(resultTarget)
@@ -71,8 +83,22 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
                     }
                 counter.getAndIncrement();
             }
+
+        if ( !descendents.isEmpty() )
+            {
+                for (EmptyBoundaryPatch p : descendents) {
+                    synchronized(executorService)
+                        {
+                           AtomicBoolean kill = new AtomicBoolean();
+                           p.setKillSwitch(kill);
+                           executorService.getExecutor().submit(new EmptyBoundaryWorkUnit(p,kill));
+                        }
+                }
+            }
+
         EmptyWorkUnitResult thisResult = new EmptyWorkUnitResult(this.hashCode(), patch.getLocalCompletedPatches());
         System.out.println("\n" + thisResult);
+        timer.cancel(); //Terminate the timer thread
         return thisResult;
     } // method call() ends here
 
@@ -104,4 +130,3 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     }
 
 } // end of class EmptyBoundaryWorkUnit
-

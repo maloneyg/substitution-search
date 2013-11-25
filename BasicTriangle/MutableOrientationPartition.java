@@ -47,7 +47,7 @@ public class MutableOrientationPartition extends MutablePartition<Orientation> i
         PartitionNode<Orientation> otherCurrent = output.getHead();
         current = current.getNext();
         while (current != null) {
-            output.add(current.getData());
+            output.addToEnd(current.getData());
             otherCurrent = otherCurrent.getNext();
             otherCurrent.setHead(current.isHead());
             current = current.getNext();

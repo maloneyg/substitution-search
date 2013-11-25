@@ -223,6 +223,11 @@ public class EmptyBoundaryPatch implements Serializable {
         die.lazySet(true);
     }
 
+    // make the kill switch point to something else
+    public void setKillSwitch(AtomicBoolean die) {
+        this.die = die;
+    }
+
     // get the descendents
     public List<EmptyBoundaryPatch> getSpawnList() {
         return spawnList;
@@ -311,7 +316,7 @@ public class EmptyBoundaryPatch implements Serializable {
 
     // here is where all of the work is done.
     // place a single tile, then call this method recursively.
-    public void solve() {
+    public List<EmptyBoundaryPatch> solve() {
         count.getAndIncrement();
         do {
             if (tileList.empty()) {
@@ -339,6 +344,7 @@ public class EmptyBoundaryPatch implements Serializable {
 
             step();
         } while (!backToStart()); // stop when we've tried all prototiles
+        return spawnList;
 
     } // solve ends here
 

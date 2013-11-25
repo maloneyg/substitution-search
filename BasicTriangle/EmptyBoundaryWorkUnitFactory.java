@@ -114,7 +114,10 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
 
         iterateEdgeBreakdown();
 
-        return EmptyBoundaryWorkUnit.createEmptyBoundaryWorkUnit(patch);
+        AtomicBoolean kill = new AtomicBoolean();
+        patch.setKillSwitch(kill);
+
+        return EmptyBoundaryWorkUnit.createEmptyBoundaryWorkUnit(patch,kill);
 
     }
 
