@@ -57,9 +57,25 @@ public class EmptyBoundaryEdgeList implements Serializable {
         starter = e;
     }
 
+    // private constructor
+    private EmptyBoundaryEdgeList(Stack<BasicEdge> open, Stack<IndexAndEdge> closed, BasicEdge e) {
+        openEdges = open;
+        closedEdges = closed;
+        starter = e;
+    }
+
     // public static factory method
     public static EmptyBoundaryEdgeList createEmptyBoundaryEdgeList(BasicEdge e) {
         return new EmptyBoundaryEdgeList(e);
+    }
+
+    // deep copy
+    public EmptyBoundaryEdgeList deepCopy() {
+        Stack<BasicEdge> newOpen = new Stack<>();
+        for (int i = 0; i < openEdges.size(); i++) newOpen.push(openEdges.get(i));
+        Stack<IndexAndEdge> newClosed = new Stack<>();
+        for (int i = 0; i < closedEdges.size(); i++) newClosed.push(closedEdges.get(i));
+        return new EmptyBoundaryEdgeList(newOpen, newClosed, starter);
     }
 
     // equals method

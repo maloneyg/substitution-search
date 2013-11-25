@@ -42,6 +42,13 @@ public class MutablePrototileList implements Serializable {
         return new MutablePrototileList(i);
     }
 
+    // deep copy
+    public MutablePrototileList deepCopy() {
+        int[] i = new int[tileCount.length];
+        for (int j = 0; j < i.length; j++) i[j] = tileCount[j];
+        return new MutablePrototileList(i);
+    }
+
     // implementation of equals method.  
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())

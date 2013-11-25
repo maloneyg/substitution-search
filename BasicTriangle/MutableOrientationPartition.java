@@ -40,6 +40,21 @@ public class MutableOrientationPartition extends MutablePartition<Orientation> i
         return new MutableOrientationPartition(o);
     }
 
+    // deep copy
+    public MutableOrientationPartition deepCopy() {
+        PartitionNode<Orientation> current = getHead();
+        MutableOrientationPartition output = new MutableOrientationPartition(current.getData());
+        PartitionNode<Orientation> otherCurrent = output.getHead();
+        current = current.getNext();
+        while (current != null) {
+            output.add(current.getData());
+            otherCurrent = otherCurrent.getNext();
+            otherCurrent.setHead(current.isHead());
+            current = current.getNext();
+        }
+        return output;
+    }
+
     // identify two orientations with each other.
     // do the same for their opposites.
     public void identify(Orientation one, Orientation two) {

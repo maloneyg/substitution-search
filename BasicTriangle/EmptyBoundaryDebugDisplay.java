@@ -332,7 +332,7 @@ public class EmptyBoundaryDebugDisplay extends JPanel implements ActionListener
 
     public static void main(String[] args) {
 
-        EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(5,"debugging");
+        EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(4,"debugging");
 
     }
 
