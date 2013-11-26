@@ -30,7 +30,7 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
         public void run() {
             if ( ThreadService.INSTANCE.getExecutor().getQueue().size() < MAX_SIZE )
                 {
-                    timer.cancel();                  
+                    timer.cancel();
                     killSwitch.lazySet(true);
                 }
         }
@@ -72,10 +72,17 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
 
     // this is the main method in EmptyBoundaryWorkUnit.
     // it produces the TestResult.
+
+    public static int i=0;
+
+    public static synchronized void incrementI() { i++; }
+
     public Result call() {
         threadService.getExecutor().registerCounter(count);
         patch.setCount(count);
         Timer timer = new Timer();
+        incrementI();
+        System.out.println("Created new timer: " + i);
         timer.schedule(new KillSignal(die,timer), KILL_TIME, KILL_TIME);
         List<EmptyBoundaryPatch> descendents = patch.solve();
         threadService.getExecutor().deregisterCounter(count);
@@ -100,6 +107,7 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
         EmptyWorkUnitResult thisResult = new EmptyWorkUnitResult(this.hashCode(), patch.getLocalCompletedPatches());
         System.out.println("\n" + thisResult);
         timer.cancel(); //Terminate the timer thread
+        timer = null;
         return thisResult;
     } // method call() ends here
 
