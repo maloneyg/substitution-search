@@ -19,17 +19,22 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     class KillSignal extends TimerTask {
 
         private AtomicBoolean killSwitch;
+        private Timer timer;
+        private static final int MAX_SIZE = 500; // max size of queue to spawn more units
 
-        public KillSignal(AtomicBoolean killSwitch) {
+        public KillSignal(AtomicBoolean killSwitch, Timer timer) {
             this.killSwitch = killSwitch;
+            this.timer = timer;
         }
 
         public void run() {
-            killSwitch.lazySet(true);
+            if ( ThreadService.INSTANCE.getExecutor().getQueue().size() < MAX_SIZE )
+                {
+                    timer.cancel();                  
+                    killSwitch.lazySet(true);
+                }
         }
     }
-
-
 
     // the main data on which EmptyBoundaryWorkUnit works
     private static ThreadService executorService = ThreadService.INSTANCE;
@@ -38,7 +43,7 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     private AtomicInteger counter;
     private List<ImmutablePatch> resultTarget;
     private AtomicBoolean die;
-    private int killTime = 30000;
+    private static final int KILL_TIME = 5000; // in ms, how long to wait before killing a work unit and spawning more
 
     private static final ThreadService threadService;
 
@@ -71,7 +76,7 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
         threadService.getExecutor().registerCounter(count);
         patch.setCount(count);
         Timer timer = new Timer();
-        timer.schedule(new KillSignal(die), killTime);
+        timer.schedule(new KillSignal(die,timer), KILL_TIME);
         List<EmptyBoundaryPatch> descendents = patch.solve();
         threadService.getExecutor().deregisterCounter(count);
 
@@ -84,17 +89,13 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
                 counter.getAndIncrement();
             }
 
-        if ( !descendents.isEmpty() )
-            {
-                for (EmptyBoundaryPatch p : descendents) {
-                    synchronized(executorService)
-                        {
-                           AtomicBoolean kill = new AtomicBoolean();
-                           p.setKillSwitch(kill);
-                           executorService.getExecutor().submit(new EmptyBoundaryWorkUnit(p,kill));
-                        }
-                }
-            }
+        for (EmptyBoundaryPatch p : descendents) {
+            AtomicBoolean kill = new AtomicBoolean();
+            p.setKillSwitch(kill);
+            EmptyBoundaryWorkUnit spawnedUnit = new EmptyBoundaryWorkUnit(p,kill);
+            executorService.getExecutor().submit(spawnedUnit);
+            System.out.println("Spawned a new unit " + spawnedUnit.hashCode());
+        }
 
         EmptyWorkUnitResult thisResult = new EmptyWorkUnitResult(this.hashCode(), patch.getLocalCompletedPatches());
         System.out.println("\n" + thisResult);
