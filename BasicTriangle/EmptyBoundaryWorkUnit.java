@@ -76,7 +76,7 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
         threadService.getExecutor().registerCounter(count);
         patch.setCount(count);
         Timer timer = new Timer();
-        timer.schedule(new KillSignal(die,timer), KILL_TIME);
+        timer.schedule(new KillSignal(die,timer), KILL_TIME, KILL_TIME);
         List<EmptyBoundaryPatch> descendents = patch.solve();
         threadService.getExecutor().deregisterCounter(count);
 
