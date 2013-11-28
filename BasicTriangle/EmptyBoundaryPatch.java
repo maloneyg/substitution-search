@@ -529,40 +529,45 @@ public class EmptyBoundaryPatch implements Serializable {
         boolean newVertex = !(vertices.contains(other)||boundary.incident(other)==1);
 
         // make sure the new vertex is in the inflated prototile
-        if (newVertex && boundary.overTheEdge(other)) {
-            if (debug) setMessage(t +"\n"+ DebugMessage.NON_CONTAINMENT.toString());
-            return false;
-        }
-
-        // make sure the new vertex doesn't overlap any open edges
-        if (newVertex) {
-            for (BasicEdge e : edges.open()) {
-                if (e.incident(other)) {
-                    if (debug) setMessage(t+"\n"+DebugMessage.INCIDENT_OPEN.toString());
-                    return false;
-                }
+        if (newVertex) { // big if statement
+            if (boundary.overTheEdge(other)) {
+                if (debug) setMessage(t +"\n"+ DebugMessage.NON_CONTAINMENT.toString());
+                return false;
             }
-        }
 
-        // make sure the new vertex doesn't overlap any closed edges
-        if (newVertex) {
+            // make sure the new vertex doesn't overlap any open edges
+//            for (BasicEdge e : edges.open()) {
+//                if (e.incident(other)) {
+//                    if (debug) setMessage(t+"\n"+DebugMessage.INCIDENT_OPEN.toString());
+//                    return false;
+//                }
+//            }
+
+            // make sure the new vertex doesn't overlap any closed edges
             for (BasicEdge e : edges.closed()) {
                 if (e.incident(other)) {
                     if (debug) setMessage(t +"\n"+ DebugMessage.INCIDENT_CLOSED.toString());
                     return false;
                 }
             }
-        }
 
-        // make sure the new vertex isn't inside any placed triangles
-        if (newVertex) {
+            // make sure the new vertex isn't inside any placed triangles
             for (BasicTriangle tr : triangles) {
                 if (tr.contains(other)) {
                     if (debug) setMessage(t +"\n"+ DebugMessage.OVERLAP.toString() +"\n"+ tr);
                     return false;
                 }
             }
-        }
+
+            // return false if the new vertex is too close to any open edge
+            for (BasicEdge open : edges.open()) {
+                if (open.tooClose(other)) {
+                    if (debug) setMessage(open.cross(other)+ " hit");
+                    return false;
+                }
+            }
+
+        } // end if newVertex
 
         // newEdges are the edges containing other in t
         BasicEdge[] newEdges = new BasicEdge[2];
@@ -595,26 +600,6 @@ public class EmptyBoundaryPatch implements Serializable {
             for (BasicEdge closed : edges.closed()) {
                 if (e.cross(closed)) {
                     if (debug) setMessage(e +"\n"+ DebugMessage.CROSS_CLOSED.toString() +"\n"+ closed);
-                    return false;
-                }
-            }
-        }
-
-//        // return false if the new vertex is too close to any existing vertex
-//        if (newVertex) {
-//            for (BytePoint p : vertices) {
-//                if (other.tooClose(p)) {
-//                    if (debug) setMessage(other +"\n"+ DebugMessage.TOO_CLOSE.toString() +"\n"+ p);
-//                    return false;
-//                }
-//            }
-//        }
-
-        // return false if the new vertex is too close to any open edge
-        if (newVertex) {
-            for (BasicEdge open : edges.open()) {
-                if (open.tooClose(other)) {
-                    if (debug) setMessage(open.cross(other)+ " hit");
                     return false;
                 }
             }
