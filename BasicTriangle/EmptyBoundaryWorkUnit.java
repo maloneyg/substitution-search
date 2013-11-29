@@ -20,7 +20,7 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
 
         private AtomicBoolean killSwitch;
         private Timer timer;
-        private static final int MAX_SIZE = 500; // max size of queue to spawn more units
+        private static final int MAX_SIZE = Preinitializer.SPAWN_MAX_SIZE; // don't spawn any more units if the queue is bigger than this
 
         public KillSignal(AtomicBoolean killSwitch, Timer timer) {
             this.killSwitch = killSwitch;
@@ -39,14 +39,16 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     // the main data on which EmptyBoundaryWorkUnit works
     private static ThreadService executorService = ThreadService.INSTANCE;
     private final EmptyBoundaryPatch patch;
-    private final AtomicInteger count = new AtomicInteger(0);
-    private AtomicInteger counter;
-    private List<ImmutablePatch> resultTarget;
+    private final AtomicInteger count = new AtomicInteger(0); // keeps track of solve calls
     private AtomicBoolean die;
-    private static final int KILL_TIME = 5000; // in ms, how long to wait before killing a work unit and spawning more
+
+    // required data to get all patches from the descendents of the initial work units
+    private final EmptyBoundaryWorkUnit initialWorkUnit; // if this is not an initial work unit, this points to this unit's eventual ancestor
+    private final List<ImmutablePatch> eventualPatches; // only exists in initial work units; stores all patch results from descendents 
+    
+    private static final int KILL_TIME = Preinitializer.SPAWN_MIN_TIME; // in ms, how long to wait before killing a work unit and spawning more
 
     private static final ThreadService threadService;
-
     private static final Logger log;
 
     static { // initialize threadService, log, and completedPatches
@@ -54,79 +56,91 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
         log = threadService.getLogger();
     } // static initialization ends here
 
-    // private constructor
-    private EmptyBoundaryWorkUnit(EmptyBoundaryPatch p, AtomicBoolean die) {
-        patch = p;
+    // private constructors
+    
+    // create an initial work unit
+    private EmptyBoundaryWorkUnit(EmptyBoundaryPatch patch, AtomicBoolean die) {
+        this.patch = patch;
         this.die = die;
+        initialWorkUnit = this;
+        eventualPatches = new LinkedList<ImmutablePatch>();
+    }
+
+    // create a descendent work unit
+    private EmptyBoundaryWorkUnit(EmptyBoundaryPatch patch, AtomicBoolean die, EmptyBoundaryWorkUnit parentUnit) {
+        this.patch = patch;
+        this.die = die;
+        if ( parentUnit == null )
+            throw new IllegalArgumentException("parent unit must not be null");
+        initialWorkUnit = parentUnit.initialWorkUnit;
+        eventualPatches = parentUnit.eventualPatches;
     }
 
     public int hashCode()
     {
-        return Objects.hash(patch, count, counter, resultTarget);
+        int hash = 0;
+        // avoid self-referential hashcode calls
+        // synchronization is necessary because calling hashCode() on eventualPatches
+        // will result an iteration over the collection; if the content of eventualPatches changes during
+        // iteration, a ConcurrentModificationException will be thrown
+        // I've checked and hashCode() is not called that frequently, so this should not be a huge performance problem
+        synchronized(eventualPatches)
+            {
+                if ( initialWorkUnit == this )
+                    hash = Objects.hash(patch, count, die, eventualPatches);
+                else
+                    hash = Objects.hash(patch, count, die, initialWorkUnit, eventualPatches);
+            }
+        return hash;
     }
 
     // public static factory method
     public static EmptyBoundaryWorkUnit createEmptyBoundaryWorkUnit(EmptyBoundaryPatch p, AtomicBoolean die) {
+        // ensures all externally created work units are marked as initial
         return new EmptyBoundaryWorkUnit(p,die);
     }
 
     // this is the main method in EmptyBoundaryWorkUnit.
     // it produces the TestResult.
 
-    public static int i=0;
-
-    public static synchronized void incrementI() { i++; }
-
     public Result call() {
         threadService.getExecutor().registerCounter(count);
         patch.setCount(count);
+        
         Timer timer = new Timer();
-        incrementI();
-        System.out.println("Created new timer: " + i);
         timer.schedule(new KillSignal(die,timer), KILL_TIME, KILL_TIME);
+        
         List<EmptyBoundaryPatch> descendents = patch.solve();
         threadService.getExecutor().deregisterCounter(count);
+        
+        timer.cancel(); //Terminate the timer thread
+        timer = null;
 
-        if ( resultTarget != null )
+        // update eventual ancestor's list of results
+        synchronized ( eventualPatches )
             {
-                synchronized(resultTarget)
-                    {
-                        resultTarget.addAll(patch.getLocalCompletedPatches());
-                    }
-                counter.getAndIncrement();
+                eventualPatches.addAll( patch.getLocalCompletedPatches() );
             }
 
         for (EmptyBoundaryPatch p : descendents) {
             AtomicBoolean kill = new AtomicBoolean();
             p.setKillSwitch(kill);
-            EmptyBoundaryWorkUnit spawnedUnit = new EmptyBoundaryWorkUnit(p,kill);
+            EmptyBoundaryWorkUnit spawnedUnit = new EmptyBoundaryWorkUnit(p,kill,this);
             executorService.getExecutor().submit(spawnedUnit);
-            System.out.println("Spawned a new unit " + spawnedUnit.hashCode());
+            //System.out.println("Spawned a new unit " + spawnedUnit.hashCode());
         }
+        
+        
+        if ( descendents.size() > 0 )
+            System.out.println("\nWork unit " + this.hashCode() + " spawned " + descendents.size() + " more units.");
+        
+        EmptyWorkUnitResult thisResult = new EmptyWorkUnitResult(this.hashCode(), patch.getLocalCompletedPatches(), eventualPatches);
+        
+        if ( patch.getLocalCompletedPatches().size() > 0 )
+            System.out.println("\n" + thisResult.toString());
 
-        EmptyWorkUnitResult thisResult = new EmptyWorkUnitResult(this.hashCode(), patch.getLocalCompletedPatches());
-        System.out.println("\n" + thisResult);
-        timer.cancel(); //Terminate the timer thread
-        timer = null;
         return thisResult;
     } // method call() ends here
-
-    public void debugCall()
-    {
-        patch.solve();
-        resultTarget.addAll(patch.getLocalCompletedPatches());
-        counter.getAndIncrement();
-    }
-
-    public void setCounter(AtomicInteger counter)
-    {
-        this.counter = counter;
-    }
-
-    public void setResultTarget(List<ImmutablePatch> resultTarget)
-    {
-        this.resultTarget = resultTarget;
-    }
 
     public int getCount()
     {

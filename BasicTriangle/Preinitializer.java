@@ -24,17 +24,20 @@ class Preinitializer {
 
     public static final int NUMBER_OF_THREADS; // number of threads per client; set in static initializer
 
+    public static final int SPAWN_MAX_SIZE = 50; // no more work units will be spawend if the queue is bigger than this size
+    public static final int SPAWN_MIN_TIME = 5000 ; // if a work unit takes longer than this time in ms, more units will be spawned
+
     // the inflation factor, represented as coefficients of
     // 1, a, a^2, etc., where a = 2*cos(pi/N).
 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2, 1); // the square of the really small search (1+a)^2 won't work with tile 3 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search (104)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, 0, 1); // quite big search (110)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 0, -3, 0, 1); // huge search (115)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, -2, 0, 1); // b+d (118)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121)
@@ -69,6 +72,9 @@ class Preinitializer {
             // determine how many threads to use
             NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
             System.out.println("Using " + NUMBER_OF_THREADS + " threads.");
+
+            // print out which puzzle we are searching;
+            System.out.println("We are searching tile " + MY_TILE + " using inflation factor " + INFL + ".");
         }
 
 } // end of class Preinitializer
