@@ -78,6 +78,9 @@ public class PuzzleBoundary implements Serializable {
     private static final BytePoint VECTOR1;
     private static final BytePoint VECTOR2;
 
+    // angles that the edges of the big triangle make with the positive x-axis
+    private static final BasicAngle[] ANGLES;
+
     // minimum allowable distance from a point to an edge
     public static final double TOO_CLOSE = BasicEdge.TOO_CLOSE;
     // we need a different number for edge 1
@@ -107,6 +110,11 @@ public class PuzzleBoundary implements Serializable {
         BytePoint[] vertices = placed.getVertices();
         for (int i = 0; i < 3; i++) vertices[i] = vertices[i].inflate();
         VERTICES = vertices;
+
+        BasicAngle[] preAngles = new BasicAngle[3];
+        BasicEdge[] tempEdges = placed.getEdges();
+        for (int i = 0; i < 3; i++) preAngles[i] = tempEdges[i].angle();
+        ANGLES = preAngles;
 
         // in order to avoid a compile-time error, I can't assign
         // E0, E1, E2, VECTOR0, VECTOR1, and VECTOR2 inside a loop
@@ -410,6 +418,25 @@ public class PuzzleBoundary implements Serializable {
     // the int i should be 0, 1, or 2 depending on which edge we want
     public BytePoint[] getVertices() {
         return VERTICES;
+    }
+
+    // somewhat complicated.  
+    // find the boundary edge with which this edge is incident
+    // at its base (first vertex). 
+    // then return the angle that this boundary edge makes with
+    // the positive x-axis.
+    public BasicAngle incidenceAngle(BasicEdge e) {
+        BytePoint base = e.getEnds()[0];
+        for (int i = 0; i < E0.length; i++) {
+            if (base.equals(E0[i])) return ANGLES[0];
+        }
+        for (int i = 0; i < E1.length; i++) {
+            if (base.equals(E1[i])) return ANGLES[1];
+        }
+        for (int i = 0; i < E2.length; i++) {
+            if (base.equals(E2[i])) return ANGLES[2];
+        }
+        throw new IllegalArgumentException(e + " is not incident with the puzzle boundary " + this);
     }
 
     // output a String

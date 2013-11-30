@@ -26,6 +26,14 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
     public static final ImmutableList<BasicPrototile> ALL_PROTOTILES;
     public static final ImmutableList<BasicEdgeLength> EDGE_LENGTHS = BasicEdgeLength.ALL_EDGE_LENGTHS;
 
+    // necessary for validity testing in patch.
+    // it's a list of edge lengths from triangles that contain an
+    // angle of 1.  we discard the shortest length and put the
+    // other two in a list.  then we can use this to see if two
+    // edge lengths can contain an angle of 1 between them.
+    public static final ImmutableList<ImmutableList<BasicEdgeLength>> ONE_LENGTHS;
+    //public static final ImmutableList<ImmutableList<BasicAngle>> ONE_ANGLES;
+
     // private constructor
     private BasicPrototile(ImmutableList<Integer> anglesList) {
         angles = new BasicAngle[] { //
@@ -67,7 +75,21 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
             tempAllPrototiles[i] = new BasicPrototile(Initializer.PROTOTILES.get(i));
         ALL_PROTOTILES = ImmutableList.copyOf(tempAllPrototiles);
 
-    }
+    } // end initialization of ALL_PROTOTILES
+
+    static { // initialize ONE_LENGTHS
+        List<ImmutableList<BasicEdgeLength>> preOneLengths = new ArrayList<>();
+        BasicEdgeLength ONE = BasicEdgeLength.createBasicEdgeLength(0);
+        for (BasicPrototile p : ALL_PROTOTILES) {
+            if (ONE.equals(p.lengths[0])||ONE.equals(p.lengths[1])||ONE.equals(p.lengths[2])) {
+                List<BasicEdgeLength> these = new ArrayList<>();
+                for (int i = 0; i < 3; i++) if (!ONE.equals(p.lengths[i])) these.add(p.lengths[i]);
+                if (these.size()==1) these.add(ONE);
+                preOneLengths.add(ImmutableList.copyOf(these));
+            }
+        }
+        ONE_LENGTHS = ImmutableList.copyOf(preOneLengths);
+    } // end initialization of ONE_LENGTHS
 
     // public static factory method
     public static BasicPrototile createBasicPrototile(int[] a) {
@@ -190,6 +212,35 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
     */
     public boolean compatible(BasicEdgeLength l) {
         return Arrays.asList(lengths).contains(l);
+    }
+
+    // return true if these edge lengths enclose an angle of 1 in any prototile
+    public static boolean encloseAngleOne(BasicEdgeLength l1, BasicEdgeLength l2) {
+        for (ImmutableList<BasicEdgeLength> L : ONE_LENGTHS) {
+            if ((l1.equals(L.get(0))&&l2.equals(L.get(1)))||(l1.equals(L.get(1))&&l2.equals(L.get(0)))) return true;
+        }
+        return false;
+    }
+
+    // return true if this edge length is the length of the edge of a triangle
+    // that contains an angle of 1, but not the shortest length in such
+    // a triangle.
+    public static boolean encloseAngleOne(BasicEdgeLength l1) {
+        for (ImmutableList<BasicEdgeLength> L : ONE_LENGTHS) {
+            for (BasicEdgeLength l : L) {
+                if (l1.equals(l)) return true;
+            }
+        }
+        return false;
+    }
+
+    // same as above, but with edges as input instead of edge lengths
+    public static boolean encloseAngleOne(BasicEdge l1, BasicEdge l2) {
+        return encloseAngleOne(l1.getLength(),l2.getLength());
+    }
+
+    public static boolean encloseAngleOne(BasicEdge l1) {
+        return encloseAngleOne(l1.getLength());
     }
 
     /*
@@ -531,6 +582,12 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
         for (int k = 0; k < 10; k++) {
             System.out.println(testMe);
             testMe = testMe.getNextTile();
+        }
+
+        System.out.println("ONE_LENGTHS:");
+        for (int i = 0; i < ONE_LENGTHS.size(); i++) {
+            System.out.println(""+i);
+            for (BasicEdgeLength l : ONE_LENGTHS.get(i)) System.out.println(l);
         }
 
     }
