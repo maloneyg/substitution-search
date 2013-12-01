@@ -9,6 +9,7 @@ import java.util.Scanner;
 public class EmptyTest
 {
     public static final String RESULT_FILENAME = "result.chk";
+    public static final List<List<ImmutablePatch>> eventualPatchList = new LinkedList<List<ImmutablePatch>>();
 
     public static void main(String[] args)
     {
@@ -22,6 +23,8 @@ public class EmptyTest
         EmptyBoundaryWorkUnitFactory factory = EmptyBoundaryWorkUnitFactory.createEmptyBoundaryWorkUnitFactory();
         while (factory.notDone())
             initialJobs.add( factory.nextWorkUnit() );
+        for (EmptyBoundaryWorkUnit u : initialJobs)
+            eventualPatchList.add(u.getEventualPatches());
 
         // start monitoring thread
         double monitorInterval = 1.0; //seconds
@@ -114,6 +117,8 @@ public class EmptyTest
                     {
                         thisResult = thisFuture.get();
                         EmptyWorkUnitResult thisEmptyResult = (EmptyWorkUnitResult)thisResult;
+                        // by the time we get here, all initial work units and their descendents will have finished
+                        // so it's safe to call getEventualPatches()
                         allCompletedPatches.addAll(thisEmptyResult.getEventualPatches());
                     }
                 catch (InterruptedException e)
@@ -131,7 +136,6 @@ public class EmptyTest
                         System.out.println("Job was cancelled!");
                     }
             }
-
 
         // stop monitoring thread
         threadMonitor.stop();
@@ -213,9 +217,19 @@ public class EmptyTest
                     average += d;
                 average = average / throughputs.size();
 
+                // calculate total number of completed patches
+                int numberOfCompletedPatches = 0;
+                for (List<ImmutablePatch> l : EmptyTest.eventualPatchList)
+                    {
+                        synchronized(l)
+                            {
+                                numberOfCompletedPatches += l.size();
+                            }
+                    }
+
                 // print statistics
                 lastUpdateTime = currentTime;
-                ThreadService.INSTANCE.getExecutor().printQueues(throughput, average, totalTime);
+                ThreadService.INSTANCE.getExecutor().printQueues(throughput, average, totalTime, numberOfCompletedPatches);
             }
         }
     }

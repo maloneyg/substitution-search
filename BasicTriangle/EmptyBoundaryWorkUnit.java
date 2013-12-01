@@ -76,6 +76,11 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
         eventualPatches = parentUnit.eventualPatches;
     }
 
+    public List<ImmutablePatch> getEventualPatches()
+    {
+        return eventualPatches;
+    }
+
     public int hashCode()
     {
         int hash = 0;
