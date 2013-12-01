@@ -110,7 +110,7 @@ public class ThreadService
         }
 
         //public void printQueues(double throughput, double average, double timeSinceLastUpdate)
-        public void printQueues(double throughput, double average, double totalTime)
+        public void printQueues(double throughput, double average, double totalTime, int numberOfCompletedPatches)
         {
             //Runtime runtime = Runtime.getRuntime();
             //String reportString = String.format("Queue: %10d   Running: %2d   Complete: %5d   Average: %6.0f /s   Now: %6.0f / s   Last Update: %.2f s  Memory: %6.3f GB / %6.3f GB    \r",
@@ -152,8 +152,8 @@ public class ThreadService
                     totalTimeString = String.format("%6.3 s", totalTime);
                 }
 
-            String reportString = String.format("Queue: %6d   Running: %2d   Done: %5d   Avg: %6.0f /s   Now: %6.0f /s   Elapsed: %s\r",
-            getQueue().size(), numberOfRunningJobs.get(), numberOfJobsRun.get(), average, throughput, totalTimeString);
+            String reportString = String.format("Queue: %6d   Running: %2d   Done: %5d   Complete: %5d   Avg: %6.0f /s   Now: %6.0f /s   Elapsed: %s\r",
+            getQueue().size(), numberOfRunningJobs.get(), numberOfJobsRun.get(), numberOfCompletedPatches, average, throughput, totalTimeString);
             System.out.print(reportString);
         }
 
