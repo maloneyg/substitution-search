@@ -31,8 +31,13 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
     // angle of 1.  we discard the shortest length and put the
     // other two in a list.  then we can use this to see if two
     // edge lengths can contain an angle of 1 between them.
+    public static final ImmutableList<ImmutableList<BasicAngle>> ONE_ANGLES;
     public static final ImmutableList<ImmutableList<BasicEdgeLength>> ONE_LENGTHS;
-    //public static final ImmutableList<ImmutableList<BasicAngle>> ONE_ANGLES;
+    // the minimum angle made with any side of length 1
+    public static final BasicAngle MIN_ANGLE;
+    // the edge length that, along with edge length 1, encloses that 
+    // minimum angle
+//    public static final BasicEdgeLength MIN_ANGLE_LENGTH;
 
     // private constructor
     private BasicPrototile(ImmutableList<Integer> anglesList) {
@@ -77,18 +82,34 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
 
     } // end initialization of ALL_PROTOTILES
 
-    static { // initialize ONE_LENGTHS
+    static { // initialize ONE_LENGTHS et. al.
         List<ImmutableList<BasicEdgeLength>> preOneLengths = new ArrayList<>();
+        List<ImmutableList<BasicAngle>> preOneAngles = new ArrayList<>();
         BasicEdgeLength ONE = BasicEdgeLength.createBasicEdgeLength(0);
+        BasicAngle preMinAngle = BasicAngle.createBasicAngle(Initializer.N/2);
         for (BasicPrototile p : ALL_PROTOTILES) {
             if (ONE.equals(p.lengths[0])||ONE.equals(p.lengths[1])||ONE.equals(p.lengths[2])) {
                 List<BasicEdgeLength> these = new ArrayList<>();
-                for (int i = 0; i < 3; i++) if (!ONE.equals(p.lengths[i])) these.add(p.lengths[i]);
-                if (these.size()==1) these.add(ONE);
+                List<BasicAngle> those = new ArrayList<>();
+                for (int i = 0; i < 3; i++) {
+                    if (!ONE.equals(p.lengths[i])) {
+                        these.add(p.lengths[i]);
+                        those.add(p.angles[i]);
+                        preMinAngle = (preMinAngle.compareTo(p.angles[i])>-1)? p.angles[i] : preMinAngle;
+                    }
+                }
+                if (these.size()==1) {
+                    these.add(ONE);
+                    those.add(BasicAngle.createBasicAngle(1));
+                    preMinAngle = BasicAngle.createBasicAngle(1);
+                }
                 preOneLengths.add(ImmutableList.copyOf(these));
+                preOneAngles.add(ImmutableList.copyOf(those));
             }
         }
         ONE_LENGTHS = ImmutableList.copyOf(preOneLengths);
+        ONE_ANGLES  = ImmutableList.copyOf(preOneAngles);
+        MIN_ANGLE = preMinAngle;
     } // end initialization of ONE_LENGTHS
 
     // public static factory method
@@ -241,6 +262,15 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
 
     public static boolean encloseAngleOne(BasicEdge l1) {
         return encloseAngleOne(l1.getLength());
+    }
+
+    // return true if this edge length might meet an edge of length one 
+    // with this angle between them.
+    public static boolean mightTouchLengthOne(BasicEdgeLength l, BasicAngle a) {
+//        for (ImmutableList<BasicEdgeLength> L : ONE_LENGTHS) {
+//            if ((l1.equals(L.get(0))&&l2.equals(L.get(1)))||(l1.equals(L.get(1))&&l2.equals(L.get(0)))) return true;
+//        }
+        return false;
     }
 
     /*

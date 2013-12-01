@@ -646,14 +646,20 @@ public class EmptyBoundaryPatch implements Serializable {
                     if (!BasicPrototile.encloseAngleOne(c2)) {
                         if (debug) setMessage("*****\n HIT " + wedge + "\n*****");
                         System.out.println("HIT");
+                        //return false;
                     } 
                 } else {
                     if (!BasicPrototile.encloseAngleOne(c1,c2)) {
                         if (debug) setMessage("*****\n HIT " + wedge + "\n*****");
                         System.out.println("HIT");
+                        //return false;
                     } 
                 }
-            }
+            } // end if (wedge==ONE)
+
+//            if (ONE.equals(c1.getLength())) {
+
+//            }
 
         } // end second-last edge check
 
