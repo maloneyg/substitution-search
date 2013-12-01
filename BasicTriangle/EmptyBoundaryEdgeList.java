@@ -208,6 +208,15 @@ public class EmptyBoundaryEdgeList implements Serializable {
         }
     }
 
+    // return the next-to-last BasicEdge
+    public BasicEdge getPenultimateEdge() {
+        if (openEdges.size()<2) {
+            return null;
+        } else {
+            return openEdges.get(openEdges.size()-2);
+        }
+    }
+
     // return the number of open edges
     public int openSize() {
         return openEdges.size();

@@ -39,12 +39,12 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     // the main data on which EmptyBoundaryWorkUnit works
     private static ThreadService executorService = ThreadService.INSTANCE;
     private final EmptyBoundaryPatch patch;
-    private final AtomicInteger count = new AtomicInteger(0); // keeps track of solve calls
+    private AtomicInteger count = new AtomicInteger(0); // keeps track of solve calls
     private AtomicBoolean die;
 
     // required data to get all patches from the descendents of the initial work units
     private final EmptyBoundaryWorkUnit initialWorkUnit; // if this is not an initial work unit, this points to this unit's eventual ancestor
-    private final List<ImmutablePatch> eventualPatches; // only exists in initial work units; stores all patch results from descendents 
+    private List<ImmutablePatch> eventualPatches; // only exists in initial work units; stores all patch results from descendents 
     
     private static final int KILL_TIME = Preinitializer.SPAWN_MIN_TIME; // in ms, how long to wait before killing a work unit and spawning more
 
@@ -150,6 +150,16 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     public int getCount()
     {
         return count.get();
+    }
+
+    public void setCounter(AtomicInteger count)
+    {
+        this.count = count;
+    }
+
+    public void setResultTarget(List<ImmutablePatch> eventualPatches)
+    {
+        this.eventualPatches = eventualPatches;
     }
 
     public EmptyBoundaryPatch getPatch()

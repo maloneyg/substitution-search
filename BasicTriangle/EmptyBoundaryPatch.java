@@ -26,6 +26,9 @@ public class EmptyBoundaryPatch implements Serializable {
     // set to true if we're debugging
     private boolean debug = false;
 
+    // angle of pi/N.  use for comparison in valid(). 
+    private static BasicAngle ONE = BasicAngle.createBasicAngle(1);
+
     // the completed patches that have been found
     private static List<ImmutablePatch> completedPatches;
 
@@ -359,7 +362,7 @@ public class EmptyBoundaryPatch implements Serializable {
                 completedPatches.add(thisPatch);
                 localCompletedPatches.add(thisPatch);
                 numCompleted++;
-                if (debug) setMessage(DebugMessage.FOUND.toString());
+//                if (debug) setMessage(DebugMessage.FOUND.toString());
                 break;
             }
             if (tileList.contains(currentPrototile) && currentPrototile.compatible(currentEdge,secondEdge,flip,partition.equivalenceClass(currentEdge.getOrientation()))) {
@@ -368,17 +371,17 @@ public class EmptyBoundaryPatch implements Serializable {
                     placeTriangle(t);
                     if (partition.valid())
                         {
-                            if (debug) setMessage(DebugMessage.PLACING.toString()+"\n"+t);
+//                            if (debug) setMessage(DebugMessage.PLACING.toString()+"\n"+t);
                             debugSolve(d);
                             count.getAndIncrement();
                         } else
                         {
-                            if (debug) setMessage(t+"\n"+DebugMessage.ORIENTATION.toString()+"\n"+partition);
+//                            if (debug) setMessage(t+"\n"+DebugMessage.ORIENTATION.toString()+"\n"+partition);
                         }
                     removeTriangle();
                 }
             } else {
-                if (debug) setMessage(currentPrototile+"\n"+DebugMessage.NONE_OR_PROTOTILE.toString()+"\n"+currentEdge);
+//                if (debug) setMessage(currentPrototile+"\n"+DebugMessage.NONE_OR_PROTOTILE.toString()+"\n"+currentEdge);
             }
 
             step();
@@ -528,41 +531,47 @@ public class EmptyBoundaryPatch implements Serializable {
 
         boolean newVertex = !(vertices.contains(other)||boundary.incident(other)==1);
 
-        // make sure the new vertex is in the inflated prototile
-        if (newVertex && boundary.overTheEdge(other)) {
-            if (debug) setMessage(t +"\n"+ DebugMessage.NON_CONTAINMENT.toString());
-            return false;
-        }
+        if (newVertex) { // big if statement
 
-        // make sure the new vertex doesn't overlap any open edges
-        if (newVertex) {
-            for (BasicEdge e : edges.open()) {
-                if (e.incident(other)) {
-                    if (debug) setMessage(t+"\n"+DebugMessage.INCIDENT_OPEN.toString());
-                    return false;
-                }
+            // make sure the new vertex is in the inflated prototile
+            if (boundary.overTheEdge(other)) {
+                if (debug) setMessage(t +"\n"+ DebugMessage.NON_CONTAINMENT.toString());
+                return false;
             }
-        }
 
-        // make sure the new vertex doesn't overlap any closed edges
-        if (newVertex) {
+            // make sure the new vertex doesn't overlap any open edges
+//            for (BasicEdge e : edges.open()) {
+//                if (e.incident(other)) {
+//                    if (debug) setMessage(t+"\n"+DebugMessage.INCIDENT_OPEN.toString());
+//                    return false;
+//                }
+//            }
+
+            // make sure the new vertex doesn't overlap any closed edges
             for (BasicEdge e : edges.closed()) {
                 if (e.incident(other)) {
                     if (debug) setMessage(t +"\n"+ DebugMessage.INCIDENT_CLOSED.toString());
                     return false;
                 }
             }
-        }
 
-        // make sure the new vertex isn't inside any placed triangles
-        if (newVertex) {
+            // make sure the new vertex isn't inside any placed triangles
             for (BasicTriangle tr : triangles) {
                 if (tr.contains(other)) {
                     if (debug) setMessage(t +"\n"+ DebugMessage.OVERLAP.toString() +"\n"+ tr);
                     return false;
                 }
             }
-        }
+
+            // return false if the new vertex is too close to any open edge
+            for (BasicEdge open : edges.open()) {
+                if (open.tooClose(other)) {
+                    if (debug) setMessage(open.cross(other)+ " hit");
+                    return false;
+                }
+            }
+
+        } // end if(newVertex)
 
         // newEdges are the edges containing other in t
         BasicEdge[] newEdges = new BasicEdge[2];
@@ -600,25 +609,59 @@ public class EmptyBoundaryPatch implements Serializable {
             }
         }
 
-//        // return false if the new vertex is too close to any existing vertex
-//        if (newVertex) {
-//            for (BytePoint p : vertices) {
-//                if (other.tooClose(p)) {
-//                    if (debug) setMessage(other +"\n"+ DebugMessage.TOO_CLOSE.toString() +"\n"+ p);
-//                    return false;
-//                }
-//            }
-//        }
+        if (newVertex) { // start second-last edge check
 
-        // return false if the new vertex is too close to any open edge
-        if (newVertex) {
-            for (BasicEdge open : edges.open()) {
-                if (open.tooClose(other)) {
-                    if (debug) setMessage(open.cross(other)+ " hit");
-                    return false;
+            /*
+            * This is a little complicated.
+            * If other is a new vertex, then there are two new edges.
+            * The one further clockwise is the next that we will try
+            * to cover.  What about the one further counterclockwise?
+            * We need to make sure it meets the other edge beside it
+            * in such a way that does not automatically preclude 
+            * completion of the puzzle. The other edge beside it is
+            * edges.getPenultimateEdge().
+            * So we first pick these two edges and call them c1, c2.
+            * 
+            * Funny thing: we need to use cw() to find the edge
+            * further counterclockwise, because cw() and ccw()
+            * were designed with reversed edges in mind.
+            */
+            BasicEdge c1 = edges.getPenultimateEdge();
+            BasicEdge c2 = BasicEdge.cw(newEdges[0],newEdges[1]);
+
+            /*
+            * Now there's an additional problem.  
+            * getPenultimateEdge() could return null.  This means
+            * that the ccw new edge is incident with the puzzle 
+            * boundary.  So we'll have to treat that case separately,
+            * using the puzzle boundary data, in particular, angles.
+            */
+            BasicAngle wedge = c2.angle().minus(((c1==null)? boundary.incidenceAngle(c2) : c1.angle()));//.piPlus());
+
+            // if the new edge makes an angle of ONE with the 
+            // placed edges or puzzle boundary, there might
+            // be trouble.
+            if (wedge.equals(ONE)) {
+                if (c1==null) {
+                    if (!BasicPrototile.encloseAngleOne(c2)) {
+                        if (debug) setMessage("*****\n HIT " + wedge + "\n*****");
+                        System.out.println("HIT");
+                        //return false;
+                    } 
+                } else {
+                    if (!BasicPrototile.encloseAngleOne(c1,c2)) {
+                        if (debug) setMessage("*****\n HIT " + wedge + "\n*****");
+                        System.out.println("HIT");
+                        //return false;
+                    } 
                 }
-            }
-        }
+            } // end if (wedge==ONE)
+
+//            if (ONE.equals(c1.getLength())) {
+
+//            }
+
+        } // end second-last edge check
 
         return true;
     }
