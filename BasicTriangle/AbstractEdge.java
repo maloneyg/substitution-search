@@ -4,11 +4,11 @@
 
 import com.google.common.collect.*;
 
-public interface AbstractEdge<A extends AbstractAngle, L extends AbstractEdgeLength, E extends AbstractEdge> {
+public interface AbstractEdge<A extends AbstractAngle, P extends AbstractPoint, L extends AbstractEdgeLength, E extends AbstractEdge> {
 
     public L getLength();
 
-    public AbstractPoint[] getEnds();
+    public P[] getEnds();
 
     /* 
     * Given an edge with a (possibly different) orientation,
@@ -21,7 +21,7 @@ public interface AbstractEdge<A extends AbstractAngle, L extends AbstractEdgeLen
     * return the edge obtained by rotating this one by an angle
     * of a and then shifting it by the vector v.
     */
-    public E transform(A a, AbstractPoint v);
+    public E transform(A a, P v);
 
     // Check if two edges are the same, with identical orientations. 
     public boolean equals(Object obj);

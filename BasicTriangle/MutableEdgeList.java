@@ -92,24 +92,33 @@ public class MutableEdgeList implements Serializable {
     // place triangle t 
     public void place(BasicTriangle t, MutableOrientationPartition p) {
         BasicEdge[] matches = t.getEdges();
+        List<BasicEdge> newOpens = new ArrayList<>(2); // new open edges
         /*
         * find the indices of the edges of t in openEdges.
         */
         List<Integer> indexList = new ArrayList<>();
-//        List<Integer> tList = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             int thisIndex = openEdges.indexOf(matches[i]);
             if (thisIndex == -1) {
-                openEdges.push(matches[i].reverse());
+                newOpens.add(matches[i].reverse());
             } else {
                 indexList.add(thisIndex);
-//                tList.add(i);
             }
         }
+
+        // if there are two new edges, push them in the right order
+        // so that the clockwise edge is on top of the stack
+        if (newOpens.size()==1) {
+            openEdges.push(newOpens.get(0));
+        } else if (newOpens.size()==2) {
+            openEdges.push(BasicEdge.ccw(newOpens.get(0),newOpens.get(1)));
+            openEdges.push(BasicEdge.cw(newOpens.get(0),newOpens.get(1)));
+        }
+
         Collections.sort(indexList);
 
         // the last open edge is the first to be added to closedEdges
-        for (int j = indexList.size()-1; j >= 0; j--) { // new
+        for (int j = indexList.size()-1; j >= 0; j--) {
             int k = indexList.get(j); // important: k is not an Integer
             BasicEdge e = openEdges.get(k);
             for (BasicEdge m : matches) {
@@ -119,14 +128,8 @@ public class MutableEdgeList implements Serializable {
                 }
             }
             closedEdges.push(new IndexAndEdge(k,e));
-            openEdges.remove(k); // new
+            openEdges.remove(k);
         }
-        // but the last to be removed from openEdges
-//        for (int j = indexList.size()-1; j >= 0; j--) {
-//            int k = indexList.get(j);
-//            openEdges.remove(indexList.get(j));
-//            openEdges.remove(k);
-//        }
 
     }
 
@@ -175,8 +178,18 @@ public class MutableEdgeList implements Serializable {
     public BasicEdge getNextEdge() {
         if (openEdges.empty()) {
             return null;
+//        } else if (closedEdges.empty()) {
         } else {
             return openEdges.peek();
+//        } else {
+//            BasicEdge output = openEdges.peek();
+//            BasicEdge current;
+//            for (int i = openEdges.size()-1; i > -1; i--) {
+//                current = openEdges.get(i);
+//                if (current.getLength().equals(BasicEdge.UNIT_LENGTH)) return current;
+//                if (current.getLength().compareTo(output.getLength())<0) output = current;
+//            }
+//            return output;
         }
     }
 

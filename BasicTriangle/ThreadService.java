@@ -8,7 +8,7 @@ public class ThreadService
 {
     private final static Logger log            = Logger.getLogger(ThreadService.class.getName());
     public static final ThreadService INSTANCE = new ThreadService();
-    public final int NUMBER_OF_THREADS         = 24; //Runtime.getRuntime().availableProcessors();
+    public final int NUMBER_OF_THREADS         = Preinitializer.NUMBER_OF_THREADS; //Runtime.getRuntime().availableProcessors();
     public static final int JOB_CAPACITY              = 10000000;                                 // how many jobs can wait in the queue at a time
     public static final String runningJobsCheckpointFilename = "runningJobs.chk";               // serialized checkpoints
     public static final String pendingJobsCheckpointFilename = "pendingJobs.chk";               // assumed to be in working directory
@@ -70,7 +70,7 @@ public class ThreadService
         //private List<Callable<?>> currentlyPendingJobs = Collections.synchronizedList(new ArrayList<Callable<?>>());
         //private Map<Callable<?>,Date> startTimes = Collections.synchronizedMap(new HashMap<Callable<?>,Date>());
 
-        private List<AtomicInteger> listOfCounters = Collections.synchronizedList(new ArrayList<AtomicInteger>());
+        private List<AtomicInteger> listOfCounters = new ArrayList<AtomicInteger>();
         private AtomicInteger numberOfJobsRun = new AtomicInteger();
         private AtomicInteger numberOfRunningJobs = new AtomicInteger();
         public static final double GB = 1073741824.0; // bytes per GB
@@ -83,29 +83,77 @@ public class ThreadService
 
         public void registerCounter(AtomicInteger counter)
         {
-            listOfCounters.add(counter);
+            synchronized(listOfCounters)
+                {
+                    listOfCounters.add(counter);
+                }
         }
 
         public void deregisterCounter(AtomicInteger counter)
         {
-            listOfCounters.remove(counter);
+            synchronized(listOfCounters)
+                {
+                    listOfCounters.remove(counter);
+                }
         }
 
         // resets all counters and returns the total number of solve calls since the last reset
         public long getNumberOfSolveCalls()
         {
             long numberOfCalls = 0L;
-            for (AtomicInteger i : listOfCounters)
-                numberOfCalls += (long)i.getAndSet(0);
+            synchronized (listOfCounters)
+                {
+                    for (AtomicInteger i : listOfCounters)
+                        numberOfCalls += (long)i.getAndSet(0);
+                }
             return numberOfCalls;
         }
 
-        public void printQueues(double throughput, double average, double timeSinceLastUpdate)
+        //public void printQueues(double throughput, double average, double timeSinceLastUpdate)
+        public void printQueues(double throughput, double average, double totalTime, int numberOfCompletedPatches)
         {
-            Runtime runtime = Runtime.getRuntime();
-            String reportString = String.format("Queue: %10d   Running: %2d   Complete: %5d   Average: %6.0f /s   Now: %6.0f / s   Last Update: %.2f s  Memory: %6.3f GB / %6.3f GB    \r",
-            getQueue().size(), numberOfRunningJobs.get(), numberOfJobsRun.get(), average, throughput, timeSinceLastUpdate,
-            (runtime.totalMemory() - runtime.freeMemory()) / GB , (runtime.maxMemory() / GB)     );
+            //Runtime runtime = Runtime.getRuntime();
+            //String reportString = String.format("Queue: %10d   Running: %2d   Complete: %5d   Average: %6.0f /s   Now: %6.0f / s   Last Update: %.2f s  Memory: %6.3f GB / %6.3f GB    \r",
+            //getQueue().size(), numberOfRunningJobs.get(), numberOfJobsRun.get(), average, throughput, timeSinceLastUpdate,
+            //(runtime.totalMemory() - runtime.freeMemory()) / GB , (runtime.maxMemory() / GB)     );
+            //System.out.print(reportString);
+            
+            String totalTimeString = "";
+
+            if ( totalTime < 60.0 )
+                // time is less than one minute
+                totalTimeString = String.format("%.1f s", totalTime);
+
+            else if ( totalTime >= 60.0 && totalTime < 3600.0 )
+                // time is between a minute and an hour
+                totalTimeString = String.format("%.1f min", totalTime/60.0);
+
+            else if ( totalTime >= 3600.0 && totalTime < 86400.0 )
+                // time is between an hour and a day
+                {
+                    double hours = Math.floor(totalTime / 3600.0);
+                    totalTime = totalTime - hours * 3600.0;
+                    double minutes = totalTime / 60.0;
+                    totalTimeString = String.format("%.0f h %.1f min", hours, minutes);
+                }
+            else if ( totalTime >= 86400.0 )
+                // time is between a day and a week
+                {
+                    double days = Math.floor(totalTime / 86400.0);
+                    totalTime = totalTime - days * 86400.0;
+                    double hours = Math.floor(totalTime / 3600.0);
+                    totalTime = totalTime - hours * 3600.0;
+                    double minutes = totalTime / 60.0;
+                    totalTimeString = String.format("%.0f d %.0f h %.1f min", days, hours, minutes); 
+                }
+            else
+                // time is really big
+                {
+                    totalTimeString = String.format("%6.3 s", totalTime);
+                }
+
+            String reportString = String.format("Queue: %6d   Running: %2d   Done: %5d   Complete: %5d   Avg: %6.0f /s   Now: %6.0f /s   Elapsed: %s\r",
+            getQueue().size(), numberOfRunningJobs.get(), numberOfJobsRun.get(), numberOfCompletedPatches, average, throughput, totalTimeString);
             System.out.print(reportString);
         }
 
@@ -176,57 +224,6 @@ public class ThreadService
         {
             log.log(Level.WARNING, "Executor service has been ordered to shut down.");
         }
-
-/*
-        public void writeCheckpoint()
-        {
-            synchronized(this)       // lock the thread service while checkpointing is in progress
-                {
-                    // copy list of all running jobs
-                    List<Callable<?>> runningJobs = new ArrayList<Callable<?>>(currentlyRunningJobs);
-
-                    // copy list of all pending jobs
-                    List<Callable<?>> pendingJobs = new ArrayList<Callable<?>>(currentlyPendingJobs);
-
-                    // serialize running jobs
-                    FileOutputStream fileOut = null;
-                    ObjectOutputStream out = null;
-                    try
-                        {
-                            fileOut = new FileOutputStream(runningJobsCheckpointFilename);
-                            out = new ObjectOutputStream(fileOut);
-                            out.writeObject(runningJobs);
-                            fileOut.close();
-                            out.close();
-                        }
-                    catch (IOException e)
-                        {
-                            e.printStackTrace();
-                            System.exit(1);
-                        }
-
-                    // serialize pending jobs
-                    try
-                        {
-                            fileOut = new FileOutputStream(pendingJobsCheckpointFilename);
-                            out = new ObjectOutputStream(fileOut);
-                            out.writeObject(pendingJobs);
-                            fileOut.close();
-                            out.close();
-                        }
-                    catch (IOException e)
-                        {
-                            e.printStackTrace();
-                            System.exit(1);
-                        }
-                }
-        }
-*/
-
-    }
-
-    public void loadCheckpoint()
-    {
     }
 
     public String toString()
@@ -256,7 +253,7 @@ public class ThreadService
             this.poolName = poolName;
         }
 
-        // instead of creating Threads, create WorkerThreads (a descendant of Thread)
+        // instead of creating Threads, create WorkerThreads (a descendent of Thread)
         public Thread newThread(Runnable runnable)
         {
             return new WorkerThread(runnable, poolName);

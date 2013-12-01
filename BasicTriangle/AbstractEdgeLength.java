@@ -3,7 +3,7 @@
 */
 
 
-public interface AbstractEdgeLength<A extends AbstractAngle, L extends AbstractEdgeLength> {
+public interface AbstractEdgeLength<A extends AbstractAngle, P extends AbstractPoint, L extends AbstractEdgeLength> {
 
     public boolean equals(Object obj);
 
@@ -12,6 +12,6 @@ public interface AbstractEdgeLength<A extends AbstractAngle, L extends AbstractE
     * The vector should lie on the positive x-axis, if that
     * notion makes any sense.
     */
-    public AbstractPoint getAsVector(A a);
+    public P getAsVector(A a);
 
 } // end of interface AbstractEdgeLength

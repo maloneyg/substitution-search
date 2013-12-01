@@ -3,7 +3,7 @@
 */
 
 
-public interface AbstractPatch<A extends AbstractAngle, L extends AbstractEdgeLength<A,L>, E extends AbstractEdge<A,L,E>, T extends AbstractTriangle, X extends AbstractPatch> {
+public interface AbstractPatch<A extends AbstractAngle, P extends AbstractPoint<P,A>, L extends AbstractEdgeLength<A,P,L>, E extends AbstractEdge<A,P,L,E>, T extends AbstractTriangle, X extends AbstractPatch> {
 
     /*
     * construct a new patch that is the same as this one, with 

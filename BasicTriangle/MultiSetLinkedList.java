@@ -9,8 +9,9 @@
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.io.*;
 
-class LinkNode {
+class LinkNode implements Serializable {
 
     private int data;
     private LinkNode next;
@@ -43,7 +44,7 @@ class LinkNode {
 
 } // end of class LinkNode
 
-public class MultiSetLinkedList {
+public class MultiSetLinkedList implements Serializable {
 
     private LinkNode head;
     private LinkNode i;
@@ -75,6 +76,24 @@ public class MultiSetLinkedList {
     // public static factory method
     public static MultiSetLinkedList createMultiSetLinkedList(ArrayList<Integer> d) {
         return new MultiSetLinkedList(d);
+    }
+
+    // make a deep copy
+    public MultiSetLinkedList deepCopy() {
+        MultiSetLinkedList output = new MultiSetLinkedList(this.head.getData());
+        output.size = this.size;
+        output.i = output.head;
+        output.afteri = output.head;
+        LinkNode currentNode = head.getNext();
+        LinkNode newCurrent = output.head;
+        while (currentNode != null) {
+            newCurrent.setNext(LinkNode.createLinkNode(currentNode.getData()));
+            newCurrent = newCurrent.getNext();
+            if (this.afteri.equals(currentNode)) output.afteri = newCurrent;
+            if (this.i.equals(currentNode)) output.i = newCurrent;
+            currentNode = currentNode.getNext();
+        }
+        return output;
     }
 
     // output a String

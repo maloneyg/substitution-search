@@ -3,14 +3,14 @@ import java.util.*;
 
 public class TriangleResults implements Serializable
 {
-    private final List<BasicPatch> allCompletedPatches;
+    private final List<ImmutablePatch> allCompletedPatches;
 
-    public TriangleResults(List<BasicPatch> allCompletedPatches)
+    public TriangleResults(List<ImmutablePatch> allCompletedPatches)
     {
         this.allCompletedPatches = Collections.unmodifiableList(allCompletedPatches);
     }
 
-    public List<BasicPatch> getPatches()
+    public List<ImmutablePatch> getPatches()
     {
         return allCompletedPatches;
     }

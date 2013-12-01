@@ -33,6 +33,9 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
     public static final double[] COS_POWERS = Initializer.COS_LIST;
     public static final double[] SIN_POWERS = Initializer.SIN_LIST;
 
+    // a threshold value that says when two points are too close
+    public static final double TOO_CLOSE = 0.95;
+
     // a pool containing all the BytePoints that have been created
     //private static final BytePointPool POOL = BytePointPool.getInstance();
 
@@ -78,6 +81,11 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
         for (int i = 0; i < vector.length; i++) vector[i] = (byte)(vector[i]+copyMe[i]);
         return new BytePoint(vector);
     }
+
+    // public static factory method for creating a brand new point
+    //static protected BytePoint createExNihilo(int[] vector) {
+   //     return new BytePoint(vector);
+    //}
 
     // toString method.
     public String toString() {
@@ -161,8 +169,14 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
         return createBytePoint(INFL.rowTimes(this.pointAsArray()));
     }
 
-    public BytePoint timesA() {
+    protected BytePoint timesA() {
         return createBytePoint(A.rowTimes(this.pointAsArray()));
+    }
+
+    // return true if this is too close to p
+    public boolean tooClose(BytePoint p) {
+        BytePoint diff = subtract(p);
+        return (diff.dotProduct(diff) < TOO_CLOSE);
     }
 
     /*
@@ -282,6 +296,24 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
                 if (j != i)
 //                    coeffs -= COS_POWERS[i]*(p0[j] * p1[(j-i-1 < 0)? length+j-i : j-i-1] * ((j-i-1<0)? -1 : 1));
                     coeffs -= SIN_POWERS[i]*(p0[j] * p1[(j-i-1 < 0)? length+j-i : j-i-1] * ((j-i-1<0)? -1 : 1));
+            }
+        }
+        return coeffs;
+    }
+
+    /*
+    * a test version of the cross product
+    */
+    public double testCross(BytePoint p) {
+        int l = length/2;
+        byte[] p0 = this.point;
+        byte[] p1 = p.point;
+        // here we store the shoelace products
+        double coeffs = 0.0;
+        for (int i = 0; i < length; i++) {
+            for (int j = 0; j < length; j++) {
+                if (j != i)
+                    coeffs += SIN_POWERS[((Math.abs(i-j)<l+1)? Math.abs(i-j) : length + 1 - Math.abs(i-j))-1]*(p0[j] * p1[i] * ((j<i)? -1 : 1));
             }
         }
         return coeffs;

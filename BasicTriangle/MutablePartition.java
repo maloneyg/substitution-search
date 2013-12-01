@@ -116,6 +116,14 @@ public class MutablePartition<E> implements Serializable {
         head = newNode;
     }
 
+    // add data at the end
+    public void addToEnd(E data) {
+        PartitionNode<E> current = head;
+        while (current.getNext() != null) current = current.getNext();
+        PartitionNode<E> newNode = new PartitionNode<>(data,null,current,true);
+        current.setNext(newNode);
+    }
+
     // get the head of the subset that contains data
     private PartitionNode<E> subset(E data) {
         PartitionNode<E> current = head;

@@ -1,22 +1,48 @@
 import java.io.*;
 import java.util.*;
+import com.google.common.collect.*;
 
 public class PatchResult implements Result, Serializable
 {
-    private final MutableWorkUnit completedUnit;
+    private final int ID; // ID of the original WorkUnitInstructions that created this PatchResult
+    private final ImmutableList<ImmutablePatch> completedPatches; // finished puzzles
+    private final int numberOfUnits; // how many work units went into this result
 
-    public PatchResult(MutableWorkUnit completedUnit)
+    public PatchResult(int ID, List<ImmutablePatch> completedPatches, int numberOfUnits)
     {
-        this.completedUnit = completedUnit;
+        this.ID = ID;
+        this.completedPatches = ImmutableList.copyOf(completedPatches);
+        this.numberOfUnits = numberOfUnits;
     }
 
-    public MutableWorkUnit getCompletedUnit()
+    public int getID()
     {
-        return completedUnit;
+        return ID;
+    }
+
+    public List<ImmutablePatch> getCompletedPatches()
+    {
+        return completedPatches;
+    }
+
+    public int getNumberOfUnits()
+    {
+        return numberOfUnits;
     }
 
     public String toString()
     {
-        return completedUnit.getPatch().getLocalCompletedPatches().size() + " completed patches";
+        return "PatchResult ID " + ID + " (" + completedPatches.size() + " completed puzzles, " + numberOfUnits + " work units)";
     }
+
+    public String toBriefString()
+    {
+        return "PatchResult ID " + ID;
+    }
+
+    public int hashCode()
+    {
+        return completedPatches.hashCode();
+    }
+
 }

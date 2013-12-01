@@ -265,20 +265,6 @@ public class ShortPolynomial implements Serializable {
         return p;
     }
 
-    // use Horner's method to compute and return the polynomial evaluated at x
-    public IntMatrix evaluate(IntMatrix x) {
-        int m = x.getColumnDimension();
-        int n = x.getRowDimension();
-        if (m != n) throw new IllegalArgumentException("Can't plug non-square ByteMatrix x into a polynomial. x = " + x);
-        IntMatrix p = IntMatrix.zeroMatrix(m,n);
-        IntMatrix id = IntMatrix.identity(m);
-        for (int i = (int)deg; i >= 0; i--) {
-            p = p.times(x);
-            p = p.plus(id.times(coef[i])); 
-        }
-        return p;
-    }
-
     // make a coefficient matrix for a set of polynomials.
     // the i-th column is a vector, the entries of which
     // are the coefficients of the i-th polynomial.

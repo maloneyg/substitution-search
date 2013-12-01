@@ -23,8 +23,8 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
     private static final PrototileList tiles = PrototileList.createPrototileList(BasicPrototile.getPrototileList(Initializer.SUBSTITUTION_MATRIX.getColumn(myTile)));
     
     // vertices of INFL.P0
-    private static final AbstractPoint[] vertices = P0.place(Preinitializer.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
-    private static final AbstractPoint[] bigVertices = new AbstractPoint[] {vertices[0].inflate(),vertices[1].inflate(),vertices[2].inflate()};
+    private static final BytePoint[] vertices = P0.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
+    private static final BytePoint[] bigVertices = new BytePoint[] {vertices[0].inflate(),vertices[1].inflate(),vertices[2].inflate()};
     
     // iterators for producing new edge breakdowns
     private static MultiSetLinkedList edge0;
@@ -81,7 +81,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         }
     } // initialization of o1 and o2 ends here
 
-    private static void iterateEdgeBreakdown() {
+    public static void iterateEdgeBreakdown() {
         edge0.iterate();
         BD0 = edge0.getImmutableList();
         if (BD0.equals(start0)) {
@@ -128,7 +128,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
 
     // advance to the work unit matching this edge breakdown
     public static void advanceToBreakdown(List<List<Integer>> breakdown) {
-        while (notDoneYet) {
+        while (true) {
             if (compareBreakdown(breakdown)) break;
             iterateEdgeBreakdown();
         }
@@ -141,7 +141,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         // depends on whether P0 is isosceles.
 
             BasicEdge[] edgeList = P0.createSkeleton(BD0, BD2, flip);
-            MutablePatch patch = MutablePatch.createMutablePatch(edgeList,bigVertices,tiles.dumpMutablePrototileList());
+            MutablePatch patch = MutablePatch.createMutablePatch(edgeList,bigVertices,tiles.dumpMutablePrototileList(),BD0,BD1,BD2);
             // identify the Orientations on the two equal edges
             if (flip) {
                 patch.addInstructions(o1,o2.getOpposite());
@@ -159,7 +159,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
 
             BasicEdge[] edgeList = P0.createSkeleton(BD0, BD1, BD2);
 
-            MutablePatch patch = MutablePatch.createMutablePatch(edgeList,bigVertices,tiles.dumpMutablePrototileList());
+            MutablePatch patch = MutablePatch.createMutablePatch(edgeList,bigVertices,tiles.dumpMutablePrototileList(),BD0,BD1,BD2);
 
             iterateEdgeBreakdown();
 
@@ -171,7 +171,8 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
     // the main data on which MutableWorkUnit works
     private final MutablePatch patch;
     private final AtomicInteger count = new AtomicInteger(0);
-    private int originalHashCode = -1;
+    private AtomicInteger counter;
+    private List<ImmutablePatch> resultTarget;
 
     private static final ThreadService threadService;
 
@@ -187,14 +188,9 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         patch = p;
     }
 
-    public int getOriginalHashCode()
+    public int hashCode()
     {
-        return originalHashCode;
-    }
-
-    public void setOriginalHashCode(int originalHashCode)
-    {
-        this.originalHashCode = originalHashCode;
+        return Objects.hash(patch, count, counter, resultTarget);
     }
 
     // public static factory method
@@ -208,19 +204,41 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
         threadService.getExecutor().registerCounter(count);
         patch.setCount(count);
         patch.solve();
-        if ( originalHashCode != -1 )
-            System.out.println("finished work unit " + originalHashCode);
+        //System.out.println("finished work unit " + hashCode());
         threadService.getExecutor().deregisterCounter(count);
-        PatchResult thisResult = new PatchResult(this);
-        MutableParadigmClient.sendResult(thisResult);
-        return thisResult;
+        if ( resultTarget != null )
+            {
+                synchronized(resultTarget)
+                    {
+                        resultTarget.addAll(patch.getLocalCompletedPatches());
+                    }
+                counter.getAndIncrement();
+            }
+        return new WorkUnitResult(patch.getLocalCompletedPatches());
     } // method call() ends here
+
+    public void debugCall()
+    {
+        patch.solve();
+        resultTarget.addAll(patch.getLocalCompletedPatches());
+        counter.getAndIncrement();
+    }
+
+    public void setCounter(AtomicInteger counter)
+    {
+        this.counter = counter;
+    }
+
+    public void setResultTarget(List<ImmutablePatch> resultTarget)
+    {
+        this.resultTarget = resultTarget;
+    }
 
     public int getCount()
     {
         return count.get();
     }
-
+/*
     // pause if the queue is getting too full
     private static void checkIfBusy()
     {
@@ -242,7 +260,7 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
                     }
                 else
                     break;
-            }*/
+            }
     }
 
     public String toString()
@@ -256,21 +274,11 @@ public class MutableWorkUnit implements WorkUnit, Serializable {
     }
 
     // destroy this method! It is unsafe
+*/
     public MutablePatch getPatch()
     {
         return patch;
     }
 
-    public static void main(String[] args) {
-
-        for (Integer i : BD0) System.out.print(i + " ");
-        System.out.println();
-        for (Integer i : BD1) System.out.print(i + " ");
-        System.out.println();
-        for (Integer i : BD2) System.out.print(i + " ");
-        System.out.println();
-        System.out.println(2*180*1260);
-
-    }
-
 } // end of class MutableWorkUnit
+

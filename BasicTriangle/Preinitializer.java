@@ -18,49 +18,63 @@ class Preinitializer {
 
     public static final float EP = 0.000001f;  // threshold value
 
+    public static final int BATCH_SIZE = 1000; // number of jobs to make per set of instructions
+
+    public static final String HOST_NAME; // name of host clients will use; set in static initializer
+
+    public static final int NUMBER_OF_THREADS; // number of threads per client; set in static initializer
+
+    public static final int SPAWN_MAX_SIZE = 50; // no more work units will be spawend if the queue is bigger than this size
+    public static final int SPAWN_MIN_TIME = 5000 ; // if a work unit takes longer than this time in ms, more units will be spawned
+
     // the inflation factor, represented as coefficients of
     // 1, a, a^2, etc., where a = 2*cos(pi/N).
 
-//    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search
-//    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2, 1); // the square of the really small search (1+a)^2 won't work with tile 3 
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search (104)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, 0, 1); // quite big search (110)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 0, -3, 0, 1); // huge search (115)
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, -2, 0, 1); // b+d (118)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, -2, -3, 1, 1); // even huger search (122)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, -2, 1, 1); // even huger search (124)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -1, 1, 1); // a + b + c 
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -2, 0, 1); // 1 + b + d 
 
     public static final ImmutableList<ImmutableList<Integer>> PROTOTILES = ImmutableList.of( 
-                             //    ImmutableList.of( 1, 2, 4 ),  //
-                             //    ImmutableList.of( 1, 3, 3 ),  //
-                             //    ImmutableList.of( 2, 2, 3 )   //
-                                 ImmutableList.of( 1, 4, 6 ),  //
-                                 ImmutableList.of( 1, 5, 5 ),  //
-                                 ImmutableList.of( 2, 4, 5 ),  //
-                                 ImmutableList.of( 2, 3, 6 ),  //
-                                 ImmutableList.of( 3, 3, 5 )   //
+                             //    ImmutableList.of( 1, 2, 4 ),  // seven
+                             //    ImmutableList.of( 1, 3, 3 ),  // seven
+                             //    ImmutableList.of( 2, 2, 3 )   // seven
+                                 ImmutableList.of( 1, 4, 6 ),  // eleven
+                                 ImmutableList.of( 1, 5, 5 ),  // eleven
+                                 ImmutableList.of( 2, 4, 5 ),  // eleven
+                                 ImmutableList.of( 2, 3, 6 ),  // eleven
+                                 ImmutableList.of( 3, 3, 5 )   // eleven
                                          );
 
-    // the zero and unit vectors.  
-    // we want to be able to change them from BytePoints to IntPoints.
-    public static final AbstractPoint ZERO_VECTOR;
-    public static final AbstractPoint UNIT_VECTOR;
+    static
+        {
+            // determine which host name to use
+            if ( System.getProperty("user.name").toLowerCase().equals("ekwan") )
+                HOST_NAME = "enj10.rc.fas.harvard.edu";
+            else if ( System.getProperty("user.name").toLowerCase().equals("ngrm1") )
+                HOST_NAME = "corbridge";
+            else
+                HOST_NAME = "localhost";
+            System.out.println("Host name automatically set to " + HOST_NAME + ".");
 
-    static {
-//        byte[] preZero = new byte[N-1];
-//        byte[] preUnit = new byte[N-1];
-//        preUnit[0] = (byte)1;
-//        ZERO_VECTOR = BytePoint.createBytePoint(preZero);
-//        UNIT_VECTOR = BytePoint.createBytePoint(preUnit);
+            // determine how many threads to use
+            NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
+            System.out.println("Using " + NUMBER_OF_THREADS + " threads.");
 
-        int[] preIZero = new int[N-1];
-        int[] preIUnit = new int[N-1];
-        preIUnit[0] = 1;
-        ZERO_VECTOR = IntPoint.createIntPoint(preIZero);
-        UNIT_VECTOR = IntPoint.createIntPoint(preIUnit);
-    }
-
-    // method for creating AbstractPoints.
-    // we want to be able to toggle between BytePoint and IntPoint
-    // just by modifying this file.
-    public static AbstractPoint createPoint(AbstractPoint p, boolean flip, BasicAngle a, AbstractPoint shift) {
-//        return BytePoint.createBytePoint((BytePoint)p,flip,a,(BytePoint)shift);
-        return IntPoint.createIntPoint((IntPoint)p,flip,a,(IntPoint)shift);
-    }
+            // print out which puzzle we are searching;
+            System.out.println("We are searching tile " + MY_TILE + " using inflation factor " + INFL + ".");
+        }
 
 } // end of class Preinitializer

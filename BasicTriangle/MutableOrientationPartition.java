@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.*;
 
 public class MutableOrientationPartition extends MutablePartition<Orientation> implements Serializable {
 
@@ -22,6 +23,11 @@ public class MutableOrientationPartition extends MutablePartition<Orientation> i
         super(o);
     }
 
+    public int hashCode()
+    {
+        return Objects.hash(instructions1, instructions2);
+    }
+
     // public static factory method.
     public static MutableOrientationPartition createMutableOrientationPartition(Orientation[] o) {
         MutableOrientationPartition output = new MutableOrientationPartition(o[0]);
@@ -32,6 +38,21 @@ public class MutableOrientationPartition extends MutablePartition<Orientation> i
     // public static factory method.
     public static MutableOrientationPartition createMutableOrientationPartition(Orientation o) {
         return new MutableOrientationPartition(o);
+    }
+
+    // deep copy
+    public MutableOrientationPartition deepCopy() {
+        PartitionNode<Orientation> current = getHead();
+        MutableOrientationPartition output = new MutableOrientationPartition(current.getData());
+        PartitionNode<Orientation> otherCurrent = output.getHead();
+        current = current.getNext();
+        while (current != null) {
+            output.addToEnd(current.getData());
+            otherCurrent = otherCurrent.getNext();
+            otherCurrent.setHead(current.isHead());
+            current = current.getNext();
+        }
+        return output;
     }
 
     // identify two orientations with each other.

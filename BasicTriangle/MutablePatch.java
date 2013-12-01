@@ -20,16 +20,27 @@ public class MutablePatch implements Serializable {
     // the number of completed patches this has found
     private int numCompleted = 0;
 
+    // a String for debugging purposes
+    private String message = DebugMessage.NONE.toString();
+
+    // set to true if we're debugging
+    private boolean debug = false;
+
+    // the edge breakdown
+    private ImmutableList<Integer> edge0;
+    private ImmutableList<Integer> edge1;
+    private ImmutableList<Integer> edge2;
+
     // the completed patches that have been found
-    private static List<BasicPatch> completedPatches;
+    private static List<ImmutablePatch> completedPatches;
 
     // a list of completed patches for this particular puzzle
-    private List<BasicPatch> localCompletedPatches = new ArrayList<BasicPatch>();
+    private List<ImmutablePatch> localCompletedPatches = new ArrayList<ImmutablePatch>();
 
     private AtomicInteger count = new AtomicInteger(0);
 
     static { // initialize completedPatches
-        ArrayList<BasicPatch> tempList = new ArrayList<>();
+        ArrayList<ImmutablePatch> tempList = new ArrayList<>();
         completedPatches = Collections.synchronizedList(tempList);
     }
 
@@ -47,6 +58,9 @@ public class MutablePatch implements Serializable {
     // the triangles in this patch
     private Stack<BasicTriangle> triangles;
 
+    // the vertices in this patch, purely for testing triangles
+    private Stack<BytePoint> vertices;
+
     // the edges in this patch
     private MutableEdgeList edges;
 
@@ -57,7 +71,7 @@ public class MutablePatch implements Serializable {
     private MutablePrototileList tileList;
 
     // vertices of the big triangle
-    private final AbstractPoint[] bigVertices;
+    private final BytePoint[] bigVertices;
 
     /*
     * The step variables.
@@ -97,10 +111,17 @@ public class MutablePatch implements Serializable {
     private final boolean initialFlip = false;
 
     // initial constructor
-    private MutablePatch(BasicEdge[] e, AbstractPoint[] v, MutablePrototileList TL) {
+    private MutablePatch(BasicEdge[] e, BytePoint[] v, MutablePrototileList TL,ImmutableList<Integer> bd0,ImmutableList<Integer> bd1,ImmutableList<Integer> bd2) {
+        edge0 = bd0;
+        edge1 = bd1;
+        edge2 = bd2;
         tileList = TL;
         triangles = new Stack<>();
         edges = MutableEdgeList.createMutableEdgeList(e);
+        // now we assume the edges in e are given in a particular order.
+        // (so we only need to add the second end of each one.)
+        vertices = new Stack<>();
+        for (BasicEdge ee : e) vertices.push(ee.getEnds()[1]);
 
         // fill up the partition
         partition = MutableOrientationPartition.createMutableOrientationPartition(e[0].getOrientation());
@@ -117,30 +138,56 @@ public class MutablePatch implements Serializable {
             }
         }
 
-        AbstractPoint[] tempVertices = new AbstractPoint[v.length];
+        BytePoint[] tempVertices = new BytePoint[v.length];
         for (int j = 0; j < v.length; j++) tempVertices[j] = v[j];
         bigVertices = tempVertices;
         resetSteps();
     }
 
     // public static factory method
-    public static MutablePatch createMutablePatch(BasicEdge[] e, AbstractPoint[] v, MutablePrototileList TL) {
-        return new MutablePatch(e,v,TL);
+    public static MutablePatch createMutablePatch(BasicEdge[] e, BytePoint[] v, MutablePrototileList TL,ImmutableList<Integer> bd0,ImmutableList<Integer> bd1,ImmutableList<Integer> bd2) {
+        return new MutablePatch(e,v,TL,bd0,bd1,bd2);
     }
 
     // get all the completed patches
-    public static List<BasicPatch> getCompletedPatches() {
+    public static List<ImmutablePatch> getCompletedPatches() {
         return completedPatches;
     }
 
+    // set the message
+    public void setMessage(String s) {
+        message = s;
+    }
+
+    // get the message
+    public String getMessage() {
+        return message;
+    }
+
+    // get edge0, edge1, and edge2
+    public ImmutableList<Integer> getEdge0() {
+        return edge0;
+    }
+    public ImmutableList<Integer> getEdge1() {
+        return edge1;
+    }
+    public ImmutableList<Integer> getEdge2() {
+        return edge2;
+    }
+
+    // toggle the debug status
+    public void setDebug(boolean tf) {
+        debug = tf;
+    }
+
     // get all the patches for this puzzle
-    public List<BasicPatch> getLocalCompletedPatches()
+    public List<ImmutablePatch> getLocalCompletedPatches()
     {
         return localCompletedPatches;
     }
 
-    // dump the contents of this as a BasicPatch
-    public BasicPatch dumpBasicPatch() {
+    // dump the contents of this as a ImmutablePatch
+    public ImmutablePatch dumpImmutablePatch() {
         BasicTriangle[] t = new BasicTriangle[triangles.size()];
         for (int i = 0; i < t.length; i++) t[i] = triangles.get(i);
         BasicEdge[] e1 = new BasicEdge[edges.openSize()];
@@ -156,7 +203,7 @@ public class MutablePatch implements Serializable {
             j++;
         }
         OrientationPartition o = partition.dumpOrientationPartition();
-        return BasicPatch.createBasicPatch(t,e1,e2,o,bigVertices);
+        return ImmutablePatch.createImmutablePatch(t,e1,e2,o,bigVertices,edge0,edge1,edge2);
     }
 
     // advance the step variables by one step
@@ -208,9 +255,10 @@ public class MutablePatch implements Serializable {
     // here is where all of the work is done.
     // place a single tile, then call this method recursively.
     public void solve() {
+        count.getAndIncrement();
         do {
             if (tileList.empty()) {
-                BasicPatch thisPatch = dumpBasicPatch();
+                ImmutablePatch thisPatch = dumpImmutablePatch();
                 completedPatches.add(thisPatch);
                 localCompletedPatches.add(thisPatch);
                 numCompleted++;
@@ -223,7 +271,6 @@ public class MutablePatch implements Serializable {
                     if (partition.valid())
                         {
                             solve();
-                            count.getAndIncrement();
                         }
                     removeTriangle();
                 }
@@ -235,32 +282,70 @@ public class MutablePatch implements Serializable {
     } // solve ends here
 
     // a solve method that stops for debugging purposes.
-    public BasicPatch debugSolve() {
+//    public ImmutablePatch debugSolve() {
+//
+//        ImmutablePatch output = dumpImmutablePatch();
+//        if (tileList.empty()) {
+//            removeTriangle();
+//            step();
+//        }
+//
+//        if (tileList.contains(currentPrototile) && currentPrototile.compatible(currentEdge,secondEdge,flip,partition.equivalenceClass(currentEdge.getOrientation()))) {
+//            BasicTriangle t = currentPrototile.place(currentEdge,secondEdge,flip);
+//            if (compatible(t)) {
+//                placeTriangle(t);
+//                if (!partition.valid()) {
+//                    removeTriangle();
+//                }
+//            }
+//        }
+//        step();
+//        if (backToStart()&&!triangles.empty()) {
+//            removeTriangle();
+//            step();
+//        }
+//        return output;
+//
+//
+//    } // debugSolve ends here
 
-        BasicPatch output = dumpBasicPatch();
-        if (tileList.empty()) {
-            removeTriangle();
-            step();
-        }
 
-        if (tileList.contains(currentPrototile) && currentPrototile.compatible(currentEdge,secondEdge,flip,partition.equivalenceClass(currentEdge.getOrientation()))) {
-            BasicTriangle t = currentPrototile.place(currentEdge,secondEdge,flip);
-            if (compatible(t)) {
-                placeTriangle(t);
-                if (!partition.valid()) {
+    // place a single tile, then call this method recursively.
+    public void debugSolve(DebugDisplay d) {
+        do {
+            d.updateMessage(message);
+            d.update(dumpImmutablePatch());
+
+            if (tileList.empty()) {
+                ImmutablePatch thisPatch = dumpImmutablePatch();
+                completedPatches.add(thisPatch);
+                localCompletedPatches.add(thisPatch);
+                numCompleted++;
+                if (debug) setMessage(DebugMessage.FOUND.toString());
+                break;
+            }
+            if (tileList.contains(currentPrototile) && currentPrototile.compatible(currentEdge,secondEdge,flip,partition.equivalenceClass(currentEdge.getOrientation()))) {
+                BasicTriangle t = currentPrototile.place(currentEdge,secondEdge,flip);
+                if (compatible(t)) {
+                    placeTriangle(t);
+                    if (partition.valid())
+                        {
+//                            if (debug) setMessage(DebugMessage.PLACING.toString()+"\n"+t);
+                            debugSolve(d);
+                            count.getAndIncrement();
+                        } else
+                        {
+                            if (debug) setMessage(t+"\n"+DebugMessage.ORIENTATION.toString()+"\n"+partition);
+                        }
                     removeTriangle();
                 }
+            } else {
+                if (debug) setMessage(currentPrototile+"\n"+DebugMessage.NONE_OR_PROTOTILE.toString()+"\n"+currentEdge);
             }
-        }
-        step();
-        if (backToStart()&&!triangles.empty()) {
-            removeTriangle();
+
             step();
-        }
-        return output;
-
-
-    } // debugSolve ends here
+        } while (!backToStart()); // stop when we've tried all prototiles
+    } // solve ends here
 
     // equals method
     public boolean equals(Object obj) {
@@ -268,19 +353,6 @@ public class MutablePatch implements Serializable {
             return false;
         MutablePatch x = (MutablePatch) obj;
 
-/*          System.out.println("triangles: " + this.triangles.equals(x.triangles));
-          System.out.println("edges: " + this.edges.equals(x.edges) );
-          System.out.println("partition: " + this.partition.equals(x.partition));
-          System.out.println("tileList: " + this.tileList.equals(x.tileList));
-          System.out.println("bigVertices: " + Arrays.equals(this.bigVertices, x.bigVertices));
-          System.out.println("currentEdge: " + this.currentEdge.equals(x.currentEdge));
-          System.out.println("currentPrototile: " + this.currentPrototile.equals(x.currentPrototile));
-          System.out.println("initialPrototile: " + this.initialPrototile.equals(x.initialPrototile));
-
-System.out.println(currentPrototile);
-System.out.println(x.currentPrototile);
-System.out.println("\n"+initialPrototile);
-System.out.println(x.initialPrototile);*/
         return (
           this.triangles.equals(x.triangles)
           &&this.edges.equals(x.edges)
@@ -318,8 +390,8 @@ System.out.println(x.initialPrototile);*/
     */
     public ArrayList<OrderedTriple> graphicsDump() {
         ArrayList<OrderedTriple> output = new ArrayList<OrderedTriple>(triangles.size());
-        AbstractPoint p0;
-        AbstractPoint p1;
+        BytePoint p0;
+        BytePoint p1;
         ArrayList<RealMatrix> edgeList = new ArrayList<RealMatrix>(3);
         int counter = 0;
         for (BasicTriangle t : triangles)
@@ -347,6 +419,9 @@ System.out.println(x.initialPrototile);*/
     * This is what we do after compatible(t) returns true.
     */
     private void placeTriangle(BasicTriangle t) {
+        BytePoint[] ends = currentEdge.getEnds();
+        BytePoint other = t.getOtherVertex(ends[0],ends[1]);
+        if (!vertices.contains(other)) vertices.push(other);
         tileList.remove(currentPrototile);
         edges.place(t,partition);
         resetSteps();
@@ -367,6 +442,19 @@ System.out.println(x.initialPrototile);*/
         flip = t.getFlip();
         tileList.add(currentPrototile);
         secondEdge = t.isSecondEdge(currentEdge);
+        BytePoint p = vertices.pop();
+        for (BasicEdge e : edges.open()) {
+            if (e.hasVertex(p)) {
+                vertices.push(p);
+                return;
+            }
+        }
+        for (BasicEdge e : edges.closed()) {
+            if (e.hasVertex(p)) {
+                vertices.push(p);
+                return;
+            }
+        }
     }
 
     /*
@@ -398,36 +486,44 @@ System.out.println(x.initialPrototile);*/
     * called in the execution of this one.  
     */
     public boolean compatible(BasicTriangle t) {
-        AbstractPoint[] ends = currentEdge.getEnds();
-        AbstractPoint other = t.getOtherVertex(ends[0],ends[1]);
+        BytePoint[] ends = currentEdge.getEnds();
+        BytePoint other = t.getOtherVertex(ends[0],ends[1]);
 
-        // test to see if other is new or already there.
-        // if it's on an openEdge but not equal to one 
-        // of its endpoints, return false immediately.
-        boolean newVertex = true;
-        for (BasicEdge e : edges.open()) {
-            if (e.hasVertex(other)) {
-                newVertex = false;
-                break;
-            } else if (e.incident(other)) {
-                return false;
-            }
-        }
+        boolean newVertex = !vertices.contains(other);
 
         // make sure the new vertex is in the inflated prototile
-        if (newVertex && !contains(other)) return false;
+        if (newVertex && !contains(other)) {
+            if (debug) setMessage(t +"\n"+ DebugMessage.NON_CONTAINMENT.toString());
+            return false;
+        }
+
+        // make sure the new vertex doesn't overlap any open edges
+        if (newVertex) {
+            for (BasicEdge e : edges.open()) {
+                if (e.incident(other)) {
+                    if (debug) setMessage(t+"\n"+DebugMessage.INCIDENT_OPEN.toString());
+                    return false;
+                }
+            }
+        }
 
         // make sure the new vertex doesn't overlap any closed edges
         if (newVertex) {
             for (BasicEdge e : edges.closed()) {
-                if (e.incident(other)) return false;
+                if (e.incident(other)) {
+                    if (debug) setMessage(t +"\n"+ DebugMessage.INCIDENT_CLOSED.toString());
+                    return false;
+                }
             }
         }
 
         // make sure the new vertex isn't inside any placed triangles
         if (newVertex) {
             for (BasicTriangle tr : triangles) {
-                if (tr.contains(other)) return false;
+                if (tr.contains(other)) {
+                    if (debug) setMessage(t +"\n"+ DebugMessage.OVERLAP.toString() +"\n"+ tr);
+                    return false;
+                }
             }
         }
 
@@ -447,14 +543,45 @@ System.out.println(x.initialPrototile);*/
         // return false if a new edge crosses any old one
         for (BasicEdge e : newEdges) {
             for (BasicEdge open : edges.open()) {
-                if (e.cross(open)) return false;
+                if (e.cross(open)) {
+                    if (debug) setMessage(e +"\n"+ DebugMessage.CROSS_OPEN.toString() +"\n"+ open);
+                    return false;
+                }
             }
             for (BasicEdge closed : edges.closed()) {
-                if (e.cross(closed)) return false;
+                if (e.cross(closed)) {
+                    if (debug) setMessage(e +"\n"+ DebugMessage.CROSS_CLOSED.toString() +"\n"+ closed);
+                    return false;
+                }
+            }
+        }
+
+//        // return false if the new vertex is too close to any existing vertex
+//        if (newVertex) {
+//            for (BytePoint p : vertices) {
+//                if (other.tooClose(p)) {
+//                    if (debug) setMessage(other +"\n"+ DebugMessage.TOO_CLOSE.toString() +"\n"+ p);
+//                    return false;
+//                }
+//            }
+//        }
+
+        // return false if the new vertex is too close to any open edge
+        if (newVertex) {
+            for (BasicEdge open : edges.open()) {
+                if (open.tooClose(other)) {
+                    if (debug) setMessage(open.cross(other)+ " hit");
+                    return false;
+                }
             }
         }
 
         return true;
+    }
+
+    // temporary--destroy this method when you don't need it anymore!
+    public void edgeDump() {
+        for (BasicEdge e: edges.open()) System.out.println(""+e);
     }
 
     /*
@@ -464,10 +591,10 @@ System.out.println(x.initialPrototile);*/
     * vector is the same as taking the 2d cross product with the 
     * original vector.
     */
-    public boolean contains(AbstractPoint p) {
-        AbstractPoint m; // the direction vector for a side
-        AbstractPoint v; // the other vertex
-        AbstractPoint t; // vertex on the given side, used to test cross product
+    public boolean contains(BytePoint p) {
+        BytePoint m; // the direction vector for a side
+        BytePoint v; // the other vertex
+        BytePoint t; // vertex on the given side, used to test cross product
         for (int i = 0; i < 3; i++) {
             m = bigVertices[(i+2)%3].subtract(bigVertices[(i+1)%3]);
             v = bigVertices[i];
@@ -503,7 +630,7 @@ System.out.println(x.initialPrototile);*/
         output += "Tile List:\n";
         output += tileList.toString() + "\n";
         output += "The big triangle:\n";
-        for (AbstractPoint p : bigVertices) output += p.toString() + " ";
+        for (BytePoint p : bigVertices) output += p.toString() + " ";
         output += "\n";
         output += "currentEdge: " + currentEdge.toString() + "\n";
         output += "currentPrototile: " + currentPrototile.toString() + "\n";

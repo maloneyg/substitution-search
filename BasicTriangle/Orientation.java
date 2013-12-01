@@ -8,7 +8,7 @@ import java.io.Serializable;
 public final class Orientation implements Serializable {
 
     private final Orientation opposite;
-    private static int i = 0;
+    private static int i = 1;
     private final int ID;
 
     // make it Serializable

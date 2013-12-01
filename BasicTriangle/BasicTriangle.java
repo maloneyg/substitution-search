@@ -17,16 +17,16 @@ import java.util.*;
 import java.util.Arrays;
 import java.util.concurrent.*;
 
-public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicEdgeLength, BasicEdge, BasicTriangle>, Serializable {
+public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoint, BasicEdgeLength, BasicEdge, BasicTriangle>, Serializable {
 
     // make it Serializable
     static final long serialVersionUID = 2896067610461604622L;
 
     private final BasicAngle[] angles;
-    private final AbstractPoint[] vertices;
+    private final BytePoint[] vertices;
     private final Orientation[] orientations;
     private final BasicEdgeLength[] edgeLengths;
-/*    private static Cache<AbstractMap.SimpleEntry<AbstractPoint[],Orientation[]>, BasicTriangle> cache = CacheBuilder.newBuilder()
+/*    private static Cache<AbstractMap.SimpleEntry<BytePoint[],Orientation[]>, BasicTriangle> cache = CacheBuilder.newBuilder()
         .maximumSize(1000)// we may want to change this later
         .build(); // maintain a cache of existing BasicTriangles
 */
@@ -36,9 +36,9 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicEd
     private final boolean flip;
 
     // constructor methods.
-    private BasicTriangle(BasicAngle[] a, AbstractPoint[] p, Orientation[] o, BasicEdgeLength[] e, BasicPrototile P, boolean f) {
+    private BasicTriangle(BasicAngle[] a, BytePoint[] p, Orientation[] o, BasicEdgeLength[] e, BasicPrototile P, boolean f) {
         angles = a;
-        AbstractPoint[] tempVertices = new AbstractPoint[p.length];
+        BytePoint[] tempVertices = new BytePoint[p.length];
         for (int i = 0; i < p.length; i++) tempVertices[i] = p[i];
         vertices = tempVertices;
         orientations = o;
@@ -48,9 +48,9 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicEd
     }
 
     // public static factory methods.
-    public static BasicTriangle createBasicTriangle(BasicAngle[] a, AbstractPoint[] p, Orientation[] o, BasicEdgeLength[] e, BasicPrototile P, boolean f) {
+    public static BasicTriangle createBasicTriangle(BasicAngle[] a, BytePoint[] p, Orientation[] o, BasicEdgeLength[] e, BasicPrototile P, boolean f) {
         /*final BasicAngle[] aa = a;
-        final AbstractPoint[] pp = p;
+        final BytePoint[] pp = p;
         final Orientation[] oo = o;
         final BasicEdgeLength[] ee = e;
         try {
@@ -80,7 +80,7 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicEd
     }
 
     // unsafe: passes final variable to outside world
-    public AbstractPoint[] getVertices() {
+    public BytePoint[] getVertices() {
         return vertices;
     }
 
@@ -91,9 +91,9 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicEd
 
     // Don't call this method too often; it's time-consuming.
     public BasicEdge[] getEdges() {
-        AbstractPoint[] vertexPair0 = {vertices[0],vertices[1]};
-        AbstractPoint[] vertexPair1 = {vertices[1],vertices[2]};
-        AbstractPoint[] vertexPair2 = {vertices[2],vertices[0]};
+        BytePoint[] vertexPair0 = {vertices[0],vertices[1]};
+        BytePoint[] vertexPair1 = {vertices[1],vertices[2]};
+        BytePoint[] vertexPair2 = {vertices[2],vertices[0]};
         BasicEdge e2 = BasicEdge.createBasicEdge(edgeLengths[2],orientations[2],vertexPair0);
         BasicEdge e0 = BasicEdge.createBasicEdge(edgeLengths[0],orientations[0],vertexPair1);
         BasicEdge e1 = BasicEdge.createBasicEdge(edgeLengths[1],orientations[1],vertexPair2);
@@ -102,7 +102,7 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicEd
     }
 
     // Given two points on the triangle, return the third.  
-    public AbstractPoint getOtherVertex(AbstractPoint vertex1, AbstractPoint vertex2) {
+    public BytePoint getOtherVertex(BytePoint vertex1, BytePoint vertex2) {
 
         // First make sure the input points are on the triangle.  
         if (!(incidentPoint(vertex1) && incidentPoint(vertex2))) {
@@ -126,7 +126,7 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicEd
     * If the point is not on the triangle, return -1.
     * Purely for internal use; never make this public.
     */
-    private int indexOf(AbstractPoint point) {
+    private int indexOf(BytePoint point) {
         for (int i = 0; i < 3; i++) {
             if (vertices[i].equals(point))
                 return i;
@@ -135,7 +135,7 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicEd
     }
 
     // Tests for incidence.  
-    public boolean incidentPoint(AbstractPoint point) {
+    public boolean incidentPoint(BytePoint point) {
         if (indexOf(point) == -1) {
             return false;
         } else {
@@ -169,7 +169,7 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicEd
     // toArray method. For drawing
     public ArrayList<RealMatrix> toArray() {
         ArrayList<RealMatrix> output = new ArrayList<RealMatrix>(3);
-        for (AbstractPoint p : vertices) {
+        for (BytePoint p : vertices) {
             output.add((RealMatrix)new Array2DRowRealMatrix(p.arrayToDraw()));
         }
         return output;
@@ -182,10 +182,10 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicEd
     * vector is the same as taking the 2d cross product with the 
     * original vector.
     */
-    public boolean contains(AbstractPoint p) {
-        AbstractPoint m; // the direction vector for a side
-        AbstractPoint v; // the other vertex
-        AbstractPoint t; // vertex on the given side, used to test cross product
+    public boolean contains(BytePoint p) {
+        BytePoint m; // the direction vector for a side
+        BytePoint v; // the other vertex
+        BytePoint t; // vertex on the given side, used to test cross product
         for (int i = 0; i < 3; i++) {
             m = vertices[(i+2)%3].subtract(vertices[(i+1)%3]);
             v = vertices[i];
@@ -206,7 +206,7 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicEd
     * this orientation has to match arrow; if they appear in the other 
     * (cyclic) order, then the orientation has to match arrow.opposite().
     */
-    public boolean incidentEdge(AbstractPoint point1, AbstractPoint point2, Orientation arrow) {
+    public boolean incidentEdge(BytePoint point1, BytePoint point2, Orientation arrow) {
         int i = indexOf(point1);
         int j = indexOf(point2);
         /* 
@@ -252,16 +252,16 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BasicEd
 
     // simple incidence test
     public boolean simpleIncidentEdge(BasicEdge e) {
-        AbstractPoint[] ends = e.getEnds();
-        List<AbstractPoint> points = Arrays.asList(vertices);
+        BytePoint[] ends = e.getEnds();
+        List<BytePoint> points = Arrays.asList(vertices);
 //        return (points.contains(ends[0])&&points.contains(ends[1]));
         return (points.contains(ends[0])&&points.indexOf(ends[1])==(points.indexOf(ends[0])+1)%3);
     }
 
     // reverse incidence test
     public boolean reverseIncidentEdge(BasicEdge e) {
-        AbstractPoint[] ends = e.getEnds();
-        List<AbstractPoint> points = Arrays.asList(vertices);
+        BytePoint[] ends = e.getEnds();
+        List<BytePoint> points = Arrays.asList(vertices);
         return (points.contains(ends[1])&&points.indexOf(ends[0])==(points.indexOf(ends[1])+1)%3);
     }
 

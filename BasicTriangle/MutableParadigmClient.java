@@ -2,17 +2,18 @@ import java.util.*;
 import java.net.*;
 import java.io.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 
 // This class will serve up work units to remote clients. 
 
 public final class MutableParadigmClient
 {
     public static final int LISTENING_PORT = 32007;
-    public static String HOST_NAME = "localhost";  // name of the server
+    public static String HOST_NAME = Preinitializer.HOST_NAME;
 
     public static final double MONITOR_INTERVAL = 0.5; // seconds
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
-    public static final int MAX_ATTEMPTS = 300; // how many time to try connecting before giving up
+    public static final int MAX_ATTEMPTS = 5; // how many time to try connecting before giving up
     public static final String HANDSHAKE = "TriangleHandshake";
     public static final String CLOSE = "TriangleClose";
 
@@ -24,7 +25,9 @@ public final class MutableParadigmClient
 
     private static ThreadService executorService = ThreadService.INSTANCE;
 
-    private static Object mutableParadigmClientLock = new Object();
+    private static Object sendLock = new Object();
+
+    private static WorkUnitFactory workUnitFactory = WorkUnitFactory.createWorkUnitFactory();
 
     // prevent instantiation
     private MutableParadigmClient()
@@ -73,6 +76,11 @@ public final class MutableParadigmClient
                     {
                         System.out.println("Unable to connect, retrying.");
                     }
+                catch (UnknownHostException e)
+                    {
+                        System.out.println("unknown host name...aborting!");
+                        System.exit(1);
+                    }
                 catch (Exception e)
                     {
                         e.printStackTrace();
@@ -83,6 +91,7 @@ public final class MutableParadigmClient
                 if ( attempts > MAX_ATTEMPTS )
                     {
                         System.out.println("Maximum number of connection attempts exceeded.");
+                        System.exit(1);
                         break;
                     }
 
@@ -101,7 +110,7 @@ public final class MutableParadigmClient
         //System.out.println("Client has shut down.");
     }
 
-    private static void connect() throws IOException, InterruptedException, ConnectException, ClassNotFoundException, SocketException
+    private static void connect() throws IOException, InterruptedException, ConnectException, ClassNotFoundException, SocketException, UnknownHostException, EOFException
     {
         // establish connection
         connection = new Socket(HOST_NAME, LISTENING_PORT);
@@ -131,24 +140,62 @@ public final class MutableParadigmClient
 
         // get ready to run jobs
         ThreadService executorService = ThreadService.INSTANCE;
+        TaskMonitor taskMonitor = new TaskMonitor();
         System.out.println("Connected and ready to run jobs.");
 
         // ask for initial batch of jobs
-        Integer numberOfNewJobsNeeded = executorService.NUMBER_OF_THREADS - executorService.getExecutor().getNumberOfRunningJobs() + 1;
-        outgoingObjectStream.writeObject(numberOfNewJobsNeeded);
+        //Integer numberOfNewJobsNeeded = executorService.NUMBER_OF_THREADS - executorService.getExecutor().getNumberOfRunningJobs() + 1;
+        //outgoingObjectStream.writeObject(numberOfNewJobsNeeded);
+        /*outgoingObjectStream.writeObject(Integer.valueOf(1));
         outgoingObjectStream.flush();
         outgoingObjectStream.reset();
+        System.out.println("Initial job request made.");*/
 
         while (true)
             {
                 try
                     {
                         incomingObject = incomingObjectStream.readObject();
-                        if ( incomingObject instanceof MutableWorkUnit )
+                        if ( incomingObject instanceof WorkUnitInstructions )
                             {
-                                MutableWorkUnit thisUnit = (MutableWorkUnit)incomingObject;
-                                Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
-                                System.out.println("received job " + thisUnit.getOriginalHashCode());
+                                WorkUnitInstructions instructions = (WorkUnitInstructions)incomingObject;
+                                System.out.println("\nReceived instruction ID = " + instructions.getID());
+                                //System.out.print("Following instructions...");
+                                List<MutableWorkUnit> theseUnits = workUnitFactory.followInstructions(instructions);
+                                //System.out.println("done!");
+
+                                AtomicInteger counter = new AtomicInteger(0);
+                                LinkedList<ImmutablePatch> completedPuzzles = new LinkedList<ImmutablePatch>();
+                                
+                                for (MutableWorkUnit thisUnit : theseUnits)
+                                    {
+                                        thisUnit.setCounter(counter);
+                                        thisUnit.setResultTarget(completedPuzzles);
+                                        Future<Result> thisFuture = executorService.getExecutor().submit(thisUnit);
+                                        //System.out.println("submitted unit " + thisUnit.hashCode());
+                                    }
+                                
+                                // register this WorkUnitInstruction
+                                taskMonitor.register(new WorkBatch(instructions,theseUnits,counter,completedPuzzles));
+
+                  /*              // wait for current batch to complete
+                                while ( counter.get() < theseUnits.size() )
+                                    {
+                                        try
+                                            {
+                                                Thread.sleep(50);
+                                            }
+                                        catch (InterruptedException e)
+                                            {
+                                            }
+                                    }
+                                
+                                sendResult(instructions.getID(), completedPuzzles, theseUnits.size());
+                                
+                                // ask for another piece of work
+                                outgoingObjectStream.writeObject(Integer.valueOf(1));
+                                outgoingObjectStream.flush();
+                                outgoingObjectStream.reset();*/
                             }
                         else if ( incomingObject instanceof String )
                             {
@@ -165,6 +212,10 @@ public final class MutableParadigmClient
                 catch (SocketException e)
                     {
                         throw new SocketException(e.getMessage());
+                    }
+                catch (EOFException e)
+                    {
+                        throw new EOFException(e.getMessage());
                     }
                 catch (Exception e)
                     {
@@ -185,38 +236,177 @@ public final class MutableParadigmClient
         System.exit(0);
     }
 
-    public static void sendResult(PatchResult result)
+    public static class WorkBatch
     {
-        if ( connection == null )
-            return;
+        private WorkUnitInstructions workUnitInstructions;
+        private List<MutableWorkUnit> theseUnits;
+        private AtomicInteger counter;
+        private LinkedList<ImmutablePatch> completedPuzzles;
 
-        synchronized(mutableParadigmClientLock)
+        public WorkBatch(WorkUnitInstructions workUnitInstructions, List<MutableWorkUnit> theseUnits,
+                         AtomicInteger counter, LinkedList<ImmutablePatch> completedPuzzles)
+        {
+            this.workUnitInstructions = workUnitInstructions;
+            this.theseUnits = theseUnits;
+            this.counter = counter;
+            this.completedPuzzles = completedPuzzles;
+        }
+
+        public WorkUnitInstructions getInstructions()
+        {
+            return workUnitInstructions;
+        }
+
+        public List<MutableWorkUnit> getList()
+        {
+            return theseUnits;
+        }
+
+        public AtomicInteger getCounter()
+        {
+            return counter;
+        }
+
+        public LinkedList<ImmutablePatch> getCompletedPuzzles()
+        {
+            return completedPuzzles;
+        }
+    }
+
+    public static void requestJob()
+    {
+        try
             {
-                System.out.println("\nsending a result for job " + result.getCompletedUnit().getOriginalHashCode() + " (" + result.getCompletedUnit().getPatch().getLocalCompletedPatches().size() + " completed puzzles)");
-                try
+                synchronized (sendLock)
+                {
+                    outgoingObjectStream.writeObject(Integer.valueOf(1));
+                    outgoingObjectStream.flush();
+                    outgoingObjectStream.reset();
+                    //System.out.println("Requested new instructions.\n");
+                }
+            }
+        catch (SocketException e)
+            {
+                if ( e.getMessage().equals("Broken pipe") )
+                    System.out.println("Broken pipe while requesting job!");
+                else if ( e.getMessage().contains("reset by peer") )
+                    System.out.println("Connection reset by peer while requesting job!");
+                else
                     {
-                        // send result
-                        outgoingObjectStream.writeObject(result);
-                        outgoingObjectStream.flush();
-                        outgoingObjectStream.reset();
-
-                        // ask for one new job
-                        outgoingObjectStream.writeObject(new Integer(1));
-                        outgoingObjectStream.flush();
-                        outgoingObjectStream.reset();
-                        System.out.println("requested 1 more job");
-                    }
-                catch (Exception e)
-                    {
+                        System.out.println("Error while requesting job!");
                         e.printStackTrace();
                     }
             }
+        catch (Exception e)
+            {
+                System.out.println("Error while requesting job!");
+                e.printStackTrace();
+            }
+    }
+
+    public static void sendResult(WorkBatch b)
+    {
+        int ID = b.getInstructions().getID();
+        List<ImmutablePatch> completedPatches = b.getCompletedPuzzles();
+        int numberOfUnits = b.getList().size();
+        sendResult(ID, completedPatches, numberOfUnits);
+    }
+
+    public static void sendResult(int ID, List<ImmutablePatch> completedPatches, int numberOfUnits )
+    {
+        // create PatchResult to send
+        PatchResult result = new PatchResult(ID, completedPatches, numberOfUnits);
+
+        // send result
+        try
+            {
+                synchronized (sendLock)
+                    {
+                        outgoingObjectStream.writeObject(result);
+                        outgoingObjectStream.flush();
+                        outgoingObjectStream.reset();
+                    }
+                System.out.println("\nSent " + result.toString() + "\n");
+            }
+        catch (SocketException e)
+            {
+                System.out.println("Broken pipe!  Unable to send result!");
+            }
+        catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+    }
+
+    private static class TaskMonitor
+    {
+        private Timer timer;
+        private ArrayList<WorkBatch> workList = new ArrayList<>();
+        private static final int UPDATE_INTERVAL = 50; // ms
+        private static final int MIN_QUEUE_SIZE = 1000; // request a new set of instructions once the queue size drops below this amount 
+        private static final int MAX_INSTRUCTIONS = 3; // at most, check out three instructions at a time
+        private static ThreadService executorService = ThreadService.INSTANCE;
+        private LinkedList<WorkBatch> toBeDeregistered = new LinkedList<>();
+        private int numberCheckedOut = 0;
+
+        public TaskMonitor()
+        {
+            timer = new Timer();
+            timer.schedule(new CustomTimerTask(), UPDATE_INTERVAL, UPDATE_INTERVAL);
+        }
+
+        private class CustomTimerTask extends TimerTask
+        {
+            public void run()
+            {
+                // if the number of jobs in the queue is below the threshold, request a new WorkUnitInstruction
+                int currentSize = executorService.getExecutor().getQueue().size();
+                if ( currentSize < MIN_QUEUE_SIZE &&
+                     numberCheckedOut < MAX_INSTRUCTIONS )
+                    {
+                        //System.out.println(currentSize + " < " + MIN_QUEUE_SIZE);
+                        MutableParadigmClient.requestJob();
+                        numberCheckedOut++;
+                        /*try
+                            {
+                                Thread.sleep(2000);
+                            }
+                        catch (InterruptedException e)
+                            {
+                            }*/
+                    }
+
+                // if any of the WorkUnitInstructions are complete, send the result
+                synchronized (TaskMonitor.this)
+                    {
+                        for (WorkBatch b : workList)
+                            {
+                                int expectedSize = b.getList().size();
+                                int actualSize = b.getCounter().get();
+                                if ( expectedSize == actualSize )
+                                    toBeDeregistered.add(b);
+                            }
+                        for (WorkBatch b : toBeDeregistered)
+                            {
+                                workList.remove(b);
+                                MutableParadigmClient.sendResult(b);
+                                numberCheckedOut--;
+                            }
+                        toBeDeregistered.clear();
+                    }
+
+            }
+        }
+
+        public synchronized void register(WorkBatch workBatch)
+        {
+            workList.add(workBatch);
+        }
     }
 
     private static class ThreadMonitor
     {
         private Timer timer;
-        private double updateInterval;
         private static ThreadService executorService = ThreadService.INSTANCE;
         private Date lastUpdateTime = null;
         private LinkedList<Double> throughputs = new LinkedList<Double>();
@@ -248,6 +438,10 @@ public final class MutableParadigmClient
                             }
                         System.exit(1);
                     }
+
+                // only do stuff if the connection is alive
+                if ( connection == null )
+                    return;
 
                 // number of jobs run in the last monitorInterval; simultaneously resets counter
                 long jobsRun = executorService.getExecutor().getNumberOfSolveCalls();
