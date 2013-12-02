@@ -111,14 +111,20 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
     public EmptyBoundaryWorkUnit nextWorkUnit() {
 
         EmptyBoundaryPatch patch = EmptyBoundaryPatch.createEmptyBoundaryPatch(STARTERS.get(starter),bigVertices,tiles.dumpMutablePrototileList());
-
-        iterateEdgeBreakdown();
-
         AtomicBoolean kill = new AtomicBoolean();
         patch.setKillSwitch(kill);
 
-        return EmptyBoundaryWorkUnit.createEmptyBoundaryWorkUnit(patch,kill);
+        EmptyBoundaryWorkUnit unit = EmptyBoundaryWorkUnit.createEmptyBoundaryWorkUnit(patch,kill);
 
+        iterateEdgeBreakdown();
+
+        return unit;
+
+    }
+
+    public EmptyBoundaryWorkUnit countToWorkUnit(int i) {
+        for (int j = 0; j < i; j++) iterateEdgeBreakdown();
+        return nextWorkUnit();
     }
 
     // public factory method

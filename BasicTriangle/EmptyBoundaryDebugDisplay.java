@@ -15,7 +15,7 @@ import javax.swing.Timer;
 public class EmptyBoundaryDebugDisplay extends JPanel implements ActionListener
 {
 
-    private EmptyBoundaryWorkUnitFactory factory = EmptyBoundaryWorkUnitFactory.createEmptyBoundaryWorkUnitFactory();
+    private static EmptyBoundaryWorkUnitFactory factory = EmptyBoundaryWorkUnitFactory.createEmptyBoundaryWorkUnitFactory();
     private EmptyBoundaryPatch patch;
     private final List<ImmutablePatch> patchesSoFar;
     private final List<String> messages;
@@ -43,10 +43,13 @@ public class EmptyBoundaryDebugDisplay extends JPanel implements ActionListener
 
     public EmptyBoundaryDebugDisplay(int l, String title) throws java.awt.HeadlessException
     {
-        for (int j = 0; j < l; j++) factory.iterateEdgeBreakdown();
+        this(factory.countToWorkUnit(l),title);
+    }
 
+    public EmptyBoundaryDebugDisplay(EmptyBoundaryWorkUnit unit, String title) throws java.awt.HeadlessException
+    {
         this.keepSolving = true;
-        this.patch = factory.nextWorkUnit().getPatch();
+        this.patch = unit.getPatch();
         patch.setDebug(true);
         this.patchesSoFar = new ArrayList<>();
         this.messages = new ArrayList<>();
@@ -332,7 +335,7 @@ public class EmptyBoundaryDebugDisplay extends JPanel implements ActionListener
 
     public static void main(String[] args) {
 
-        EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(4,"debugging");
+        EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(3,"debugging");
 
     }
 
