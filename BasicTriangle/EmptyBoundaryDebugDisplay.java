@@ -11,6 +11,7 @@ import javax.swing.JButton;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.Timer;
+import java.io.*;
 
 public class EmptyBoundaryDebugDisplay extends JPanel implements ActionListener
 {
@@ -43,13 +44,13 @@ public class EmptyBoundaryDebugDisplay extends JPanel implements ActionListener
 
     public EmptyBoundaryDebugDisplay(int l, String title) throws java.awt.HeadlessException
     {
-        this(factory.countToWorkUnit(l),title);
+        this(factory.countToWorkUnit(l).getPatch(),title);
     }
 
-    public EmptyBoundaryDebugDisplay(EmptyBoundaryWorkUnit unit, String title) throws java.awt.HeadlessException
+    public EmptyBoundaryDebugDisplay(EmptyBoundaryPatch patch, String title) throws java.awt.HeadlessException
     {
         this.keepSolving = true;
-        this.patch = unit.getPatch();
+        this.patch = patch;
         patch.setDebug(true);
         this.patchesSoFar = new ArrayList<>();
         this.messages = new ArrayList<>();
@@ -335,7 +336,18 @@ public class EmptyBoundaryDebugDisplay extends JPanel implements ActionListener
 
     public static void main(String[] args) {
 
-        EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(3,"debugging");
+//        EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(3,"debugging");
+
+        String filename = "storage/" + "-915295802.chk";
+        try {
+            FileInputStream fileIn = new FileInputStream(filename);
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            EmptyBoundaryPatch myPatch = ((EmptyBoundaryPatch)in.readObject());
+            EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(myPatch,"debugging");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
 
     }
 

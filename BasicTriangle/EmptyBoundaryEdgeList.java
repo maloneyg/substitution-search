@@ -16,7 +16,7 @@ import java.util.Collections;
 public class EmptyBoundaryEdgeList implements Serializable {
 
     // a helper class. closedEdges holds a Stack of these.
-    private class IndexAndEdge { // nested class begins here
+    private class IndexAndEdge implements Serializable { // nested class begins here
 
         private final int index;
         private final BasicEdge edge;

@@ -3,9 +3,11 @@
 */
 
 import com.google.common.collect.*;
+import java.io.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Stack;
+import java.util.Date;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.math3.linear.*;
@@ -16,6 +18,11 @@ public class EmptyBoundaryPatch implements Serializable {
 
     // make it Serializable
 //    static final long serialVersionUID = 3422733298735932933L;
+
+    // a Date for serializing at regular intervals. delete.
+    private Date lastUpdateTime = null;
+    private long SERIALIZATION_INTERVAL = 4000;
+    String RESULT_FILENAME;
 
     // the number of completed patches this has found
     private int numCompleted = 0;
@@ -121,6 +128,7 @@ public class EmptyBoundaryPatch implements Serializable {
 
     // initial constructor
     private EmptyBoundaryPatch(BasicEdge e, BytePoint[] v, MutablePrototileList TL) {
+
         // turn off the kill switch
         die = new AtomicBoolean();
 
@@ -152,10 +160,14 @@ public class EmptyBoundaryPatch implements Serializable {
         }
 
         resetSteps();
+
+        // serialization stuff. delete.
+        RESULT_FILENAME = String.format("%010d.chk",hashCode());
     }
 
     // spawn constructor
     private EmptyBoundaryPatch(BasicPrototile initialPrototile, boolean initialSecondEdge, boolean initialFlip, List<BasicTriangle> initialTriangles, Stack<BasicTriangle> triangles, PuzzleBoundary boundary, Stack<BytePoint> vertices, EmptyBoundaryEdgeList edges, MutableOrientationPartition partition, MutablePrototileList tileList) {
+
         // turn off the kill switch
         die = new AtomicBoolean();
 
@@ -178,6 +190,9 @@ public class EmptyBoundaryPatch implements Serializable {
 
         // set the step variables
         resetSteps();
+
+        // serialization stuff. delete.
+        RESULT_FILENAME = String.format("%010d.chk",hashCode());
     }
 
     // public static factory method, single edge
@@ -320,6 +335,29 @@ public class EmptyBoundaryPatch implements Serializable {
     // here is where all of the work is done.
     // place a single tile, then call this method recursively.
     public List<EmptyBoundaryPatch> solve() {
+
+        // costly serialization. delete this.
+        if (lastUpdateTime == null) {
+            lastUpdateTime = new java.util.Date();
+        } else if ((new java.util.Date()).getTime()-lastUpdateTime.getTime() > SERIALIZATION_INTERVAL) {
+            try
+                {
+                    FileOutputStream fileOut = new FileOutputStream("storage/"+RESULT_FILENAME);
+                    ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                    out.writeObject(this);
+                    out.close();
+                    fileOut.close();
+                    System.out.println("wrote results to " + RESULT_FILENAME + ".");
+                }
+            catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            lastUpdateTime = new java.util.Date();
+        }
+        // here ends costly serialization. 
+
+
         count.getAndIncrement();
         do {
             if (tileList.empty()) {
@@ -645,13 +683,13 @@ public class EmptyBoundaryPatch implements Serializable {
                 if (c1==null) {
                     if (!BasicPrototile.encloseAngleOne(c2)) {
                         if (debug) setMessage("*****\n HIT " + wedge + "\n*****");
-                        System.out.println("HIT");
+                        //System.out.println("HIT");
                         //return false;
                     } 
                 } else {
                     if (!BasicPrototile.encloseAngleOne(c1,c2)) {
                         if (debug) setMessage("*****\n HIT " + wedge + "\n*****");
-                        System.out.println("HIT");
+                        //System.out.println("HIT");
                         //return false;
                     } 
                 }
