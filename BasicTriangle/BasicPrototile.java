@@ -37,7 +37,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
     public static final BasicAngle MIN_ANGLE;
     // the edge length that, along with edge length 1, encloses that 
     // minimum angle
-//    public static final BasicEdgeLength MIN_ANGLE_LENGTH;
+    public static final BasicEdgeLength MIN_ANGLE_LENGTH;
 
     // private constructor
     private BasicPrototile(ImmutableList<Integer> anglesList) {
@@ -110,6 +110,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
         ONE_LENGTHS = ImmutableList.copyOf(preOneLengths);
         ONE_ANGLES  = ImmutableList.copyOf(preOneAngles);
         MIN_ANGLE = preMinAngle;
+        MIN_ANGLE_LENGTH = BasicEdgeLength.lengthOpposite(MIN_ANGLE.plus(BasicAngle.createBasicAngle(1)).supplement());
     } // end initialization of ONE_LENGTHS
 
     // public static factory method
@@ -267,10 +268,23 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
     // return true if this edge length might meet an edge of length one 
     // with this angle between them.
     public static boolean mightTouchLengthOne(BasicEdgeLength l, BasicAngle a) {
-//        for (ImmutableList<BasicEdgeLength> L : ONE_LENGTHS) {
-//            if ((l1.equals(L.get(0))&&l2.equals(L.get(1)))||(l1.equals(L.get(1))&&l2.equals(L.get(0)))) return true;
-//        }
-        return false;
+        int i = a.compareTo(MIN_ANGLE);
+        if (i < 0) return false;
+        if (i == 0 && !l.equals(MIN_ANGLE_LENGTH)) return false;
+        if (i == 1) {
+            for (ImmutableList<BasicEdgeLength> L : ONE_LENGTHS) {
+                for (BasicEdgeLength ll : L) {
+                    if (ll.equals(l)) return true;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    // return true if this angle might meet an edge of length one 
+    public static boolean mightTouchLengthOne(BasicAngle a) {
+        return a.compareTo(MIN_ANGLE)>-1;
     }
 
     /*
@@ -619,6 +633,8 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
             System.out.println(""+i);
             for (BasicEdgeLength l : ONE_LENGTHS.get(i)) System.out.println(l);
         }
+        System.out.println("MIN_ANGLE: " + MIN_ANGLE);
+        System.out.println("MIN_ANGLE_LENGTH: " + MIN_ANGLE_LENGTH);
 
     }
 
