@@ -35,6 +35,8 @@ public class EmptyBoundaryPatch implements Serializable {
 
     // angle of pi/N.  use for comparison in valid(). 
     private static BasicAngle ONE = BasicAngle.createBasicAngle(1);
+    // short edge length. use for comparison in valid().
+    private static BasicEdgeLength SHORT = BasicEdgeLength.lengthOpposite(ONE);
 
     // the completed patches that have been found
     private static List<ImmutablePatch> completedPatches;
@@ -697,20 +699,20 @@ public class EmptyBoundaryPatch implements Serializable {
 
             // now check to see if either edge has length 1
             if (c1 == null) {
-                if (ONE.equals(c2.getLength())&&!BasicPrototile.mightTouchLengthOne(wedge)) {
+                if (SHORT.equals(c2.getLength())&&!BasicPrototile.mightTouchLengthOne(wedge)) {
                     if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
                     System.out.println("HIT: short side");
-                    return false;
+//                    return false;
                 }
             } else { // c1 isn't null
-                if (ONE.equals(c2.getLength())&&!BasicPrototile.mightTouchLengthOne(c1.getLength(), wedge)) {
+                if (SHORT.equals(c2.getLength())&&!BasicPrototile.mightTouchLengthOne(c1.getLength(), wedge)) {
                     if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
                     System.out.println("HIT: short side");
-                    return false;
-                } else if (ONE.equals(c1.getLength())&&!BasicPrototile.mightTouchLengthOne(c2.getLength(), wedge)) {
+//                    return false;
+                } else if (SHORT.equals(c1.getLength())&&!BasicPrototile.mightTouchLengthOne(c2.getLength(), wedge)) {
                     if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
                     System.out.println("HIT: short side");
-                    return false;
+//                    return false;
                 }
 
             }
