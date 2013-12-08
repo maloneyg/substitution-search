@@ -330,7 +330,6 @@ public class PatchDisplay extends JFrame implements ActionListener
                         checkpointFile = f;
                         break;
                     }
-        checkpointFile = new File("P1327775369.chk");
         if ( checkpointFile != null )
             {
                 System.out.println("Initializing debug PatchDisplay with " + checkpointFile.getName() + "...");
