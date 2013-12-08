@@ -11,12 +11,13 @@
 import com.google.common.collect.ImmutableList;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.atomic.*;
 
 class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 0;        // the tile we're searching
+    public static final int MY_TILE = 3;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
@@ -32,7 +33,7 @@ class Preinitializer {
     public static final boolean SERIALIZATION_FLAG = true;  // should EmptyBoundaryPatch.solve() serialize periodically?
     public static final long SERIALIZATION_INTERVAL = 5000L; // time in ms between serializations
     public static final String SERIALIZATION_DIRECTORY = "storage"; // directory to store checkpoints in
-    public static final boolean SERIALIZATION_CLEARFIRST = true; // clear all files in storage directory before starting
+    public static final boolean SERIALIZATION_CLEARFIRST = false; // clear all files in storage directory before starting
 
     // the inflation factor, represented as coefficients of
     // 1, a, a^2, etc., where a = 2*cos(pi/N).
@@ -44,14 +45,14 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, 0, 1); // quite big search (110)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 0, -3, 0, 1); // huge search (115)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, -2, 0, 1); // b+d (118)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, -2, -3, 1, 1); // even huger search (122)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, -2, 1, 1); // even huger search (124)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -1, 1, 1); // a + b + c 
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -1, 1, 1); // a + b + c 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -2, 0, 1); // 1 + b + d 
 
     public static final ImmutableList<ImmutableList<Integer>> PROTOTILES = ImmutableList.of( 

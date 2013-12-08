@@ -442,6 +442,57 @@ public class EmptyBoundaryPatch implements Serializable {
         } while (!backToStart()); // stop when we've tried all prototiles
     } // solve ends here
 
+    public void debugSolve(ArrayList<PatchDisplay.DebugFrame> frames)
+    {
+        while ( frames.size() <= PatchDisplay.DebugPanel.MAX_FRAMES )
+            {
+                if ( frames.size() > 0 && backToStart() )
+                    break;
+                PatchDisplay.DebugFrame currentFrame = new PatchDisplay.DebugFrame(dumpImmutablePatch(),message);
+                frames.add(currentFrame);
+                System.out.print("\rComputing frames..." + frames.size() + " frames computed...");
+
+                if ( tileList.empty() )
+                    {
+                        ImmutablePatch thisPatch = dumpImmutablePatch();
+                        completedPatches.add(thisPatch);
+                        localCompletedPatches.add(thisPatch);
+                        numCompleted++;
+                        //if ( debug )
+                        //   setMessage(DebugMessage.FOUND.toString());
+                        break;
+                    }
+                if (    tileList.contains(currentPrototile)
+                     && currentPrototile.compatible(currentEdge,secondEdge,flip,partition.equivalenceClass( currentEdge.getOrientation() ) ) )
+                     {
+                        BasicTriangle t = currentPrototile.place(currentEdge,secondEdge,flip);
+                        if (compatible(t))
+                            {
+                                placeTriangle(t);
+                                if (partition.valid())
+                                    {
+                                        //if (debug)
+                                        //setMessage(DebugMessage.PLACING.toString()+"\n"+t);
+                                        debugSolve(frames);
+                                        count.getAndIncrement();
+                                    }
+                                else
+                                    {
+                                        // if (debug)
+                                        //setMessage(t+"\n"+DebugMessage.ORIENTATION.toString()+"\n"+partition);
+                                    }
+                                removeTriangle();
+                            }
+                    }
+                else
+                    {
+                        //if (debug)
+                        //setMessage(currentPrototile+"\n"+DebugMessage.NONE_OR_PROTOTILE.toString()+"\n"+currentEdge);
+                    }
+                step();
+            } 
+    }
+
     // equals method
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())
