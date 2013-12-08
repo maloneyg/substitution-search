@@ -150,7 +150,7 @@ public class PatchDisplay extends JFrame implements ActionListener
             currentIndexArea.setBounds(5,50,80,15);
             add(currentIndexArea);
 
-            messageArea = new JTextArea("Patch " + patch.hashCode());
+            messageArea = new JTextArea("---");
             messageArea.setFont(new Font("SansSerif", Font.PLAIN, 10));
             messageArea.setEditable(false);
             messageArea.setLineWrap(true);
@@ -161,7 +161,7 @@ public class PatchDisplay extends JFrame implements ActionListener
                 messageX = 300;
             else
                 messageX = 10;
-            messageArea.setBounds(messageX,75,200,150);
+            messageArea.setBounds(messageX,75,250,200);
             add(messageArea);
 
             next = new JButton("next");

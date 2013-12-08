@@ -444,17 +444,9 @@ public class EmptyBoundaryPatch implements Serializable {
 
     public void debugSolve(ArrayList<PatchDisplay.DebugFrame> frames)
     {
-        while ( frames.size() <= PatchDisplay.DebugPanel.MAX_FRAMES )
+        debug = true;
+        do
             {
-                if ( frames.size() > 0 && backToStart() )
-                {
-                    System.out.println("back to start");
-                    break;
-                }
-                PatchDisplay.DebugFrame currentFrame = new PatchDisplay.DebugFrame(dumpImmutablePatch(),message);
-                frames.add(currentFrame);
-                System.out.print("\rComputing frames..." + frames.size() + " frames computed...");
-
                 if ( tileList.empty() )
                     {
                         ImmutablePatch thisPatch = dumpImmutablePatch();
@@ -493,7 +485,12 @@ public class EmptyBoundaryPatch implements Serializable {
                         //setMessage(currentPrototile+"\n"+DebugMessage.NONE_OR_PROTOTILE.toString()+"\n"+currentEdge);
                     }
                 step();
+                
+                PatchDisplay.DebugFrame currentFrame = new PatchDisplay.DebugFrame(dumpImmutablePatch(),message.toString());
+                frames.add(currentFrame);
+                System.out.print("\rComputing frames..." + frames.size() + " frames computed...");
             } 
+        while ( frames.size() <= PatchDisplay.DebugPanel.MAX_FRAMES && backToStart() == false);
     }
 
     // equals method
