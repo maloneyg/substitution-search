@@ -446,7 +446,7 @@ public class EmptyBoundaryPatch implements Serializable {
     {
         while ( frames.size() <= PatchDisplay.DebugPanel.MAX_FRAMES )
             {
-                if ( frames.size() > 10 && backToStart() )
+                if ( frames.size() > 0 && backToStart() )
                 {
                     System.out.println("back to start");
                     break;
