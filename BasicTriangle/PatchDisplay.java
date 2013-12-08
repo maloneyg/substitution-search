@@ -39,7 +39,6 @@ public class PatchDisplay extends JFrame implements ActionListener
         private JButton previous;
         private int position;
         private JTextArea messageArea;
-        private 
 
         // geometry data
         private EmptyBoundaryPatch patch;
@@ -118,7 +117,7 @@ public class PatchDisplay extends JFrame implements ActionListener
                         checkpointFile = f;
                         break;
                     }
-        checkpointFile = new File("N2108595042.chk");
+        checkpointFile = new File("P1327775369.chk");
         if ( checkpointFile != null )
             {
                 System.out.println("Initializing debug PatchDisplay with " + checkpointFile.getName() + "...");
