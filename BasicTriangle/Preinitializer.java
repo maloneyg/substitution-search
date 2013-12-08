@@ -9,12 +9,14 @@
  *************************************************************************/
 
 import com.google.common.collect.ImmutableList;
+import java.io.*;
+import java.util.*;
 
 class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 4;        // the tile we're searching
+    public static final int MY_TILE = 0;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
@@ -26,6 +28,11 @@ class Preinitializer {
 
     public static final int SPAWN_MAX_SIZE = 50; // no more work units will be spawend if the queue is bigger than this size
     public static final int SPAWN_MIN_TIME = 5000 ; // if a work unit takes longer than this time in ms, more units will be spawned
+
+    public static final boolean SERIALIZATION_FLAG = true;  // should EmptyBoundaryPatch.solve() serialize periodically?
+    public static final long SERIALIZATION_INTERVAL = 5000L; // time in ms between serializations
+    public static final String SERIALIZATION_DIRECTORY = "storage"; // directory to store checkpoints in
+    public static final boolean SERIALIZATION_CLEARFIRST = true; // clear all files in storage directory before starting
 
     // the inflation factor, represented as coefficients of
     // 1, a, a^2, etc., where a = 2*cos(pi/N).
@@ -75,6 +82,55 @@ class Preinitializer {
 
             // print out which puzzle we are searching;
             System.out.println("We are searching tile " + MY_TILE + " using inflation factor " + INFL + ".");
+        
+            // print out serialization settings
+            if ( SERIALIZATION_FLAG == true )
+                {
+                    System.out.println(String.format("Serialization will be performed every %.1f seconds.", SERIALIZATION_INTERVAL/1000.0));
+                    
+                    // check if storage folder exists
+                    File storageDirectory = new File(SERIALIZATION_DIRECTORY);
+                    if ( ! storageDirectory.exists() )
+                        {
+                            boolean success = storageDirectory.mkdirs();
+                            if ( success )
+                                System.out.println("Created a new storage directory called " + SERIALIZATION_DIRECTORY + "/");
+                            else
+                                {
+                                    System.out.println("Failure creating storage directory!");
+                                    System.exit(1);
+                                }
+                        }
+                    else if ( storageDirectory.exists() && ! storageDirectory.isDirectory() )
+                        {
+                            System.out.println("Fatal error: specified storage directory " + SERIALIZATION_DIRECTORY + " is a regular file!");
+                            System.exit(1);
+                        }
+                    else
+                        System.out.println("Will store checkpoints in " + SERIALIZATION_DIRECTORY + "/");
+
+                    // clear directory if requested
+                    if ( SERIALIZATION_CLEARFIRST == true )
+                        {
+                            int numberOfFiles = 0;
+                            for ( File f : storageDirectory.listFiles() )
+                                {
+                                    String[] fields = f.getName().split("\\.");
+                                    String extension = fields[fields.length-1];
+                                    if ( extension.equals("chk") )
+                                        {
+                                            f.delete();
+                                            numberOfFiles++;
+                                        }
+                                }
+                            if ( numberOfFiles > 0 )
+                                System.out.println("Deleted " + numberOfFiles + " pre-existing chk files from " + SERIALIZATION_DIRECTORY + "/");
+                        }
+                }
+            else
+                System.out.println("Serialization is off.");
+
+            System.out.println();
         }
 
 } // end of class Preinitializer

@@ -176,6 +176,9 @@ public class EmptyTest
         private Date startTime = new Date();
         private LinkedList<Double> throughputs = new LinkedList<Double>();
 
+        private int lastNumberOfCompletedPatches = 0;
+        private final String INTERIM_RESULTS_FILENAME = Preinitializer.SERIALIZATION_DIRECTORY + "/interimResults.chk";
+
         public ThreadMonitor(double updateInterval) // seconds
         {
             this.updateInterval = updateInterval;
@@ -230,6 +233,39 @@ public class EmptyTest
                 // print statistics
                 lastUpdateTime = currentTime;
                 ThreadService.INSTANCE.getExecutor().printQueues(throughput, average, totalTime, numberOfCompletedPatches);
+
+                // serialize interim results if more have been added since last time
+                if ( Preinitializer.SERIALIZATION_FLAG == true && numberOfCompletedPatches > lastNumberOfCompletedPatches )
+                    {
+                        LinkedList<ImmutablePatch> interimPatches = new LinkedList<ImmutablePatch>();
+                        for (List<ImmutablePatch> l : EmptyTest.eventualPatchList)
+                            {
+                                synchronized(l)
+                                    {
+                                        interimPatches.addAll(l);
+                                    }
+                            }
+                        TriangleResults interimResults = new TriangleResults(interimPatches);
+
+                        try
+                            {
+                                FileOutputStream fileOut = new FileOutputStream(INTERIM_RESULTS_FILENAME);
+                                ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                                out.writeObject(interimResults);
+                                out.close();
+                                fileOut.close();
+                                int newResults = interimPatches.size() - lastNumberOfCompletedPatches;
+                                System.out.println("\n\n" + newResults + " new results, so wrote " + interimPatches.size()
+                                                   + " interim results to " + INTERIM_RESULTS_FILENAME + ".\n");
+                            }
+                        catch (Exception e)
+                            {
+                                System.out.println("\nError while writing interim results to " + INTERIM_RESULTS_FILENAME + "!");
+                                e.printStackTrace();
+                            }
+                        
+                        lastNumberOfCompletedPatches = interimPatches.size();
+                    }
             }
         }
     }
