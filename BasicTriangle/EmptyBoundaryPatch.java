@@ -447,7 +447,10 @@ public class EmptyBoundaryPatch implements Serializable {
         while ( frames.size() <= PatchDisplay.DebugPanel.MAX_FRAMES )
             {
                 if ( frames.size() > 0 && backToStart() )
+                {
+                    System.out.println("back to start");
                     break;
+                }
                 PatchDisplay.DebugFrame currentFrame = new PatchDisplay.DebugFrame(dumpImmutablePatch(),message);
                 frames.add(currentFrame);
                 System.out.print("\rComputing frames..." + frames.size() + " frames computed...");
