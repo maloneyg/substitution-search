@@ -95,6 +95,7 @@ public class PatchDisplay extends JFrame implements ActionListener
         private JTextArea currentIndexArea;
         private JTextArea messageArea;
         private String positionString;
+        private JButton nextFileButton;
 
         // animation controls
         private boolean playing = false;
@@ -210,6 +211,13 @@ public class PatchDisplay extends JFrame implements ActionListener
             previous.setBounds(10,10,90,20);
             add(previous);
 
+            nextFileButton = new JButton("next file");
+            nextFileButton.setEnabled(true);
+            nextFileButton.setActionCommand("next file");
+            nextFileButton.addActionListener(parentFrame);
+            nextFileButton.setBounds(120,35,90,20);
+            add(nextFileButton);
+
             animationTimer = new javax.swing.Timer(ANIMATION_DELAY,parentFrame);
             animationTimer.setActionCommand("animation");
             animationTimer.start();
@@ -322,15 +330,21 @@ public class PatchDisplay extends JFrame implements ActionListener
         File storageDirectory = new File(Preinitializer.SERIALIZATION_DIRECTORY);
         File[] fileList = storageDirectory.listFiles();
         File checkpointFile = null;
+
         // select the first appropriate file in the directory
         for ( File f : fileList )
-            if ( f.isFile() )
-                if ( f.getName().startsWith("P") || f.getName().startsWith("N") )
+            {
+                if ( f.isFile() )
                     {
-                        checkpointFile = f;
-                        break;
+                        if ( f.getName().startsWith("P") || f.getName().startsWith("N") )
+                            {
+                                checkpointFile = f;
+                                break;
+                            }
                     }
+            }
         checkpointFile = new File("N2108595042.chk");
+        
         if ( checkpointFile != null )
             {
                 System.out.println("Initializing debug PatchDisplay with " + checkpointFile.getName() + "...");
