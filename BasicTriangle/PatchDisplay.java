@@ -25,7 +25,7 @@ public class PatchDisplay extends JFrame implements ActionListener
     public PatchDisplay(ArrayList<File> checkpoints, String originalFilename, EmptyBoundaryPatch patch) throws HeadlessException
     {
         System.out.println("Will render a maximium of " + DebugPanel.MAX_FRAMES + " frames and");
-        System.out.println("animate every " + DebugPanel.FRAME_INTERVAL + " frames with a delay of " + DebugPanel.ANIMATION_DELAY + " ms.");
+        System.out.println("animate every " + DebugPanel.FRAME_INTERVAL + " frames with a delay of " + DebugPanel.ANIMATION_DELAY + " ms.\n");
         currentFilename = originalFilename;
         this.checkpoints = checkpoints;
         activePanel = new DebugPanel((ActionListener)this, patch, currentFilename);
@@ -88,7 +88,10 @@ public class PatchDisplay extends JFrame implements ActionListener
                     activePanel.forward = true;
             }
         else if ("rewind".equals(e.getActionCommand()))
-            activePanel.position = 0;
+            {
+                activePanel.position = 0;
+                activePanel.updatePosition();
+            }
         else if ("animation".equals(e.getActionCommand()))
             {
                 if ( activePanel.playing == true )
