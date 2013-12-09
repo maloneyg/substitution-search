@@ -15,14 +15,22 @@ import java.io.*;
 public class PatchDisplay extends JFrame implements ActionListener
 {
     private DebugPanel activePanel;
-    public static final int WINDOW_HEIGHT = 600;
+    public static final int WINDOW_HEIGHT = 600;  // if you don't use a square you'll get distortion
     public static final int WINDOW_WIDTH  = 600;
+    private int currentIndex = 0;
+    private String currentFilename;
+    private ArrayList<File> checkpoints;
+    public static final java.text.SimpleDateFormat SDF = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
-    public PatchDisplay(EmptyBoundaryPatch patch) throws HeadlessException
+    public PatchDisplay(ArrayList<File> checkpoints, String originalFilename, EmptyBoundaryPatch patch) throws HeadlessException
     {
-        activePanel = new DebugPanel((ActionListener)this, patch);
+        System.out.println("Will render a maximium of " + DebugPanel.MAX_FRAMES + " frames and");
+        System.out.println("animate every " + DebugPanel.FRAME_INTERVAL + " frames with a delay of " + DebugPanel.ANIMATION_DELAY + " ms.\n");
+        currentFilename = originalFilename;
+        this.checkpoints = checkpoints;
+        activePanel = new DebugPanel((ActionListener)this, patch, currentFilename);
         setContentPane(activePanel);
-        
+
         setSize(WINDOW_WIDTH,WINDOW_HEIGHT);
         setLocation(10,10);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -61,9 +69,17 @@ public class PatchDisplay extends JFrame implements ActionListener
                     activePanel.previous.setEnabled(false);
             }
         else if ("play".equals(e.getActionCommand()))
-            activePanel.playing = true;
+            {
+                activePanel.playing = true;
+                if ( !activePanel.animationTimer.isRunning() )
+                    activePanel.animationTimer.start();
+            }
         else if ("stop".equals(e.getActionCommand()))
-            activePanel.playing = false;
+            {
+                activePanel.playing = false;
+                if ( activePanel.animationTimer.isRunning() )
+                    activePanel.animationTimer.stop();
+            }
         else if ("reverse".equals(e.getActionCommand()))
             {
                 if (activePanel.forward == true)
@@ -72,19 +88,114 @@ public class PatchDisplay extends JFrame implements ActionListener
                     activePanel.forward = true;
             }
         else if ("rewind".equals(e.getActionCommand()))
-            activePanel.position = 0;
+            {
+                activePanel.position = 0;
+                activePanel.updatePosition();
+            }
         else if ("animation".equals(e.getActionCommand()))
             {
                 if ( activePanel.playing == true )
                     {
+                        //System.out.print(activePanel.position + " --> ");
                         if ( activePanel.forward == true )
-                            activePanel.next.doClick();
-                        else if ( activePanel.forward == false )
-                            activePanel.previous.doClick();
+                            activePanel.position += DebugPanel.FRAME_INTERVAL;
+                        else
+                            activePanel.position -= DebugPanel.FRAME_INTERVAL;
+                        //System.out.println(activePanel.position);
+
+                        // prevent position from getting out of range
+                        if ( activePanel.position > activePanel.frames.size() - 1 )
+                            {
+                                activePanel.playing = false;
+                                activePanel.animationTimer.stop();
+                                activePanel.position = activePanel.frames.size() - 1;
+                            }
+                        else if ( activePanel.position < 0 )
+                            {
+                                activePanel.playing = false;
+                                activePanel.animationTimer.stop();
+                                activePanel.position = 0;
+                            }
+                        else
+                            {
+                                activePanel.updatePosition();
+                                if ( activePanel.position > 0 )
+                                    activePanel.previous.setEnabled(true);
+                                else
+                                    activePanel.previous.setEnabled(false);
+                                if ( activePanel.position == activePanel.frames.size() - 1 )
+                                    activePanel.next.setEnabled(false);
+                                else
+                                    activePanel.next.setEnabled(true);
+                            }
                 }
-            }    
+            }
+        else if ("next file".equals(e.getActionCommand()))
+            {
+                if ( currentIndex == checkpoints.size()-1 )
+                    {
+                        System.out.println(">>> end of list reached");
+                        activePanel.nextFileButton.setEnabled(false);
+                    }
+                else
+                    {
+                        activePanel.previousFileButton.setEnabled(true);
+                        currentIndex++;
+                        File currentFile = checkpoints.get(currentIndex);
+                        currentFilename = currentFile.getName();
+                        String lastModifiedString = SDF.format(currentFile.lastModified());
+                        System.out.println("Moving to next file (" + (currentIndex+1) + " of " + checkpoints.size() + "): " + currentFilename + " (last modified " + lastModifiedString + ")...");
+                        EmptyBoundaryPatch newPatch = null;
+                        try
+                            {
+                                String filename = Preinitializer.SERIALIZATION_DIRECTORY + "/" + currentFilename;
+                                FileInputStream fileIn = new FileInputStream(filename);
+                                ObjectInputStream in = new ObjectInputStream(fileIn);
+                                newPatch = ((EmptyBoundaryPatch)in.readObject());
+                            }
+                        catch (Exception ex)
+                            {
+                                ex.printStackTrace();
+                            }
+                        activePanel = new DebugPanel((ActionListener)this,newPatch,currentFilename);
+                        setContentPane(activePanel);
+                    }
+            }
+        else if ("previous file".equals(e.getActionCommand()))
+            {
+                if ( currentIndex == 0 )
+                    {
+                        System.out.println(">>> beginning of list reached");
+                        activePanel.previousFileButton.setEnabled(false);
+                    }
+                else
+                    {
+                        activePanel.nextFileButton.setEnabled(true);
+                        currentIndex--;
+                        File currentFile = checkpoints.get(currentIndex);
+                        currentFilename = currentFile.getName();
+                        String lastModifiedString = SDF.format(currentFile.lastModified());
+                        System.out.println("Moving to previous file (" + (currentIndex+1) + " of " + checkpoints.size() + "): " + currentFilename + " (last modified " + lastModifiedString +   ")...");
+                        EmptyBoundaryPatch newPatch = null;
+                        try
+                            {
+                                String filename = Preinitializer.SERIALIZATION_DIRECTORY + "/" + currentFilename;
+                                FileInputStream fileIn = new FileInputStream(filename);
+                                ObjectInputStream in = new ObjectInputStream(fileIn);
+                                newPatch = ((EmptyBoundaryPatch)in.readObject());
+                            }
+                        catch (Exception ex)
+                            {
+                                ex.printStackTrace();
+                            }
+                        activePanel = new DebugPanel((ActionListener)this,newPatch,currentFilename);
+                        setContentPane(activePanel);
+                    }
+            }
+
+
         activePanel.updateUI();
-        }
+    }
 
     public static class DebugPanel extends JPanel
     {
@@ -96,12 +207,14 @@ public class PatchDisplay extends JFrame implements ActionListener
         private JTextArea messageArea;
         private String positionString;
         private JButton nextFileButton;
+        private JButton previousFileButton;
+        private JTextArea currentFilenameArea;
 
         // animation controls
         private boolean playing = false;
         private boolean forward = true;
         private static final int ANIMATION_DELAY = 1; // ms
-        private static final int FRAME_INTERVAL = 1;  // every redraw, advance or retreat by this many frames
+        private static final int FRAME_INTERVAL = 5;  // every animation redraw, advance or retreat by this many frames
         private JButton playButton;
         private JButton stopButton;
         private JButton reverseButton;
@@ -110,7 +223,7 @@ public class PatchDisplay extends JFrame implements ActionListener
 
         // geometry data
         private EmptyBoundaryPatch patch;
-        public static final int MAX_FRAMES = 3000; // up to this many frames will be rendered
+        public static final int MAX_FRAMES = 50000; // up to this many frames will be rendered
         private ArrayList<PatchDisplay.DebugFrame> frames;
         private EmptyBoundaryWorkUnitFactory factory = EmptyBoundaryWorkUnitFactory.createEmptyBoundaryWorkUnitFactory();
 
@@ -122,14 +235,13 @@ public class PatchDisplay extends JFrame implements ActionListener
         private static final int WINDOW_HEIGHT = PatchDisplay.WINDOW_HEIGHT;
         private static final int WINDOW_WIDTH = PatchDisplay.WINDOW_WIDTH;
 
-        public DebugPanel(ActionListener parentFrame, EmptyBoundaryPatch patch)
+        public DebugPanel(ActionListener parentFrame, EmptyBoundaryPatch patch, String currentFilename)
         {
             // pre-compute the data for this panel
             this.patch = patch;
             frames = new ArrayList<PatchDisplay.DebugFrame>();
-            System.out.println();
             patch.debugSolve(frames);
-            System.out.println("done.");
+            System.out.println("done.\n");
             
             // set the current frame
             if ( frames.size() > 0 )
@@ -159,10 +271,10 @@ public class PatchDisplay extends JFrame implements ActionListener
             if ( Preinitializer.MY_TILE == 3 )
                 messageX = 10;
             else if ( Preinitializer.MY_TILE == 4 )
-                messageX = 300;
+                messageX = 10;
             else
                 messageX = 10;
-            messageArea.setBounds(messageX,75,250,200);
+            messageArea.setBounds(messageX,75,250,225);
             add(messageArea);
 
             next = new JButton("next");
@@ -186,6 +298,7 @@ public class PatchDisplay extends JFrame implements ActionListener
             stopButton.addActionListener(parentFrame);
             stopButton.setBounds(310,10,90,20);
             add(stopButton);
+
             reverseButton = new JButton("reverse");
             reverseButton.setEnabled(true);
             reverseButton.setActionCommand("reverse");
@@ -201,10 +314,7 @@ public class PatchDisplay extends JFrame implements ActionListener
             add(rewindButton);
 
             previous = new JButton("previous");
-            if (position == 0)
-                previous.setEnabled(false);
-            else 
-                previous.setEnabled(true);
+            previous.setEnabled(false);
             previous.setActionCommand("retreat");
             previous.setMnemonic(KeyEvent.VK_B);
             previous.addActionListener(parentFrame);
@@ -218,9 +328,21 @@ public class PatchDisplay extends JFrame implements ActionListener
             nextFileButton.setBounds(120,35,90,20);
             add(nextFileButton);
 
+            previousFileButton = new JButton("previous file");
+            previousFileButton.setEnabled(true);
+            previousFileButton.setActionCommand("previous file");
+            previousFileButton.addActionListener(parentFrame);
+            previousFileButton.setBounds(220,35,120,20);
+            add(previousFileButton);
+
+            currentFilenameArea = new JTextArea(currentFilename);
+            currentFilenameArea.setFont(new Font("SansSerif", Font.PLAIN,10));
+            currentFilenameArea.setEditable(false);
+            currentFilenameArea.setBounds(10,550,200,15);
+            add(currentFilenameArea);
+
             animationTimer = new javax.swing.Timer(ANIMATION_DELAY,parentFrame);
             animationTimer.setActionCommand("animation");
-            animationTimer.start();
         }
 
         public void updatePosition()
@@ -332,18 +454,36 @@ public class PatchDisplay extends JFrame implements ActionListener
         File checkpointFile = null;
 
         // select the first appropriate file in the directory
+        ArrayList<File> validFiles = new ArrayList<File>();
         for ( File f : fileList )
             {
                 if ( f.isFile() )
                     {
-                        if ( f.getName().startsWith("P") || f.getName().startsWith("N") )
+                        if ( (f.getName().startsWith("P") || f.getName().startsWith("N")) && f.getName().endsWith("chk") )
                             {
-                                checkpointFile = f;
-                                break;
+                                validFiles.add(f);
                             }
                     }
             }
-        checkpointFile = new File("N1218255044.chk");
+
+        // sort list of checkpoints in ascending order/last modified
+        ArrayList<File> sortedValidFiles = new ArrayList<File>(validFiles);
+        Comparator<File> comparator = new Comparator<File>()
+            {
+                public int compare(File f1, File f2)
+                {
+                    return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
+                }
+            };
+        Comparator<File> comparator2 = Collections.reverseOrder(comparator);
+        Collections.sort(sortedValidFiles, comparator2);
+
+        if ( sortedValidFiles.size() > 0 )
+            checkpointFile = sortedValidFiles.get(0);
+
+        // uncomment this to display this file specifically first
+        // after that, it will go through all the files in the directory in order and then quit
+        checkpointFile = new File("N1051916890.chk");
         
         if ( checkpointFile != null )
             {
@@ -354,7 +494,7 @@ public class PatchDisplay extends JFrame implements ActionListener
                         FileInputStream fileIn = new FileInputStream(filename);
                         ObjectInputStream in = new ObjectInputStream(fileIn);
                         EmptyBoundaryPatch patch = ((EmptyBoundaryPatch)in.readObject());
-                        PatchDisplay display = new PatchDisplay(patch);
+                        PatchDisplay display = new PatchDisplay(sortedValidFiles,filename,patch);
                     }
                 catch (HeadlessException e)
                     {

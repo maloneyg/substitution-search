@@ -17,7 +17,7 @@ class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 3;        // the tile we're searching
+    public static final int MY_TILE = 4;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
@@ -27,14 +27,16 @@ class Preinitializer {
 
     public static final int NUMBER_OF_THREADS; // number of threads per client; set in static initializer
 
-    public static final int SPAWN_MAX_SIZE = 50; // no more work units will be spawend if the queue is bigger than this size
-    public static final int SPAWN_MIN_TIME = 5000 ; // if a work unit takes longer than this time in ms, more units will be spawned
+    public static final int SPAWN_MAX_SIZE = 5000; // no more work units will be spawned if the queue is bigger than this size
+    public static final int SPAWN_MIN_TIME = 10000; // if a work unit takes longer than this time in ms, more units will be spawned
 
-    public static final boolean SERIALIZATION_FLAG = true;  // should EmptyBoundaryPatch.solve() serialize periodically?
-    public static final long SERIALIZATION_INTERVAL = 5000L; // time in ms between serializations
+    public static final boolean SERIALIZATION_FLAG = true;          // should EmptyBoundaryPatch.solve() serialize periodically?
+                                                                    // results will still be checkpointed periodically
+    public static final long SERIALIZATION_INTERVAL = 5000L;        // time in ms between serializations
     public static final String SERIALIZATION_DIRECTORY = "storage"; // directory to store checkpoints in
-    public static final boolean SERIALIZATION_CLEARFIRST = false; // clear all files in storage directory before starting
+    public static final boolean SERIALIZATION_CLEARFIRST = true;    // clear all files in storage directory before starting
 
+    public static final boolean DEBUG_MODE;
     // the inflation factor, represented as coefficients of
     // 1, a, a^2, etc., where a = 2*cos(pi/N).
 
@@ -68,6 +70,17 @@ class Preinitializer {
 
     static
         {
+            // determine main class
+            StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+            StackTraceElement main = stack[stack.length - 1];
+            String mainClassName = main.getClassName();
+            if ( mainClassName.equals("PatchDisplay") )
+                DEBUG_MODE = true;
+            else
+                DEBUG_MODE = false;
+            System.out.println("Loaded main class " + mainClassName + "; debugging flag set to " + DEBUG_MODE + ".");
+
+
             // determine which host name to use
             if ( System.getProperty("user.name").toLowerCase().equals("ekwan") )
                 HOST_NAME = "enj10.rc.fas.harvard.edu";
@@ -75,17 +88,19 @@ class Preinitializer {
                 HOST_NAME = "corbridge";
             else
                 HOST_NAME = "localhost";
-            System.out.println("Host name automatically set to " + HOST_NAME + ".");
+            if ( DEBUG_MODE == false )
+                System.out.println("Host name automatically set to " + HOST_NAME + ".");
 
             // determine how many threads to use
-            NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
+            //NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
+            NUMBER_OF_THREADS = 2;
             System.out.println("Using " + NUMBER_OF_THREADS + " threads.");
 
             // print out which puzzle we are searching;
             System.out.println("We are searching tile " + MY_TILE + " using inflation factor " + INFL + ".");
         
             // print out serialization settings
-            if ( SERIALIZATION_FLAG == true )
+            if ( SERIALIZATION_FLAG == true && DEBUG_MODE == false )
                 {
                     System.out.println(String.format("Serialization will be performed every %.1f seconds.", SERIALIZATION_INTERVAL/1000.0));
                     
