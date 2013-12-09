@@ -15,14 +15,19 @@ import java.io.*;
 public class PatchDisplay extends JFrame implements ActionListener
 {
     private DebugPanel activePanel;
-    public static final int WINDOW_HEIGHT = 600;
+    public static final int WINDOW_HEIGHT = 600;  // if you don't use a square you'll get distortion
     public static final int WINDOW_WIDTH  = 600;
+    private int currentIndex = 0;
+    private String currentFilename;
+    private ArrayList<File> checkpoints;
 
-    public PatchDisplay(EmptyBoundaryPatch patch) throws HeadlessException
+    public PatchDisplay(ArrayList<File> checkpoints, String originalFilename, EmptyBoundaryPatch patch) throws HeadlessException
     {
-        activePanel = new DebugPanel((ActionListener)this, patch);
+        currentFilename = originalFilename;
+        this.checkpoints = checkpoints;
+        activePanel = new DebugPanel((ActionListener)this, patch, currentFilename);
         setContentPane(activePanel);
-        
+
         setSize(WINDOW_WIDTH,WINDOW_HEIGHT);
         setLocation(10,10);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -78,13 +83,62 @@ public class PatchDisplay extends JFrame implements ActionListener
                 if ( activePanel.playing == true )
                     {
                         if ( activePanel.forward == true )
-                            activePanel.next.doClick();
-                        else if ( activePanel.forward == false )
-                            activePanel.previous.doClick();
+                            activePanel.position++;
+                        else
+                            activePanel.position--;
+
+                        // prevent position from getting out of range
+                        if ( activePanel.position > activePanel.frames.size() - 1 )
+                            {
+                                activePanel.playing = false;
+                                activePanel.position = activePanel.frames.size() - 1;
+                            }
+                        else if ( activePanel.position < 0 )
+                            {
+                                activePanel.playing = false;
+                                activePanel.position = 0;
+                            }
+                        else
+                            {
+                                activePanel.updatePosition();
+                                if ( activePanel.position > 0 )
+                                    activePanel.previous.setEnabled(true);
+                                else
+                                    activePanel.previous.setEnabled(false);
+                                if ( activePanel.position == activePanel.frames.size() - 1 )
+                                    activePanel.next.setEnabled(false);
+                                else
+                                    activePanel.next.setEnabled(true);
+                            }
                 }
-            }    
+            }
+        else if ("next file".equals(e.getActionCommand()))
+            {
+                if ( currentIndex == checkpoints.size()-1 )
+                    {
+                        System.out.println("There are no more valid files to look at.");
+                        System.exit(0);
+                    }
+                currentIndex++;
+                currentFilename = checkpoints.get(currentIndex).getName();
+                System.out.println("Moving to next file: " + currentFilename + "...");
+                EmptyBoundaryPatch newPatch = null;
+                try
+                    {
+                        String filename = Preinitializer.SERIALIZATION_DIRECTORY + "/" + currentFilename;
+                        FileInputStream fileIn = new FileInputStream(filename);
+                        ObjectInputStream in = new ObjectInputStream(fileIn);
+                        newPatch = ((EmptyBoundaryPatch)in.readObject());
+                    }
+                catch (Exception ex)
+                    {
+                        ex.printStackTrace();
+                    }
+                activePanel = new DebugPanel((ActionListener)this,newPatch,currentFilename);
+                setContentPane(activePanel);
+            }
         activePanel.updateUI();
-        }
+    }
 
     public static class DebugPanel extends JPanel
     {
@@ -96,11 +150,12 @@ public class PatchDisplay extends JFrame implements ActionListener
         private JTextArea messageArea;
         private String positionString;
         private JButton nextFileButton;
+        private JTextArea currentFilenameArea;
 
         // animation controls
         private boolean playing = false;
         private boolean forward = true;
-        private static final int ANIMATION_DELAY = 1; // ms
+        private static final int ANIMATION_DELAY = 5; // ms
         private static final int FRAME_INTERVAL = 1;  // every redraw, advance or retreat by this many frames
         private JButton playButton;
         private JButton stopButton;
@@ -122,7 +177,7 @@ public class PatchDisplay extends JFrame implements ActionListener
         private static final int WINDOW_HEIGHT = PatchDisplay.WINDOW_HEIGHT;
         private static final int WINDOW_WIDTH = PatchDisplay.WINDOW_WIDTH;
 
-        public DebugPanel(ActionListener parentFrame, EmptyBoundaryPatch patch)
+        public DebugPanel(ActionListener parentFrame, EmptyBoundaryPatch patch, String currentFilename)
         {
             // pre-compute the data for this panel
             this.patch = patch;
@@ -186,6 +241,7 @@ public class PatchDisplay extends JFrame implements ActionListener
             stopButton.addActionListener(parentFrame);
             stopButton.setBounds(310,10,90,20);
             add(stopButton);
+
             reverseButton = new JButton("reverse");
             reverseButton.setEnabled(true);
             reverseButton.setActionCommand("reverse");
@@ -217,6 +273,12 @@ public class PatchDisplay extends JFrame implements ActionListener
             nextFileButton.addActionListener(parentFrame);
             nextFileButton.setBounds(120,35,90,20);
             add(nextFileButton);
+
+            currentFilenameArea = new JTextArea(currentFilename);
+            currentFilenameArea.setFont(new Font("SansSerif", Font.PLAIN,10));
+            currentFilenameArea.setEditable(false);
+            currentFilenameArea.setBounds(10,550,200,15);
+            add(currentFilenameArea);
 
             animationTimer = new javax.swing.Timer(ANIMATION_DELAY,parentFrame);
             animationTimer.setActionCommand("animation");
@@ -332,14 +394,16 @@ public class PatchDisplay extends JFrame implements ActionListener
         File checkpointFile = null;
 
         // select the first appropriate file in the directory
+        ArrayList<File> validFiles = new ArrayList<File>();
         for ( File f : fileList )
             {
                 if ( f.isFile() )
                     {
-                        if ( f.getName().startsWith("P") || f.getName().startsWith("N") )
+                        if ( (f.getName().startsWith("P") || f.getName().startsWith("N")) && f.getName().endsWith("chk") )
                             {
-                                checkpointFile = f;
-                                break;
+                                validFiles.add(f);
+                                if ( validFiles.size() == 1 )
+                                    checkpointFile = f;
                             }
                     }
             }
@@ -354,7 +418,7 @@ public class PatchDisplay extends JFrame implements ActionListener
                         FileInputStream fileIn = new FileInputStream(filename);
                         ObjectInputStream in = new ObjectInputStream(fileIn);
                         EmptyBoundaryPatch patch = ((EmptyBoundaryPatch)in.readObject());
-                        PatchDisplay display = new PatchDisplay(patch);
+                        PatchDisplay display = new PatchDisplay(validFiles,filename,patch);
                     }
                 catch (HeadlessException e)
                     {
