@@ -343,7 +343,7 @@ public class PatchDisplay extends JFrame implements ActionListener
                             }
                     }
             }
-        checkpointFile = new File("N2108595042.chk");
+        checkpointFile = new File("N1218255044.chk");
         
         if ( checkpointFile != null )
             {
