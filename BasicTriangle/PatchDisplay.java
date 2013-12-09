@@ -66,9 +66,17 @@ public class PatchDisplay extends JFrame implements ActionListener
                     activePanel.previous.setEnabled(false);
             }
         else if ("play".equals(e.getActionCommand()))
-            activePanel.playing = true;
+            {
+                activePanel.playing = true;
+                if ( !activePanel.animationTimer.isRunning() )
+                    activePanel.animationTimer.start();
+            }
         else if ("stop".equals(e.getActionCommand()))
-            activePanel.playing = false;
+            {
+                activePanel.playing = false;
+                if ( activePanel.animationTimer.isRunning() )
+                    activePanel.animationTimer.stop();
+            }
         else if ("reverse".equals(e.getActionCommand()))
             {
                 if (activePanel.forward == true)
@@ -91,11 +99,13 @@ public class PatchDisplay extends JFrame implements ActionListener
                         if ( activePanel.position > activePanel.frames.size() - 1 )
                             {
                                 activePanel.playing = false;
+                                activePanel.animationTimer.stop();
                                 activePanel.position = activePanel.frames.size() - 1;
                             }
                         else if ( activePanel.position < 0 )
                             {
                                 activePanel.playing = false;
+                                activePanel.animationTimer.stop();
                                 activePanel.position = 0;
                             }
                         else
@@ -214,10 +224,10 @@ public class PatchDisplay extends JFrame implements ActionListener
             if ( Preinitializer.MY_TILE == 3 )
                 messageX = 10;
             else if ( Preinitializer.MY_TILE == 4 )
-                messageX = 300;
+                messageX = 10;
             else
                 messageX = 10;
-            messageArea.setBounds(messageX,75,250,200);
+            messageArea.setBounds(messageX,75,250,225);
             add(messageArea);
 
             next = new JButton("next");
@@ -282,7 +292,6 @@ public class PatchDisplay extends JFrame implements ActionListener
 
             animationTimer = new javax.swing.Timer(ANIMATION_DELAY,parentFrame);
             animationTimer.setActionCommand("animation");
-            animationTimer.start();
         }
 
         public void updatePosition()
@@ -407,7 +416,10 @@ public class PatchDisplay extends JFrame implements ActionListener
                             }
                     }
             }
-        checkpointFile = new File("N1218255044.chk");
+        
+        // uncomment this to display this file specifically first
+        // after that, it will go through all the files in the directory in order and then quit
+        //checkpointFile = new File("N1218255044.chk");
         
         if ( checkpointFile != null )
             {
