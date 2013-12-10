@@ -336,19 +336,18 @@ public class EmptyBoundaryDebugDisplay extends JPanel implements ActionListener
 
     public static void main(String[] args) {
 
-
-        String filename = "storage/" + "-915295802.chk";
+        String filename = "storage/" + "1797710250.chk";
         try {
             FileInputStream fileIn = new FileInputStream(filename);
             ObjectInputStream in = new ObjectInputStream(fileIn);
             EmptyBoundaryPatch myPatch = ((EmptyBoundaryPatch)in.readObject());
-            //EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(myPatch,"debugging");
+            EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(myPatch,"debugging");
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
 
-        EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(4,"debugging");
+        //EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(4,"debugging");
 
     }
 

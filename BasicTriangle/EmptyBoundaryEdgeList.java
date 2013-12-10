@@ -203,9 +203,11 @@ public class EmptyBoundaryEdgeList implements Serializable {
     public BasicEdge getNextEdge() {
         if (openEdges.empty()) {
             return null;
-        } else {
-            return openEdges.peek();
-        }
+        } else if (openEdges.size()>1) { // optional
+            BasicEdge maybe = openEdges.get(openEdges.size()-2);//
+            if (maybe.getLength().equals(BasicEdge.UNIT_LENGTH)) return maybe;//
+      }
+        return openEdges.peek();
     }
 
     // return the next-to-last BasicEdge

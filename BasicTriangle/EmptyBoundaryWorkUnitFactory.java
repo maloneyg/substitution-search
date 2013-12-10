@@ -48,6 +48,7 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
             if (start2.get(i) > 0) preStarters.add(BasicEdge.createBasicEdge(l,o,new BytePoint[] {bigVertices[0],bigVertices[0].add(l.getAsVector(a))}));
         }
         STARTERS = ImmutableList.copyOf(preStarters);
+        System.out.println("STARTERS: " + STARTERS.size());
     } // static initialization of starters ends here
 
     // true if we haven't created all edge breakdowns yet
@@ -80,12 +81,9 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
     // BATCH_SIZE: how many WorkUnits to try and make from this set of instructions
     // ID: a number identifynig how many instructions have been parceled out
     public EmptyBoundaryWorkUnitInstructions getInstructions(int BATCH_SIZE, int ID) {
-        int j = 0;
-        while (notDoneYet && j<BATCH_SIZE) {
-            iterateEdgeBreakdown();
-            j++;
-        }
-        return EmptyBoundaryWorkUnitInstructions.createEmptyBoundaryWorkUnitInstructions(starter,j,ID);
+        int output = starter;
+        iterateEdgeBreakdown();
+        return EmptyBoundaryWorkUnitInstructions.createEmptyBoundaryWorkUnitInstructions(output,1,ID);
     }
 
     // follow a set of instructions, returning the resulting WorkUnits in a List

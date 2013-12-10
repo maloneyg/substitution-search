@@ -344,12 +344,12 @@ public class EmptyBoundaryPatch implements Serializable {
         } else if ((new java.util.Date()).getTime()-lastUpdateTime.getTime() > SERIALIZATION_INTERVAL) {
             try
                 {
-                    FileOutputStream fileOut = new FileOutputStream("storage/"+RESULT_FILENAME);
-                    ObjectOutputStream out = new ObjectOutputStream(fileOut);
-                    out.writeObject(this);
-                    out.close();
-                    fileOut.close();
-                    System.out.println("wrote results to " + RESULT_FILENAME + ".");
+                    //FileOutputStream fileOut = new FileOutputStream("storage/"+RESULT_FILENAME);
+                    //ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                    //out.writeObject(this);
+                    //out.close();
+                    //fileOut.close();
+                    //System.out.println("wrote results to " + RESULT_FILENAME + ".");
                 }
             catch (Exception e)
                 {
@@ -701,18 +701,18 @@ public class EmptyBoundaryPatch implements Serializable {
             if (c1 == null) {
                 if (SHORT.equals(c2.getLength())&&!BasicPrototile.mightTouchLengthOne(wedge)) {
                     if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
-                    System.out.println("HIT: short side");
-//                    return false;
+//                    System.out.println("HIT: short side");
+                    return false;
                 }
             } else { // c1 isn't null
                 if (SHORT.equals(c2.getLength())&&!BasicPrototile.mightTouchLengthOne(c1.getLength(), wedge)) {
                     if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
-                    System.out.println("HIT: short side");
-//                    return false;
+//                    System.out.println("HIT: short side");
+                    return false;
                 } else if (SHORT.equals(c1.getLength())&&!BasicPrototile.mightTouchLengthOne(c2.getLength(), wedge)) {
                     if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
-                    System.out.println("HIT: short side");
-//                    return false;
+//                    System.out.println("HIT: short side");
+                    return false;
                 }
 
             }

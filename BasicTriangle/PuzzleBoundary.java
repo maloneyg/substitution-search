@@ -107,13 +107,14 @@ public class PuzzleBoundary implements Serializable {
         int tileNum = Preinitializer.MY_TILE;
         BasicTriangle placed = BasicPrototile.ALL_PROTOTILES.get(tileNum).place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false);
         BasicAngle[] angles = placed.getAngles();
-        BytePoint[] vertices = placed.getVertices();
-        for (int i = 0; i < 3; i++) vertices[i] = vertices[i].inflate();
+        BytePoint[] preVertices = placed.getVertices();
+        BytePoint[] vertices = new BytePoint[3];
+        for (int i = 0; i < 3; i++) vertices[i] = preVertices[i].inflate();
         VERTICES = vertices;
 
         BasicAngle[] preAngles = new BasicAngle[3];
         BasicEdge[] tempEdges = placed.getEdges();
-        for (int i = 0; i < 3; i++) preAngles[i] = tempEdges[i].angle();
+        for (int i = 0; i < 3; i++) preAngles[i] = tempEdges[i].angle().piPlus();
         ANGLES = preAngles;
 
         // in order to avoid a compile-time error, I can't assign
@@ -485,6 +486,8 @@ public class PuzzleBoundary implements Serializable {
 
         boolean[] testbool = new boolean[3];
         for (int i = 0; i < 3; i++) System.out.println(testbool[i]);
+        System.out.println("ANGLES:");
+        for (int i = 0; i < 3; i++) System.out.println(ANGLES[i]);
 //        Integer i0 = 2;
 //        Integer i1 = 3;
 //        Integer i2 = 3;
