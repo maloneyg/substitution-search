@@ -169,7 +169,11 @@ public class EmptyBoundaryEdgeList implements Serializable {
 
         // remove edges from boundary
         // technically we don't need to know if they're incident
-        for (BasicEdge e : matches) if (!e.compatible(starter)) boundary.remove(e);
+        for (BasicEdge e : matches) {
+            if (!e.compatible(starter)) {
+                boundary.remove(e);
+            }
+        }
 
         // return BasicEdges from closedEdges to openEdges
         // until you get one that isn't incident with t
@@ -203,10 +207,10 @@ public class EmptyBoundaryEdgeList implements Serializable {
     public BasicEdge getNextEdge() {
         if (openEdges.empty()) {
             return null;
-        } else if (openEdges.size()>1) { // optional
-            BasicEdge maybe = openEdges.get(openEdges.size()-2);//
-            if (maybe.getLength().equals(BasicEdge.UNIT_LENGTH)) return maybe;//
-      }
+//        } else if (openEdges.size()>1) { // optional
+//            BasicEdge maybe = openEdges.get(openEdges.size()-2);//
+//            if (maybe.getLength().equals(BasicEdge.UNIT_LENGTH)) return maybe;//
+        }
         return openEdges.peek();
     }
 

@@ -48,7 +48,6 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
             if (start2.get(i) > 0) preStarters.add(BasicEdge.createBasicEdge(l,o,new BytePoint[] {bigVertices[0],bigVertices[0].add(l.getAsVector(a))}));
         }
         STARTERS = ImmutableList.copyOf(preStarters);
-        System.out.println("STARTERS: " + STARTERS.size());
     } // static initialization of starters ends here
 
     // true if we haven't created all edge breakdowns yet

@@ -767,17 +767,17 @@ public class EmptyBoundaryPatch implements Serializable {
                 if (SHORT.equals(c2.getLength())&&!BasicPrototile.mightTouchLengthOne(wedge)) {
                     if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
                     //System.out.println("HIT: short side");
-//                    return false;
+                    return false;
                 }
             } else { // c1 isn't null
                 if (SHORT.equals(c2.getLength())&&!BasicPrototile.mightTouchLengthOne(c1.getLength(), wedge)) {
                     if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
                     //System.out.println("HIT: short side");
-//                    return false;
+                    return false;
                 } else if (SHORT.equals(c1.getLength())&&!BasicPrototile.mightTouchLengthOne(c2.getLength(), wedge)) {
                     if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
                     //System.out.println("HIT: short side");
-//                    return false;
+                    return false;
                 }
 
             }

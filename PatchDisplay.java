@@ -483,7 +483,7 @@ public class PatchDisplay extends JFrame implements ActionListener
 
         // uncomment this to display this file specifically first
         // after that, it will go through all the files in the directory in order and then quit
-        checkpointFile = new File("N1051916890.chk");
+//        checkpointFile = new File("N1051916890.chk");
         
         if ( checkpointFile != null )
             {

@@ -73,7 +73,7 @@ public class EmptyBoundaryDebugDisplay extends JPanel implements ActionListener
         messageArea.setFont(new Font("SansSerif", Font.PLAIN, 10));
         messageArea.setEditable(false);
         messageArea.setLineWrap(true);
-        messageArea.setBounds((Preinitializer.MY_TILE==4)? 10 : 300,75,200,150);
+        messageArea.setBounds((Preinitializer.MY_TILE>1)? 10 : 300,75,200,150);
         add(messageArea);
 
         next = new JButton("next");
@@ -336,18 +336,18 @@ public class EmptyBoundaryDebugDisplay extends JPanel implements ActionListener
 
     public static void main(String[] args) {
 
-        String filename = "storage/" + "1797710250.chk";
-        try {
-            FileInputStream fileIn = new FileInputStream(filename);
-            ObjectInputStream in = new ObjectInputStream(fileIn);
-            EmptyBoundaryPatch myPatch = ((EmptyBoundaryPatch)in.readObject());
-            EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(myPatch,"debugging");
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+//        String filename = "storage/" + "1797710250.chk";
+//        try {
+//            FileInputStream fileIn = new FileInputStream(filename);
+//            ObjectInputStream in = new ObjectInputStream(fileIn);
+//            EmptyBoundaryPatch myPatch = ((EmptyBoundaryPatch)in.readObject());
+//            EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(myPatch,"debugging");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            System.exit(1);
+//        }
 
-        //EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(4,"debugging");
+        EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(3,"debugging");
 
     }
 
