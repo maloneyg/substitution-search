@@ -1,5 +1,7 @@
 import java.io.*;
 
+// Greg!  This should have been a String enum!
+
 public interface DebugMessage extends Serializable
 {
     public static final DebugMessage ORIENTATION = new DebugMessage() {

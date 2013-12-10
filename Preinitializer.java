@@ -9,6 +9,9 @@
  *************************************************************************/
 
 import com.google.common.collect.ImmutableList;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.atomic.*;
 
 class Preinitializer {
 
@@ -24,9 +27,16 @@ class Preinitializer {
 
     public static final int NUMBER_OF_THREADS; // number of threads per client; set in static initializer
 
-    public static final int SPAWN_MAX_SIZE = 50; // no more work units will be spawend if the queue is bigger than this size
-    public static final int SPAWN_MIN_TIME = 5000 ; // if a work unit takes longer than this time in ms, more units will be spawned
+    public static final int SPAWN_MAX_SIZE = 5000; // no more work units will be spawned if the queue is bigger than this size
+    public static final int SPAWN_MIN_TIME = 10000; // if a work unit takes longer than this time in ms, more units will be spawned
 
+    public static final boolean SERIALIZATION_FLAG = true;          // should EmptyBoundaryPatch.solve() serialize periodically?
+                                                                    // results will still be checkpointed periodically
+    public static final long SERIALIZATION_INTERVAL = 5000L;        // time in ms between serializations
+    public static final String SERIALIZATION_DIRECTORY = "storage"; // directory to store checkpoints in
+    public static final boolean SERIALIZATION_CLEARFIRST = true;    // clear all files in storage directory before starting
+
+    public static final boolean DEBUG_MODE;
     // the inflation factor, represented as coefficients of
     // 1, a, a^2, etc., where a = 2*cos(pi/N).
 
@@ -60,6 +70,17 @@ class Preinitializer {
 
     static
         {
+            // determine main class
+            StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+            StackTraceElement main = stack[stack.length - 1];
+            String mainClassName = main.getClassName();
+            if ( mainClassName.equals("PatchDisplay") )
+                DEBUG_MODE = true;
+            else
+                DEBUG_MODE = false;
+            System.out.println("Loaded main class " + mainClassName + "; debugging flag set to " + DEBUG_MODE + ".");
+
+
             // determine which host name to use
             if ( System.getProperty("user.name").toLowerCase().equals("ekwan") )
                 HOST_NAME = "enj10.rc.fas.harvard.edu";
@@ -67,14 +88,65 @@ class Preinitializer {
                 HOST_NAME = "corbridge";
             else
                 HOST_NAME = "localhost";
-            System.out.println("Host name automatically set to " + HOST_NAME + ".");
+            if ( DEBUG_MODE == false )
+                System.out.println("Host name automatically set to " + HOST_NAME + ".");
 
             // determine how many threads to use
-            NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
+            //NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
+            NUMBER_OF_THREADS = 2;
             System.out.println("Using " + NUMBER_OF_THREADS + " threads.");
 
             // print out which puzzle we are searching;
             System.out.println("We are searching tile " + MY_TILE + " using inflation factor " + INFL + ".");
+        
+            // print out serialization settings
+            if ( SERIALIZATION_FLAG == true && DEBUG_MODE == false )
+                {
+                    System.out.println(String.format("Serialization will be performed every %.1f seconds.", SERIALIZATION_INTERVAL/1000.0));
+                    
+                    // check if storage folder exists
+                    File storageDirectory = new File(SERIALIZATION_DIRECTORY);
+                    if ( ! storageDirectory.exists() )
+                        {
+                            boolean success = storageDirectory.mkdirs();
+                            if ( success )
+                                System.out.println("Created a new storage directory called " + SERIALIZATION_DIRECTORY + "/");
+                            else
+                                {
+                                    System.out.println("Failure creating storage directory!");
+                                    System.exit(1);
+                                }
+                        }
+                    else if ( storageDirectory.exists() && ! storageDirectory.isDirectory() )
+                        {
+                            System.out.println("Fatal error: specified storage directory " + SERIALIZATION_DIRECTORY + " is a regular file!");
+                            System.exit(1);
+                        }
+                    else
+                        System.out.println("Will store checkpoints in " + SERIALIZATION_DIRECTORY + "/");
+
+                    // clear directory if requested
+                    if ( SERIALIZATION_CLEARFIRST == true )
+                        {
+                            int numberOfFiles = 0;
+                            for ( File f : storageDirectory.listFiles() )
+                                {
+                                    String[] fields = f.getName().split("\\.");
+                                    String extension = fields[fields.length-1];
+                                    if ( extension.equals("chk") )
+                                        {
+                                            f.delete();
+                                            numberOfFiles++;
+                                        }
+                                }
+                            if ( numberOfFiles > 0 )
+                                System.out.println("Deleted " + numberOfFiles + " pre-existing chk files from " + SERIALIZATION_DIRECTORY + "/");
+                        }
+                }
+            else
+                System.out.println("Serialization is off.");
+
+            System.out.println();
         }
 
 } // end of class Preinitializer

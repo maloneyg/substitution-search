@@ -17,12 +17,14 @@ import java.util.concurrent.atomic.*;
 public class EmptyBoundaryPatch implements Serializable {
 
     // make it Serializable
-//    static final long serialVersionUID = 3422733298735932933L;
+    static final long serialVersionUID = 4422733298735932933L;
 
     // a Date for serializing at regular intervals. delete.
     private Date lastUpdateTime = null;
-    private long SERIALIZATION_INTERVAL = 4000;
-    String RESULT_FILENAME;
+    private static final long SERIALIZATION_INTERVAL = Preinitializer.SERIALIZATION_INTERVAL;
+    private static final boolean SERIALIZATION_FLAG = Preinitializer.SERIALIZATION_FLAG;
+    private static final String SERIALIZATION_DIRECTORY = Preinitializer.SERIALIZATION_DIRECTORY;
+    private final String resultFilename;
 
     // the number of completed patches this has found
     private int numCompleted = 0;
@@ -164,7 +166,11 @@ public class EmptyBoundaryPatch implements Serializable {
         resetSteps();
 
         // serialization stuff. delete.
-        RESULT_FILENAME = String.format("%010d.chk",hashCode());
+        int hashcode = hashCode();
+        if ( hashcode >= 0 )
+            resultFilename = String.format("%s/P%010d.chk",SERIALIZATION_DIRECTORY,hashcode);
+        else
+            resultFilename = String.format("%s/N%010d.chk",SERIALIZATION_DIRECTORY,-1*hashcode);
     }
 
     // spawn constructor
@@ -194,7 +200,11 @@ public class EmptyBoundaryPatch implements Serializable {
         resetSteps();
 
         // serialization stuff. delete.
-        RESULT_FILENAME = String.format("%010d.chk",hashCode());
+        int hashcode = hashCode();
+        if ( hashcode >= 0 )
+            resultFilename = String.format("%s/P%010d.chk",SERIALIZATION_DIRECTORY,hashcode);
+        else
+            resultFilename = String.format("%s/N%010d.chk",SERIALIZATION_DIRECTORY,-1*hashcode);
     }
 
     // public static factory method, single edge
@@ -339,24 +349,28 @@ public class EmptyBoundaryPatch implements Serializable {
     public List<EmptyBoundaryPatch> solve() {
 
         // costly serialization. delete this.
-        if (lastUpdateTime == null) {
-            lastUpdateTime = new java.util.Date();
-        } else if ((new java.util.Date()).getTime()-lastUpdateTime.getTime() > SERIALIZATION_INTERVAL) {
-            try
-                {
-                    //FileOutputStream fileOut = new FileOutputStream("storage/"+RESULT_FILENAME);
-                    //ObjectOutputStream out = new ObjectOutputStream(fileOut);
-                    //out.writeObject(this);
-                    //out.close();
-                    //fileOut.close();
-                    //System.out.println("wrote results to " + RESULT_FILENAME + ".");
-                }
-            catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-            lastUpdateTime = new java.util.Date();
-        }
+        if ( SERIALIZATION_FLAG == true )
+            {
+                if (lastUpdateTime == null)
+                    lastUpdateTime = new Date();
+                else if ((new java.util.Date()).getTime()-lastUpdateTime.getTime() > SERIALIZATION_INTERVAL)
+                    {
+                        try
+                            {
+                                FileOutputStream fileOut = new FileOutputStream(resultFilename);
+                                ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                                out.writeObject(this);
+                                out.close();
+                                fileOut.close();
+                                //System.out.println("wrote results to " + resultFilename + ".");
+                            }
+                        catch (Exception e)
+                            {
+                                e.printStackTrace();
+                            }
+                        lastUpdateTime = new java.util.Date();
+                    }
+            }
         // here ends costly serialization. 
 
 
@@ -427,6 +441,57 @@ public class EmptyBoundaryPatch implements Serializable {
             step();
         } while (!backToStart()); // stop when we've tried all prototiles
     } // solve ends here
+
+    public void debugSolve(ArrayList<PatchDisplay.DebugFrame> frames)
+    {
+        debug = true;
+        do
+            {
+                if ( tileList.empty() )
+                    {
+                        ImmutablePatch thisPatch = dumpImmutablePatch();
+                        completedPatches.add(thisPatch);
+                        localCompletedPatches.add(thisPatch);
+                        numCompleted++;
+                        //if ( debug )
+                        //   setMessage(DebugMessage.FOUND.toString());
+                        break;
+                    }
+                if (    tileList.contains(currentPrototile)
+                     && currentPrototile.compatible(currentEdge,secondEdge,flip,partition.equivalenceClass( currentEdge.getOrientation() ) ) )
+                     {
+                        BasicTriangle t = currentPrototile.place(currentEdge,secondEdge,flip);
+                        if (compatible(t))
+                            {
+                                placeTriangle(t);
+                                if (partition.valid())
+                                    {
+                                        //if (debug)
+                                        //setMessage(DebugMessage.PLACING.toString()+"\n"+t);
+                                        debugSolve(frames);
+                                        count.getAndIncrement();
+                                    }
+                                else
+                                    {
+                                        // if (debug)
+                                        //setMessage(t+"\n"+DebugMessage.ORIENTATION.toString()+"\n"+partition);
+                                    }
+                                removeTriangle();
+                            }
+                    }
+                else
+                    {
+                        //if (debug)
+                        //setMessage(currentPrototile+"\n"+DebugMessage.NONE_OR_PROTOTILE.toString()+"\n"+currentEdge);
+                    }
+                step();
+                
+                PatchDisplay.DebugFrame currentFrame = new PatchDisplay.DebugFrame(dumpImmutablePatch(),message.toString());
+                frames.add(currentFrame);
+                System.out.print("\rComputing frames..." + frames.size() + " frames computed...");
+            } 
+        while ( frames.size() <= PatchDisplay.DebugPanel.MAX_FRAMES && backToStart() == false);
+    }
 
     // equals method
     public boolean equals(Object obj) {
@@ -701,18 +766,18 @@ public class EmptyBoundaryPatch implements Serializable {
             if (c1 == null) {
                 if (SHORT.equals(c2.getLength())&&!BasicPrototile.mightTouchLengthOne(wedge)) {
                     if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
-//                    System.out.println("HIT: short side");
-                    return false;
+                    //System.out.println("HIT: short side");
+//                    return false;
                 }
             } else { // c1 isn't null
                 if (SHORT.equals(c2.getLength())&&!BasicPrototile.mightTouchLengthOne(c1.getLength(), wedge)) {
                     if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
-//                    System.out.println("HIT: short side");
-                    return false;
+                    //System.out.println("HIT: short side");
+//                    return false;
                 } else if (SHORT.equals(c1.getLength())&&!BasicPrototile.mightTouchLengthOne(c2.getLength(), wedge)) {
                     if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
-//                    System.out.println("HIT: short side");
-                    return false;
+                    //System.out.println("HIT: short side");
+//                    return false;
                 }
 
             }
