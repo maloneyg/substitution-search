@@ -74,7 +74,7 @@ class Preinitializer {
             StackTraceElement[] stack = Thread.currentThread().getStackTrace();
             StackTraceElement main = stack[stack.length - 1];
             String mainClassName = main.getClassName();
-            if ( mainClassName.equals("PatchDisplay") )
+            if ( mainClassName.toLowerCase().indexOf("display") > -1 )
                 DEBUG_MODE = true;
             else
                 DEBUG_MODE = false;
@@ -92,8 +92,8 @@ class Preinitializer {
                 System.out.println("Host name automatically set to " + HOST_NAME + ".");
 
             // determine how many threads to use
-            //NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
-            NUMBER_OF_THREADS = 2;
+            NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
+            //NUMBER_OF_THREADS = 2;
             System.out.println("Using " + NUMBER_OF_THREADS + " threads.");
 
             // print out which puzzle we are searching;
