@@ -197,6 +197,12 @@ public class EmptyTest
         {
             public void run()
             {
+                // check for kill file
+                File killFile = new File("kill.txt");
+                if ( killFile.isFile() )
+                    System.exit(1);
+
+                // compute statistics
                 long jobsRun = executorService.getExecutor().getNumberOfSolveCalls();  // number of jobs run in the last monitorInterval; simultaneously    resets counter
                 // this accounts for the fact that the timer might be occasionally delayed
                 Date currentTime = new Date();
