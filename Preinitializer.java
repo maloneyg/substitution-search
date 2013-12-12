@@ -32,7 +32,7 @@ class Preinitializer {
 
     public static final boolean SERIALIZATION_FLAG = true;          // should EmptyBoundaryPatch.solve() serialize periodically?
                                                                     // results will still be checkpointed periodically
-    public static final long SERIALIZATION_INTERVAL = 5000L;        // time in ms between serializations
+    public static final long SERIALIZATION_INTERVAL = 500L;        // time in ms between serializations
     public static final String SERIALIZATION_DIRECTORY = "storage"; // directory to store checkpoints in
     public static final boolean SERIALIZATION_CLEARFIRST = true;    // clear all files in storage directory before starting
 
