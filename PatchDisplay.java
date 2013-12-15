@@ -268,8 +268,8 @@ public class PatchDisplay extends JFrame implements ActionListener
             messageArea.setEditable(false);
             messageArea.setLineWrap(true);
             int messageX = 0;
-            if ( Preinitializer.MY_TILE == 3 )
-                messageX = 10;
+            if ( Preinitializer.MY_TILE == 2 )
+                messageX = 400;
             else if ( Preinitializer.MY_TILE == 4 )
                 messageX = 10;
             else
