@@ -35,6 +35,12 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
     // is it reflected or not?
     private final boolean flip;
 
+    // helper fields for the contains(BytePoint) method
+    // direction vectors for the edges
+    private final BytePoint[] directions;
+    // signs of the cross products of opposite vertices with directions vectors
+    private final double[] signa;
+
     // constructor methods.
     private BasicTriangle(BasicAngle[] a, BytePoint[] p, Orientation[] o, BasicEdgeLength[] e, BasicPrototile P, boolean f) {
         angles = a;
@@ -45,6 +51,19 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
         edgeLengths = e;
         prototile = P;
         flip = f;
+
+        directions = new BytePoint[] { //
+                            vertices[1].subtract(vertices[0]),  //
+                            vertices[2].subtract(vertices[1]), //
+                            vertices[0].subtract(vertices[2]) //
+                                     }; //
+
+        signa = new double[] { //
+            Math.signum(vertices[2].subtract(vertices[0]).crossProduct(directions[2])),  //
+            Math.signum(vertices[0].subtract(vertices[1]).crossProduct(directions[0])), //
+            Math.signum(vertices[1].subtract(vertices[2]).crossProduct(directions[1])) //
+                          }; //
+
     }
 
     // public static factory methods.
@@ -183,19 +202,30 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
     * original vector.
     */
     public boolean contains(BytePoint p) {
-        BytePoint m; // the direction vector for a side
-        BytePoint v; // the other vertex
-        BytePoint t; // vertex on the given side, used to test cross product
         for (int i = 0; i < 3; i++) {
-            m = vertices[(i+2)%3].subtract(vertices[(i+1)%3]);
-            v = vertices[i];
-            t = vertices[(i+1)%3];
-            if (Math.signum((v.subtract(t)).crossProduct(m)) != Math.signum((p.subtract(t)).crossProduct(m)))
-//            if (Math.signum((v.subtract(t)).crossProduct(m).evaluate(Initializer.COS)) != Math.signum((p.subtract(t)).crossProduct(m).evaluate(Initializer.COS)))
+            if (signa[i] != Math.signum((p.subtract(vertices[i])).crossProduct(directions[i])))
                 return false;
         }
         return true;
     }
+
+    /*
+    * old version
+    */
+//    public boolean contains(BytePoint p) {
+//        BytePoint m; // the direction vector for a side
+//        BytePoint v; // the other vertex
+//        BytePoint t; // vertex on the given side, used to test cross product
+//        for (int i = 0; i < 3; i++) {
+//            m = vertices[(i+2)%3].subtract(vertices[(i+1)%3]);
+//            v = vertices[i];
+//            t = vertices[(i+1)%3];
+////            if (Math.signum((v.subtract(t)).crossProduct(m)) != Math.signum((p.subtract(t)).crossProduct(m)))
+//            if (Math.signum((v.subtract(t)).crossProduct(m).evaluate(Initializer.COS)) != Math.signum((p.subtract(t)).crossProduct(m).evaluate(Initializer.COS)))
+//                return false;
+//        }
+//        return true;
+//    }
 
     /** 
     * Tricky incidence test.
