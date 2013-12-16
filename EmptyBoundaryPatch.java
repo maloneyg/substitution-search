@@ -432,7 +432,7 @@ public class EmptyBoundaryPatch implements Serializable {
                             count.getAndIncrement();
                         } else
                         {
-//                            if (debug) setMessage(t+"\n"+DebugMessage.ORIENTATION.toString()+"\n"+partition);
+                            if (debug) setMessage(t+"\n"+DebugMessage.ORIENTATION.toString()+"\n"+partition);
                         }
                     removeTriangle();
                 }
@@ -784,9 +784,45 @@ public class EmptyBoundaryPatch implements Serializable {
 
             }
 
+            if (!quantumFit(c2)) {
+                if (debug) setMessage("*****\n" + "quantum\n miss  " + "\n*****");
+                //System.out.println("QUANTUM MISS.");
+                return false;
+
+            }
+
         } // end second-last edge check
 
         return true;
+    }
+
+    // check if a quantum tile might fit in here
+    private boolean quantumFit(BasicEdge e) {
+        BytePoint[] points = e.getQuantumTriangle();
+        boolean okay = true;
+        for (BytePoint p : points) {
+            for (BytePoint v : vertices) if (v.equals(p)) return true;
+            okay = true;
+            int i = boundary.incident(p);
+            if (i==1) {
+                return true;
+            } else if (i==-1) {
+                okay = false;
+            }
+            if (okay) {
+                if (boundary.overTheEdge(p)) okay = false;
+            }
+            if (okay) {
+                for (BasicTriangle t : triangles) {
+                    if (t.contains(p)) {
+                        okay = false;
+                        break;
+                    }
+                }
+            }
+            if (okay) return true;
+        }
+        return false;
     }
 
     // temporary--destroy this method when you don't need it anymore!

@@ -6,6 +6,8 @@ import java.lang.Math.*;
 import java.io.Serializable;
 import com.google.common.collect.*;
 import com.google.common.base.*;
+import java.util.ArrayList;
+import java.util.List;
 
 final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, BytePoint, BasicEdgeLength>, Comparable<BasicEdgeLength>, Serializable {
 
@@ -116,16 +118,24 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
         orientationPool = ImmutableList.copyOf(preO);
 
         // initialize quantumTriangle
-        list<BytePoint> preQT = new ArrayList<>();
+        List<BytePoint> preQT = new ArrayList<>();
         for (ImmutableList<Integer> L : Preinitializer.PROTOTILES) {
-            for (int k = 0; k < 3; k++) {
-                if (L.get(k)-1==i||n-L.get(k)-1==i) {
-                    BytePoint otherLength = L.get((k+1)%3);
+            for (int j = 0; j < 3; j++) {
+                if (L.get(j)-1==i||Initializer.N-L.get(j)-1==i) {
+                    // get the next and previous angles in the list
+                    Integer ang1 = L.get((j+1)%3);
+                    Integer ang2 = L.get((j-1<0)? 2 : j-1);
+                    // get the length represented by the next angle
+                    BytePoint otherLength = REPS.get(Initializer.acute(ang1)-1);
+                    BytePoint newOne = otherLength.rotate(BasicAngle.createBasicAngle(ang2));
+                    if (!preQT.contains(newOne)) preQT.add(newOne);
+                    BytePoint newTwo = otherLength.rotate(BasicAngle.createBasicAngle(ang2).supplement()).add(REPS.get(i));
+                    if (!preQT.contains(newTwo)) preQT.add(newTwo);
                 }
             }
         } // here ends initialization of quantumTriangle
         quantumTriangle = ImmutableList.copyOf(preQT);
-    }
+    } // here ends constructor
 
     // public static factory method
     static public BasicEdgeLength createBasicEdgeLength(int i) {
@@ -178,6 +188,13 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
     */
     public Orientation getOrientation(int i) {
         return orientationPool.get(i);
+    }
+
+    /*
+    * return the quantum triangle associated with this edge length
+    */
+    public List<BytePoint> getQuantumTriangle() {
+        return quantumTriangle;
     }
 
     /*

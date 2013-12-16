@@ -4,6 +4,7 @@
 
 import java.io.Serializable;
 import java.lang.Math.*;
+import java.util.List;
 
 public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, BasicEdgeLength, BasicEdge>, Serializable {
 
@@ -317,6 +318,16 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
     // of this BasicEdge 
     public boolean hasVertex(BytePoint p) {
         return (p.equals(ends[0]) || p.equals(ends[1]));
+    }
+
+    // get the quantum triangle associated with this edge
+    public BytePoint[] getQuantumTriangle() {
+        BasicAngle a = angle().piPlus();
+        List<BytePoint> preQT = length.getQuantumTriangle();
+        BytePoint[] output = new BytePoint[preQT.size()];
+        for (int i = 0; i < output.length; i++)
+            output[i] = preQT.get(i).rotate(a).add(ends[1]);
+        return output;
     }
 
     public static void main(String[] args) {
