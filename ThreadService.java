@@ -157,15 +157,28 @@ public class ThreadService
             System.out.print(reportString);
         }
 
+        //private static Map<Runnable,Date> startTimes = Collections.synchronizedMap(new HashMap<Runnable,Date>());
+
         protected void beforeExecute(Thread t, Runnable r)
         {
             //log.log(Level.INFO, String.format("%s is starting work on %s", Thread.currentThread().getName(), jobMap.get(r).toString()));
+            //startTimes.put(r,new Date());
             super.beforeExecute(t,r);
             incrementNumberOfRunningJobs();
          }
 
         protected void afterExecute(Runnable r, Throwable t)
         {
+            /*Date endDate = new Date();
+            Date startDate = startTimes.get(r);
+            if ( startDate != null )
+                {
+                    double elapsedTime = ( endDate.getTime() - startTimes.get(r).getTime() ) / (60.0 * 1000.0);
+                    log.log(Level.INFO, String.format("Finished a work unit in %.4f minutes.", elapsedTime));
+                    startTimes.remove(r);
+                }
+            else
+                log.log(Level.INFO,"Warning: runnable not in the map!");*/
             super.afterExecute(r,t);
             decrementNumberOfRunningJobs();
             numberOfJobsRun.getAndIncrement();

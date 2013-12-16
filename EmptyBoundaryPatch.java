@@ -25,6 +25,7 @@ public class EmptyBoundaryPatch implements Serializable {
     private static final boolean SERIALIZATION_FLAG = Preinitializer.SERIALIZATION_FLAG;
     private static final String SERIALIZATION_DIRECTORY = Preinitializer.SERIALIZATION_DIRECTORY;
     private final String resultFilename;
+    private boolean serialized = false;
 
     // the number of completed patches this has found
     private int numCompleted = 0;
@@ -353,7 +354,7 @@ public class EmptyBoundaryPatch implements Serializable {
             {
                 if (lastUpdateTime == null)
                     lastUpdateTime = new Date();
-                else if ((new java.util.Date()).getTime()-lastUpdateTime.getTime() > SERIALIZATION_INTERVAL)
+                else if (serialized == false && (new java.util.Date()).getTime()-lastUpdateTime.getTime() > SERIALIZATION_INTERVAL)
                     {
                         try
                             {
@@ -362,13 +363,14 @@ public class EmptyBoundaryPatch implements Serializable {
                                 out.writeObject(this);
                                 out.close();
                                 fileOut.close();
-                                //System.out.println("wrote results to " + resultFilename + ".");
+                                System.out.println("\nwrote work unit to " + resultFilename + ".");
                             }
                         catch (Exception e)
                             {
                                 e.printStackTrace();
                             }
                         lastUpdateTime = new java.util.Date();
+                        serialized = true;
                     }
             }
         // here ends costly serialization. 

@@ -74,6 +74,12 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
     */
     final private ImmutableList<Orientation> orientationPool;
 
+    /*
+    * A list of points that might be the third point of a triangle
+    * having an edge of this length in the standard position
+    */
+    final private ImmutableList<BytePoint> quantumTriangle;
+
     // private constructor
     private BasicEdgeLength(int i) {
         // make a list of all edges with this length
@@ -101,12 +107,24 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
         }
         breakdown = ImmutableList.copyOf(preBreakdown);
 
+        // initialize orientationPool
         ImmutableList<Integer> numOccurrences = Initializer.INFLATED_LENGTHS.getRow(i);
         int kk = 0;
         for (int j = 0; j < numOccurrences.size(); j++) kk += numOccurrences.get(j);
         Orientation[] preO = new Orientation[kk];
         for (int j = 0; j < preO.length; j++) preO[j] = Orientation.createOrientation();
         orientationPool = ImmutableList.copyOf(preO);
+
+        // initialize quantumTriangle
+        list<BytePoint> preQT = new ArrayList<>();
+        for (ImmutableList<Integer> L : Preinitializer.PROTOTILES) {
+            for (int k = 0; k < 3; k++) {
+                if (L.get(k)-1==i||n-L.get(k)-1==i) {
+                    BytePoint otherLength = L.get((k+1)%3);
+                }
+            }
+        } // here ends initialization of quantumTriangle
+        quantumTriangle = ImmutableList.copyOf(preQT);
     }
 
     // public static factory method

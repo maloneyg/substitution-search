@@ -17,7 +17,7 @@ class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 4;        // the tile we're searching
+    public static final int MY_TILE = 2;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
@@ -32,7 +32,7 @@ class Preinitializer {
 
     public static final boolean SERIALIZATION_FLAG = false;          // should EmptyBoundaryPatch.solve() serialize periodically?
                                                                     // results will still be checkpointed periodically
-    public static final long SERIALIZATION_INTERVAL = 5000L;        // time in ms between serializations
+    public static final long SERIALIZATION_INTERVAL = 500L;        // time in ms between serializations
     public static final String SERIALIZATION_DIRECTORY = "storage"; // directory to store checkpoints in
     public static final boolean SERIALIZATION_CLEARFIRST = true;    // clear all files in storage directory before starting
 
@@ -92,8 +92,14 @@ class Preinitializer {
                 System.out.println("Host name automatically set to " + HOST_NAME + ".");
 
             // determine how many threads to use
-            NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
-            //NUMBER_OF_THREADS = 2;
+            String localhost = "";
+            try { localhost = java.net.InetAddress.getLocalHost().getHostName(); } catch (Exception e) {}
+            if ( localhost.length() > 0 )
+                System.out.println("Local host is: " + localhost);
+            if ( localhost.indexOf("enj") > -1 )
+                NUMBER_OF_THREADS = 24;
+            else
+                NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
             System.out.println("Using " + NUMBER_OF_THREADS + " threads.");
 
             // print out which puzzle we are searching;
