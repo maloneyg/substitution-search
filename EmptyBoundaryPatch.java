@@ -236,7 +236,7 @@ public class EmptyBoundaryPatch implements Serializable {
 
     // set the message
     public void setMessage(String s) {
-        message = s;
+        message = tilesPercent()+"\n"+s;
     }
 
     // get the message
@@ -823,6 +823,11 @@ public class EmptyBoundaryPatch implements Serializable {
             if (okay) return true;
         }
         return false;
+    }
+
+    // a method for estimating how much work has been done
+    public String tilesPercent() {
+        return String.format("%.2f%% done",100*((double)triangles.size())/(triangles.size()+tileList.size()));
     }
 
     // temporary--destroy this method when you don't need it anymore!
