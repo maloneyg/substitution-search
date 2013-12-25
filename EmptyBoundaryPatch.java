@@ -655,20 +655,20 @@ public class EmptyBoundaryPatch implements Serializable {
 //            }
 
             // make sure the new vertex doesn't overlap any closed edges
-            for (BasicEdge e : edges.closed()) {
-                if (e.incident(other)) {
-                    if (debug) setMessage(t +"\n"+ DebugMessage.INCIDENT_CLOSED.toString());
-                    return false;
-                }
-            }
+//            for (BasicEdge e : edges.closed()) {
+//                if (e.incident(other)) {
+//                    if (debug) setMessage(t +"\n"+ DebugMessage.INCIDENT_CLOSED.toString());
+//                    return false;
+//                }
+//            }
 
             // make sure the new vertex isn't inside any placed triangles
-            for (BasicTriangle tr : triangles) {
-                if (tr.contains(other)) {
-                    if (debug) setMessage(t +"\n"+ DebugMessage.OVERLAP.toString() +"\n"+ tr);
-                    return false;
-                }
-            }
+//            for (BasicTriangle tr : triangles) {
+//                if (tr.contains(other)) {
+//                    if (debug) setMessage(t +"\n"+ DebugMessage.OVERLAP.toString() +"\n"+ tr);
+//                    return false;
+//                }
+//            }
 
             // return false if the new vertex is too close to any open edge
             for (BasicEdge open : edges.open()) {
@@ -708,12 +708,12 @@ public class EmptyBoundaryPatch implements Serializable {
                     return false;
                 }
             }
-            for (BasicEdge closed : edges.closed()) {
-                if (e.cross(closed)) {
-                    if (debug) setMessage(e +"\n"+ DebugMessage.CROSS_CLOSED.toString() +"\n"+ closed);
-                    return false;
-                }
-            }
+//            for (BasicEdge closed : edges.closed()) {
+//                if (e.cross(closed)) {
+//                    if (debug) setMessage(e +"\n"+ DebugMessage.CROSS_CLOSED.toString() +"\n"+ closed);
+//                    return false;
+//                }
+//            }
         }
 
         if (newVertex) { // start second-last edge check
