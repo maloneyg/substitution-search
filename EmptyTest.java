@@ -163,7 +163,7 @@ public class EmptyTest
 
                 // begin writing edge breakdowns
                 System.out.print("Writing edge breakdowns to disk...");
-                EdgeBreakdown breakdown = new EdgeBreakdown();
+                EdgeBreakdown breakdown = EdgeBreakdown.createEdgeBreakdown();
                 try
                     {
                         FileOutputStream fileOut = new FileOutputStream(RESULT_FILENAME);

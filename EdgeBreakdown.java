@@ -25,6 +25,11 @@ public class EdgeBreakdown implements Serializable {
         }
     }
 
+    // public static factory method
+    public static EdgeBreakdown createEdgeBreakdown() {
+        return new EdgeBreakdown();
+    }
+
     // add a new edge breakdown for length i
     public void addBreakdown(int i, Iterable<BasicEdgeLength> breakdown) {
         breakdowns[i].addChain(breakdown);
