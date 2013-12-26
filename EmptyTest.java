@@ -144,10 +144,9 @@ public class EmptyTest
         System.out.println("All jobs complete.  " + totalPatches + " completed patches were found.");
 
         if (allCompletedPatches.size() > 0)
-            {
+            { // begin writing results
                 System.out.print("Writing completed patches to disk...");
                 TriangleResults triangleResults = new TriangleResults(allCompletedPatches);
-                //for (ImmutablePatch p : allCompletedPatches) G.add(p.getEdge0(),p.getEdge1(),p.getEdge2(),lengths[0],lengths[1],lengths[2]); // write   to the edge breakdown graph
                 try
                     {
                         FileOutputStream fileOut = new FileOutputStream(RESULT_FILENAME);
@@ -161,11 +160,28 @@ public class EmptyTest
                     {
                         e.printStackTrace();
                     }
-            }
+
+                // begin writing edge breakdowns
+                System.out.print("Writing edge breakdowns to disk...");
+                EdgeBreakdown breakdown = new EdgeBreakdown();
+                try
+                    {
+                        FileOutputStream fileOut = new FileOutputStream(RESULT_FILENAME);
+                        ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                        out.writeObject(triangleResults);
+                        out.close();
+                        fileOut.close();
+                        System.out.println("wrote results to " + RESULT_FILENAME + ".");
+                    }
+                catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+            } // end writing results
 
         // terminate normally
         System.exit(0);
-    }
+    } // main method ends here
 
     private static class ThreadMonitor
     {
