@@ -21,7 +21,7 @@ class Preinitializer {
 
     public static final float EP = 0.000001f;  // threshold value
 
-    public static final int BATCH_SIZE = 1; // number of jobs to make per set of instructions
+    //public static final int BATCH_SIZE = 1; // number of jobs to make per set of instructions
 
     public static final String HOST_NAME; // name of host clients will use; set in static initializer
 
