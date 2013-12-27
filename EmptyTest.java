@@ -183,14 +183,14 @@ public class EmptyTest
                     {
                         e.printStackTrace();
                     }
-//                System.out.println("Breakdowns:\n");
-//                try {
-//                    System.out.println(breakdown);
-//                } catch (Exception e) {
-//                    StackTraceElement[] elmnt = e.getStackTrace();
-//                    for (int i = 0; i < 10; i++) System.out.println(elmnt[i]);
-//                    System.exit(1);
-//                }
+                System.out.println("Breakdowns:\n");
+                try {
+                    System.out.println(breakdown);
+                } catch (Exception e) {
+                    StackTraceElement[] elmnt = e.getStackTrace();
+                    for (int i = 0; i < 10; i++) System.out.println(elmnt[i]);
+                    System.exit(1);
+                }
             } // end writing results
 
         // terminate normally

@@ -89,6 +89,10 @@ class TreeNode<E> implements Serializable {
 
 public class MultiTree<E> implements Serializable, Iterable<E> {
 
+    private interface BetterIterator<E> extends Iterator<E> {
+        public int getLevel();
+    }
+
     private TreeNode<E> head;
 
     // public constructor
@@ -136,7 +140,11 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
     // output a String
     public String toString() {
         String output = "";
-        for (E data : this) output += data.toString() + "\n";
+        BetterIterator<E> it = iterator();
+        while (it.hasNext()) {
+            E nexto = it.next();
+            output += "Level: " + it.getLevel() + ".  " + nexto + "\n";
+        }
         return output;
     }
 
@@ -177,10 +185,11 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
         return result;
     }
 
-    public Iterator<E> iterator() { // iterator begins here
-        return new Iterator<E>() {
+    public BetterIterator<E> iterator() { // iterator begins here
+        return new BetterIterator<E>() {
 
             private TreeNode<E> current = head;
+            private int level = 0;
 
             public boolean hasNext() {
                 return hasNext(current);
@@ -211,8 +220,10 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
 
             public TreeNode<E> next(TreeNode<E> node) {
                 if (!node.getNext().isEmpty()) {
+                    level++;
                     return node.getNext().get(0);
                 } else {
+                    level--;
                     return next(node.getPrevious(),node);
                 }
             }
@@ -220,13 +231,19 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
             public TreeNode<E> next(TreeNode<E> parent, TreeNode<E> child) {
                 int j = parent.getNext().indexOf(child);
                 if (j < parent.getNext().size()-1) {
+                    level++;
                     return parent.getNext().get(j+1);
                 } else {
+                    level--;
                     return next(parent.getPrevious(),parent);
                 }
             }
 
             public void remove() { // do nothing
+            }
+
+            public int getLevel() {
+                return level; 
             }
 
         };
