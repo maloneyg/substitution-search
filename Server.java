@@ -268,18 +268,34 @@ public class Server
                             else if ( incomingObject instanceof Integer )
                                 {
                                     // this is a request for new jobs
+                                    System.out.println("request for new jobs received");
                                     int jobCount = (Integer)incomingObject;
                                     for (int i=0; i < jobCount; i++)
                                         {
+
                                             // attempt to send a job from the queue
                                             // if there are no jobs in the queue, wait
                                             EmptyBoundaryWorkUnit unit = null;
                                             try
                                                 {
                                                     unit = (EmptyBoundaryWorkUnit)ThreadService.INSTANCE.getExecutor().getQueue().poll(1000L, TimeUnit.MILLISECONDS);
+                                                }
+                                            catch (InterruptedException e)
+                                                {
+                                                }
+
+                                            if ( unit == null )
+                                                {
+                                                    i--;
+                                                    System.out.println("waiting for more jobs to enter queue");
+                                                    continue;
+                                                }
+
+                                            try
+                                                {
                                                     synchronized (sendLock)
                                                         {
-                                                            System.out.println("sending job");
+                                                            //System.out.println("sending job");
                                                             outgoingObjectStream.writeObject(unit);
                                                             outgoingObjectStream.flush();
                                                             outgoingObjectStream.reset();
@@ -293,21 +309,7 @@ public class Server
                                                     // resubmit the unit to the local queue
                                                     ThreadService.INSTANCE.getExecutor().submit(unit);
                                                 }
-                                            catch (InterruptedException e)
-                                                {
-                                                }
-
-                                            if ( unit == null )
-                                                {
-                                                    i--;
-                                                    continue;
-                                                }
                                             
-                                            // send this job over the connection
-                                            outgoingObjectStream.writeObject(unit);
-                                            outgoingObjectStream.flush();
-                                            outgoingObjectStream.reset();
-
                                             // keep track of which work units have been sent out
                                             synchronized (Server.clientWorkUnitMap)
                                                 {
@@ -320,7 +322,6 @@ public class Server
                                                 {
                                                     Server.backupUnitMap.put(unit.uniqueID(), unit);
                                                 }
-
                                         }
                                 }
                         }
@@ -367,9 +368,12 @@ public class Server
                                     System.out.println("Signalling " + t.address + " to close.");
                                     try
                                         {
-                                            t.outgoingObjectStream.writeObject(CLOSE);
-                                            t.outgoingObjectStream.flush();
-                                            t.outgoingObjectStream.close();
+                                            synchronized(t.sendLock)
+                                                {
+                                                    t.outgoingObjectStream.writeObject(CLOSE);
+                                                    t.outgoingObjectStream.flush();
+                                                    t.outgoingObjectStream.close();
+                                                }
                                         }
                                     catch (Exception e)
                                         {

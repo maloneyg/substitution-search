@@ -169,8 +169,10 @@ public final class Client
                                         break;
                                     }
                             }
+                        else if ( incomingObject == null )
+                            System.out.println("received a null!");
                         else
-                            break;
+                            System.out.println("Unknown object type received: " + incomingObject.getClass());
                     }
                 catch (SocketException e)
                     {
@@ -201,6 +203,7 @@ public final class Client
 
     public static void requestJob()
     {
+        System.out.println("requesting a job");
         try
             {
                 synchronized (sendLock)
@@ -256,7 +259,7 @@ public final class Client
     private static class TaskMonitor
     {
         private Timer timer;
-        private static final int UPDATE_INTERVAL = 50; // ms
+        private static final int UPDATE_INTERVAL = 500; // ms
         private static ThreadService executorService = ThreadService.INSTANCE;
 
         public TaskMonitor()
