@@ -27,7 +27,7 @@ class Preinitializer {
 
     public static final int NUMBER_OF_THREADS; // number of threads per client; set in static initializer
 
-    public static final int SPAWN_MAX_SIZE = 1000; // no more work units will be spawned if the queue is bigger than this size
+    public static final int SPAWN_MAX_SIZE = 100; // no more work units will be spawned if the queue is bigger than this size
     public static final int SPAWN_MIN_TIME = 10000; // if a work unit takes longer than this time in ms, more units will be spawned
 
     public static final boolean SERIALIZATION_FLAG = false;          // should EmptyBoundaryPatch.solve() serialize periodically?
@@ -40,6 +40,11 @@ class Preinitializer {
     // the inflation factor, represented as coefficients of
     // 1, a, a^2, etc., where a = 2*cos(pi/N).
 
+    public static final String MAIN_CLASS_NAME; // name of the class whose main method is running on this JVM
+
+    public static final String RESULT_FILENAME = "result.chk"; // name of file to write the completed patches to at the end
+    public static final int LISTENING_PORT = 32007; // sockets will transmite/recieve on this port number
+
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2, 1); // the square of the really small search (1+a)^2 won't work with tile 3 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search (104)
@@ -47,10 +52,10 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, 0, 1); // quite big search (110)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 0, -3, 0, 1); // huge search (115)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, -2, 0, 1); // b+d (118)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121)
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121) use this one
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, -2, -3, 1, 1); // even huger search (122)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, -2, 1, 1); // even huger search (124)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
@@ -73,13 +78,12 @@ class Preinitializer {
             // determine main class
             StackTraceElement[] stack = Thread.currentThread().getStackTrace();
             StackTraceElement main = stack[stack.length - 1];
-            String mainClassName = main.getClassName();
-            if ( mainClassName.toLowerCase().indexOf("display") > -1 )
+            MAIN_CLASS_NAME = main.getClassName();
+            if ( MAIN_CLASS_NAME.toLowerCase().indexOf("display") > -1 )
                 DEBUG_MODE = true;
             else
                 DEBUG_MODE = false;
-            System.out.println("Loaded main class " + mainClassName + "; debugging flag set to " + DEBUG_MODE + ".");
-
+            System.out.println("Loaded main class " + MAIN_CLASS_NAME + "; debugging flag set to " + DEBUG_MODE + ".");
 
             // determine which host name to use
             if ( System.getProperty("user.name").toLowerCase().equals("ekwan") )

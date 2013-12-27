@@ -6,6 +6,7 @@ public class EmptyWorkUnitResult implements Result, Serializable
     private final List<ImmutablePatch> localCompletedPatches;
     private final List<ImmutablePatch> eventualPatches;
     private int originalHashcode;
+    private int uniqueID;
 
     public EmptyWorkUnitResult(int originalHashcode, List<ImmutablePatch> localCompletedPatches, List<ImmutablePatch> eventualPatches)
     {
@@ -16,6 +17,16 @@ public class EmptyWorkUnitResult implements Result, Serializable
         // don't allow any null lists
         if ( localCompletedPatches == null || eventualPatches == null )
             throw new IllegalArgumentException("patch refs should not be null!");
+    }
+
+    public void setUniqueID(int uniqueID)
+    {
+        this.uniqueID = uniqueID;
+    }
+
+    public int uniqueID()
+    {
+        return uniqueID;
     }
 
     public int getOriginalHashcode()
