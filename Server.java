@@ -233,6 +233,7 @@ public class Server
                                     
                                     // retrieve the contents of this EmptyWorkUnitResult
                                     int jobID = result.uniqueID();
+                                    System.out.println("received ID " + jobID);
                                     List<ImmutablePatch> localCompletedPatches = result.getLocalCompletedPatches();
 
                                     // store results centrally
@@ -275,27 +276,40 @@ public class Server
 
                                             // attempt to send a job from the queue
                                             // if there are no jobs in the queue, wait
-                                            EmptyBoundaryWorkUnit unit = null;
+                                            Runnable r = null;
                                             try
                                                 {
-                                                    unit = (EmptyBoundaryWorkUnit)ThreadService.INSTANCE.getExecutor().getQueue().poll(1000L, TimeUnit.MILLISECONDS);
+                                                    r = ThreadService.INSTANCE.getExecutor().getQueue().poll(1000L, TimeUnit.MILLISECONDS);
                                                 }
                                             catch (InterruptedException e)
                                                 {
                                                 }
 
-                                            if ( unit == null )
+                                            if ( r == null )
                                                 {
                                                     i--;
                                                     System.out.println("waiting for more jobs to enter queue");
                                                     continue;
                                                 }
 
+                                            Map<RunnableFuture,EmptyBoundaryWorkUnit> jobMap = ThreadService.INSTANCE.getExecutor().jobMap;
+                                            EmptyBoundaryWorkUnit unit = null;
+                                            synchronized(jobMap)
+                                                {
+                                                    unit = jobMap.remove(r);
+                                                }
+
+                                            if ( unit == null )
+                                                {
+                                                    System.out.println("unexpected failure in job stealer");
+                                                    break;
+                                                }
+
                                             try
                                                 {
                                                     synchronized (sendLock)
                                                         {
-                                                            //System.out.println("sending job");
+                                                            System.out.println("sending job " + unit.uniqueID());
                                                             outgoingObjectStream.writeObject(unit);
                                                             outgoingObjectStream.flush();
                                                             outgoingObjectStream.reset();
@@ -303,8 +317,7 @@ public class Server
                                                 }
                                             catch (IOException e)
                                                 {
-                                                    System.out.println("Error sending unit!");
-                                                    e.printStackTrace();
+                                                    System.out.println("Error sending unit!  Requeued.");
 
                                                     // resubmit the unit to the local queue
                                                     ThreadService.INSTANCE.getExecutor().submit(unit);

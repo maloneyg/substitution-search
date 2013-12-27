@@ -70,6 +70,8 @@ public class ThreadService
         //private List<Callable<?>> currentlyPendingJobs = Collections.synchronizedList(new ArrayList<Callable<?>>());
         //private Map<Callable<?>,Date> startTimes = Collections.synchronizedMap(new HashMap<Callable<?>,Date>());
 
+        public HashMap<RunnableFuture,EmptyBoundaryWorkUnit> jobMap = new HashMap<>();
+
         private List<AtomicInteger> listOfCounters = new ArrayList<AtomicInteger>();
         private AtomicInteger numberOfJobsRun = new AtomicInteger();
         private AtomicInteger numberOfRunningJobs = new AtomicInteger();
@@ -163,6 +165,14 @@ public class ThreadService
         {
             //log.log(Level.INFO, String.format("%s is starting work on %s", Thread.currentThread().getName(), jobMap.get(r).toString()));
             //startTimes.put(r,new Date());
+            synchronized(jobMap)
+                {
+                    EmptyBoundaryWorkUnit u = jobMap.remove(r);
+                    /*if ( u!=null )
+                        System.out.println("success");
+                    else
+                        System.out.println("failure");*/
+                }
             super.beforeExecute(t,r);
             incrementNumberOfRunningJobs();
          }
@@ -229,7 +239,17 @@ public class ThreadService
 
         public <T> Future<T> submit(Callable<T> task)
         {
-            Future<T> ftask = super.submit(task);
+            if ( task == null )
+                throw new NullPointerException();
+            RunnableFuture<T> ftask = newTaskFor(task);
+            if ( task instanceof EmptyBoundaryWorkUnit)
+                {
+                    synchronized(jobMap)
+                        {
+                            jobMap.put(ftask,(EmptyBoundaryWorkUnit)task);
+                        }
+                }
+            execute(ftask);
             return ftask;
         }
 

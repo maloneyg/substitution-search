@@ -148,13 +148,13 @@ public final class Client
                 try
                     {
                         incomingObject = incomingObjectStream.readObject();
-                        System.out.println("object received!");
+                        //System.out.println("object received!");
                         if ( incomingObject instanceof EmptyBoundaryWorkUnit )
                             {
-                        System.out.println("job received!");
+                                //System.out.println("job received!");
                                 EmptyBoundaryWorkUnit unit = (EmptyBoundaryWorkUnit)incomingObject;
                                 Future<Result> thisFuture = executorService.getExecutor().submit(unit);
-                                System.out.println("submitted");
+                                System.out.println("submitted ID " + unit.uniqueID());
                                 synchronized(allFutures)
                                     {
                                         allFutures.add(thisFuture);
@@ -201,18 +201,34 @@ public final class Client
         System.exit(0);
     }
 
-    public static void requestJob()
+    public static void requestJob(int i)
     {
-        System.out.println("requesting a job");
+        System.out.println("requesting " + i + " jobs");
         try
             {
                 synchronized (sendLock)
                 {
-                    outgoingObjectStream.writeObject(Integer.valueOf(1));
+                    outgoingObjectStream.writeObject(Integer.valueOf(i));
                     outgoingObjectStream.flush();
                     outgoingObjectStream.reset();
                     //System.out.println("Requested new instructions.\n");
                 }
+                while (true)
+                    {
+                        if ( incomingObjectStream.available() > 0 )
+                            {
+                                //System.out.println("stream has bytes");
+                                break;
+                            }
+                        try
+                            {
+                                Thread.sleep(100);
+                                //System.out.println("waiting for job");
+                            }
+                        catch (InterruptedException e)
+                            {
+                            }
+                    }
             }
         catch (SocketException e)
             {
@@ -244,7 +260,7 @@ public final class Client
                         outgoingObjectStream.flush();
                         outgoingObjectStream.reset();
                     }
-                System.out.println("\nSent " + result.toString() + "\n");
+                System.out.println("sent result ID " + result.uniqueID());
             }
         catch (SocketException e)
             {
@@ -275,7 +291,7 @@ public final class Client
                 // if the number of jobs in the queue is below the threshold, request more work
                 int currentSize = executorService.getExecutor().getQueue().size();
                 if ( currentSize == 0 )
-                    Client.requestJob();
+                    Client.requestJob(1);
 
                 // if any of the WorkUnitInstructions are complete, send the result
                 List<Future<Result>> completedJobs = new LinkedList<Future<Result>>();
