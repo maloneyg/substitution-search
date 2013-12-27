@@ -4,7 +4,7 @@ import com.google.common.collect.*;
 
 public class PatchResult implements Result, Serializable
 {
-    private final int ID; // ID of the original WorkUnitInstructions that created this PatchResult
+    private final int ID; // ID of the original EmptyBoundaryWorkUnit that created this PatchResult
     private final ImmutableList<ImmutablePatch> completedPatches; // finished puzzles
     private final int numberOfUnits; // how many work units went into this result
 

@@ -3,12 +3,36 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 import com.google.common.collect.*;
+import java.util.concurrent.atomic.*;
 
 public class Server
 {
     public static final ThreadService executorService = ThreadService.INSTANCE;
+
+    // these maps keep track of all the connections we have
     private static List<ConnectionThread> LIVE_CONNECTIONS = new ArrayList<ConnectionThread>();
     private static List<ConnectionThread> ALL_CONNECTIONS = new ArrayList<ConnectionThread>();
+
+    // this keeps track of which jobs have been dispatched
+    // maps ConnectionThreads to the unique IDs of each work unit that the thread is working on
+    private static final Map<ConnectionThread,List<Integer>> clientWorkUnitMap = new HashMap<>();
+
+    // this keeps a copy of all the work units that are currently checked out over the network
+    // maps unique EmptyBoundaryWorkUnit IDs to the units themselves
+    private static final Map<Integer,EmptyBoundaryWorkUnit> backupUnitMap = new HashMap<>();
+
+    // this stores all the completed puzzles
+    public static final List<ImmutablePatch> completedPatches = Collections.synchronizedList(new LinkedList<ImmutablePatch>());
+
+    // parameters for networking
+    public static final int LISTENING_PORT = Preinitializer.LISTENING_PORT;
+    public static final int TIMEOUT = 1; // seconds to wait before declaring a node unreachable
+
+    // prevent instantiation
+    private Server()
+        {
+            throw new RuntimeException("you aren't supposed to instantiate this!");
+        }
 
     public static void main(String[] args)
     {
@@ -20,31 +44,108 @@ public class Server
                 // submit jobs to queue
                 EmptyBoundaryWorkUnit thisUnit = factory.nextWorkUnit();
                 executorService.getExecutor().submit(thisUnit);
-                System.out.print(thisUnit.hashCode() + " ");
+                System.out.print(thisUnit.hashCode() + " (" + thisUnit.uniqueID() + ") ");
             }
         System.out.println();
 
         // start monitoring thread
         ThreadMonitor threadMonitor = new ThreadMonitor(1.0); // monitoring interval in seconds
 
-        // create workload balancer
+        // wait briefly to let things get going
+        pause(2000);
 
-        // start accepting connections
+        // start accepting connections and wait for all jobs to complete
+        ServerSocket listener = null;
+        Socket connection = null;
+        ConnectionThread connectionThread = null;
+        
+        System.out.println("Listening on port " + LISTENING_PORT + "...");
 
-        // wait for all jobs to complete
-        pause(1000);
         while ( true )
             {
                 if ( executorService.getExecutor().getNumberOfRunningJobs() == 0 &&
-                     executorService.getExecutor().getQueue().size() == 0 )
+                     executorService.getExecutor().getQueue().size() == 0 &&
+                     backupUnitMap.size() == 0 )
                     break;
-                pause(500);
+                
+                try
+                    {
+                        listener = new ServerSocket(LISTENING_PORT);
+                        listener.setSoTimeout(TIMEOUT*1000);
+                        connection = listener.accept();
+                        System.out.print("[ " + new Date().toString() + " ] Opened a socket to " +
+                        connection.getInetAddress().getCanonicalHostName() + " (" + connection.getInetAddress() + ").\n");
+                        listener.close();
+                        connectionThread = new ConnectionThread(connection);
+                        connectionThread.checkConnection();
+                        System.out.println("Handshake successful.\n");
+                        connectionThread.start();
+                    }
+                catch (BindException e)
+                    {
+                        if (e.getMessage().equals("Address already in use"))
+                            System.out.println("A triangle server is already running on this port!");
+                        else
+                            e.printStackTrace();
+                        System.exit(1);
+                    }
+                catch (SocketTimeoutException e)
+                    {
+                        try
+                            {
+                                if ( listener != null )
+                                    listener.close();
+                            }
+                        catch (Exception e2)
+                            {
+                                e2.printStackTrace();
+                                System.exit(1);
+                            }
+                    }
+                catch (ConnectException e)
+                    {
+                        System.out.println(e.getMessage());
+                    }
+                catch (EOFException e)
+                    {
+                        System.out.println("Connection to " + connection.getInetAddress() + " closed unexpectedly.");
+                        synchronized(LIVE_CONNECTIONS)
+                            {
+                                LIVE_CONNECTIONS.remove(connectionThread);
+                            }
+                    }
+                catch (Exception e)
+                    {
+                        System.out.println("Server shutdown:");
+                        e.printStackTrace();
+                        break;
+                    }
             }
 
         // write out all results
         threadMonitor.stop();
-        pause(500);
-        System.out.println("All jobs complete!  Have a nice day!");
+        pause(1000);
+        System.out.print("\nAll jobs complete!  Writing completed patches to disk...");
+        if ( completedPatches.size() == 0 )
+            System.out.println("no results to write.");
+        else
+            {
+                try
+                    {
+                        TriangleResults triangleResults = new TriangleResults(completedPatches);
+                        FileOutputStream fileOut = new FileOutputStream(Preinitializer.RESULT_FILENAME);
+                        ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                        out.writeObject(triangleResults);
+                        out.close();
+                        fileOut.close();
+                        System.out.println("wrote " + completedPatches.size() + " results to " + Preinitializer.RESULT_FILENAME + ".");
+                    }
+                catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+            }
+        System.out.println("Have a nice day!");
         System.exit(0);
     }
 
@@ -109,10 +210,138 @@ public class Server
                     Server.LIVE_CONNECTIONS.add(this);
                     Server.ALL_CONNECTIONS.add(this);
                 }
-        }
 
+            // add entry to clientWorkUnitMap
+            synchronized(Server.clientWorkUnitMap)
+                {
+                    clientWorkUnitMap.put( this, new ArrayList<Integer>() );
+                }
+        }
+    
+        @SuppressWarnings("deprecation")
         public void run()
         {
+            while (true)
+                {
+                    try
+                        {
+                            Object incomingObject = incomingObjectStream.readObject();
+                            if ( incomingObject instanceof EmptyWorkUnitResult )
+                                {
+                                    // this is an incoming result
+                                    EmptyWorkUnitResult result = (EmptyWorkUnitResult)incomingObject;
+                                    
+                                    // retrieve the contents of this EmptyWorkUnitResult
+                                    int jobID = result.uniqueID();
+                                    List<ImmutablePatch> localCompletedPatches = result.getLocalCompletedPatches();
+
+                                    // store results centrally
+                                    Server.completedPatches.addAll( localCompletedPatches );
+
+                                    // mark job as finished
+                                    synchronized (clientWorkUnitMap)
+                                        {
+                                            List<Integer> list = clientWorkUnitMap.get(this);
+                                            boolean success = list.remove(Integer.valueOf(result.uniqueID()));
+                                            if ( !success )
+                                                System.out.println("error in clientWorkUnitMap!");
+                                        }
+
+                                    // remove backup unit
+                                    synchronized (backupUnitMap)
+                                        {
+                                            EmptyBoundaryWorkUnit unit = backupUnitMap.remove(Integer.valueOf(result.uniqueID()));
+                                            if ( unit == null )
+                                                System.out.println("error in backup unit map!");
+                                        }
+
+                                    // print a report
+                                    Date currentDate = new Date();
+                                    String dateString = String.format("%02d:%02d:%02d", currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
+                                    String statusString = String.format("[ %s ] : Received result %s ", dateString, result.uniqueID());
+                                    if ( localCompletedPatches.size() > 0 )
+                                        statusString = statusString + "(" + localCompletedPatches.size() + " new completed puzzles) ";
+                                    statusString = statusString + "from " + address;
+                                    System.out.println(statusString);
+
+                                }
+                            else if ( incomingObject instanceof Integer )
+                                {
+                                    // this is a request for new jobs
+                                    int jobCount = (Integer)incomingObject;
+                                    for (int i=0; i < jobCount; i++)
+                                        {
+                                            // attempt to send a job from the queue
+                                            // if there are no jobs in the queue, wait
+                                            EmptyBoundaryWorkUnit unit = null;
+                                            try
+                                                {
+                                                    unit = (EmptyBoundaryWorkUnit)ThreadService.INSTANCE.getExecutor().getQueue().poll(1000L, TimeUnit.MILLISECONDS);
+                                                    synchronized (sendLock)
+                                                        {
+                                                            System.out.println("sending job");
+                                                            outgoingObjectStream.writeObject(unit);
+                                                            outgoingObjectStream.flush();
+                                                            outgoingObjectStream.reset();
+                                                        }
+                                                }
+                                            catch (IOException e)
+                                                {
+                                                    System.out.println("Error sending unit!");
+                                                    e.printStackTrace();
+
+                                                    // resubmit the unit to the local queue
+                                                    ThreadService.INSTANCE.getExecutor().submit(unit);
+                                                }
+                                            catch (InterruptedException e)
+                                                {
+                                                }
+
+                                            if ( unit == null )
+                                                {
+                                                    i--;
+                                                    continue;
+                                                }
+                                            
+                                            // send this job over the connection
+                                            outgoingObjectStream.writeObject(unit);
+                                            outgoingObjectStream.flush();
+                                            outgoingObjectStream.reset();
+
+                                            // keep track of which work units have been sent out
+                                            synchronized (Server.clientWorkUnitMap)
+                                                {
+                                                    List<Integer> thisList = Server.clientWorkUnitMap.get(this);
+                                                    thisList.add(unit.uniqueID());
+                                                }
+
+                                            // keep a copy of this job in case it dies
+                                            synchronized (Server.backupUnitMap)
+                                                {
+                                                    Server.backupUnitMap.put(unit.uniqueID(), unit);
+                                                }
+
+                                        }
+                                }
+                        }
+                    catch (EOFException | SocketException e)
+                        {
+                            System.out.println("Connection to " + address + " lost.");
+                            break;
+                        }
+                    catch (Exception e)
+                        {
+                            System.out.println("Unexpected exception in Server.ConnectionThread.run():");
+                            e.printStackTrace();
+                            break;
+                        }
+            }
+
+            // this thread is not running anymore, so remove it from the clientWorkUnitMap
+            synchronized (clientWorkUnitMap)
+                {
+                    clientWorkUnitMap.remove(this);
+                }
         }
 
         public boolean isConnected()
@@ -150,7 +379,6 @@ public class Server
                         }
                 }
         }
-
     }
 
     private static class ThreadMonitor
@@ -217,8 +445,7 @@ public class Server
                     average += d;
                 average = average / throughputs.size();
 
-                // right now we're not keeping track of the number of completed patches
-                int numberOfCompletedPatches = -1;
+                int numberOfCompletedPatches = Server.completedPatches.size();
 
                 // print statistics
                 lastUpdateTime = currentTime;

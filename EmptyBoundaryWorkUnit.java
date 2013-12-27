@@ -42,6 +42,14 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     private AtomicInteger count = new AtomicInteger(0); // keeps track of solve calls
     private AtomicBoolean die;
 
+    public static final AtomicInteger IDgenerator = new AtomicInteger(0);
+    public final int uniqueID = IDgenerator.incrementAndGet();
+
+    public int uniqueID()
+    {
+        return uniqueID;
+    }
+
     // required data to get all patches from the descendents of the initial work units
     private final EmptyBoundaryWorkUnit initialWorkUnit; // if this is not an initial work unit, this points to this unit's eventual ancestor
     private List<ImmutablePatch> eventualPatches; // only exists in initial work units; stores all patch results from descendents 
@@ -63,7 +71,11 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
         this.patch = patch;
         this.die = die;
         initialWorkUnit = this;
-        eventualPatches = new LinkedList<ImmutablePatch>();
+        
+        if ( Preinitializer.MAIN_CLASS_NAME.equals("Server") )
+            eventualPatches = Server.completedPatches;
+        else
+            eventualPatches = new LinkedList<ImmutablePatch>();
     }
 
     // create a descendent work unit
@@ -112,14 +124,21 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
         threadService.getExecutor().registerCounter(count);
         patch.setCount(count);
         
-        Timer timer = new Timer();
-        timer.schedule(new KillSignal(die,timer), KILL_TIME, KILL_TIME);
+        Timer timer = null;
+        if ( ! Preinitializer.MAIN_CLASS_NAME.equals("Client") )
+            {
+                timer = new Timer();
+                timer.schedule(new KillSignal(die,timer), KILL_TIME, KILL_TIME);
+            }
         
         List<EmptyBoundaryPatch> descendents = patch.solve();
         threadService.getExecutor().deregisterCounter(count);
         
-        timer.cancel(); //Terminate the timer thread
-        timer = null;
+        if ( timer != null )
+            {
+                timer.cancel(); //Terminate the timer thread
+                timer = null;
+            }
 
         // update eventual ancestor's list of results
         synchronized ( eventualPatches )
