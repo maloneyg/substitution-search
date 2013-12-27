@@ -9,6 +9,7 @@ import java.util.Scanner;
 public class EmptyTest
 {
     public static final String RESULT_FILENAME = "result.chk";
+    public static final String BREAKDOWN_FILENAME = "breakdown.chk";
     public static final List<List<ImmutablePatch>> eventualPatchList = new LinkedList<List<ImmutablePatch>>();
 
     public static void main(String[] args)
@@ -163,20 +164,33 @@ public class EmptyTest
 
                 // begin writing edge breakdowns
                 System.out.print("Writing edge breakdowns to disk...");
-                EdgeBreakdown breakdown = EdgeBreakdown.createEdgeBreakdown();
+                EdgeBreakdownTree breakdown = EdgeBreakdownTree.createEdgeBreakdownTree();
+                for (ImmutablePatch P : allCompletedPatches) {
+                    breakdown.addBreakdown(Initializer.acute(Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE).get(0))-1,P.getEdge0());
+                    breakdown.addBreakdown(Initializer.acute(Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE).get(1))-1,P.getEdge1());
+                    breakdown.addBreakdown(Initializer.acute(Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE).get(2))-1,P.getEdge2());
+                }
                 try
                     {
-                        FileOutputStream fileOut = new FileOutputStream(RESULT_FILENAME);
+                        FileOutputStream fileOut = new FileOutputStream(BREAKDOWN_FILENAME);
                         ObjectOutputStream out = new ObjectOutputStream(fileOut);
-                        out.writeObject(triangleResults);
+                        out.writeObject(breakdown);
                         out.close();
                         fileOut.close();
-                        System.out.println("wrote results to " + RESULT_FILENAME + ".");
+                        System.out.println("wrote breakdowns to " + BREAKDOWN_FILENAME + ".");
                     }
                 catch (Exception e)
                     {
                         e.printStackTrace();
                     }
+//                System.out.println("Breakdowns:\n");
+//                try {
+//                    System.out.println(breakdown);
+//                } catch (Exception e) {
+//                    StackTraceElement[] elmnt = e.getStackTrace();
+//                    for (int i = 0; i < 10; i++) System.out.println(elmnt[i]);
+//                    System.exit(1);
+//                }
             } // end writing results
 
         // terminate normally

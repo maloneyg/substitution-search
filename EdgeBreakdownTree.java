@@ -1,7 +1,7 @@
 
 /*************************************************************************
- *  Compilation:  javac EdgeBreakdown.java
- *  Execution:    java EdgeBreakdown
+ *  Compilation:  javac EdgeBreakdownTree.java
+ *  Execution:    java EdgeBreakdownTree
  *
  *  A class representing all edge breakdowns that have been found so far.
  *
@@ -9,16 +9,17 @@
 
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Collections;
 import java.util.Iterator;
 import java.io.Serializable;
 
-public class EdgeBreakdown implements Serializable {
+public class EdgeBreakdownTree implements Serializable {
 
     private MultiTree<BasicEdgeLength>[] breakdowns;
 
     // private constructor
-    private EdgeBreakdown() {
+    private EdgeBreakdownTree() {
         breakdowns = new MultiTree[Preinitializer.N/2];
         for (int i = 0; i < breakdowns.length; i++) {
             breakdowns[i] = new MultiTree<BasicEdgeLength>();
@@ -26,12 +27,12 @@ public class EdgeBreakdown implements Serializable {
     }
 
     // public static factory method
-    public static EdgeBreakdown createEdgeBreakdown() {
-        return new EdgeBreakdown();
+    public static EdgeBreakdownTree createEdgeBreakdownTree() {
+        return new EdgeBreakdownTree();
     }
 
     // add a new edge breakdown for length i
-    public void addBreakdown(int i, Iterable<BasicEdgeLength> breakdown) {
+    public void addBreakdown(int i, List<BasicEdgeLength> breakdown, int dummy) {
         breakdowns[i].addChain(breakdown);
     }
 
@@ -39,27 +40,31 @@ public class EdgeBreakdown implements Serializable {
     public void addBreakdown(int i, ImmutableList<Integer> breakdown) {
         ArrayList<BasicEdgeLength> forward = new ArrayList<>(breakdown.size());
         ArrayList<BasicEdgeLength> reverse = new ArrayList<>(breakdown.size());
-        for (int j = 0; j < forward.size(); j++) {
+        for (int j = 0; j < breakdown.size(); j++) {
             forward.add(BasicEdgeLength.createBasicEdgeLength(breakdown.get(j)));
         }
-        for (int j = 0; j < forward.size(); j++) {
+        for (int j = 0; j < breakdown.size(); j++) {
             reverse.add(forward.get(forward.size()-j-1));
         }
-        addBreakdown(i,forward);
-        addBreakdown(i,reverse);
+        addBreakdown(i,forward,0);
+        addBreakdown(i,reverse,0);
     }
 
     // output a String
     public String toString() {
-        String output = "Boilerplate ToString method for EdgeBreakdown";
-        return output + "\n";
+        String output = "";
+        for (int i = 0; i < breakdowns.length; i++) {
+            int level = 0;
+            output += "Edge " + i + ":\n" + breakdowns[i] + "\n";
+        }
+        return output;
     }
 
     // equals method.
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())
             return false;
-        EdgeBreakdown l = (EdgeBreakdown) obj;
+        EdgeBreakdownTree l = (EdgeBreakdownTree) obj;
         if (this.breakdowns.length!=l.breakdowns.length) return false;
         for (int i = 0; i < breakdowns.length; i++) {
             if (!this.breakdowns[i].equals(l.breakdowns[i])) return false;
@@ -81,4 +86,4 @@ public class EdgeBreakdown implements Serializable {
 
     }
 
-} // end of class EdgeBreakdown
+} // end of class EdgeBreakdownTree

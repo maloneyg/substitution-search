@@ -87,7 +87,7 @@ class TreeNode<E> implements Serializable {
 
 } // end of class TreeNode
 
-public class MultiTree<E> implements Serializable {
+public class MultiTree<E> implements Serializable, Iterable<E> {
 
     private TreeNode<E> head;
 
@@ -135,9 +135,27 @@ public class MultiTree<E> implements Serializable {
 
     // output a String
     public String toString() {
-        String output = "Boilerplate ToString method for MultiTree";
-        return output + "\n";
+        String output = "";
+        for (E data : this) output += data.toString() + "\n";
+        return output;
     }
+
+    // output a String
+//    public String toString(TreeNode<E> node, String output, int level) {
+//        output += "Level " + level + ": ";
+//        output += node.getData().toString() + "\n";
+//        if (node.getNext().isEmpty()) {
+//            TreeNode<E> otherNode = node.getPrevious();
+//            int j = otherNode.getNext().indexOf(node);
+//            if (j < otherNode.getNext().size()-1) {
+//                return toString(otherNode.getNext().get(j+1),output,level);
+//            } else {
+//                return output;
+//            }
+//        } else {
+//            return toString(node.getNext().get(0),output,level+1);
+//        }
+//    }
 
     // equals method.
     // currently broken
@@ -158,6 +176,61 @@ public class MultiTree<E> implements Serializable {
             result = prime*result + currentNode.getData().hashCode();
         return result;
     }
+
+    public Iterator<E> iterator() { // iterator begins here
+        return new Iterator<E>() {
+
+            private TreeNode<E> current = head;
+
+            public boolean hasNext() {
+                return hasNext(current);
+            }
+
+            public boolean hasNext(TreeNode<E> node) {
+                if (!node.getNext().isEmpty()) {
+                    return true;
+                } else {
+                    return hasNext(node.getPrevious(),node);
+                }
+            }
+
+            public boolean hasNext(TreeNode<E> parent, TreeNode<E> child) {
+                if (parent == null) {
+                    return false;
+                } else if (parent.getNext().indexOf(child) < parent.getNext().size()-1) {
+                    return true;
+                } else {
+                    return hasNext(parent.getPrevious(),parent);
+                }
+            }
+
+            public E next() {
+                current = next(current);
+                return current.getData();
+            }
+
+            public TreeNode<E> next(TreeNode<E> node) {
+                if (!node.getNext().isEmpty()) {
+                    return node.getNext().get(0);
+                } else {
+                    return next(node.getPrevious(),node);
+                }
+            }
+
+            public TreeNode<E> next(TreeNode<E> parent, TreeNode<E> child) {
+                int j = parent.getNext().indexOf(child);
+                if (j < parent.getNext().size()-1) {
+                    return parent.getNext().get(j+1);
+                } else {
+                    return next(parent.getPrevious(),parent);
+                }
+            }
+
+            public void remove() { // do nothing
+            }
+
+        };
+    } // first iterator ends here
 
     // test client
     public static void main(String[] args) {
