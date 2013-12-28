@@ -121,7 +121,7 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     // it produces the TestResult.
 
     public Result call() {
-        System.out.println("running job ID " + uniqueID);
+        //System.out.println("running job ID " + uniqueID);
         threadService.getExecutor().registerCounter(count);
         patch.setCount(count);
         
@@ -160,7 +160,8 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
             System.out.println("\nWork unit " + this.hashCode() + " spawned " + descendents.size() + " more units.");
         
         EmptyWorkUnitResult thisResult = new EmptyWorkUnitResult(this.hashCode(), patch.getLocalCompletedPatches(), eventualPatches);
-        
+        thisResult.setUniqueID(uniqueID);
+
         if ( patch.getLocalCompletedPatches().size() > 0 )
             System.out.println("\n" + thisResult.toString());
 

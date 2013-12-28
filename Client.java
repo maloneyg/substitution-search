@@ -64,7 +64,7 @@ public final class Client
                     }
                 catch (ConnectException | ClassNotFoundException e)
                     {
-                        if ( e.getMessage().equals("Connection refused") )
+                        if ( e.getMessage().toLowerCase().indexOf("connection refused") > -1 )
                             System.out.println("connection refused.");
                         else
                             {
@@ -148,7 +148,7 @@ public final class Client
                 try
                     {
                         incomingObject = incomingObjectStream.readObject();
-                        //System.out.println("object received!");
+                        System.out.println("object received!");
                         if ( incomingObject instanceof EmptyBoundaryWorkUnit )
                             {
                                 //System.out.println("job received!");
@@ -213,24 +213,8 @@ public final class Client
                     outgoingObjectStream.reset();
                     //System.out.println("Requested new instructions.\n");
                 }
-                while (true)
-                    {
-                        if ( incomingObjectStream.available() > 0 )
-                            {
-                                //System.out.println("stream has bytes");
-                                break;
-                            }
-                        try
-                            {
-                                Thread.sleep(100);
-                                //System.out.println("waiting for job");
-                            }
-                        catch (InterruptedException e)
-                            {
-                            }
-                    }
             }
-        catch (SocketException e)
+        catch (IOException e)
             {
                 if ( e.getMessage().equals("Broken pipe") )
                     System.out.println("Broken pipe while requesting job!");
@@ -277,6 +261,7 @@ public final class Client
         private Timer timer;
         private static final int UPDATE_INTERVAL = 500; // ms
         private static ThreadService executorService = ThreadService.INSTANCE;
+        private static Date lastUpdate = null;
 
         public TaskMonitor()
         {
@@ -288,11 +273,6 @@ public final class Client
         {
             public void run()
             {
-                // if the number of jobs in the queue is below the threshold, request more work
-                int currentSize = executorService.getExecutor().getQueue().size();
-                if ( currentSize == 0 )
-                    Client.requestJob(1);
-
                 // if any of the WorkUnitInstructions are complete, send the result
                 List<Future<Result>> completedJobs = new LinkedList<Future<Result>>();
                 synchronized( allFutures )
@@ -302,6 +282,7 @@ public final class Client
                             if (f.isDone())
                                 completedJobs.add(f);
                     }
+
                 for (Future<Result> f : completedJobs)
                     {
                         // send each result
@@ -317,7 +298,7 @@ public final class Client
                             }
                         if ( thisResult == null )
                             {
-                                System.out.println("error in client while trying to send back result!");
+                                System.out.println("null error in client while trying to send back result!");
                                 continue;
                             }
                         EmptyWorkUnitResult thisEmptyResult = (EmptyWorkUnitResult)thisResult;
@@ -327,6 +308,23 @@ public final class Client
                     {
                         // remove the results that have been sent so they won't be sent again 
                         allFutures.removeAll(completedJobs);
+                    }
+
+                // if the number of jobs in the queue is below the threshold, request more work
+                int currentSize = executorService.getExecutor().getQueue().size();
+                if ( currentSize == 0 )
+                    {
+                        if ( TaskMonitor.lastUpdate == null )
+                            {
+                                TaskMonitor.lastUpdate = new Date();
+                                return;
+                            }
+                        if ( new Date().getTime() - TaskMonitor.lastUpdate.getTime() < 1.5*Preinitializer.SPAWN_MIN_TIME )
+                            return;
+                        TaskMonitor.lastUpdate = new Date();
+                        int numberOfJobsNeeded = Preinitializer.NUMBER_OF_THREADS + 1 - currentSize - 
+                                                 executorService.getExecutor().getNumberOfRunningJobs();
+                        Client.requestJob(numberOfJobsNeeded);
                     }
             }
         }

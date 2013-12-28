@@ -6,7 +6,7 @@ public class EmptyWorkUnitResult implements Result, Serializable
     private final List<ImmutablePatch> localCompletedPatches;
     private final List<ImmutablePatch> eventualPatches;
     private int originalHashcode;
-    private int uniqueID;
+    private int uniqueID = -1;
 
     public EmptyWorkUnitResult(int originalHashcode, List<ImmutablePatch> localCompletedPatches, List<ImmutablePatch> eventualPatches)
     {
