@@ -51,7 +51,7 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     }
 
     // required data to get all patches from the descendents of the initial work units
-    private final EmptyBoundaryWorkUnit initialWorkUnit; // if this is not an initial work unit, this points to this unit's eventual ancestor
+    private transient final EmptyBoundaryWorkUnit initialWorkUnit; // if this is not an initial work unit, this points to this unit's eventual ancestor
     private List<ImmutablePatch> eventualPatches; // only exists in initial work units; stores all patch results from descendents 
     
     private static final int KILL_TIME = Preinitializer.SPAWN_MIN_TIME; // in ms, how long to wait before killing a work unit and spawning more
@@ -93,6 +93,16 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
         return eventualPatches;
     }
 
+    public void newEventualPatches()
+    {
+        eventualPatches = new LinkedList<ImmutablePatch>();
+    }
+
+    public void serverEventualPatches()
+    {
+         eventualPatches = Server.completedPatches;
+    }
+
     public int hashCode()
     {
         int hash = 0;
@@ -121,7 +131,7 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     // it produces the TestResult.
 
     public Result call() {
-        //System.out.println("running job ID " + uniqueID);
+        System.out.println("running job ID " + uniqueID);
         threadService.getExecutor().registerCounter(count);
         patch.setCount(count);
         

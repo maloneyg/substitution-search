@@ -293,6 +293,7 @@ public final class Client
                             }
                         catch (Exception e)
                             {
+                                e.printStackTrace();
                                 System.out.println("error in client while trying to send back result!");
                                 continue;
                             }

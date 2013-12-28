@@ -297,20 +297,17 @@ public class Server
                                             synchronized(jobMap)
                                                 {
                                                     unit = jobMap.remove(r);
-                                                }
-
-                                            if ( unit == null )
-                                                {
-                                                    System.out.println("unexpected failure in job stealer");
-                                                    break;
+                                                    unit.newEventualPatches();
+                                                    System.out.println("removed unit " + unit.uniqueID());
                                                 }
 
                                             try
                                                 {
                                                     synchronized (sendLock)
                                                         {
-                                                            System.out.println("sending job " + unit.uniqueID());
+                                                            System.out.println("sending unit " + unit.uniqueID());
                                                             outgoingObjectStream.writeObject(unit);
+                                                            System.out.println("done sending unit " + unit.uniqueID());
                                                             outgoingObjectStream.flush();
                                                             outgoingObjectStream.reset();
                                                         }
@@ -320,6 +317,7 @@ public class Server
                                                     System.out.println("Error sending unit!  Requeued.");
 
                                                     // resubmit the unit to the local queue
+                                                    unit.serverEventualPatches();
                                                     ThreadService.INSTANCE.getExecutor().submit(unit);
                                                 }
                                             
