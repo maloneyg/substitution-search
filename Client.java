@@ -148,13 +148,13 @@ public final class Client
                 try
                     {
                         incomingObject = incomingObjectStream.readObject();
-                        System.out.println("object received!");
+                        //System.out.println("object received!");
                         if ( incomingObject instanceof EmptyBoundaryWorkUnit )
                             {
                                 //System.out.println("job received!");
                                 EmptyBoundaryWorkUnit unit = (EmptyBoundaryWorkUnit)incomingObject;
                                 Future<Result> thisFuture = executorService.getExecutor().submit(unit);
-                                System.out.println("submitted ID " + unit.uniqueID());
+                                //System.out.println("submitted ID " + unit.uniqueID());
                                 synchronized(allFutures)
                                     {
                                         allFutures.add(thisFuture);
@@ -203,7 +203,7 @@ public final class Client
 
     public static void requestJob(int i)
     {
-        System.out.println("requesting " + i + " jobs");
+        //System.out.println("requesting " + i + " jobs");
         try
             {
                 synchronized (sendLock)
@@ -244,7 +244,7 @@ public final class Client
                         outgoingObjectStream.flush();
                         outgoingObjectStream.reset();
                     }
-                System.out.println("sent result ID " + result.uniqueID());
+                //System.out.println("sent result ID " + result.uniqueID());
             }
         catch (SocketException e)
             {
@@ -323,7 +323,7 @@ public final class Client
                         if ( new Date().getTime() - TaskMonitor.lastUpdate.getTime() < 1.5*Preinitializer.SPAWN_MIN_TIME )
                             return;
                         TaskMonitor.lastUpdate = new Date();
-                        int numberOfJobsNeeded = Preinitializer.NUMBER_OF_THREADS + 1 - currentSize - 
+                        int numberOfJobsNeeded = 2*Preinitializer.NUMBER_OF_THREADS + 1 - currentSize - 
                                                  executorService.getExecutor().getNumberOfRunningJobs();
                         Client.requestJob(numberOfJobsNeeded);
                     }
@@ -335,7 +335,7 @@ public final class Client
     {
         private Timer timer;
         private static ThreadService executorService = ThreadService.INSTANCE;
-        private Date lastUpdateTime = null;
+        private static final Date startTime = new Date();
         private LinkedList<Double> throughputs = new LinkedList<Double>();
 
         public ThreadMonitor()
@@ -374,13 +374,7 @@ public final class Client
                 long jobsRun = executorService.getExecutor().getNumberOfSolveCalls();
 
                 // this accounts for the fact that the timer might be occasionally delayed
-                Date currentTime = new Date();
-                if ( lastUpdateTime == null )
-                    {
-                        lastUpdateTime = currentTime;
-                        return;
-                    }
-                double elapsedTime = ( currentTime.getTime() - lastUpdateTime.getTime() ) / 1000.0;
+                double elapsedTime = ( new Date().getTime() - startTime.getTime() ) / 1000.0;
                 double throughput = jobsRun / elapsedTime;
 
                 // keep track of how many jobs have been finished
@@ -393,7 +387,6 @@ public final class Client
                 average = average / throughputs.size();
 
                 // print statistics
-                lastUpdateTime = currentTime;
                 ThreadService.INSTANCE.getExecutor().printQueues(throughput, average, elapsedTime, -1);
             }
         }

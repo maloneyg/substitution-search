@@ -131,7 +131,7 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     // it produces the TestResult.
 
     public Result call() {
-        System.out.println("running job ID " + uniqueID);
+        //System.out.println("running job ID " + uniqueID);
         threadService.getExecutor().registerCounter(count);
         patch.setCount(count);
         

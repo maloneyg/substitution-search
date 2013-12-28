@@ -233,7 +233,7 @@ public class Server
                                     
                                     // retrieve the contents of this EmptyWorkUnitResult
                                     int jobID = result.uniqueID();
-                                    System.out.println("received ID " + jobID);
+                                    //System.out.println("received ID " + jobID);
                                     List<ImmutablePatch> localCompletedPatches = result.getLocalCompletedPatches();
 
                                     // store results centrally
@@ -269,7 +269,7 @@ public class Server
                             else if ( incomingObject instanceof Integer )
                                 {
                                     // this is a request for new jobs
-                                    System.out.println("request for new jobs received");
+                                    //System.out.println("request for new jobs received");
                                     int jobCount = (Integer)incomingObject;
                                     for (int i=0; i < jobCount; i++)
                                         {
@@ -287,9 +287,18 @@ public class Server
 
                                             if ( r == null )
                                                 {
-                                                    i--;
-                                                    System.out.println("waiting for more jobs to enter queue");
-                                                    continue;
+                                                    if ( ThreadService.INSTANCE.getExecutor().getNumberOfRunningJobs() == 0 )
+                                                        {
+                                                            // there are no jobs running here, so ask the client to return its jobs
+                                                            break;
+                                                        }
+                                                    else
+                                                        {
+                                                            // jobs are running and will spawn soon
+                                                            i--;
+                                                            System.out.println("waiting for more jobs to enter queue");
+                                                            continue;
+                                                        }
                                                 }
 
                                             Map<RunnableFuture,EmptyBoundaryWorkUnit> jobMap = ThreadService.INSTANCE.getExecutor().jobMap;
@@ -298,16 +307,16 @@ public class Server
                                                 {
                                                     unit = jobMap.remove(r);
                                                     unit.newEventualPatches();
-                                                    System.out.println("removed unit " + unit.uniqueID());
+                                                    //System.out.println("removed unit " + unit.uniqueID());
                                                 }
 
                                             try
                                                 {
                                                     synchronized (sendLock)
                                                         {
-                                                            System.out.println("sending unit " + unit.uniqueID());
+                                                            //System.out.println("sending unit " + unit.uniqueID());
                                                             outgoingObjectStream.writeObject(unit);
-                                                            System.out.println("done sending unit " + unit.uniqueID());
+                                                            //System.out.println("done sending unit " + unit.uniqueID());
                                                             outgoingObjectStream.flush();
                                                             outgoingObjectStream.reset();
                                                         }

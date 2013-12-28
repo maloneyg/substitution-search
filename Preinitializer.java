@@ -55,11 +55,11 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, -2, 0, 1); // b+d (118)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121) use this one
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121) use this one
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, -2, -3, 1, 1); // even huger search (122)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, -2, 1, 1); // even huger search (124)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -1, 1, 1); // a + b + c 
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -1, 1, 1); // a + b + c 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -2, 0, 1); // 1 + b + d 
 
     public static final ImmutableList<ImmutableList<Integer>> PROTOTILES = ImmutableList.of( 
@@ -87,7 +87,7 @@ class Preinitializer {
 
             // determine which host name to use
             if ( System.getProperty("user.name").toLowerCase().equals("ekwan") )
-                HOST_NAME = "enj10.rc.fas.harvard.edu";
+                HOST_NAME = "enj06.rc.fas.harvard.edu";
             else if ( System.getProperty("user.name").toLowerCase().equals("ngrm1") )
                 HOST_NAME = "corbridge";
             else
