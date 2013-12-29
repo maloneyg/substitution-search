@@ -333,6 +333,11 @@ public final class Client
                                                 outgoingObjectStream.writeObject(batch);
                                                 outgoingObjectStream.flush();
                                                 outgoingObjectStream.reset();
+                                                synchronized(allFutures)
+                                                    {
+                                                        allFutures.clear();
+                                                    }
+                                                Client.kill.set(false);
                                                 System.out.println("\ndone sending batch");
                                             }
                                         System.out.println("sent batch to server");
