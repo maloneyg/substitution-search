@@ -64,6 +64,8 @@ public class Server
 
         while ( true )
             {
+                //if (  executorService.getExecutor().getNumberOfRunningJobs() == 0 )
+                //    System.out.println(backupUnitMap.size());
                 if ( executorService.getExecutor().getNumberOfRunningJobs() == 0 &&
                      executorService.getExecutor().getQueue().size() == 0 &&
                      backupUnitMap.size() == 0 )
@@ -478,7 +480,6 @@ public class Server
                                                             {
                                                                 t.outgoingObjectStream.writeObject(Client.RETURN);
                                                                 t.outgoingObjectStream.flush();
-                                                                t.outgoingObjectStream.close();
                                                             }
                                                     }
                                                 catch (Exception e)

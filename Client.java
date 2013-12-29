@@ -182,11 +182,18 @@ public final class Client
                                     }
                                 else if ( incomingString.equals(RETURN) )
                                     {
-                                        if (Preinitializer.MAIN_CLASS_NAME.equals("Client"))
-                                        System.out.println("Kill request received.");
-                                        // tell work units to die
-                                        kill.lazySet(true);
-                                        break;
+                                        if ( ThreadService.INSTANCE.getExecutor().getQueue().size() == 0 &&
+                                             ThreadService.INSTANCE.getExecutor().getNumberOfRunningJobs() == 0 )
+                                            {
+                                                // we don't have any work to do, so don't do anything
+                                                System.out.println("Kill request received but no work to send back.");
+                                            }
+                                        else
+                                            {
+                                                // we have work to do, so tell work units to die
+                                                kill.lazySet(true);
+                                                System.out.println("Kill request received: kill switch set.");
+                                            }
                                     }
                             }
                         else if ( incomingObject == null )
@@ -223,16 +230,16 @@ public final class Client
 
     public static void requestJob(int i)
     {
-        //System.out.println("requesting " + i + " jobs");
         try
             {
                 synchronized (sendLock)
-                {
-                    outgoingObjectStream.writeObject(Integer.valueOf(i));
-                    outgoingObjectStream.flush();
-                    outgoingObjectStream.reset();
-                    //System.out.println("Requested new instructions.\n");
-                }
+                    {
+                        System.out.println("requesting " + i + " jobs");
+                        outgoingObjectStream.writeObject(Integer.valueOf(i));
+                        outgoingObjectStream.flush();
+                        outgoingObjectStream.reset();
+                        System.out.println("Requested new instructions.");
+                    }
             }
         catch (IOException e)
             {
@@ -258,13 +265,16 @@ public final class Client
         // send result
         try
             {
+                System.out.println("trying to send result ID " + result.uniqueID() + " (" + result.getLocalCompletedPatches().size() + " puzzles)");
                 synchronized (sendLock)
                     {
+                        System.out.println("lock acquired for result sending");
                         outgoingObjectStream.writeObject(result);
+                        System.out.println("sent result ID " + result.uniqueID());
                         outgoingObjectStream.flush();
                         outgoingObjectStream.reset();
                     }
-                //System.out.println("sent result ID " + result.uniqueID());
+                System.out.println("exit synchronized");
             }
         catch (SocketException e)
             {
@@ -312,9 +322,11 @@ public final class Client
                                     {
                                         synchronized (sendLock)
                                             {
+                                                System.out.println("sending batch");
                                                 outgoingObjectStream.writeObject(batch);
                                                 outgoingObjectStream.flush();
                                                 outgoingObjectStream.reset();
+                                                System.out.println("done sending batch");
                                             }
                                         System.out.println("sent batch to server");
                                     }
@@ -330,6 +342,7 @@ public final class Client
                             }
                         else
                             {
+                                System.out.println("doing nothing: " + allFutures.size());
                                 // do nothing
                             }
                         return;
