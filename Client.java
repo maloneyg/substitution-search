@@ -3,6 +3,7 @@ import java.net.*;
 import java.io.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
+import com.google.common.collect.*;
 
 // This class will serve up work units to remote clients. 
 
@@ -425,7 +426,10 @@ public final class Client
         private Timer timer;
         private static ThreadService executorService = ThreadService.INSTANCE;
         private static final Date startTime = new Date();
-        private LinkedList<Double> throughputs = new LinkedList<Double>();
+        private EvictingQueue<Double> throughputs = EvictingQueue.create(500);
+        private Date lastUpdateTime = null;
+
+        private int lastNumberOfCompletedPatches = 0;
 
         public ThreadMonitor()
         {
@@ -459,12 +463,21 @@ public final class Client
                 if ( connection == null )
                     return;
 
-                // number of jobs run in the last monitorInterval; simultaneously resets counter
+                // jobsRun is the number of jobs run in the last monitorInterval; simultaneously resets counter
                 long jobsRun = executorService.getExecutor().getNumberOfSolveCalls();
 
                 // this accounts for the fact that the timer might be occasionally delayed
-                double elapsedTime = ( new Date().getTime() - startTime.getTime() ) / 1000.0;
+                Date currentTime = new Date();
+                if ( lastUpdateTime == null )
+                    {
+                        lastUpdateTime = currentTime;
+                        return;
+                    }
+                double elapsedTime = ( currentTime.getTime() - lastUpdateTime.getTime() ) / 1000.0;
                 double throughput = jobsRun / elapsedTime;
+
+                // calculte how long the timer has been running
+                double totalTime = ( currentTime.getTime() - startTime.getTime() ) / 1000.0;  // in seconds
 
                 // keep track of how many jobs have been finished
                 throughputs.add(throughput);
@@ -475,8 +488,11 @@ public final class Client
                     average += d;
                 average = average / throughputs.size();
 
+                int numberOfCompletedPatches = Server.completedPatches.size();
+
                 // print statistics
-                ThreadService.INSTANCE.getExecutor().printQueues(throughput, average, elapsedTime, -1);
+                lastUpdateTime = currentTime;
+                ThreadService.INSTANCE.getExecutor().printQueues(throughput, average, totalTime, numberOfCompletedPatches);
             }
         }
     }
