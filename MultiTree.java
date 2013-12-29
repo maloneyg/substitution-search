@@ -70,6 +70,12 @@ class TreeNode<E> implements Serializable {
         next.add(new TreeNode<E>(newData, new ArrayList<TreeNode<E>>(), this));
     }
 
+    // remove a descendant node
+    public void removeNext(TreeNode<E> nextOne) {
+        next.remove(nextOne);
+        nextOne = null;
+    }
+
     // get a list of all immediate descendants
     public ArrayList<TreeNode<E>> getNext() {
         return next;
@@ -104,6 +110,11 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
     private MultiTree(E data) {
         head = new TreeNode<>();
         head.addNext(new TreeNode<>(data));
+    }
+
+    // return true if this MultiTree is empty
+    public boolean isEmpty() {
+        return head.getNext().isEmpty();
     }
 
     // return the TreeNode at the top level containing the given data
@@ -148,40 +159,27 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
         return output;
     }
 
-    // output a String
-//    public String toString(TreeNode<E> node, String output, int level) {
-//        output += "Level " + level + ": ";
-//        output += node.getData().toString() + "\n";
-//        if (node.getNext().isEmpty()) {
-//            TreeNode<E> otherNode = node.getPrevious();
-//            int j = otherNode.getNext().indexOf(node);
-//            if (j < otherNode.getNext().size()-1) {
-//                return toString(otherNode.getNext().get(j+1),output,level);
-//            } else {
-//                return output;
-//            }
-//        } else {
-//            return toString(node.getNext().get(0),output,level+1);
-//        }
-//    }
-
     // equals method.
-    // currently broken
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())
             return false;
         MultiTree l = (MultiTree) obj;
+        BetterIterator<E> it1 = this.iterator();
+        BetterIterator<E> it2 = l.iterator();
+        while (it1.hasNext()) {
+            if (!it2.hasNext()) return false;
+            if (!it2.next().equals(it1.next())) return false;
+        }
+        if (it2.hasNext()) return false;
         return true;
     }
 
     // hashCode override.
-    // currently broken
     public int hashCode() {
         int prime = 59;
         int result = 19;
-        TreeNode currentNode = head;
-        while (currentNode != null)
-            result = prime*result + currentNode.getData().hashCode();
+        for (E data : this)
+            result = prime*result + data.hashCode();
         return result;
     }
 
@@ -195,7 +193,7 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
                 return hasNext(current);
             }
 
-            public boolean hasNext(TreeNode<E> node) {
+            private boolean hasNext(TreeNode<E> node) {
                 if (!node.getNext().isEmpty()) {
                     return true;
                 } else {
@@ -203,7 +201,7 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
                 }
             }
 
-            public boolean hasNext(TreeNode<E> parent, TreeNode<E> child) {
+            private boolean hasNext(TreeNode<E> parent, TreeNode<E> child) {
                 if (parent == null) {
                     return false;
                 } else if (parent.getNext().indexOf(child) < parent.getNext().size()-1) {
@@ -218,7 +216,7 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
                 return current.getData();
             }
 
-            public TreeNode<E> next(TreeNode<E> node) {
+            private TreeNode<E> next(TreeNode<E> node) {
                 if (!node.getNext().isEmpty()) {
                     level++;
                     return node.getNext().get(0);
@@ -228,7 +226,7 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
                 }
             }
 
-            public TreeNode<E> next(TreeNode<E> parent, TreeNode<E> child) {
+            private TreeNode<E> next(TreeNode<E> parent, TreeNode<E> child) {
                 int j = parent.getNext().indexOf(child);
                 if (j < parent.getNext().size()-1) {
                     level++;
