@@ -42,7 +42,10 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     private AtomicInteger count = new AtomicInteger(0); // keeps track of solve calls
 
     private AtomicBoolean die;
-    private static LinkedList<EmptyBoundaryPatch> returnSpawnList = new LinkedList<>();
+
+    // the lists we use to make an EmptyBatch if we receive a Client kill signal
+    public static LinkedList<EmptyBoundaryPatch> returnSpawnList = new LinkedList<>();
+    public static List<EmptyWorkUnitResult> returnResultsList = new LinkedList<>();
 
     public static final AtomicInteger IDgenerator = new AtomicInteger(0);
     public final int uniqueID = IDgenerator.incrementAndGet();
@@ -52,17 +55,19 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
         return uniqueID;
     }
 
-    // get the list of all spawn created since the Client kill switch was pulled
-    public static List<EmptyBoundaryPatch> getSpawnList()
-    {
-        return returnSpawnList;
-    }
-
     // reset the spawn list
     public static void clearSpawnList()
     {
         synchronized ( returnSpawnList ) {
             returnSpawnList.clear();
+        }
+    }
+
+    // reset the results list
+    public static void clearResultsList()
+    {
+        synchronized ( returnResultsList ) {
+            returnResultsList.clear();
         }
     }
 
@@ -192,14 +197,22 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
                 p.setKillSwitch(kill);
                 EmptyBoundaryWorkUnit spawnedUnit = new EmptyBoundaryWorkUnit(p,kill,this);
                 executorService.getExecutor().submit(spawnedUnit);
+                if ( descendents.size() > 0 )
+                    System.out.println("\nWork unit " + this.hashCode() + " spawned " + descendents.size() + " more units.");
             }
         }
         
-        if ( descendents.size() > 0 )
-            System.out.println("\nWork unit " + this.hashCode() + " spawned " + descendents.size() + " more units.");
         
         EmptyWorkUnitResult thisResult = new EmptyWorkUnitResult(this.hashCode(), patch.getLocalCompletedPatches(), eventualPatches);
         thisResult.setUniqueID(uniqueID);
+
+        // add thisResult to another list for dispatch if we've received
+        // a kill signal on the Client side
+        if (Client.checkKillSwitch()) {
+            synchronized ( returnResultsList ) {
+                returnResultsList.add(thisResult);
+            }
+        }
 
         if ( patch.getLocalCompletedPatches().size() > 0 )
             System.out.println("\n" + thisResult.toString());

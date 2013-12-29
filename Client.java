@@ -300,7 +300,11 @@ public final class Client
                         if ( executorService.getExecutor().getQueue().size() == 0 && executorService.getExecutor().getNumberOfRunningJobs() == 0 )
                             {
                                 // create EmptyBatch
-                                EmptyBatch batch = 
+                                synchronized ( EmptyBoundaryWorkUnit.returnSpawnList ) {
+                                    synchronized ( EmptyBoundaryWorkUnit.returnResultsList ) {
+                                        EmptyBatch batch = new EmptyBatch(EmptyBoundaryWorkUnit.returnResultsList,EmptyBoundaryWorkUnit.returnSpawnList);
+                                    }
+                                }
 
                                 // send back EmptyBatch
                                 try
