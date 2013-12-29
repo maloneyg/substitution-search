@@ -75,6 +75,7 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     public void setKillSwitch(AtomicBoolean die)
     {
         this.die = die;
+        patch.setKillSwitch(this.die);
     }
 
     // required data to get all patches from the descendents of the initial work units
