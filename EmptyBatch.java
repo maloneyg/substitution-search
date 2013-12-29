@@ -1,19 +1,20 @@
 import java.util.*;
 import java.io.*;
 import com.google.common.collect.*;
+import java.util.concurrent.atomic.*;
 
 public class EmptyBatch implements Serializable
 {
     private final List<EmptyWorkUnitResult> results;    // holds the results of the work units that were sent to the client
     private final List<EmptyBoundaryPatch> newPatches;  // holds the spawn of the results
 
-    public EmptyBatch(List<EmptyBoundaryWorkUnitResult> results, List<EmptyBoundaryPatch> newPatches)
+    public EmptyBatch(List<EmptyWorkUnitResult> results, List<EmptyBoundaryPatch> newPatches)
     {
         this.results = ImmutableList.copyOf(results);
         this.newPatches = ImmutableList.copyOf(newPatches);
     }
 
-    public List<EmptyBoundaryWorkUnitResult> getResults()
+    public List<EmptyWorkUnitResult> getResults()
     {
         return results;
     }
@@ -35,4 +36,4 @@ public class EmptyBatch implements Serializable
 
         return newUnits;
     }
-}
+} // end of class EmptyBatch
