@@ -288,7 +288,7 @@ public class Server
 
                                     // add spawn to queue
                                     for (EmptyBoundaryWorkUnit unit : batch.getNewUnits()) {
-                                        unit.setKillSwitch(new AtomicInteger(false));
+                                        unit.setKillSwitch(new AtomicBoolean(false));
                                         ThreadService.INSTANCE.getExecutor().submit(unit);
                                     }
 

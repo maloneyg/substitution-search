@@ -357,6 +357,7 @@ public final class Client
                                 System.out.println("doing nothing: " + allFutures.size());
                                 // do nothing
                             }
+                        kill.set(false);
                         return;
                     }
 
