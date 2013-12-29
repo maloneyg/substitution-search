@@ -161,7 +161,7 @@ public class Server
     }
 
     public static class ConnectionThread extends Thread
-    {
+    { // begin ConnectionThread
         private Socket connection = null;
         private InputStream incomingStream;
         private ObjectInputStream incomingObjectStream;
@@ -178,6 +178,45 @@ public class Server
             this.connection = connection;
             address = connection.getInetAddress().getCanonicalHostName();
         }
+
+        // a method for dealing with incoming results
+        @SuppressWarnings("deprecation")
+        private void stashResult(EmptyWorkUnitResult result)
+        {
+            // retrieve the contents of this EmptyWorkUnitResult
+            int jobID = result.uniqueID();
+            //System.out.println("received ID " + jobID);
+            List<ImmutablePatch> localCompletedPatches = result.getLocalCompletedPatches();
+
+            // store results centrally
+            Server.completedPatches.addAll( localCompletedPatches );
+
+            // mark job as finished
+            synchronized (clientWorkUnitMap)
+                {
+                    List<Integer> list = clientWorkUnitMap.get(this);
+                    boolean success = list.remove(Integer.valueOf(result.uniqueID()));
+                    if ( !success )
+                        System.out.println("error in clientWorkUnitMap!");
+                }
+
+            // remove backup unit
+            synchronized (backupUnitMap)
+                {
+                    EmptyBoundaryWorkUnit unit = backupUnitMap.remove(Integer.valueOf(result.uniqueID()));
+                    if ( unit == null )
+                        System.out.println("error in backup unit map!");
+                }
+
+            // print a report
+            Date currentDate = new Date();
+            String dateString = String.format("%02d:%02d:%02d", currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
+            String statusString = String.format("[ %s ] : Received result %s ", dateString, result.uniqueID());
+            if ( localCompletedPatches.size() > 0 )
+                statusString = statusString + "(" + localCompletedPatches.size() + " new completed puzzles) ";
+            statusString = statusString + "from " + address;
+            System.out.println(statusString);
+        } // end stashResult
 
         // set streams and handshake
         public void checkConnection() throws SocketException, ConnectException, SocketTimeoutException, IOException, ClassNotFoundException
@@ -229,51 +268,24 @@ public class Server
                             if ( incomingObject instanceof EmptyBatch )
                                 {
                                     // this is a returning set of units and spawn
-                                    EmptyBoundaryWorkUnit unit = (EmptyBoundaryWorkUnit)incomingObject;
+                                    EmptyBatch batch = (EmptyBatch)incomingObject;
 
                                     // mark jobs as finished
+                                    List<EmptyWorkUnitResult> results = batch.getResults();
+                                    for (EmptyWorkUnitResult res : results)
+                                        stashResult(res);
 
                                     // add spawn to queue
+                                    for (EmptyBoundaryWorkUnit unit : batch.getNewUnits())
+                                        ThreadService.INSTANCE.getExecutor().submit(unit);
 
                                 }
                             else if ( incomingObject instanceof EmptyWorkUnitResult )
                                 {
                                     // this is an incoming result
                                     EmptyWorkUnitResult result = (EmptyWorkUnitResult)incomingObject;
-                                    
-                                    // retrieve the contents of this EmptyWorkUnitResult
-                                    int jobID = result.uniqueID();
-                                    //System.out.println("received ID " + jobID);
-                                    List<ImmutablePatch> localCompletedPatches = result.getLocalCompletedPatches();
-
-                                    // store results centrally
-                                    Server.completedPatches.addAll( localCompletedPatches );
-
-                                    // mark job as finished
-                                    synchronized (clientWorkUnitMap)
-                                        {
-                                            List<Integer> list = clientWorkUnitMap.get(this);
-                                            boolean success = list.remove(Integer.valueOf(result.uniqueID()));
-                                            if ( !success )
-                                                System.out.println("error in clientWorkUnitMap!");
-                                        }
-
-                                    // remove backup unit
-                                    synchronized (backupUnitMap)
-                                        {
-                                            EmptyBoundaryWorkUnit unit = backupUnitMap.remove(Integer.valueOf(result.uniqueID()));
-                                            if ( unit == null )
-                                                System.out.println("error in backup unit map!");
-                                        }
-
-                                    // print a report
-                                    Date currentDate = new Date();
-                                    String dateString = String.format("%02d:%02d:%02d", currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
-                                    String statusString = String.format("[ %s ] : Received result %s ", dateString, result.uniqueID());
-                                    if ( localCompletedPatches.size() > 0 )
-                                        statusString = statusString + "(" + localCompletedPatches.size() + " new completed puzzles) ";
-                                    statusString = statusString + "from " + address;
-                                    System.out.println(statusString);
+                                    // file it away
+                                    stashResult(result);
 
                                 }
                             else if ( incomingObject instanceof Integer )
@@ -419,7 +431,7 @@ public class Server
                         }
                 }
         }
-    }
+    } // end ConnectionThread
 
     private static class ThreadMonitor
     {

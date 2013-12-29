@@ -8,6 +8,9 @@ public class EmptyBatch implements Serializable
     private final List<EmptyWorkUnitResult> results;    // holds the results of the work units that were sent to the client
     private final List<EmptyBoundaryPatch> newPatches;  // holds the spawn of the results
 
+    // a constant that we send when there is nothing to return
+    public static final EmptyBatch NO_RESULTS = new EmptyBatch(new LinkedList<EmptyWorkUnitResult>(), new LinkedList<EmptyBoundaryPatch>());
+
     public EmptyBatch(List<EmptyWorkUnitResult> results, List<EmptyBoundaryPatch> newPatches)
     {
         this.results = ImmutableList.copyOf(results);
