@@ -127,6 +127,7 @@ public class Server
 
         // write out all results
         threadMonitor.stop();
+        ConnectionThread.closeAllConnections();
         pause(1000);
         System.out.print("\nAll jobs complete!  Writing completed patches to disk...");
         if ( completedPatches.size() == 0 )
@@ -198,9 +199,10 @@ public class Server
             synchronized (clientWorkUnitMap)
                 {
                     List<Integer> list = clientWorkUnitMap.get(this);
+                    //System.out.println("Trying to remove " + result.uniqueID() + " from: " + list);
                     boolean success = list.remove(Integer.valueOf(result.uniqueID()));
                     if ( !success )
-                        System.out.println("error in clientWorkUnitMap!");
+                        System.out.println("error in clientWorkUnitMap!  expected to find ID " + result.uniqueID());
                 }
 
             // remove backup unit
@@ -209,16 +211,20 @@ public class Server
                     EmptyBoundaryWorkUnit unit = backupUnitMap.remove(Integer.valueOf(result.uniqueID()));
                     if ( unit == null )
                         System.out.println("error in backup unit map!");
+                    //System.out.println(backupUnitMap.keySet());
                 }
 
             // print a report
             Date currentDate = new Date();
             String dateString = String.format("%02d:%02d:%02d", currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
-            String statusString = String.format("[ %s ] : Received result %s ", dateString, result.uniqueID());
+            String statusString = "";
             if ( localCompletedPatches.size() > 0 )
-                statusString = statusString + "(" + localCompletedPatches.size() + " new completed puzzles) ";
-            statusString = statusString + "from " + address;
-            System.out.println(statusString);
+                {
+                    statusString = String.format("[ %s ] : Received result %s ", dateString, result.uniqueID());
+                    statusString = statusString + "(" + localCompletedPatches.size() + " new completed puzzles) ";
+                    statusString = statusString + "from " + address;
+                    System.out.println(statusString);
+                }
         } // end stashResult
 
         // set streams and handshake
@@ -267,7 +273,9 @@ public class Server
                 {
                     try
                         {
+                            //System.out.println("reading");
                             Object incomingObject = incomingObjectStream.readObject();
+                            //System.out.println("read object");
                             if ( incomingObject instanceof EmptyBatch )
                                 {
                                     // this is a returning set of units and spawn
@@ -287,6 +295,7 @@ public class Server
                                 {
                                     // this is an incoming result
                                     EmptyWorkUnitResult result = (EmptyWorkUnitResult)incomingObject;
+                                    
                                     // file it away
                                     stashResult(result);
 
@@ -296,6 +305,7 @@ public class Server
                                     // this is a request for new jobs
                                     //System.out.println("request for new jobs received");
                                     int jobCount = (Integer)incomingObject;
+                                    //int retry = 0;
                                     for (int i=0; i < jobCount; i++)
                                         {
 
@@ -313,9 +323,12 @@ public class Server
                                             if ( r == null )
                                                 {
                                                     // try again
-                                                    i--;
-                                                    System.out.println("waiting for more jobs to enter queue");
-                                                    continue;
+                                                    //i--;
+                                                    //retry++;
+                                                    //System.out.println("\nwaiting for more jobs to enter queue");
+                                                    //if ( retry == 5 )
+                                                        break;
+                                                    //continue;
                                                 }
 
                                             Map<RunnableFuture,EmptyBoundaryWorkUnit> jobMap = ThreadService.INSTANCE.getExecutor().jobMap;

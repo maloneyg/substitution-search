@@ -168,6 +168,7 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
             {
                 timer = new Timer();
                 timer.schedule(new KillSignal(die,timer), KILL_TIME, KILL_TIME);
+                eventualPatches = Server.completedPatches;
             }
         
         List<EmptyBoundaryPatch> descendents = patch.solve();
@@ -193,9 +194,9 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
                 returnSpawnList.addAll(descendents);
             }
             if ( descendents.size() > 0 )
-                System.out.println("\nWork unit " + this.hashCode() + " spawned " + descendents.size() + " more units (return).");
+                System.out.println("\nWork unit " + uniqueID + " spawned " + descendents.size() + " more units (return).");
             else
-                System.out.println("\nWork unit " + this.hashCode() + " tried to spawn");
+                System.out.println("\nWork unit " + uniqueID + " tried to spawn");
         } else {
             for (EmptyBoundaryPatch p : descendents) {
                 AtomicBoolean kill = new AtomicBoolean();
@@ -204,7 +205,7 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
                 executorService.getExecutor().submit(spawnedUnit);
             }
             if ( descendents.size() > 0 )
-                System.out.println("\nWork unit " + this.hashCode() + " spawned " + descendents.size() + " more units.");
+                System.out.println("\nWork unit " + uniqueID + " spawned " + descendents.size() + " more units.");
         }
         
         EmptyWorkUnitResult thisResult = new EmptyWorkUnitResult(uniqueID, patch.getLocalCompletedPatches());

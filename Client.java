@@ -126,11 +126,11 @@ public final class Client
         //connection.setSoTimeout(TIMEOUT*1000);
         
         // create streams
-        outputStream = connection.getOutputStream();
+        outputStream = new BufferedOutputStream(connection.getOutputStream());
         outputStream.flush();
         outgoingObjectStream = new ObjectOutputStream(outputStream);
         inputStream = connection.getInputStream();
-        incomingObjectStream = new ObjectInputStream(inputStream);
+        incomingObjectStream = new ObjectInputStream(new BufferedInputStream(inputStream));
 
         // send handshake
         outgoingObjectStream.writeObject(HANDSHAKE);
@@ -265,16 +265,16 @@ public final class Client
         // send result
         try
             {
-                System.out.println("trying to send result ID " + result.uniqueID() + " (" + result.getLocalCompletedPatches().size() + " puzzles)");
+                //System.out.println("\ntrying to send result ID " + result.uniqueID() + " (" + result.getLocalCompletedPatches().size() + " puzzles)");
                 synchronized (sendLock)
                     {
-                        System.out.println("lock acquired for result sending");
+                        //System.out.println("\nlock acquired for result sending: allFutures " + allFutures.size());
                         outgoingObjectStream.writeObject(result);
-                        System.out.println("sent result ID " + result.uniqueID());
+                        //System.out.println("\nsent result ID " + result.uniqueID());
                         outgoingObjectStream.flush();
                         outgoingObjectStream.reset();
                     }
-                System.out.println("exit synchronized");
+                //System.out.println("\nexit synchronized");
             }
         catch (SocketException e)
             {
@@ -310,6 +310,13 @@ public final class Client
                         EmptyBatch batch = null;
                         if ( executorService.getExecutor().getQueue().size() == 0 && executorService.getExecutor().getNumberOfRunningJobs() == 0 )
                             {
+                                if ( EmptyBoundaryWorkUnit.returnSpawnList.size() == 0 &&
+                                     EmptyBoundaryWorkUnit.returnResultsList.size() == 0 )
+                                    {
+                                        System.out.println("nothing to send back");
+                                        return;
+                                    }
+
                                 // create EmptyBatch
                                 synchronized ( EmptyBoundaryWorkUnit.returnSpawnList ) {
                                     synchronized ( EmptyBoundaryWorkUnit.returnResultsList ) {
@@ -322,11 +329,11 @@ public final class Client
                                     {
                                         synchronized (sendLock)
                                             {
-                                                System.out.println("sending batch");
+                                                System.out.println("\nsending " + batch.toString());
                                                 outgoingObjectStream.writeObject(batch);
                                                 outgoingObjectStream.flush();
                                                 outgoingObjectStream.reset();
-                                                System.out.println("done sending batch");
+                                                System.out.println("\ndone sending batch");
                                             }
                                         System.out.println("sent batch to server");
                                     }

@@ -9,8 +9,8 @@ public class EmptyWorkUnitResult implements Result, Serializable
     public EmptyWorkUnitResult(int uniqueID, List<ImmutablePatch> localCompletedPatches)
     //public EmptyWorkUnitResult(int originalHashcode, List<ImmutablePatch> localCompletedPatches, List<ImmutablePatch> eventualPatches)
     {
-        //this.localCompletedPatches = localCompletedPatches;
-        this.localCompletedPatches = new LinkedList<ImmutablePatch>();
+        this.localCompletedPatches = localCompletedPatches;
+        //this.localCompletedPatches = new LinkedList<ImmutablePatch>();
         this.uniqueID = uniqueID;
     }
 
