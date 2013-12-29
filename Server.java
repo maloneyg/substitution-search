@@ -226,7 +226,17 @@ public class Server
                     try
                         {
                             Object incomingObject = incomingObjectStream.readObject();
-                            if ( incomingObject instanceof EmptyWorkUnitResult )
+                            if ( incomingObject instanceof EmptyBatch )
+                                {
+                                    // this is a returning set of units and spawn
+                                    EmptyBoundaryWorkUnit unit = (EmptyBoundaryWorkUnit)incomingObject;
+
+                                    // mark jobs as finished
+
+                                    // add spawn to queue
+
+                                }
+                            else if ( incomingObject instanceof EmptyWorkUnitResult )
                                 {
                                     // this is an incoming result
                                     EmptyWorkUnitResult result = (EmptyWorkUnitResult)incomingObject;
@@ -290,6 +300,12 @@ public class Server
                                                     if ( ThreadService.INSTANCE.getExecutor().getNumberOfRunningJobs() == 0 )
                                                         {
                                                             // there are no jobs running here, so ask the client to return its jobs
+                                                            synchronized (sendLock)
+                                                                {
+                                                                    outgoingObjectStream.writeObject("RETURN");
+                                                                    outgoingObjectStream.flush();
+                                                                    outgoingObjectStream.reset();
+                                                                }
                                                             break;
                                                         }
                                                     else

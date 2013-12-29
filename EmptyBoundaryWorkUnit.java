@@ -143,6 +143,7 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
             }
         
         List<EmptyBoundaryPatch> descendents = patch.solve();
+
         threadService.getExecutor().deregisterCounter(count);
         
         if ( timer != null )
@@ -164,7 +165,6 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
             executorService.getExecutor().submit(spawnedUnit);
             //System.out.println("Spawned a new unit " + spawnedUnit.hashCode());
         }
-        
         
         if ( descendents.size() > 0 )
             System.out.println("\nWork unit " + this.hashCode() + " spawned " + descendents.size() + " more units.");
