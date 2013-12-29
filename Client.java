@@ -16,6 +16,10 @@ public final class Client
     public static final int MAX_ATTEMPTS = 5; // how many time to try connecting before giving up
     public static final String HANDSHAKE = "TriangleHandshake";
     public static final String CLOSE = "TriangleClose";
+    public static final String RETURN = "KillThemAll";
+
+    // a kill switch
+    private static AtomicBoolean kill = new AtomicBoolean(false);
 
     private static Socket connection;
     private static InputStream inputStream;
@@ -28,6 +32,11 @@ public final class Client
     private static final List<Future<Result>> allFutures = new LinkedList<Future<Result>>();
 
     private static Object sendLock = new Object();
+
+    // check the kill switch
+    public static boolean checkKillSwitch() {
+        return kill.get();
+    }
 
     // prevent instantiation
     private Client()
@@ -153,6 +162,9 @@ public final class Client
                             {
                                 //System.out.println("job received!");
                                 EmptyBoundaryWorkUnit unit = (EmptyBoundaryWorkUnit)incomingObject;
+                                // set the kill switch on new jobs to the master switch
+                                unit.setKillSwitch(kill);
+                                // submit, get a Future
                                 Future<Result> thisFuture = executorService.getExecutor().submit(unit);
                                 //System.out.println("submitted ID " + unit.uniqueID());
                                 synchronized(allFutures)
@@ -166,6 +178,14 @@ public final class Client
                                 if ( incomingString.equals(CLOSE) )
                                     {
                                         System.out.println("Close request received.");
+                                        break;
+                                    }
+                                else if ( incomingString.equals(RETURN) )
+                                    {
+                                        if (Preinitializer.MAIN_CLASS_NAME.equals("Client"))
+                                        System.out.println("Kill request received.");
+                                        // tell work units to die
+                                        kill.lazySet(true);
                                         break;
                                     }
                             }

@@ -40,7 +40,9 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     private static ThreadService executorService = ThreadService.INSTANCE;
     private final EmptyBoundaryPatch patch;
     private AtomicInteger count = new AtomicInteger(0); // keeps track of solve calls
+
     private AtomicBoolean die;
+    private static LinkedList<EmptyBoundaryPatch> RETURN_SPAWN_LIST = new LinkedList<>();
 
     public static final AtomicInteger IDgenerator = new AtomicInteger(0);
     public final int uniqueID = IDgenerator.incrementAndGet();
@@ -48,6 +50,12 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     public int uniqueID()
     {
         return uniqueID;
+    }
+
+    // set the kill switch to point to some external switch
+    public void setKillSwitch(AtomicBoolean die)
+    {
+        this.die = die;
     }
 
     // required data to get all patches from the descendents of the initial work units
@@ -158,12 +166,19 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
                 eventualPatches.addAll( patch.getLocalCompletedPatches() );
             }
 
-        for (EmptyBoundaryPatch p : descendents) {
-            AtomicBoolean kill = new AtomicBoolean();
-            p.setKillSwitch(kill);
-            EmptyBoundaryWorkUnit spawnedUnit = new EmptyBoundaryWorkUnit(p,kill,this);
-            executorService.getExecutor().submit(spawnedUnit);
-            //System.out.println("Spawned a new unit " + spawnedUnit.hashCode());
+        // what we do with the spawn depends on whether spawning was 
+        // triggered by a Client killswitch or not
+        if (Client.checkKillSwitch()) {
+            synchronized ( RETURN_SPAWN_LIST ) {
+                RETURN_SPAWN_LIST.addAll(descendents);
+            }
+        } else {
+            for (EmptyBoundaryPatch p : descendents) {
+                AtomicBoolean kill = new AtomicBoolean();
+                p.setKillSwitch(kill);
+                EmptyBoundaryWorkUnit spawnedUnit = new EmptyBoundaryWorkUnit(p,kill,this);
+                executorService.getExecutor().submit(spawnedUnit);
+            }
         }
         
         if ( descendents.size() > 0 )
