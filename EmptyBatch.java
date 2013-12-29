@@ -39,4 +39,14 @@ public class EmptyBatch implements Serializable
 
         return newUnits;
     }
+
+    public String toString()
+    {
+        return "(" + results.size() + " results and " + newPatches.size() + " spawn)";
+    }
+
+    public int hashCode()
+    {
+        return Objects.hash(results, newPatches);
+    }
 } // end of class EmptyBatch

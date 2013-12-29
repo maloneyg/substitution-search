@@ -293,7 +293,44 @@ public final class Client
         {
             public void run()
             {
-                // if any of the WorkUnitInstructions are complete, send the result
+                // if kill signal has been set
+                if ( Client.kill.get() )
+                    {
+                        // if all jobs have emptied out
+                        if ( executorService.getExecutor().getQueue().size() == 0 && executorService.getExecutor().getNumberOfRunningJobs() == 0 )
+                            {
+                                // create EmptyBatch
+                                EmptyBatch batch = 
+
+                                // send back EmptyBatch
+                                try
+                                    {
+                                        synchronized (sendLock)
+                                            {
+                                                outgoingObjectStream.writeObject(batch);
+                                                outgoingObjectStream.flush();
+                                                outgoingObjectStream.reset();
+                                            }
+                                        System.out.println("sent batch to server");
+                                    }
+                                catch (SocketException e)
+                                    {
+                                        System.out.println("Broken pipe!  Unable to send batch!");
+                                    }
+                                catch (Exception e)
+                                    {
+                                        e.printStackTrace();
+                                    }
+
+                            }
+                        else
+                            {
+                                // do nothing
+                            }
+                        return;
+                    }
+
+                // if any of the work units are complete, send the result
                 List<Future<Result>> completedJobs = new LinkedList<Future<Result>>();
                 synchronized( allFutures )
                     {
