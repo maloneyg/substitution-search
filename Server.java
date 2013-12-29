@@ -27,6 +27,7 @@ public class Server
     // parameters for networking
     public static final int LISTENING_PORT = Preinitializer.LISTENING_PORT;
     public static final int TIMEOUT = 1; // seconds to wait before declaring a node unreachable
+    private static Date lastRespawn = new Date();
 
     // prevent instantiation
     private Server()
@@ -309,24 +310,10 @@ public class Server
 
                                             if ( r == null )
                                                 {
-                                                    if ( ThreadService.INSTANCE.getExecutor().getNumberOfRunningJobs() == 0 )
-                                                        {
-                                                            // there are no jobs running here, so ask the client to return its jobs
-                                                            synchronized (sendLock)
-                                                                {
-                                                                    outgoingObjectStream.writeObject("RETURN");
-                                                                    outgoingObjectStream.flush();
-                                                                    outgoingObjectStream.reset();
-                                                                }
-                                                            break;
-                                                        }
-                                                    else
-                                                        {
-                                                            // jobs are running and will spawn soon
-                                                            i--;
-                                                            System.out.println("waiting for more jobs to enter queue");
-                                                            continue;
-                                                        }
+                                                    // try again
+                                                    i--;
+                                                    System.out.println("waiting for more jobs to enter queue");
+                                                    continue;
                                                 }
 
                                             Map<RunnableFuture,EmptyBoundaryWorkUnit> jobMap = ThreadService.INSTANCE.getExecutor().jobMap;
@@ -471,6 +458,38 @@ public class Server
                         System.exit(1);
                     }
                 
+                // if the queue is empty and no jobs are running, send a signal to all clients to spawn
+                Date currentTime = new Date();
+                if (    ThreadService.INSTANCE.getExecutor.getNumberOfJobsRunning() == 0 &&
+                        ThreadService.INSTANCE.getExecutor.getQueue().size()        == 0 &&
+                     && currentTime.getTime() - Server.lastRespawn.getTime() > 1.5*Preinitializer.SPAWN_MIN_TIME )
+                    {
+                        lastRespawn = currentTime;
+                        synchronized(LIVE_CONNECTIONS)
+                            {
+                                for (ConnectionThread t : LIVE_CONNECTIONS)
+                                    {
+                                        if ( t.connection.isConnected() )
+                                            {
+                                                System.out.println("Signaling " + t.address + " to return spawn."); 
+                                                try
+                                                    {
+                                                        synchronized (t.sendLock)
+                                                            {
+                                                                t.outgoingObjectStream.writeObject(Client.RETURN);
+                                                                t.outgoingObjectStream.flush();
+                                                                t.outgoingObjectStream.close();
+                                                            }
+                                                    }
+                                                catch (Exception e)
+                                                    {
+                                                        e.printStackTrace();
+                                                    }
+                                            }
+                                    }
+                            }
+                    }
+
                 // compute statistics
                 // jobsRun is the number of jobs run in the last monitorInterval; simultaneously resets counter
                 long jobsRun = executorService.getExecutor().getNumberOfSolveCalls(); 
