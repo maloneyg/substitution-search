@@ -460,9 +460,9 @@ public class Server
                 
                 // if the queue is empty and no jobs are running, send a signal to all clients to spawn
                 Date currentTime = new Date();
-                if (    ThreadService.INSTANCE.getExecutor.getNumberOfJobsRunning() == 0 &&
-                        ThreadService.INSTANCE.getExecutor.getQueue().size()        == 0 &&
-                     && currentTime.getTime() - Server.lastRespawn.getTime() > 1.5*Preinitializer.SPAWN_MIN_TIME )
+                if ( ThreadService.INSTANCE.getExecutor().getNumberOfRunningJobs() == 0 &&
+                     ThreadService.INSTANCE.getExecutor().getQueue().size()        == 0 &&
+                     currentTime.getTime() - Server.lastRespawn.getTime() > 1.5*Preinitializer.SPAWN_MIN_TIME )
                     {
                         lastRespawn = currentTime;
                         synchronized(LIVE_CONNECTIONS)
@@ -495,7 +495,7 @@ public class Server
                 long jobsRun = executorService.getExecutor().getNumberOfSolveCalls(); 
 
                 // this accounts for the fact that the timer might be occasionally delayed
-                Date currentTime = new Date();
+                currentTime = new Date();
                 if ( lastUpdateTime == null )
                     {
                         lastUpdateTime = currentTime;

@@ -297,12 +297,13 @@ public final class Client
                 if ( Client.kill.get() )
                     {
                         // if all jobs have emptied out
+                        EmptyBatch batch = null;
                         if ( executorService.getExecutor().getQueue().size() == 0 && executorService.getExecutor().getNumberOfRunningJobs() == 0 )
                             {
                                 // create EmptyBatch
                                 synchronized ( EmptyBoundaryWorkUnit.returnSpawnList ) {
                                     synchronized ( EmptyBoundaryWorkUnit.returnResultsList ) {
-                                        EmptyBatch batch = new EmptyBatch(EmptyBoundaryWorkUnit.returnResultsList,EmptyBoundaryWorkUnit.returnSpawnList);
+                                        batch = new EmptyBatch(EmptyBoundaryWorkUnit.returnResultsList,EmptyBoundaryWorkUnit.returnSpawnList);
                                     }
                                 }
 
@@ -381,10 +382,11 @@ public final class Client
                                 TaskMonitor.lastUpdate = new Date();
                                 return;
                             }
-                        if ( new Date().getTime() - TaskMonitor.lastUpdate.getTime() < 1.5*Preinitializer.SPAWN_MIN_TIME )
+                        if ( new Date().getTime() - TaskMonitor.lastUpdate.getTime() < 2000 )
+                        //if ( new Date().getTime() - TaskMonitor.lastUpdate.getTime() < 1.5*Preinitializer.SPAWN_MIN_TIME )
                             return;
                         TaskMonitor.lastUpdate = new Date();
-                        int numberOfJobsNeeded = 2*Preinitializer.NUMBER_OF_THREADS + 1 - currentSize - 
+                        int numberOfJobsNeeded = 3*Preinitializer.NUMBER_OF_THREADS + 1 - currentSize - 
                                                  executorService.getExecutor().getNumberOfRunningJobs();
                         Client.requestJob(numberOfJobsNeeded);
                     }

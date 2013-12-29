@@ -191,15 +191,18 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
             synchronized ( returnSpawnList ) {
                 returnSpawnList.addAll(descendents);
             }
+            if ( descendents.size() > 0 )
+                System.out.println("\nWork unit " + this.hashCode() + " spawned " + descendents.size() + " more units (return).");
         } else {
             for (EmptyBoundaryPatch p : descendents) {
                 AtomicBoolean kill = new AtomicBoolean();
                 p.setKillSwitch(kill);
                 EmptyBoundaryWorkUnit spawnedUnit = new EmptyBoundaryWorkUnit(p,kill,this);
                 executorService.getExecutor().submit(spawnedUnit);
-                if ( descendents.size() > 0 )
-                    System.out.println("\nWork unit " + this.hashCode() + " spawned " + descendents.size() + " more units.");
             }
+            if ( descendents.size() > 0 )
+                System.out.println("\nWork unit " + this.hashCode() + " spawned " + descendents.size() + " more units.");
+            
         }
         
         
