@@ -42,7 +42,7 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     private AtomicInteger count = new AtomicInteger(0); // keeps track of solve calls
 
     private AtomicBoolean die;
-    private static LinkedList<EmptyBoundaryPatch> RETURN_SPAWN_LIST = new LinkedList<>();
+    private static LinkedList<EmptyBoundaryPatch> returnSpawnList = new LinkedList<>();
 
     public static final AtomicInteger IDgenerator = new AtomicInteger(0);
     public final int uniqueID = IDgenerator.incrementAndGet();
@@ -50,6 +50,20 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     public int uniqueID()
     {
         return uniqueID;
+    }
+
+    // get the list of all spawn created since the Client kill switch was pulled
+    public static List<EmptyBoundaryPatch> getSpawnList()
+    {
+        return returnSpawnList;
+    }
+
+    // reset the spawn list
+    public static void clearSpawnList()
+    {
+        synchronized ( returnSpawnList ) {
+            returnSpawnList.clear();
+        }
     }
 
     // set the kill switch to point to some external switch
@@ -169,8 +183,8 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
         // what we do with the spawn depends on whether spawning was 
         // triggered by a Client killswitch or not
         if (Client.checkKillSwitch()) {
-            synchronized ( RETURN_SPAWN_LIST ) {
-                RETURN_SPAWN_LIST.addAll(descendents);
+            synchronized ( returnSpawnList ) {
+                returnSpawnList.addAll(descendents);
             }
         } else {
             for (EmptyBoundaryPatch p : descendents) {
