@@ -31,6 +31,24 @@ public class EdgeBreakdownTree implements Serializable {
         return new EdgeBreakdownTree();
     }
 
+    // merge two EdgeBreakdownTrees.
+    // we assume that they are totally ordered, in the sense that
+    // for each edge, the tree from one edge breakdown (this) is
+    // a subtree of the tree from the other edge breakdown (older)
+    public EdgeBreakdownTree merge(EdgeBreakdownTree older) {
+        if (this.breakdowns.length != Preinitializer.N/2) throw new IllegalArgumentException("Trying to merge an edge breakdown created using different initialization data.");
+        if (this.breakdowns.length != older.breakdowns.length) throw new IllegalArgumentException("Cannot merge two edge breakdowns with different numbers of edges.");
+        EdgeBreakdownTree output = new EdgeBreakdownTree();
+        for (int i = 1; i < breakdowns.length; i++) {
+            if (this.breakdowns[i].isEmpty()) {
+                output.breakdowns[i] = older.breakdowns[i];
+            } else {
+                output.breakdowns[i] = this.breakdowns[i];
+            }
+        }
+        return output;
+    }
+
     // add a new edge breakdown for length i
     public void addBreakdown(int i, List<BasicEdgeLength> breakdown, int dummy) {
         breakdowns[i].addChain(breakdown);
