@@ -287,8 +287,10 @@ public class Server
                                         stashResult(res);
 
                                     // add spawn to queue
-                                    for (EmptyBoundaryWorkUnit unit : batch.getNewUnits())
+                                    for (EmptyBoundaryWorkUnit unit : batch.getNewUnits()) {
+                                        unit.setKillSwitch(new AtomicInteger(false));
                                         ThreadService.INSTANCE.getExecutor().submit(unit);
+                                    }
 
                                 }
                             else if ( incomingObject instanceof EmptyWorkUnitResult )
