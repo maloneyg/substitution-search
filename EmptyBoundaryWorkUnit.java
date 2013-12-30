@@ -193,10 +193,10 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
             synchronized ( returnSpawnList ) {
                 returnSpawnList.addAll(descendents);
             }
-            if ( descendents.size() > 0 )
-                System.out.println("\nWork unit " + uniqueID + " spawned " + descendents.size() + " more units (return).");
-            else
-                System.out.println("\nWork unit " + uniqueID + " tried to spawn");
+            //if ( descendents.size() > 0 )
+            //    System.out.println("\nWork unit " + uniqueID + " spawned " + descendents.size() + " more units (return).");
+            //else
+            //    System.out.println("\nWork unit " + uniqueID + " tried to spawn");
         } else {
             for (EmptyBoundaryPatch p : descendents) {
                 AtomicBoolean kill = new AtomicBoolean();
@@ -204,8 +204,8 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
                 EmptyBoundaryWorkUnit spawnedUnit = new EmptyBoundaryWorkUnit(p,kill,this);
                 executorService.getExecutor().submit(spawnedUnit);
             }
-            if ( descendents.size() > 0 )
-                System.out.println("\nWork unit " + uniqueID + " spawned " + descendents.size() + " more units.");
+            //if ( descendents.size() > 0 )
+            //    System.out.println("\nWork unit " + uniqueID + " spawned " + descendents.size() + " more units.");
         }
         
         EmptyWorkUnitResult thisResult = new EmptyWorkUnitResult(uniqueID, patch.getLocalCompletedPatches());
@@ -218,8 +218,8 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
             }
         }
 
-        if ( patch.getLocalCompletedPatches().size() > 0 )
-            System.out.println("\n" + thisResult.toString());
+        //if ( patch.getLocalCompletedPatches().size() > 0 )
+        //    System.out.println("\n" + thisResult.toString());
 
         return thisResult;
     } // method call() ends here

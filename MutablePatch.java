@@ -32,17 +32,17 @@ public class MutablePatch implements Serializable {
     private ImmutableList<Integer> edge2;
 
     // the completed patches that have been found
-    private static List<ImmutablePatch> completedPatches;
+//    private static List<ImmutablePatch> completedPatches;
 
     // a list of completed patches for this particular puzzle
     private List<ImmutablePatch> localCompletedPatches = new ArrayList<ImmutablePatch>();
 
     private AtomicInteger count = new AtomicInteger(0);
 
-    static { // initialize completedPatches
-        ArrayList<ImmutablePatch> tempList = new ArrayList<>();
-        completedPatches = Collections.synchronizedList(tempList);
-    }
+  //  static { // initialize completedPatches
+  //      ArrayList<ImmutablePatch> tempList = new ArrayList<>();
+  //      completedPatches = Collections.synchronizedList(tempList);
+  //  }
 
     /*
     * The state variables.
@@ -150,9 +150,9 @@ public class MutablePatch implements Serializable {
     }
 
     // get all the completed patches
-    public static List<ImmutablePatch> getCompletedPatches() {
-        return completedPatches;
-    }
+  //  public static List<ImmutablePatch> getCompletedPatches() {
+  //      return completedPatches;
+  //  }
 
     // set the message
     public void setMessage(String s) {
@@ -259,7 +259,7 @@ public class MutablePatch implements Serializable {
         do {
             if (tileList.empty()) {
                 ImmutablePatch thisPatch = dumpImmutablePatch();
-                completedPatches.add(thisPatch);
+                //completedPatches.add(thisPatch);
                 localCompletedPatches.add(thisPatch);
                 numCompleted++;
                 break;
@@ -318,7 +318,7 @@ public class MutablePatch implements Serializable {
 
             if (tileList.empty()) {
                 ImmutablePatch thisPatch = dumpImmutablePatch();
-                completedPatches.add(thisPatch);
+                //completedPatches.add(thisPatch);
                 localCompletedPatches.add(thisPatch);
                 numCompleted++;
                 if (debug) setMessage(DebugMessage.FOUND.toString());

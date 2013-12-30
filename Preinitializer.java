@@ -12,12 +12,13 @@ import com.google.common.collect.ImmutableList;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
+import java.nio.file.*;
 
 class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 4;        // the tile we're searching
+    public static final int MY_TILE = 1;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
@@ -44,6 +45,10 @@ class Preinitializer {
 
     public static final String RESULT_FILENAME = "result.chk"; // name of file to write the completed patches to at the end
     public static final int LISTENING_PORT = 32007; // sockets will transmite/recieve on this port number
+    
+    public static final boolean WRITE_INTERIM_RESULTS = true; // should the Server write PatchResults preiodically?
+    public static final String INTERIM_RESULT_FILENAME = "interim.chk";
+    public static final String INTERIM_RESULT_BACKUP_FILENAME = "interim_backup.chk";
 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2, 1); // the square of the really small search (1+a)^2 won't work with tile 3 
@@ -55,11 +60,11 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, -2, 0, 1); // b+d (118)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121) use this one
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121) use this one
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, -2, -3, 1, 1); // even huger search (122)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, -2, 1, 1); // even huger search (124)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -1, 1, 1); // a + b + c 
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -1, 1, 1); // a + b + c 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -2, 0, 1); // 1 + b + d 
 
     public static final ImmutableList<ImmutableList<Integer>> PROTOTILES = ImmutableList.of( 
@@ -108,7 +113,33 @@ class Preinitializer {
 
             // print out which puzzle we are searching;
             System.out.println("We are searching tile " + MY_TILE + " using inflation factor " + INFL + ".");
-        
+
+            // deal with interim result file if necessary
+            if ( MAIN_CLASS_NAME.equals("Server") )
+                {
+                    if ( WRITE_INTERIM_RESULTS == true )
+                        {
+                            Path primary_file = Paths.get(INTERIM_RESULT_FILENAME);
+                            Path backup_file  = Paths.get(INTERIM_RESULT_BACKUP_FILENAME);
+                            if ( Files.exists(primary_file) )
+                                {
+                                    try
+                                        {
+                                            Files.copy(primary_file, backup_file, StandardCopyOption.REPLACE_EXISTING);
+                                            System.out.println("Backed up pre-existing file " + INTERIM_RESULT_FILENAME + " to "
+                                                               + INTERIM_RESULT_BACKUP_FILENAME + ".");
+                                        }
+                                    catch (IOException e)
+                                        {
+                                            e.printStackTrace();
+                                        }
+                                }
+                            System.out.println("Will write interim results to " + INTERIM_RESULT_FILENAME + ".");
+                        }
+                    else
+                        System.out.println("Will not write any interim results.");
+                }
+
             // print out serialization settings
             if ( SERIALIZATION_FLAG == true && DEBUG_MODE == false )
                 {

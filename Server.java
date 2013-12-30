@@ -22,7 +22,7 @@ public class Server
     private static final Map<Long,EmptyBoundaryWorkUnit> backupUnitMap = new HashMap<>();
 
     // this stores all the completed puzzles
-    public static final List<ImmutablePatch> completedPatches = Collections.synchronizedList(new LinkedList<ImmutablePatch>());
+    public static final List<ImmutablePatch> completedPatches = new LinkedList<ImmutablePatch>();
 
     // parameters for networking
     public static final int LISTENING_PORT = Preinitializer.LISTENING_PORT;
@@ -50,7 +50,7 @@ public class Server
         System.out.println();
 
         // start monitoring thread
-        ThreadMonitor threadMonitor = new ThreadMonitor(1.0); // monitoring interval in seconds
+        ThreadMonitor threadMonitor = new ThreadMonitor(2.0); // monitoring interval in seconds
 
         // wait briefly to let things get going
         pause(2000);
@@ -126,27 +126,30 @@ public class Server
             }
 
         // write out all results
-        threadMonitor.stop();
         ConnectionThread.closeAllConnections();
-        pause(1000);
+        threadMonitor.stop();
+        pause(3000);
         System.out.print("\nAll jobs complete!  Writing completed patches to disk...");
-        if ( completedPatches.size() == 0 )
-            System.out.println("no results to write.");
-        else
+        synchronized (completedPatches)
             {
-                try
+                if ( completedPatches.size() == 0 )
+                    System.out.println("no results to write.");
+                else
                     {
-                        TriangleResults triangleResults = new TriangleResults(completedPatches);
-                        FileOutputStream fileOut = new FileOutputStream(Preinitializer.RESULT_FILENAME);
-                        ObjectOutputStream out = new ObjectOutputStream(fileOut);
-                        out.writeObject(triangleResults);
-                        out.close();
-                        fileOut.close();
-                        System.out.println("wrote " + completedPatches.size() + " results to " + Preinitializer.RESULT_FILENAME + ".");
-                    }
-                catch (Exception e)
-                    {
-                        e.printStackTrace();
+                        try
+                            {
+                                TriangleResults triangleResults = new TriangleResults(completedPatches);
+                                FileOutputStream fileOut = new FileOutputStream(Preinitializer.RESULT_FILENAME);
+                                ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                                out.writeObject(triangleResults);
+                                out.close();
+                                fileOut.close();
+                                System.out.println("wrote " + completedPatches.size() + " results to " + Preinitializer.RESULT_FILENAME + ".");
+                            }
+                        catch (Exception e)
+                            {
+                                e.printStackTrace();
+                            }
                     }
             }
         System.out.println("Have a nice day!");
@@ -155,13 +158,13 @@ public class Server
 
     public static void pause(long delay)
     {
-        try
-            {
-                Thread.sleep(delay);
-            }
-        catch (InterruptedException e)
-            {
-            }
+                try
+                    {
+                        Thread.sleep(delay);
+                    }
+                catch (InterruptedException e)
+                    {
+                    }
     }
 
     public static class ConnectionThread extends Thread
@@ -193,7 +196,10 @@ public class Server
             List<ImmutablePatch> localCompletedPatches = result.getLocalCompletedPatches();
 
             // store results centrally
-            Server.completedPatches.addAll( localCompletedPatches );
+            synchronized (completedPatches)
+                {
+                    Server.completedPatches.addAll( localCompletedPatches );
+                }
 
             // mark job as finished
             synchronized (clientWorkUnitMap)
@@ -218,13 +224,13 @@ public class Server
             Date currentDate = new Date();
             String dateString = String.format("%02d:%02d:%02d", currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
             String statusString = "";
-            if ( localCompletedPatches.size() > 0 )
+            /*if ( localCompletedPatches.size() > 0 )
                 {
                     statusString = String.format("\n[ %s ] : Received result %s ", dateString, result.uniqueID());
                     statusString = statusString + "(" + localCompletedPatches.size() + " new completed puzzles) ";
                     statusString = statusString + "from " + address;
                     System.out.println(statusString);
-                }
+                }*/
         } // end stashResult
 
         // set streams and handshake
@@ -351,7 +357,7 @@ public class Server
                                                 }
                                             catch (IOException e)
                                                 {
-                                                    System.out.println("Error sending unit!  Requeued.");
+                                                    System.out.println("Error sending unit " + unit.uniqueID() + "!  Requeued.");
 
                                                     // resubmit the unit to the local queue
                                                     unit.serverEventualPatches();
@@ -417,7 +423,7 @@ public class Server
                         {
                             if ( t.connection.isConnected() )
                                 {
-                                    System.out.println("Signalling " + t.address + " to close.");
+                                    System.out.println("\nSignalling " + t.address + " to close.");
                                     try
                                         {
                                             synchronized(t.sendLock)
@@ -445,9 +451,10 @@ public class Server
         private Date lastUpdateTime = null;
         private Date startTime = new Date();
         private EvictingQueue<Double> throughputs = EvictingQueue.create(500);
-
+        private static AtomicBoolean cancelled = new AtomicBoolean();
         private int lastNumberOfCompletedPatches = 0;
-        private final String INTERIM_RESULTS_FILENAME = Preinitializer.SERIALIZATION_DIRECTORY + "/interimResults.chk";
+        private final String INTERIM_RESULT_FILENAME = Preinitializer.INTERIM_RESULT_FILENAME;
+        private Date lastInterimWrite = new Date();
 
         public ThreadMonitor(double updateInterval) // seconds
         {
@@ -459,6 +466,7 @@ public class Server
 
         public void stop()
         {
+            cancelled.set(true);
             timer.cancel();
             System.out.println("\nThread monitor stopped.");
         }
@@ -467,6 +475,10 @@ public class Server
         {
             public void run()
             {
+                // abort if cancelled
+                if ( cancelled.get() )
+                    return;
+
                 // check for kill file
                 File killFile = new File("kill.txt");
                 if ( killFile.isFile() )
@@ -488,7 +500,7 @@ public class Server
                                     {
                                         if ( t.connection.isConnected() )
                                             {
-                                                System.out.println("Signaling " + t.address + " to return spawn."); 
+                                                System.out.println("\nSignaling " + t.address + " to return spawn."); 
                                                 try
                                                     {
                                                         synchronized (t.sendLock)
@@ -506,6 +518,46 @@ public class Server
                             }
                     }
 
+                // if a connection has died, re-queue the jobs that were dispatched
+
+                // periodically write interim results to disk
+                int numberOfCompletedPatches = 0;
+                synchronized ( Server.completedPatches )
+                    {
+                        numberOfCompletedPatches = Server.completedPatches.size();
+                    }
+
+                if (    Preinitializer.WRITE_INTERIM_RESULTS == true
+                     && numberOfCompletedPatches > lastNumberOfCompletedPatches
+                     && currentTime.getTime() - lastInterimWrite.getTime() > 30 * 1000 )
+                    {
+                        TriangleResults interimResults = null;
+                        synchronized (Server.completedPatches)
+                            {
+                                interimResults = new TriangleResults(Server.completedPatches);
+                            }
+
+                        try
+                            {
+                                FileOutputStream fileOut = new FileOutputStream(INTERIM_RESULT_FILENAME);
+                                ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                                out.writeObject(interimResults);
+                                out.close();
+                                fileOut.close();
+                                int newResults = numberOfCompletedPatches - lastNumberOfCompletedPatches;
+                                System.out.println("\n" + newResults + " new results, so wrote " + numberOfCompletedPatches
+                                                   + " interim results to " + INTERIM_RESULT_FILENAME + ".\n");
+                            }
+                        catch (Exception e)
+                            {
+                                System.out.println("\nError while writing interim results to " + INTERIM_RESULT_FILENAME + "!");
+                                e.printStackTrace();
+                            }
+
+                        lastNumberOfCompletedPatches = numberOfCompletedPatches;
+                        lastInterimWrite = currentTime;
+                    }
+
                 // compute statistics
                 // jobsRun is the number of jobs run in the last monitorInterval; simultaneously resets counter
                 long jobsRun = executorService.getExecutor().getNumberOfSolveCalls(); 
@@ -518,6 +570,9 @@ public class Server
                         return;
                     }
                 double elapsedTime = ( currentTime.getTime() - lastUpdateTime.getTime() ) / 1000.0;
+                if ( elapsedTime < 0.1 )
+                    return;
+                //System.out.println(elapsedTime);
                 double throughput = jobsRun / elapsedTime;
 
                 // calculte how long the timer has been running
@@ -531,8 +586,6 @@ public class Server
                 for (Double d : throughputs)
                     average += d;
                 average = average / throughputs.size();
-
-                int numberOfCompletedPatches = Server.completedPatches.size();
 
                 // print statistics
                 lastUpdateTime = currentTime;

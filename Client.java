@@ -12,7 +12,7 @@ public final class Client
     public static final int LISTENING_PORT = Preinitializer.LISTENING_PORT;
     public static String HOST_NAME = Preinitializer.HOST_NAME;
 
-    public static final double MONITOR_INTERVAL = 1.0; // seconds
+    public static final double MONITOR_INTERVAL = 2.0; // seconds
     public static final int TIMEOUT = 1; // how many seconds to wait before declaring a node unreachable
     public static final int MAX_ATTEMPTS = 5; // how many time to try connecting before giving up
     public static final String HANDSHAKE = "TriangleHandshake";
@@ -187,13 +187,13 @@ public final class Client
                                              ThreadService.INSTANCE.getExecutor().getNumberOfRunningJobs() == 0 )
                                             {
                                                 // we don't have any work to do, so don't do anything
-                                                System.out.println("Kill request received but no work to send back.");
+                                                System.out.println("\nKill request received but no work to send back.");
                                             }
                                         else
                                             {
                                                 // we have work to do, so tell work units to die
                                                 kill.lazySet(true);
-                                                System.out.println("Kill request received: kill switch set.");
+                                                System.out.println("\nKill request received: kill switch set.");
                                             }
                                     }
                             }
