@@ -1,0 +1,8 @@
+*.class
+lib/*
+*.sh
+*.log*
+*.out
+compile
+*.chk
+storage/*.chk
