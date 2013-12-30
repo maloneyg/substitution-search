@@ -15,11 +15,11 @@ public class Server
 
     // this keeps track of which jobs have been dispatched
     // maps ConnectionThreads to the unique IDs of each work unit that the thread is working on
-    private static final Map<ConnectionThread,List<Integer>> clientWorkUnitMap = new HashMap<>();
+    private static final Map<ConnectionThread,List<Long>> clientWorkUnitMap = new HashMap<>();
 
     // this keeps a copy of all the work units that are currently checked out over the network
     // maps unique EmptyBoundaryWorkUnit IDs to the units themselves
-    private static final Map<Integer,EmptyBoundaryWorkUnit> backupUnitMap = new HashMap<>();
+    private static final Map<Long,EmptyBoundaryWorkUnit> backupUnitMap = new HashMap<>();
 
     // this stores all the completed puzzles
     public static final List<ImmutablePatch> completedPatches = Collections.synchronizedList(new LinkedList<ImmutablePatch>());
@@ -188,7 +188,7 @@ public class Server
         private void stashResult(EmptyWorkUnitResult result)
         {
             // retrieve the contents of this EmptyWorkUnitResult
-            int jobID = result.uniqueID();
+            long jobID = result.uniqueID();
             //System.out.println("received ID " + jobID);
             List<ImmutablePatch> localCompletedPatches = result.getLocalCompletedPatches();
 
@@ -198,9 +198,9 @@ public class Server
             // mark job as finished
             synchronized (clientWorkUnitMap)
                 {
-                    List<Integer> list = clientWorkUnitMap.get(this);
+                    List<Long> list = clientWorkUnitMap.get(this);
                     //System.out.println("Trying to remove " + result.uniqueID() + " from: " + list);
-                    boolean success = list.remove(Integer.valueOf(result.uniqueID()));
+                    boolean success = list.remove(Long.valueOf(result.uniqueID()));
                     if ( !success )
                         System.out.println("error in clientWorkUnitMap!  expected to find ID " + result.uniqueID());
                 }
@@ -208,7 +208,7 @@ public class Server
             // remove backup unit
             synchronized (backupUnitMap)
                 {
-                    EmptyBoundaryWorkUnit unit = backupUnitMap.remove(Integer.valueOf(result.uniqueID()));
+                    EmptyBoundaryWorkUnit unit = backupUnitMap.remove(Long.valueOf(result.uniqueID()));
                     if ( unit == null )
                         System.out.println("error in backup unit map!");
                     //System.out.println(backupUnitMap.keySet());
@@ -220,7 +220,7 @@ public class Server
             String statusString = "";
             if ( localCompletedPatches.size() > 0 )
                 {
-                    statusString = String.format("[ %s ] : Received result %s ", dateString, result.uniqueID());
+                    statusString = String.format("\n[ %s ] : Received result %s ", dateString, result.uniqueID());
                     statusString = statusString + "(" + localCompletedPatches.size() + " new completed puzzles) ";
                     statusString = statusString + "from " + address;
                     System.out.println(statusString);
@@ -262,7 +262,7 @@ public class Server
             // add entry to clientWorkUnitMap
             synchronized(Server.clientWorkUnitMap)
                 {
-                    clientWorkUnitMap.put( this, new ArrayList<Integer>() );
+                    clientWorkUnitMap.put( this, new ArrayList<Long>() );
                 }
         }
     
@@ -307,9 +307,12 @@ public class Server
                                     // this is a request for new jobs
                                     //System.out.println("request for new jobs received");
                                     int jobCount = (Integer)incomingObject;
-                                    //int retry = 0;
                                     for (int i=0; i < jobCount; i++)
                                         {
+                                            // don't send out any new jobs until there's been enough time to build up more stuff in the queue
+                                            if ( new Date().getTime() - Server.lastRespawn.getTime()< 3*Preinitializer.SPAWN_MIN_TIME)
+                                                break;
+
 
                                             // attempt to send a job from the queue
                                             // if there are no jobs in the queue, wait
@@ -322,16 +325,9 @@ public class Server
                                                 {
                                                 }
 
+                                            // if there's nothing to send back, do nothing
                                             if ( r == null )
-                                                {
-                                                    // try again
-                                                    //i--;
-                                                    //retry++;
-                                                    //System.out.println("\nwaiting for more jobs to enter queue");
-                                                    //if ( retry == 5 )
-                                                        break;
-                                                    //continue;
-                                                }
+                                                break;
 
                                             Map<RunnableFuture,EmptyBoundaryWorkUnit> jobMap = ThreadService.INSTANCE.getExecutor().jobMap;
                                             EmptyBoundaryWorkUnit unit = null;
@@ -365,7 +361,7 @@ public class Server
                                             // keep track of which work units have been sent out
                                             synchronized (Server.clientWorkUnitMap)
                                                 {
-                                                    List<Integer> thisList = Server.clientWorkUnitMap.get(this);
+                                                    List<Long> thisList = Server.clientWorkUnitMap.get(this);
                                                     thisList.add(unit.uniqueID());
                                                 }
 
@@ -394,6 +390,10 @@ public class Server
             synchronized (clientWorkUnitMap)
                 {
                     clientWorkUnitMap.remove(this);
+                }
+            synchronized (LIVE_CONNECTIONS)
+                {
+                    LIVE_CONNECTIONS.remove(this);
                 }
         }
 

@@ -17,7 +17,7 @@ class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 0;        // the tile we're searching
+    public static final int MY_TILE = 4;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
@@ -27,7 +27,7 @@ class Preinitializer {
 
     public static final int NUMBER_OF_THREADS; // number of threads per client; set in static initializer
 
-    public static final int SPAWN_MAX_SIZE = 100; // no more work units will be spawned if the queue is bigger than this size
+    public static final int SPAWN_MAX_SIZE = 1000; // no more work units will be spawned if the queue is bigger than this size
     public static final int SPAWN_MIN_TIME = 1000; // if a work unit takes longer than this time in ms, more units will be spawned
 
     public static final boolean SERIALIZATION_FLAG = false;          // should EmptyBoundaryPatch.solve() serialize periodically?

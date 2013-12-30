@@ -4,17 +4,15 @@ import java.util.*;
 public class EmptyWorkUnitResult implements Result, Serializable
 {
     private final List<ImmutablePatch> localCompletedPatches;
-    private final int uniqueID;
+    private final long uniqueID;
 
-    public EmptyWorkUnitResult(int uniqueID, List<ImmutablePatch> localCompletedPatches)
-    //public EmptyWorkUnitResult(int originalHashcode, List<ImmutablePatch> localCompletedPatches, List<ImmutablePatch> eventualPatches)
+    public EmptyWorkUnitResult(long uniqueID, List<ImmutablePatch> localCompletedPatches)
     {
         this.localCompletedPatches = localCompletedPatches;
-        //this.localCompletedPatches = new LinkedList<ImmutablePatch>();
         this.uniqueID = uniqueID;
     }
 
-    public int uniqueID()
+    public long uniqueID()
     {
         return uniqueID;
     }

@@ -47,10 +47,10 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     public static LinkedList<EmptyBoundaryPatch> returnSpawnList = new LinkedList<>();
     public static List<EmptyWorkUnitResult> returnResultsList = new LinkedList<>();
 
-    public static final AtomicInteger IDgenerator = new AtomicInteger(0);
-    public final int uniqueID = IDgenerator.incrementAndGet();
+    public static final AtomicLong IDgenerator = new AtomicLong(0L);
+    public final long uniqueID = IDgenerator.incrementAndGet();
 
-    public int uniqueID()
+    public long uniqueID()
     {
         return uniqueID;
     }

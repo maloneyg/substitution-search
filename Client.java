@@ -30,7 +30,7 @@ public final class Client
 
     private static ThreadService executorService = ThreadService.INSTANCE;
 
-    private static final List<Future<Result>> allFutures = new LinkedList<Future<Result>>();
+    private static final HashMap<Long,Future<Result>> allFutures = new HashMap<Long,Future<Result>>();
 
     private static Object sendLock = new Object();
 
@@ -170,7 +170,7 @@ public final class Client
                                 //System.out.println("submitted ID " + unit.uniqueID());
                                 synchronized(allFutures)
                                     {
-                                        allFutures.add(thisFuture);
+                                        allFutures.put(Long.valueOf(unit.uniqueID()),thisFuture);
                                     }
                             }
                         else if ( incomingObject instanceof String )
@@ -235,11 +235,10 @@ public final class Client
             {
                 synchronized (sendLock)
                     {
-                        System.out.println("requesting " + i + " jobs");
                         outgoingObjectStream.writeObject(Integer.valueOf(i));
                         outgoingObjectStream.flush();
                         outgoingObjectStream.reset();
-                        System.out.println("Requested new instructions.");
+                        System.out.println("\nRequested " + i + " jobs.");
                     }
             }
         catch (IOException e)
@@ -290,7 +289,7 @@ public final class Client
     private static class TaskMonitor
     {
         private Timer timer;
-        private static final int UPDATE_INTERVAL = 500; // ms
+        private static final int UPDATE_INTERVAL = 2000; // ms
         private static ThreadService executorService = ThreadService.INSTANCE;
         private static Date lastUpdate = null;
 
@@ -315,6 +314,7 @@ public final class Client
                                      EmptyBoundaryWorkUnit.returnResultsList.size() == 0 )
                                     {
                                         System.out.println("nothing to send back");
+                                        kill.set(false);
                                         return;
                                     }
 
@@ -330,18 +330,45 @@ public final class Client
                                     {
                                         synchronized (sendLock)
                                             {
-                                                System.out.println("\nsending " + batch.toString());
-                                                outgoingObjectStream.writeObject(batch);
-                                                outgoingObjectStream.flush();
-                                                outgoingObjectStream.reset();
                                                 synchronized(allFutures)
                                                     {
-                                                        allFutures.clear();
+                                                        System.out.println("\nsending " + batch.toString());
+                                                        
+                                                        outgoingObjectStream.writeObject(batch);
+                                                        outgoingObjectStream.flush();
+                                                        outgoingObjectStream.reset();
+                                                        
+                                                        //System.out.println(allFutures.keySet());
+                                                        synchronized (EmptyBoundaryWorkUnit.returnResultsList)
+                                                            {
+                                                                for (EmptyWorkUnitResult r : EmptyBoundaryWorkUnit.returnResultsList)
+                                                                    {
+                                                                        Long i = Long.valueOf(r.uniqueID());
+                                                                        //System.out.println("2: removing " + i);
+                                                                        //String contents = allFutures.keySet().toString();
+                                                                        Future<Result> f = allFutures.remove(i);
+                                                                        if ( f == null )
+                                                                            {
+                                                                                System.out.println("unexpected error in allFutures 2");
+                                                                                //System.out.println("fail: " + i + "   " + contents);
+                                                                            }
+                                                                        //else
+                                                                            //System.out.println("success: " + i + "   " + contents);
+                                                                    }
+                                                            }
+                                                    }
+                                            
+                                                synchronized (EmptyBoundaryWorkUnit.returnSpawnList)
+                                                    {
+                                                        EmptyBoundaryWorkUnit.returnSpawnList.clear();
+                                                    }
+                                                synchronized (EmptyBoundaryWorkUnit.returnResultsList)
+                                                    {
+                                                        EmptyBoundaryWorkUnit.returnResultsList.clear();
                                                     }
                                                 Client.kill.set(false);
-                                                System.out.println("\ndone sending batch");
+                                                //System.out.println("sent batch to server");
                                             }
-                                        System.out.println("sent batch to server");
                                     }
                                 catch (SocketException e)
                                     {
@@ -363,11 +390,11 @@ public final class Client
                     }
 
                 // if any of the work units are complete, send the result
-                List<Future<Result>> completedJobs = new LinkedList<Future<Result>>();
+                List<Future<Result>> completedJobs = new LinkedList<>();
                 synchronized( allFutures )
                     {
                         // find out which jobs are finished
-                        for (Future<Result> f : allFutures)
+                        for (Future<Result> f : allFutures.values())
                             if (f.isDone())
                                 completedJobs.add(f);
                     }
@@ -379,6 +406,16 @@ public final class Client
                         try
                             {
                                 thisResult = f.get();
+                                EmptyWorkUnitResult r = (EmptyWorkUnitResult)thisResult;
+                                Client.sendResult(r);
+                                Long i = Long.valueOf(r.uniqueID());
+                                //System.out.println("1: removing " + i);
+                                synchronized( allFutures )
+                                    {
+                                        Future<Result> f2 = allFutures.remove(i);
+                                        if ( f2 == null )
+                                             System.out.println("unexpected error in allFutures 1");
+                                    }
                             }
                         catch (Exception e)
                             {
@@ -391,30 +428,16 @@ public final class Client
                                 System.out.println("null error in client while trying to send back result!");
                                 continue;
                             }
-                        EmptyWorkUnitResult thisEmptyResult = (EmptyWorkUnitResult)thisResult;
-                        Client.sendResult(thisEmptyResult);
-                    }
-                synchronized( allFutures )
-                    {
-                        // remove the results that have been sent so they won't be sent again 
-                        allFutures.removeAll(completedJobs);
                     }
 
                 // if the number of jobs in the queue is below the threshold, request more work
                 int currentSize = executorService.getExecutor().getQueue().size();
-                if ( currentSize == 0 )
+                if ( currentSize < Preinitializer.NUMBER_OF_THREADS )
                     {
-                        if ( TaskMonitor.lastUpdate == null )
-                            {
-                                TaskMonitor.lastUpdate = new Date();
-                                return;
-                            }
-                        if ( new Date().getTime() - TaskMonitor.lastUpdate.getTime() < 2000 )
-                        //if ( new Date().getTime() - TaskMonitor.lastUpdate.getTime() < 1.5*Preinitializer.SPAWN_MIN_TIME )
-                            return;
+                        if ( TaskMonitor.lastUpdate == null || 
+                             new Date().getTime() - TaskMonitor.lastUpdate.getTime() < 5000 )
                         TaskMonitor.lastUpdate = new Date();
-                        int numberOfJobsNeeded = 3*Preinitializer.NUMBER_OF_THREADS + 1 - currentSize - 
-                                                 executorService.getExecutor().getNumberOfRunningJobs();
+                        int numberOfJobsNeeded = 3*Preinitializer.NUMBER_OF_THREADS; 
                         Client.requestJob(numberOfJobsNeeded);
                     }
             }
