@@ -4,6 +4,7 @@
  *  Execution:    java EdgeBreakdownTree
  *
  *  A class representing all edge breakdowns that have been found so far.
+ *  Also useful for storing possible edge breakdowns in a PuzzleBoundary.
  *
  *************************************************************************/
 
