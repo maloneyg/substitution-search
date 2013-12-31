@@ -198,13 +198,20 @@ public class ThreadService
                 }
             catch (ExecutionException e)
                 {
-
                     // dump a picture of the error
                     synchronized ( jobMap ) {
                         EmptyBoundaryWorkUnit u = jobMap.get(r); 
                         try
                             {
                                 TriangleResults errorResults = new TriangleResults(ImmutableList.of(u.getPatch().dumpImmutablePatch()));
+                                while (true)
+                                    {
+                                        File test = new File(errorsCheckpointFilename + errorCounter.get() + ".chk");
+                                        if ( test.isFile() )
+                                            counter.incrementAndGet();
+                                        else
+                                            break;
+                                    }
                                 FileOutputStream fileOut = new FileOutputStream(errorsCheckpointFilename + errorCounter.get() + ".chk");
                                 ObjectOutputStream out = new ObjectOutputStream(fileOut);
                                 out.writeObject(errorResults);
