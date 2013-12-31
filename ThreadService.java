@@ -185,14 +185,7 @@ public class ThreadService
                 }
             else
                 log.log(Level.INFO,"Warning: runnable not in the map!");*/
-            synchronized(jobMap)
-                {
-                    EmptyBoundaryWorkUnit u = jobMap.remove(r);
-                    /*if ( u!=null )
-                        System.out.println("success");
-                    else
-                        System.out.println("failure");*/
-                }
+
             super.afterExecute(r,t);
             decrementNumberOfRunningJobs();
             numberOfJobsRun.getAndIncrement();
@@ -250,6 +243,15 @@ public class ThreadService
             catch (CancellationException e)
                 {
                 }
+            synchronized(jobMap)
+                {
+                    EmptyBoundaryWorkUnit u = jobMap.remove(r);
+                    /*if ( u!=null )
+                        System.out.println("success");
+                    else
+                        System.out.println("failure");*/
+                }
+
         }
 
         public int getNumberOfJobsRun()

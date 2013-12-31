@@ -19,12 +19,22 @@ public class EdgeBreakdownTree implements Serializable {
 
     private MultiTree<BasicEdgeLength>[] breakdowns;
 
+    // these pointers are only used if we are using
+    // this edge to restrict possibilities in the
+    // puzzle boundary
+    private TreeNode<BasicEdgeLength> pointer0;
+    private TreeNode<BasicEdgeLength> pointer1;
+    private TreeNode<BasicEdgeLength> pointer2;
+
     // private constructor
     private EdgeBreakdownTree() {
         breakdowns = new MultiTree[Preinitializer.N/2];
         for (int i = 0; i < breakdowns.length; i++) {
             breakdowns[i] = new MultiTree<BasicEdgeLength>();
         }
+        pointer0 = breakdowns[0].getHead();
+        pointer1 = breakdowns[0].getHead();
+        pointer2 = breakdowns[0].getHead();
     }
 
     // public static factory method

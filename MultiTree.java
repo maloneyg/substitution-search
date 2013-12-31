@@ -117,6 +117,11 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
         return head.getNext().isEmpty();
     }
 
+    // return the head node
+    public TreeNode<E> getHead() {
+        return head;
+    }
+
     // return the TreeNode at the top level containing the given data
     // return null if no TreeNode at the top contains the given data
     public TreeNode<E> nodeContaining(E data) {
