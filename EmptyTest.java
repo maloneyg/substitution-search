@@ -120,7 +120,7 @@ public class EmptyTest
                         EmptyWorkUnitResult thisEmptyResult = (EmptyWorkUnitResult)thisResult;
                         // by the time we get here, all initial work units and their descendents will have finished
                         // so it's safe to call getEventualPatches()
-                        allCompletedPatches.addAll(thisEmptyResult.getEventualPatches());
+//                        allCompletedPatches.addAll(thisEmptyResult.getEventualPatches());
                     }
                 catch (InterruptedException e)
                     {

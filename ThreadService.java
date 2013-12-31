@@ -3,6 +3,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import java.io.*;
 import java.util.logging.*;
+import com.google.common.collect.ImmutableList;
 
 public class ThreadService
 {
@@ -12,6 +13,8 @@ public class ThreadService
     public static final int JOB_CAPACITY              = 10000000;                                 // how many jobs can wait in the queue at a time
     public static final String runningJobsCheckpointFilename = "runningJobs.chk";               // serialized checkpoints
     public static final String pendingJobsCheckpointFilename = "pendingJobs.chk";               // assumed to be in working directory
+    public static final String errorsCheckpointFilename = "errors";               // assumed to be in working directory
+    private static AtomicInteger errorCounter = new AtomicInteger();
 
     private final CustomThreadPoolExecutor executorService;
 
@@ -165,14 +168,7 @@ public class ThreadService
         {
             //log.log(Level.INFO, String.format("%s is starting work on %s", Thread.currentThread().getName(), jobMap.get(r).toString()));
             //startTimes.put(r,new Date());
-            synchronized(jobMap)
-                {
-                    EmptyBoundaryWorkUnit u = jobMap.remove(r);
-                    /*if ( u!=null )
-                        System.out.println("success");
-                    else
-                        System.out.println("failure");*/
-                }
+
             super.beforeExecute(t,r);
             incrementNumberOfRunningJobs();
          }
@@ -189,6 +185,14 @@ public class ThreadService
                 }
             else
                 log.log(Level.INFO,"Warning: runnable not in the map!");*/
+            synchronized(jobMap)
+                {
+                    EmptyBoundaryWorkUnit u = jobMap.remove(r);
+                    /*if ( u!=null )
+                        System.out.println("success");
+                    else
+                        System.out.println("failure");*/
+                }
             super.afterExecute(r,t);
             decrementNumberOfRunningJobs();
             numberOfJobsRun.getAndIncrement();
@@ -201,6 +205,37 @@ public class ThreadService
                 }
             catch (ExecutionException e)
                 {
+
+                    // dump a picture of the error
+                    synchronized ( jobMap ) {
+                        EmptyBoundaryWorkUnit u = jobMap.get(r); 
+                        try
+                            {
+                                TriangleResults errorResults = new TriangleResults(ImmutableList.of(u.getPatch().dumpImmutablePatch()));
+                                FileOutputStream fileOut = new FileOutputStream(errorsCheckpointFilename + errorCounter.get() + ".chk");
+                                ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                                out.writeObject(errorResults);
+                                out.close();
+                                fileOut.close();
+                                System.out.println("wrote an error to " + errorsCheckpointFilename + errorCounter.get() + ".chk.");
+                            }
+                        catch (Exception f)
+                            {
+                                f.printStackTrace();
+                            }
+                    } // here ends the error picture dump
+
+                    // dump a String describing the error
+                    try (PrintWriter out = new PrintWriter(errorsCheckpointFilename + errorCounter.get() + ".txt")) {
+                        StringWriter sw = new StringWriter();
+                        e.printStackTrace(new PrintWriter(sw));
+                        String exceptionAsString = sw.toString();
+                        out.write(exceptionAsString);
+                    } catch (Exception f) {
+                        f.printStackTrace();
+                    }
+                    errorCounter.getAndIncrement();
+
                     // convert stack trace to String
                     StringWriter sw = new StringWriter();
                     PrintWriter pw = new PrintWriter(sw);
@@ -313,4 +348,4 @@ public class ThreadService
             log.log(Level.INFO, getName() + " has been terminated");
         }
     }
-}
+} // end of ThreadService
