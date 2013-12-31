@@ -13,14 +13,7 @@ public class Server
     private static List<ConnectionThread> LIVE_CONNECTIONS = new ArrayList<ConnectionThread>();
     private static List<ConnectionThread> ALL_CONNECTIONS = new ArrayList<ConnectionThread>();
 
-    // this keeps track of which jobs have been dispatched
-    // maps ConnectionThreads to the unique IDs of each work unit that the thread is working on
-    private static final Map<ConnectionThread,List<Long>> clientWorkUnitMap = new HashMap<>();
-
-    // this keeps a copy of all the work units that are currently checked out over the network
-    // maps unique EmptyBoundaryWorkUnit IDs to the units themselves
-    private static final Map<Long,EmptyBoundaryWorkUnit> backupUnitMap = new HashMap<Long,EmptyBoundaryWorkUnit>();
-
+    private static final ClientDatabase clientDatabase = ClientDatabase.INSTANCE;
 
     // this stores all the completed puzzles
     public static final List<ImmutablePatch> completedPatches = new LinkedList<ImmutablePatch>();
@@ -69,7 +62,7 @@ public class Server
                 //    System.out.println(backupUnitMap.size());
                 if ( executorService.getExecutor().getNumberOfRunningJobs() == 0 &&
                      executorService.getExecutor().getQueue().size() == 0 &&
-                     backupUnitMap.size() == 0 )
+                     clientDatabase.jobsCheckedOut()  == 0 )
                     break;
                 
                 try
@@ -192,7 +185,7 @@ public class Server
         private void stashResult(EmptyWorkUnitResult result)
         {
             // retrieve the contents of this EmptyWorkUnitResult
-            long jobID = result.uniqueID();
+            Long jobID = result.uniqueID();
             //System.out.println("received ID " + jobID);
             List<ImmutablePatch> localCompletedPatches = result.getLocalCompletedPatches();
 
@@ -203,23 +196,7 @@ public class Server
                 }
 
             // mark job as finished
-            synchronized (clientWorkUnitMap)
-                {
-                    List<Long> list = clientWorkUnitMap.get(this);
-                    //System.out.println("Trying to remove " + result.uniqueID() + " from: " + list);
-                    boolean success = list.remove(Long.valueOf(result.uniqueID()));
-                    if ( !success )
-                        System.out.println("error in clientWorkUnitMap!  expected to find ID " + result.uniqueID());
-                }
-
-            // remove backup unit
-            synchronized (backupUnitMap)
-                {
-                    EmptyBoundaryWorkUnit unit = backupUnitMap.remove(Long.valueOf(result.uniqueID()));
-                    if ( unit == null )
-                        System.out.println("error in backup unit map!");
-                    //System.out.println(backupUnitMap.keySet());
-                }
+            clientDatabase.markAsFinished(this,jobID);
 
             // print a report
             Date currentDate = new Date();
@@ -264,12 +241,6 @@ public class Server
                 {
                     Server.LIVE_CONNECTIONS.add(this);
                     Server.ALL_CONNECTIONS.add(this);
-                }
-
-            // add entry to clientWorkUnitMap
-            synchronized(Server.clientWorkUnitMap)
-                {
-                    clientWorkUnitMap.put( this, new ArrayList<Long>() );
                 }
         }
     
@@ -366,18 +337,7 @@ public class Server
                                                     continue;
                                                 }
                                             
-                                            // keep track of which work units have been sent out
-                                            synchronized (Server.clientWorkUnitMap)
-                                                {
-                                                    List<Long> thisList = Server.clientWorkUnitMap.get(this);
-                                                    thisList.add(unit.uniqueID());
-                                                }
-
-                                            // keep a copy of this job in case it dies
-                                            synchronized (Server.backupUnitMap)
-                                                {
-                                                    Server.backupUnitMap.put(unit.uniqueID(), unit);
-                                                }
+                                            clientDatabase.markAsStarted(this,unit);
                                         }
                                 }
                         }
@@ -516,95 +476,7 @@ public class Server
                     }
 
                 // if a connection has died, re-queue the jobs that were dispatched
-                synchronized ( clientWorkUnitMap )
-                    {
-                        List<ConnectionThread> threadsToRemove = new LinkedList<>();
-
-                        for ( ConnectionThread t : clientWorkUnitMap.keySet() )
-                            {
-                                if ( t.isAlive() )
-                                    continue;
-
-                                // if a thread is dead, then find out which unique IDs it had checked out
-                                List<Long> IDlist = clientWorkUnitMap.get(t);
-                                if ( IDlist.size() == 0 )
-                                    {
-                                        threadsToRemove.add(t);
-                                        continue;
-                                    }
-
-                                System.out.println("\nRe-queueing " + IDlist.size() + " jobs from dead thread: " + t.address);
-                                
-                                // get the EmptyBoundaryWorkUnits that correspond to these IDs
-                                HashMap<EmptyBoundaryWorkUnit,Long> unitMap = new HashMap<>();
-                                synchronized ( backupUnitMap )
-                                    {
-                                        // put all the work units that have to be requeued in unitMap
-                                        for (Long l : IDlist)
-                                            {
-                                                EmptyBoundaryWorkUnit unit = backupUnitMap.get(l);
-                                                if ( unit == null )
-                                                    {
-                                                        System.out.println("Error in unit map!  Expected to find a unit for ID " + l);
-                                                        System.out.println(backupUnitMap.keySet());
-                                                        break;
-                                                    }
-                                                Long l2 = unitMap.put(unit,l);
-                                                if ( l2 != null )
-                                                    System.out.println("replaced " + l2 + " with " + l);
-                                                if ( unit == null )
-                                                    System.out.println("null unit");
-                                                if ( l == null )
-                                                    System.out.println("null long");
-                                            }
-                                       // *** just use the unique ID straight from the work unit? 
-                                        System.out.println("Re-queueing unit IDs: ");
-                                        System.out.println(unitMap.values());
-                                        for ( EmptyBoundaryWorkUnit u : unitMap.keySet() )
-                                            {
-                                                Long l = unitMap.get(u);
-
-                                                if ( u == null )
-                                                    System.out.println("2null unit");
-                                                if ( l == null )
-                                                    System.out.println("2null long");
-
-                                                 // requeue each unit
-                                                u.serverEventualPatches();
-                                                ThreadService.INSTANCE.getExecutor().submit(u);
-                                                System.out.print(u.uniqueID() + " ");
-
-                                                // remove unit from clientWorkMap
-                                                boolean success = IDlist.remove(l);
-                                                if ( success == false )
-                                                    System.out.println("Failed to remove " + l + " from " + IDlist.toString());
-
-                                                // remove unit from backupUnitMap
-                                                EmptyBoundaryWorkUnit u2 = backupUnitMap.remove(l);
-                                                if ( u2 == null )
-                                                    System.out.println("Failed to remove " + l + " from " + backupUnitMap.keySet().toString());
-                                            }
-                                        System.out.println();
-                                    }
-                                // if we have successfully re-queued all the dead units, mark this thread for removal
-                                if ( clientWorkUnitMap.get(t).size() == 0 )
-                                    threadsToRemove.add(t);
-                                else
-                                    {
-                                        System.out.println("Error: failed to re-queue " + IDlist.size() + " jobs: ");
-                                        for ( Long l : IDlist )
-                                            System.out.print(l + " ");
-                                    }
-                            }
-                        for ( ConnectionThread t : threadsToRemove )
-                            {
-                                List<Long> list = clientWorkUnitMap.remove(t);
-                                if ( list == null )
-                                    System.out.println("Error while trying to remove thread!");
-                                else
-                                    System.out.println("Successfully requeued all jobs that were sent to " + t.address + ".");
-                            }
-                    }
+                clientDatabase.requeueDead();
 
                 // periodically write interim results to disk
                 int numberOfCompletedPatches = 0;

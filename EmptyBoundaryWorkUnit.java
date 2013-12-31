@@ -48,9 +48,9 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
     public static List<EmptyWorkUnitResult> returnResultsList = new LinkedList<>();
 
     public static final AtomicLong IDgenerator = new AtomicLong(0L);
-    public final long uniqueID = IDgenerator.incrementAndGet();
+    public final Long uniqueID = Long.valueOf(IDgenerator.incrementAndGet());
 
-    public long uniqueID()
+    public Long uniqueID()
     {
         return uniqueID;
     }
