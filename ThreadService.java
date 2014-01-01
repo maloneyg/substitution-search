@@ -208,7 +208,7 @@ public class ThreadService
                                     {
                                         File test = new File(errorsCheckpointFilename + errorCounter.get() + ".chk");
                                         if ( test.isFile() )
-                                            counter.incrementAndGet();
+                                            errorCounter.incrementAndGet();
                                         else
                                             break;
                                     }
