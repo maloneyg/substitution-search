@@ -410,7 +410,8 @@ public class EmptyBoundaryPatch implements Serializable {
     // place a single tile, then call this method recursively.
     public void debugSolve(EmptyBoundaryDebugDisplay d) {
         do {
-            d.updateMessage(message);
+            d.updateMessage(edges.openSize() + " open edges.\n" + edges.closedSize() + " closed edges.\n");
+            //d.updateMessage(message);
             d.update(dumpImmutablePatch());
 
             if (tileList.empty()) {

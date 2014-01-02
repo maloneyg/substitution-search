@@ -26,10 +26,9 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
     private final BytePoint[] vertices;
     private final Orientation[] orientations;
     private final BasicEdgeLength[] edgeLengths;
-/*    private static Cache<AbstractMap.SimpleEntry<BytePoint[],Orientation[]>, BasicTriangle> cache = CacheBuilder.newBuilder()
-        .maximumSize(1000)// we may want to change this later
-        .build(); // maintain a cache of existing BasicTriangles
-*/
+    // direction vectors of the edges of this triangle
+    private final BytePoint[] directions;
+
     // the prototile of which this is an instance
     private final BasicPrototile prototile;
     // is it reflected or not?
@@ -45,24 +44,15 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
         edgeLengths = e;
         prototile = P;
         flip = f;
+        directions = new BytePoint[] { //
+                        BytePoint.unitize(e[2],p[1].subtract(p[0])),//
+                        BytePoint.unitize(e[0],p[2].subtract(p[1])),//
+                        BytePoint.unitize(e[1],p[0].subtract(p[2])) //
+                                     };
     }
 
     // public static factory methods.
     public static BasicTriangle createBasicTriangle(BasicAngle[] a, BytePoint[] p, Orientation[] o, BasicEdgeLength[] e, BasicPrototile P, boolean f) {
-        /*final BasicAngle[] aa = a;
-        final BytePoint[] pp = p;
-        final Orientation[] oo = o;
-        final BasicEdgeLength[] ee = e;
-        try {
-            return cache.get(new AbstractMap.SimpleEntry(p,o), new Callable<BasicTriangle>() {
-                @Override
-                public BasicTriangle call() throws IllegalArgumentException {
-                  return new BasicTriangle(aa,pp,oo,ee);
-                }
-              });
-        } catch (ExecutionException ex) {
-            throw new IllegalArgumentException(ex.getCause());
-        }*/
         return new BasicTriangle(a,p,o,e,P,f);
     }
 
@@ -182,16 +172,24 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
     * vector is the same as taking the 2d cross product with the 
     * original vector.
     */
+//    public boolean contains(BytePoint p) {
+//        BytePoint m; // the direction vector for a side
+//        BytePoint v; // the other vertex
+//        BytePoint t; // vertex on the given side, used to test cross product
+//        for (int i = 0; i < 3; i++) {
+//            m = vertices[(i+2)%3].subtract(vertices[(i+1)%3]);
+//            v = vertices[i];
+//            t = vertices[(i+1)%3];
+//            if (Math.signum((v.subtract(t)).crossProduct(m)) != Math.signum((p.subtract(t)).crossProduct(m)))
+//                return false;
+//        }
+//        return true;
+//    }
+
+    // alternative to the above method
     public boolean contains(BytePoint p) {
-        BytePoint m; // the direction vector for a side
-        BytePoint v; // the other vertex
-        BytePoint t; // vertex on the given side, used to test cross product
         for (int i = 0; i < 3; i++) {
-            m = vertices[(i+2)%3].subtract(vertices[(i+1)%3]);
-            v = vertices[i];
-            t = vertices[(i+1)%3];
-            if (Math.signum((v.subtract(t)).crossProduct(m)) != Math.signum((p.subtract(t)).crossProduct(m)))
-//            if (Math.signum((v.subtract(t)).crossProduct(m).evaluate(Initializer.COS)) != Math.signum((p.subtract(t)).crossProduct(m).evaluate(Initializer.COS)))
+            if ((p.subtract(vertices[i])).crossProduct(directions[i]) > BasicEdge.TOO_CLOSE)
                 return false;
         }
         return true;

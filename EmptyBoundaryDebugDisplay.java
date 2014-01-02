@@ -347,7 +347,7 @@ public class EmptyBoundaryDebugDisplay extends JPanel implements ActionListener
 //            System.exit(1);
 //        }
 
-        EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(1,"debugging");
+        EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(0,"debugging");
 
     }
 
