@@ -18,7 +18,7 @@ public class PointsDisplay extends JPanel implements ActionListener
     private JButton next;
     private JButton previous;
     private int position;
-    public static final int windowSize = 800;
+    public static final int windowSize = 500;
 
     private JTextArea currentStatus;
     private JTextField userInput;

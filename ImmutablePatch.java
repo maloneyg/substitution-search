@@ -134,6 +134,14 @@ public class ImmutablePatch implements Serializable {
             }
             output.add(new OrderedTriple(new ArrayList<RealMatrix>(edgeList)));
         }
+        if (openEdges.length > 1) {
+            for (BytePoint p : openEdges[openEdges.length-2].reverse().getQuantumTriangle()) {
+                edgeList.set(0,(RealMatrix)new Array2DRowRealMatrix(p.arrayToDraw()));
+                edgeList.set(1,(RealMatrix)new Array2DRowRealMatrix(p.arrayToDraw()));
+                edgeList.set(2,(RealMatrix)new Array2DRowRealMatrix(p.arrayToDraw()));
+                output.add(new OrderedTriple(new ArrayList<RealMatrix>(edgeList)));
+            }
+        }
         return output;
     }
 
