@@ -189,7 +189,7 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
     // alternative to the above method
     public boolean contains(BytePoint p) {
         for (int i = 0; i < 3; i++) {
-            if ((p.subtract(vertices[i])).crossProduct(directions[i]) > BasicEdge.TOO_CLOSE)
+            if ((p.subtract(vertices[i])).crossProduct(directions[i]) < BasicEdge.TOO_CLOSE)
                 return false;
         }
         return true;

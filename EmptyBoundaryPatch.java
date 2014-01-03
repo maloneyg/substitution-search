@@ -410,8 +410,8 @@ public class EmptyBoundaryPatch implements Serializable {
     // place a single tile, then call this method recursively.
     public void debugSolve(EmptyBoundaryDebugDisplay d) {
         do {
-            d.updateMessage(edges.openSize() + " open edges.\n" + edges.closedSize() + " closed edges.\n");
-            //d.updateMessage(message);
+            //d.updateMessage(edges.openSize() + " open edges.\n" + edges.closedSize() + " closed edges.\n");
+            d.updateMessage(message);
             d.update(dumpImmutablePatch());
 
             if (tileList.empty()) {
@@ -794,6 +794,13 @@ public class EmptyBoundaryPatch implements Serializable {
 
         } // end second-last edge check
 
+        // make sure the new triangle doesn't have any old vertices inside it
+        if (coversVertex(t)) {
+            if (debug) setMessage(t + DebugMessage.VERTEX_COVER.toString());
+            //System.out.println("COVERS VERTEX.");
+            return false;
+        }
+
         return true;
     }
 
@@ -822,6 +829,15 @@ public class EmptyBoundaryPatch implements Serializable {
                 }
             }
             if (okay) return true;
+        }
+        return false;
+    }
+
+    // check if a triangle covers any placed vertices
+    private boolean coversVertex(BasicTriangle t) {
+        List<BytePoint> points = Arrays.asList(t.getVertices());
+        for (BytePoint p : vertices) {
+            if ((!points.contains(p))&&t.contains(p)) return true;
         }
         return false;
     }

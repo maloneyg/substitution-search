@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class TriangleResultsDisplay
+public class ClosedResultsDisplay
 {
     @SuppressWarnings("unchecked")
     public static void main(String[] args)
@@ -33,7 +33,7 @@ public class TriangleResultsDisplay
             // display data
             try
                 {
-                    PointsDisplay display = new PointsDisplay(patches,filename);
+                    ClosedPointsDisplay display = new ClosedPointsDisplay(patches,filename);
                     System.out.println(patches.get(0).openSize() + " open edges.");
                     System.out.println(patches.get(0).closedSize() + " closed edges.");
                     System.out.println(patches.get(0).triangleSize() + " triangles.");

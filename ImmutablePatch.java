@@ -145,4 +145,44 @@ public class ImmutablePatch implements Serializable {
         return output;
     }
 
+    /*
+    * produce closed edges for drawing the patch
+    */
+    public ArrayList<OrderedTriple> closedGraphicsDump() {
+        ArrayList<OrderedTriple> output = new ArrayList<OrderedTriple>(closedEdges.length);
+        BytePoint p0;
+        BytePoint p1;
+        ArrayList<RealMatrix> edgeList = new ArrayList<RealMatrix>(3);
+        int counter = 0;
+        output.add(new OrderedTriple(toArray()));
+        for (BasicEdge e : closedEdges) {
+            p0 = e.getEnds()[0];
+            p1 = e.getEnds()[1];
+            counter++;
+            if (counter == 1) {
+                edgeList.add((RealMatrix)new Array2DRowRealMatrix(p0.arrayToDraw()));
+                edgeList.add((RealMatrix)new Array2DRowRealMatrix(p1.arrayToDraw()));
+                edgeList.add((RealMatrix)new Array2DRowRealMatrix(p0.arrayToDraw()));
+            } else {
+                edgeList.set(0,(RealMatrix)new Array2DRowRealMatrix(p0.arrayToDraw()));
+                edgeList.set(1,(RealMatrix)new Array2DRowRealMatrix(p1.arrayToDraw()));
+                edgeList.set(2,(RealMatrix)new Array2DRowRealMatrix(p0.arrayToDraw()));
+            }
+            output.add(new OrderedTriple(new ArrayList<RealMatrix>(edgeList)));
+        }
+        return output;
+    }
+
+    public int openSize() {
+        return openEdges.length;
+    }
+
+    public int closedSize() {
+        return closedEdges.length;
+    }
+
+    public int triangleSize() {
+        return triangles.length;
+    }
+
 } // end of class ImmutablePatch

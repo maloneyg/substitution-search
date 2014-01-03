@@ -24,6 +24,8 @@ public interface DebugMessage extends Serializable
         public String toString() { return " is too close to point "; } };
     public static final DebugMessage NON_CONTAINMENT = new DebugMessage() {
         public String toString() { return " rejected for non-containment in the big tile"; } };
+    public static final DebugMessage VERTEX_COVER = new DebugMessage() {
+        public String toString() { return " covers a vertex "; } };
     public static final DebugMessage OVERLAP = new DebugMessage() {
         public String toString() { return " rejected for overlapping "; } };
     public static final DebugMessage PLACING = new DebugMessage() {

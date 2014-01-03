@@ -24,18 +24,30 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
 
     private final BytePoint[] ends;
 
+//    static { // initialize TOO_CLOSE
+//        double smallest = 10.0;
+//        for (BasicPrototile p : BasicPrototile.ALL_PROTOTILES) {
+//            BasicTriangle t = p.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false);
+//            BasicEdge[] edges = t.getEdges();
+//            BytePoint[] vertices = t.getVertices();
+//            for (int i = 0; i < 3; i++) {
+//                double d = Math.abs(edges[i].cross(vertices[i]));
+//                if (d < smallest) smallest = d;
+//            }
+//        }
+//        TOO_CLOSE = 0.95*smallest;
+//    }
+
     static { // initialize TOO_CLOSE
         double smallest = 10.0;
-        for (BasicPrototile p : BasicPrototile.ALL_PROTOTILES) {
-            BasicTriangle t = p.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false);
-            BasicEdge[] edges = t.getEdges();
-            BytePoint[] vertices = t.getVertices();
-            for (int i = 0; i < 3; i++) {
-                double d = Math.abs(edges[i].cross(vertices[i]));
+        BytePoint base = BasicEdgeLength.createBasicEdgeLength(0).getAsVector(BasicAngle.createBasicAngle(0));
+        for (BasicEdgeLength l : BasicEdgeLength.ALL_EDGE_LENGTHS) {
+            for (BytePoint r : l.getQuantumTriangle()) {
+                double d = Math.abs(base.crossProduct(r));
                 if (d < smallest) smallest = d;
             }
         }
-        TOO_CLOSE = 0.95*smallest;
+        TOO_CLOSE = 0.98*smallest;
     }
 
     // Constructor methods.  
