@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Stack;
 import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
 
 class TreeNode<E> implements Serializable {
 
@@ -97,6 +99,7 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
 
     private interface BetterIterator<E> extends Iterator<E> {
         public int getLevel();
+        public boolean top();
     }
 
     private TreeNode<E> head;
@@ -151,6 +154,27 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
                 currentNode = nextNode;
             }
         }
+    }
+
+    // output a list of chains represented by this tree
+    public List<List<E>> getChains() {
+        BetterIterator<E> i = iterator();
+        List<List<E>> output = new LinkedList<>();
+        List<E> fill = new LinkedList<>();
+        while (i.hasNext()) {
+            E data = i.next();
+            if (i.getLevel()<fill.size()) {
+                fill.set(i.getLevel(),data);
+            } else if (i.getLevel()>fill.size()) {
+                throw new IllegalArgumentException("Trying to add to level " + fill.size() + " of a chain using data from level " + i.getLevel() + ".");
+            } else {
+                fill.add(data);
+            }
+            if (i.top()) {
+                output.add(ImmutableList.copyOf(fill));
+            }
+        }
+        return output;
     }
 
     // output a String
@@ -247,6 +271,10 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
 
             public int getLevel() {
                 return level; 
+            }
+
+            public boolean top() {
+                return current.getNext().isEmpty(); 
             }
 
         };

@@ -10,6 +10,7 @@
 
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Collections;
 import java.util.Iterator;
@@ -35,6 +36,26 @@ public class EdgeBreakdownTree implements Serializable {
         pointer0 = breakdowns[0].getHead();
         pointer1 = breakdowns[0].getHead();
         pointer2 = breakdowns[0].getHead();
+    }
+
+    // private constructor
+    // three edge breakdowns--one for each edge in the prototile
+    // that we're searching
+    private EdgeBreakdownTree(EdgeBreakdownTree base, BasicEdgeLength l) {
+        breakdowns = new MultiTree[3];
+        List<Integer> angles = Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE);
+        for (int i = 0; i < 3; i++) {
+            breakdowns[i] = base.breakdowns[Initializer.acute(angles.get(i))-1];
+        }
+        List<List<BasicEdgeLength>> replacements = breakdowns[2].getChains();
+        MultiTree<BasicEdgeLength> newTree = new MultiTree<>();
+        for (List<BasicEdgeLength> a : replacements) {
+            if (a.get(a.size()-1).equals(l)) newTree.addChain(a);
+        }
+        breakdowns[2] = newTree;
+        pointer0 = breakdowns[0].getHead();
+        pointer1 = breakdowns[1].getHead();
+        pointer2 = breakdowns[2].getHead();
     }
 
     // public static factory method
