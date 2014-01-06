@@ -822,7 +822,7 @@ public class EmptyBoundaryPatch implements Serializable {
             }
             if (okay) {
                 for (BasicTriangle t : triangles) {
-                    if (t.contains(p)) {
+                    if (t.covers(p)) {
                         okay = false;
                         break;
                     }
@@ -835,9 +835,8 @@ public class EmptyBoundaryPatch implements Serializable {
 
     // check if a triangle covers any placed vertices
     private boolean coversVertex(BasicTriangle t) {
-        List<BytePoint> points = Arrays.asList(t.getVertices());
         for (BytePoint p : vertices) {
-            if ((!points.contains(p))&&t.contains(p)) return true;
+            if (t.covers(p)) return true;
         }
         return false;
     }

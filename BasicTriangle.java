@@ -189,6 +189,17 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
     // alternative to the above method
     public boolean contains(BytePoint p) {
         for (int i = 0; i < 3; i++) {
+            //System.out.println((vertices[i].subtract(p)).crossProduct(directions[i]));
+            if ((vertices[i].subtract(p)).crossProduct(directions[i]) < -BasicEdge.TOO_CLOSE)
+                return false;
+        }
+        return true;
+    }
+
+    // same as contains, but returns false for this triangle's vertices
+    public boolean covers(BytePoint p) {
+        if (p.equals(vertices[0])||p.equals(vertices[1])||p.equals(vertices[2])) return false;
+        for (int i = 0; i < 3; i++) {
             if ((p.subtract(vertices[i])).crossProduct(directions[i]) < BasicEdge.TOO_CLOSE)
                 return false;
         }
@@ -270,6 +281,26 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
             if (f.getLength().equals(e.getLength())) return (e.congruent(f) == flip);
         }
         return false;
+    }
+
+    public static void main(String[] args) {
+
+        BasicTriangle test = BasicPrototile.createBasicPrototile(new int[] {3, 3, 5}).place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false);
+        BytePoint p1 = BasicEdgeLength.createBasicEdgeLength(0).getAsVector(BasicAngle.createBasicAngle(19));
+        BytePoint p2 = BasicEdgeLength.createBasicEdgeLength(1).getAsVector(BasicAngle.createBasicAngle(19));
+        BytePoint p3 = BasicEdgeLength.createBasicEdgeLength(0).getAsVector(BasicAngle.createBasicAngle(1));
+        BytePoint p4 = p1.add(p1.add(p1.add(p1.add(p1))));
+        System.out.println(test);
+        System.out.println("first vertex: " + test.contains(test.vertices[0]));
+        System.out.println("second vertex: " + test.contains(test.vertices[1]));
+        System.out.println("third vertex: " + test.contains(test.vertices[2]));
+        System.out.println("p1: " + test.contains(p1));
+        System.out.println("p2: " + test.contains(p2));
+        System.out.println("p3: " + test.contains(p3));
+        System.out.println("p4: " + test.contains(p4));
+        System.out.println("TOO_CLOSE: " + BasicEdge.TOO_CLOSE);
+        System.out.println("directions: " + test.directions[0] + " " + test.directions[1] + " " + test.directions[2]);
+
     }
 
 } // end of class BasicTriangle
