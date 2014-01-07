@@ -110,6 +110,15 @@ public class EdgeBreakdownTree implements Serializable {
         return output;
     }
 
+    // output a String of chains
+    public String chainString() {
+        String output = "";
+        for (int i = 0; i < breakdowns.length; i++) {
+            output += "Edge " + i + ":\n" + breakdowns[i].chainString() + "\n";
+        }
+        return output;
+    }
+
     // equals method.
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())

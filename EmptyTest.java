@@ -185,7 +185,7 @@ public class EmptyTest
                     }
                 System.out.println("Breakdowns:\n");
                 try {
-                    System.out.println(breakdown);
+                    System.out.println(breakdown.chainString());
                 } catch (Exception e) {
                     StackTraceElement[] elmnt = e.getStackTrace();
                     for (int i = 0; i < 10; i++) System.out.println(elmnt[i]);

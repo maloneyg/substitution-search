@@ -146,6 +146,46 @@ public class Server
                             }
                     }
             }
+
+
+            // begin writing edge breakdowns
+            System.out.print("Writing edge breakdowns to disk...");
+            EdgeBreakdownTree breakdown = EdgeBreakdownTree.createEdgeBreakdownTree();
+            // make the edge breakdown file
+            synchronized (completedPatches) {
+                for (ImmutablePatch P : completedPatches) {
+                    breakdown.addBreakdown(Initializer.acute(Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE).get(0))-1,P.getEdge0());
+                    breakdown.addBreakdown(Initializer.acute(Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE).get(1))-1,P.getEdge1());
+                    breakdown.addBreakdown(Initializer.acute(Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE).get(2))-1,P.getEdge2());
+                }
+            }
+
+            // write it to disk
+            try
+                {
+                    FileOutputStream fileOut = new FileOutputStream(Preinitializer.BREAKDOWN_FILENAME);
+                    ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                    out.writeObject(breakdown);
+                    out.close();
+                    fileOut.close();
+                    System.out.println("wrote breakdowns to " + Preinitializer.BREAKDOWN_FILENAME + ".");
+                }
+            catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+
+            // print the breakdowns
+            System.out.println("Breakdowns:\n");
+            try {
+                System.out.println(breakdown.toString());
+                System.out.println(breakdown.chainString());
+            } catch (Exception e) {
+                StackTraceElement[] elmnt = e.getStackTrace();
+                for (int i = 0; i < 10; i++) System.out.println(elmnt[i]);
+                System.exit(1);
+            }
+
         System.out.println("Have a nice day!");
         System.exit(0);
     }
@@ -551,4 +591,4 @@ public class Server
             }
         }
     }
-}
+} // end of class Server

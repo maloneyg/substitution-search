@@ -163,10 +163,10 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
         List<E> fill = new LinkedList<>();
         while (i.hasNext()) {
             E data = i.next();
-            if (i.getLevel()<fill.size()) {
-                fill.set(i.getLevel(),data);
-            } else if (i.getLevel()>fill.size()) {
-                throw new IllegalArgumentException("Trying to add to level " + fill.size() + " of a chain using data from level " + i.getLevel() + ".");
+            if (i.getLevel()<=fill.size()) {
+                fill.set(i.getLevel()-1,data);
+//            } else if (i.getLevel()>fill.size()) {
+//                throw new IllegalArgumentException("Trying to add to level " + fill.size() + " of a chain using data from level " + i.getLevel() + ".");
             } else {
                 fill.add(data);
             }
@@ -184,6 +184,18 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
         while (it.hasNext()) {
             E nexto = it.next();
             output += "Level: " + it.getLevel() + ".  " + nexto + "\n";
+        }
+        return output;
+    }
+
+    // output a String of chains
+    public String chainString() {
+        String output = "";
+        for (List<E> l : getChains()) {
+            for (E e : l) {
+                output += e + " ";
+            }
+            output += "\n";
         }
         return output;
     }
