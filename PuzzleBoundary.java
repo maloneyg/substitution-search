@@ -361,6 +361,7 @@ public class PuzzleBoundary implements Serializable {
         for (int i = 0; i < E0.length; i++) {
             if (ends[0].equals(E0[i])&&i!=E0.length-1) hit = true;
             if (hit) {
+                if (!breakdown.precedesLength(0,e.getLength())) return -1;
                 if (block0[i]) return -1;
                 if (ends[1].equals(E0[i])) return 1;
             }
@@ -369,6 +370,7 @@ public class PuzzleBoundary implements Serializable {
         for (int i = 0; i < E1.length; i++) {
             if (ends[0].equals(E1[i])&&i!=E1.length-1) hit = true;
             if (hit) {
+                if (!breakdown.precedesLength(1,e.getLength())) return -1;
                 if (block1[i]) return -1;
                 if (ends[1].equals(E1[i])) return 1;
             }
@@ -377,6 +379,7 @@ public class PuzzleBoundary implements Serializable {
         for (int i = 0; i < E2.length; i++) {
             if (ends[0].equals(E2[i])&&i!=E2.length-1) hit = true;
             if (hit) {
+                if (!breakdown.precedesLength(2,e.getLength())) return -1;
                 if (block2[i]) return -1;
                 if (ends[1].equals(E2[i])) return 1;
             }
@@ -406,14 +409,17 @@ public class PuzzleBoundary implements Serializable {
     public void add(BasicEdge e) {
         if (flip(E0,block0,e)) {
             placed0.push(e);
+            breakdown.place(0,e.getLength());
             return;
         }
         if (flip(E1,block1,e)) {
             placed1.push(e);
+            breakdown.place(1,e.getLength());
             return;
         }
         if (flip(E2,block2,e)) {
             placed2.push(e);
+            breakdown.place(2,e.getLength());
             return;
         }
     }
@@ -422,14 +428,17 @@ public class PuzzleBoundary implements Serializable {
     public void remove(BasicEdge e) {
         if (flip(E0,block0,e)) {
             placed0.pop();
+            breakdown.remove(0);
             return;
         }
         if (flip(E1,block1,e)) {
             placed1.pop();
+            breakdown.remove(1);
             return;
         }
         if (flip(E2,block2,e)) {
             placed2.pop();
+            breakdown.remove(2);
             return;
         }
     }
