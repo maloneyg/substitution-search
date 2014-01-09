@@ -236,7 +236,7 @@ public class EmptyBoundaryPatch implements Serializable {
 
     // set the message
     public void setMessage(String s) {
-        message = s;
+        message = tilesPercent()+"\n"+s;
     }
 
     // get the message
@@ -410,6 +410,7 @@ public class EmptyBoundaryPatch implements Serializable {
     // place a single tile, then call this method recursively.
     public void debugSolve(EmptyBoundaryDebugDisplay d) {
         do {
+            //d.updateMessage(edges.openSize() + " open edges.\n" + edges.closedSize() + " closed edges.\n");
             d.updateMessage(message);
             d.update(dumpImmutablePatch());
 
@@ -655,20 +656,20 @@ public class EmptyBoundaryPatch implements Serializable {
 //            }
 
             // make sure the new vertex doesn't overlap any closed edges
-            for (BasicEdge e : edges.closed()) {
-                if (e.incident(other)) {
-                    if (debug) setMessage(t +"\n"+ DebugMessage.INCIDENT_CLOSED.toString());
-                    return false;
-                }
-            }
+//            for (BasicEdge e : edges.closed()) {
+//                if (e.incident(other)) {
+//                    if (debug) setMessage(t +"\n"+ DebugMessage.INCIDENT_CLOSED.toString());
+//                    return false;
+//                }
+//            }
 
             // make sure the new vertex isn't inside any placed triangles
-            for (BasicTriangle tr : triangles) {
-                if (tr.contains(other)) {
-                    if (debug) setMessage(t +"\n"+ DebugMessage.OVERLAP.toString() +"\n"+ tr);
-                    return false;
-                }
-            }
+//            for (BasicTriangle tr : triangles) {
+//                if (tr.contains(other)) {
+//                    if (debug) setMessage(t +"\n"+ DebugMessage.OVERLAP.toString() +"\n"+ tr);
+//                    return false;
+//                }
+//            }
 
             // return false if the new vertex is too close to any open edge
             for (BasicEdge open : edges.open()) {
@@ -708,12 +709,12 @@ public class EmptyBoundaryPatch implements Serializable {
                     return false;
                 }
             }
-            for (BasicEdge closed : edges.closed()) {
-                if (e.cross(closed)) {
-                    if (debug) setMessage(e +"\n"+ DebugMessage.CROSS_CLOSED.toString() +"\n"+ closed);
-                    return false;
-                }
-            }
+//            for (BasicEdge closed : edges.closed()) {
+//                if (e.cross(closed)) {
+//                    if (debug) setMessage(e +"\n"+ DebugMessage.CROSS_CLOSED.toString() +"\n"+ closed);
+//                    return false;
+//                }
+//            }
         }
 
         if (newVertex) { // start second-last edge check
@@ -793,6 +794,13 @@ public class EmptyBoundaryPatch implements Serializable {
 
         } // end second-last edge check
 
+        // make sure the new triangle doesn't have any old vertices inside it
+        if (coversVertex(t)) {
+            if (debug) setMessage(t + DebugMessage.VERTEX_COVER.toString());
+            //System.out.println("COVERS VERTEX.");
+            return false;
+        }
+
         return true;
     }
 
@@ -814,7 +822,7 @@ public class EmptyBoundaryPatch implements Serializable {
             }
             if (okay) {
                 for (BasicTriangle t : triangles) {
-                    if (t.contains(p)) {
+                    if (t.covers(p)) {
                         okay = false;
                         break;
                     }
@@ -823,6 +831,19 @@ public class EmptyBoundaryPatch implements Serializable {
             if (okay) return true;
         }
         return false;
+    }
+
+    // check if a triangle covers any placed vertices
+    private boolean coversVertex(BasicTriangle t) {
+        for (BytePoint p : vertices) {
+            if (t.covers(p)) return true;
+        }
+        return false;
+    }
+
+    // a method for estimating how much work has been done
+    public String tilesPercent() {
+        return String.format("%.2f%% done",100*((double)triangles.size())/(triangles.size()+tileList.size()));
     }
 
     // temporary--destroy this method when you don't need it anymore!

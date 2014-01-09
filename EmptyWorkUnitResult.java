@@ -4,23 +4,17 @@ import java.util.*;
 public class EmptyWorkUnitResult implements Result, Serializable
 {
     private final List<ImmutablePatch> localCompletedPatches;
-    private final List<ImmutablePatch> eventualPatches;
-    private int originalHashcode;
+    private final Long uniqueID;
 
-    public EmptyWorkUnitResult(int originalHashcode, List<ImmutablePatch> localCompletedPatches, List<ImmutablePatch> eventualPatches)
+    public EmptyWorkUnitResult(Long uniqueID, List<ImmutablePatch> localCompletedPatches)
     {
         this.localCompletedPatches = localCompletedPatches;
-        this.eventualPatches = eventualPatches;
-        this.originalHashcode = originalHashcode;
-
-        // don't allow any null lists
-        if ( localCompletedPatches == null || eventualPatches == null )
-            throw new IllegalArgumentException("patch refs should not be null!");
+        this.uniqueID = uniqueID;
     }
 
-    public int getOriginalHashcode()
+    public Long uniqueID()
     {
-        return originalHashcode;
+        return uniqueID;
     }
 
     public List<ImmutablePatch> getLocalCompletedPatches()
@@ -28,13 +22,8 @@ public class EmptyWorkUnitResult implements Result, Serializable
         return localCompletedPatches;
     }
 
-    public List<ImmutablePatch> getEventualPatches()
-    {
-        return eventualPatches;
-    }
-
     public String toString()
     {
-        return "Result for job ID " + originalHashcode + ": " + localCompletedPatches.size() + " completed patches";
+        return "Result for job ID " + uniqueID + ": " + localCompletedPatches.size() + " completed patches";
     }
 }

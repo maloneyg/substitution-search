@@ -8,6 +8,7 @@
 
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Collections;
 import java.io.*;
 
@@ -59,7 +60,7 @@ public class MultiSetLinkedList implements Serializable {
     }
 
     // private constructor
-    private MultiSetLinkedList(ArrayList<Integer> d) {
+    private MultiSetLinkedList(List<Integer> d) {
         Collections.sort(d);
         int l = d.size();
         size = l;
@@ -74,7 +75,7 @@ public class MultiSetLinkedList implements Serializable {
     }
 
     // public static factory method
-    public static MultiSetLinkedList createMultiSetLinkedList(ArrayList<Integer> d) {
+    public static MultiSetLinkedList createMultiSetLinkedList(List<Integer> d) {
         return new MultiSetLinkedList(d);
     }
 

@@ -11,9 +11,10 @@ import javax.swing.JButton;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class PointsDisplay extends JPanel implements ActionListener
+public class ClosedPointsDisplay extends JPanel implements ActionListener
 {
     private final List<ImmutablePatch> patches;
+    private ArrayList<OrderedTriple> preData;
     private ArrayList<OrderedTriple> data;
     private JButton next;
     private JButton previous;
@@ -23,17 +24,19 @@ public class PointsDisplay extends JPanel implements ActionListener
     private JTextArea currentStatus;
     private JTextField userInput;
 
-    public PointsDisplay(List<ImmutablePatch> patches, String title) throws java.awt.HeadlessException
+    public ClosedPointsDisplay(List<ImmutablePatch> patches, String title) throws java.awt.HeadlessException
     {
         if ( patches.size() == 0 || patches == null )
             throw new IllegalArgumentException("can't make display if there aren't any patches!");
         this.patches = patches;
         this.position = 0;
-        this.data = this.patches.get(position).graphicsDump();
+        this.preData = this.patches.get(position).closedGraphicsDump();
+        this.data = new ArrayList<>();
+        this.data.add(preData.get(0));
         this.setLayout(null);
 
         next = new JButton("next");
-        if (position+1 >= patches.size()) {
+        if (position+1 >= preData.size()) {
             next.setEnabled(false);
         } else {
             next.setEnabled(true);
@@ -94,13 +97,13 @@ public class PointsDisplay extends JPanel implements ActionListener
     public void actionPerformed(ActionEvent e) {
         if ("advance".equals(e.getActionCommand())) {
             position++;
-            this.data = patches.get(position).graphicsDump();
-            if (position+1 == patches.size()) next.setEnabled(false);
+            this.data.add(preData.get(position));
+            if (position+1 == preData.size()) next.setEnabled(false);
             if (position > 0) previous.setEnabled(true);
         } else if ("retreat".equals(e.getActionCommand())) {
             position--;
-            this.data = patches.get(position).graphicsDump();
-            if (position+1 < patches.size()) next.setEnabled(true);
+            this.data.remove(data.size()-1);
+            if (position+1 < preData.size()) next.setEnabled(true);
             if (position == 0) previous.setEnabled(false);
         } else if ("changed".equals(e.getActionCommand())) {
             String text = userInput.getText();
@@ -123,7 +126,7 @@ public class PointsDisplay extends JPanel implements ActionListener
                     return;
                 }
             position = requestedPosition;
-            this.data = patches.get(position).graphicsDump();
+            this.data = patches.get(position).closedGraphicsDump();
             if (position+1 == patches.size()) next.setEnabled(false);
             if (position > 0) previous.setEnabled(true);
             if (position+1 < patches.size()) next.setEnabled(true);
@@ -223,11 +226,11 @@ public class PointsDisplay extends JPanel implements ActionListener
         triplesList.add(new OrderedTriple(T1.toArray()));
         triplesList.add(new OrderedTriple(T2.toArray()));
 
-//        PointsDisplay theseData = new PointsDisplay(triplesList, "TriangleDraw");
+//        ClosedPointsDisplay theseData = new ClosedPointsDisplay(triplesList, "TriangleDraw");
 
-//        PointsDisplay theseData = new PointsDisplay(patch.graphicsDump(), "TriangleDraw");
+//        ClosedPointsDisplay theseData = new ClosedPointsDisplay(patch.graphicsDump(), "TriangleDraw");
 
     }
 
 
-} // end of class PointsDisplay
+} // end of class ClosedPointsDisplay

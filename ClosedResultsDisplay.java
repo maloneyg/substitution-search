@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class TriangleResultsDisplay
+public class ClosedResultsDisplay
 {
     @SuppressWarnings("unchecked")
     public static void main(String[] args)
@@ -9,9 +9,7 @@ public class TriangleResultsDisplay
             // deserialize data
             String filename = //"results/tile0-bc.chk";//
                               //"results/tile0-abc.chk";//"results/tile0superhuge.chk";
-                              //"result.chk";
-                                "errors0.chk";
-//            ArrayList<ImmutablePatch> patches = null;
+                              "errors3.chk";
             List<ImmutablePatch> patches = null;
             if ( ! new File(filename).isFile() )
                 {
@@ -35,7 +33,7 @@ public class TriangleResultsDisplay
             // display data
             try
                 {
-                    PointsDisplay display = new PointsDisplay(patches,filename);
+                    ClosedPointsDisplay display = new ClosedPointsDisplay(patches,filename);
                     System.out.println(patches.get(0).openSize() + " open edges.");
                     System.out.println(patches.get(0).closedSize() + " closed edges.");
                     System.out.println(patches.get(0).triangleSize() + " triangles.");

@@ -17,6 +17,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 import java.io.Serializable;
+import java.io.*;
+import java.util.*;
 
 class PointAndLength implements Comparable<PointAndLength>, Serializable {
 
@@ -88,19 +90,54 @@ public class PuzzleBoundary implements Serializable {
     // the origin, whereas edge 1 doesn't
     public static final double EDGE_ONE_TOO_CLOSE;
 
+    // the edge breakdowns we're using in this search
+    // for annoying reasons having to do with initialization, I can't make 
+    // it final
+    public static EdgeBreakdownTree BREAKDOWNS;
+
     // the instance variables appear here
 
     // the blocks keep track of which points on the 
     // boundaries have been covered by tile edges
-    boolean[] block0;
-    boolean[] block1;
-    boolean[] block2;
+    private boolean[] block0;
+    private boolean[] block1;
+    private boolean[] block2;
+
+    // the blocks keep track of which points on the 
+    private EdgeBreakdownTree breakdown;
 
     // lists of triangle edges that have been placed
     // along the boundaries
     Stack<BasicEdge> placed0 = new Stack<>();
     Stack<BasicEdge> placed1 = new Stack<>();
     Stack<BasicEdge> placed2 = new Stack<>();
+
+    static { // load the previous edge breakdown for use here
+
+            // deserialize data
+            String filename = Preinitializer.BREAKDOWN_FILENAME;
+            if ( ! new File(filename).isFile() )
+                {
+                    BREAKDOWNS = EdgeBreakdownTree.FULL_BREAKDOWNS;
+                }
+            else
+                {
+                try
+                    {
+                        FileInputStream fileIn = new FileInputStream(filename);
+                        ObjectInputStream in = new ObjectInputStream(fileIn);
+                        BREAKDOWNS = (EdgeBreakdownTree)in.readObject();
+                        System.out.println("Edge breakdowns have been read.");
+                    }
+                catch (Exception e)
+                    {
+                        e.printStackTrace();
+                        BREAKDOWNS = null;
+                        System.exit(1);
+                    }
+                }
+
+    } // finished loading previous edge breakdowns
 
     static { // figure out where the points can go on the edges
 
@@ -195,6 +232,7 @@ public class PuzzleBoundary implements Serializable {
         block0 = new boolean[E0.length];
         block1 = new boolean[E1.length];
         block2 = new boolean[E2.length];
+        breakdown = EdgeBreakdownTree.createEdgeBreakdownTree(BREAKDOWNS);
     }
 
     // private constructor
@@ -203,16 +241,18 @@ public class PuzzleBoundary implements Serializable {
         block1 = new boolean[E1.length];
         block2 = new boolean[E2.length];
         add(e);
+        breakdown = EdgeBreakdownTree.createEdgeBreakdownTree(BREAKDOWNS,e.getLength());
     }
 
     // private constructor
-    private PuzzleBoundary(boolean[] b0,boolean[] b1,boolean[] b2,Stack<BasicEdge> e0,Stack<BasicEdge> e1,Stack<BasicEdge> e2) {
+    private PuzzleBoundary(boolean[] b0,boolean[] b1,boolean[] b2,Stack<BasicEdge> e0,Stack<BasicEdge> e1,Stack<BasicEdge> e2,EdgeBreakdownTree t) {
         block0 = b0;
         block1 = b1;
         block2 = b2;
         placed0 = e0;
         placed1 = e1;
         placed2 = e2;
+        breakdown = t;
     }
 
     // public static factory method
@@ -239,7 +279,8 @@ public class PuzzleBoundary implements Serializable {
         for (int i = 0; i < placed0.size(); i++) e0.push(placed0.get(i));
         for (int i = 0; i < placed1.size(); i++) e1.push(placed1.get(i));
         for (int i = 0; i < placed2.size(); i++) e2.push(placed2.get(i));
-        return new PuzzleBoundary(b0,b1,b2,e0,e1,e2);
+        EdgeBreakdownTree t = breakdown.deepCopy();
+        return new PuzzleBoundary(b0,b1,b2,e0,e1,e2,t);
     }
 
     // increment an array of bytes, wrapping around if
@@ -320,6 +361,7 @@ public class PuzzleBoundary implements Serializable {
         for (int i = 0; i < E0.length; i++) {
             if (ends[0].equals(E0[i])&&i!=E0.length-1) hit = true;
             if (hit) {
+                if (!breakdown.precedesLength(0,e.getLength())) return -1;
                 if (block0[i]) return -1;
                 if (ends[1].equals(E0[i])) return 1;
             }
@@ -328,6 +370,7 @@ public class PuzzleBoundary implements Serializable {
         for (int i = 0; i < E1.length; i++) {
             if (ends[0].equals(E1[i])&&i!=E1.length-1) hit = true;
             if (hit) {
+                if (!breakdown.precedesLength(1,e.getLength())) return -1;
                 if (block1[i]) return -1;
                 if (ends[1].equals(E1[i])) return 1;
             }
@@ -336,6 +379,7 @@ public class PuzzleBoundary implements Serializable {
         for (int i = 0; i < E2.length; i++) {
             if (ends[0].equals(E2[i])&&i!=E2.length-1) hit = true;
             if (hit) {
+                if (!breakdown.precedesLength(2,e.getLength())) return -1;
                 if (block2[i]) return -1;
                 if (ends[1].equals(E2[i])) return 1;
             }
@@ -365,14 +409,17 @@ public class PuzzleBoundary implements Serializable {
     public void add(BasicEdge e) {
         if (flip(E0,block0,e)) {
             placed0.push(e);
+            breakdown.place(0,e.getLength());
             return;
         }
         if (flip(E1,block1,e)) {
             placed1.push(e);
+            breakdown.place(1,e.getLength());
             return;
         }
         if (flip(E2,block2,e)) {
             placed2.push(e);
+            breakdown.place(2,e.getLength());
             return;
         }
     }
@@ -381,14 +428,17 @@ public class PuzzleBoundary implements Serializable {
     public void remove(BasicEdge e) {
         if (flip(E0,block0,e)) {
             placed0.pop();
+            breakdown.remove(0);
             return;
         }
         if (flip(E1,block1,e)) {
             placed1.pop();
+            breakdown.remove(1);
             return;
         }
         if (flip(E2,block2,e)) {
             placed2.pop();
+            breakdown.remove(2);
             return;
         }
     }
