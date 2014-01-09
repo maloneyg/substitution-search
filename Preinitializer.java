@@ -46,6 +46,7 @@ class Preinitializer {
 
     public static final String RESULT_FILENAME = "result.chk"; // name of file to write the completed patches to at the end
     public static final String BREAKDOWN_FILENAME = "breakdown.chk"; // name of file to which we write the edge breakdowns
+
     public static final int LISTENING_PORT = 32007; // sockets will transmite/recieve on this port number
     
     public static final boolean WRITE_INTERIM_RESULTS = true; // should the Server write PatchResults preiodically?
@@ -55,11 +56,11 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2, 1); // the square of the really small search (1+a)^2 won't work with tile 3 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search (104)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, 0, 1); // quite big search (110)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 0, -3, 0, 1); // huge search (115)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, -2, 0, 1); // b+d (118)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121) use this one

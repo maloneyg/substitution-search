@@ -93,6 +93,15 @@ class TreeNode<E> implements Serializable {
         return data.toString();
     }
 
+    // if this has a descendent containing e, return that descendent
+    // otherwise return null
+    public TreeNode<E> getDescendent(E e) {
+        for (TreeNode<E> n : next) {
+            if (e.equals(n.getData())) return n;
+        }
+        return null;
+    }
+
 } // end of class TreeNode
 
 public class MultiTree<E> implements Serializable, Iterable<E> {

@@ -23,9 +23,25 @@ public class EdgeBreakdownTree implements Serializable {
     // these pointers are only used if we are using
     // this edge to restrict possibilities in the
     // puzzle boundary
-    private TreeNode<BasicEdgeLength> pointer0;
-    private TreeNode<BasicEdgeLength> pointer1;
-    private TreeNode<BasicEdgeLength> pointer2;
+    private TreeNode<BasicEdgeLength>[] pointers;
+
+    // full list of edge breakdowns for all edges
+    public static final EdgeBreakdownTree FULL_BREAKDOWNS;
+
+    static { // initialize FULL_BREAKDOWNS
+
+        EdgeBreakdownTree output = new EdgeBreakdownTree();
+        for (int i = 0; i < output.breakdowns.length; i++) {
+            MultiSetLinkedList m = MultiSetLinkedList.createMultiSetLinkedList(new ArrayList<Integer>(BasicEdgeLength.createBasicEdgeLength(i).getBreakdown()));
+            ImmutableList<Integer> starter = m.getImmutableList();
+            do {
+                output.addBreakdown(i,m.getImmutableList());
+                m.iterate();
+            } while (!starter.equals(m.getImmutableList()));
+        }
+        FULL_BREAKDOWNS = output;
+
+    } // here ends initialization of FULL_BREAKDOWNS
 
     // private constructor
     private EdgeBreakdownTree() {
@@ -33,9 +49,7 @@ public class EdgeBreakdownTree implements Serializable {
         for (int i = 0; i < breakdowns.length; i++) {
             breakdowns[i] = new MultiTree<BasicEdgeLength>();
         }
-        pointer0 = breakdowns[0].getHead();
-        pointer1 = breakdowns[0].getHead();
-        pointer2 = breakdowns[0].getHead();
+        pointers = new TreeNode[] { breakdowns[0].getHead(),breakdowns[0].getHead(),breakdowns[0].getHead() };
     }
 
     // private constructor
@@ -53,14 +67,44 @@ public class EdgeBreakdownTree implements Serializable {
             if (a.get(a.size()-1).equals(l)) newTree.addChain(a);
         }
         breakdowns[2] = newTree;
-        pointer0 = breakdowns[0].getHead();
-        pointer1 = breakdowns[1].getHead();
-        pointer2 = breakdowns[2].getHead();
+        pointers = new TreeNode[] {breakdowns[0].getHead(), breakdowns[1].getHead(), breakdowns[2].getHead()};
     }
 
-    // public static factory method
+    // private constructor
+    // same as above, but without the starter
+    private EdgeBreakdownTree(EdgeBreakdownTree base) {
+        breakdowns = new MultiTree[3];
+        List<Integer> angles = Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE);
+        for (int i = 0; i < 3; i++) {
+            breakdowns[i] = base.breakdowns[Initializer.acute(angles.get(i))-1];
+        }
+        pointers = new TreeNode[] {breakdowns[0].getHead(), breakdowns[1].getHead(), breakdowns[2].getHead()};
+    }
+
+    // private constructor
+    // designed for cloning base
+    private EdgeBreakdownTree(EdgeBreakdownTree base, boolean dummyVariable) {
+        breakdowns = base.breakdowns;
+        pointers = new TreeNode[] {base.pointers[0],base.pointers[1],base.pointers[2]};
+    }
+
+    // public static factory methods
     public static EdgeBreakdownTree createEdgeBreakdownTree() {
         return new EdgeBreakdownTree();
+    }
+
+    public static EdgeBreakdownTree createEdgeBreakdownTree(EdgeBreakdownTree t, BasicEdgeLength l) {
+        return new EdgeBreakdownTree(t,l);
+    }
+
+    public static EdgeBreakdownTree createEdgeBreakdownTree(EdgeBreakdownTree t) {
+        return new EdgeBreakdownTree(t);
+    }
+    // here end the public static factory methods
+
+    // (somewhat) deep copy method
+    public EdgeBreakdownTree deepCopy() {
+        return new EdgeBreakdownTree(this,true);
     }
 
     // merge two EdgeBreakdownTrees.
@@ -98,6 +142,45 @@ public class EdgeBreakdownTree implements Serializable {
         }
         addBreakdown(i,forward,0);
         addBreakdown(i,reverse,0);
+    }
+
+    // return the descendent of pointers[i] that contains l
+    // if there is none, return null
+    public TreeNode<BasicEdgeLength> getDescendent(int i, BasicEdgeLength l) {
+        if (i < 0 || i >= pointers.length) throw new IllegalArgumentException("We don't have a breakdown numbered " + i + ".");
+        return pointers[i].getDescendent(l);
+    }
+
+    // return true if pointers[i] has a descendent that contains l
+    public boolean precedesLength(int i, BasicEdgeLength l) {
+        if (i < 0 || i >= pointers.length) throw new IllegalArgumentException("We don't have a breakdown numbered " + i + ".");
+        for (TreeNode<BasicEdgeLength> n : pointers[i].getNext()) {
+            if (l.equals(n.getData())) return true;
+        }
+        return false;
+    }
+
+    // set pointers[i] to the given TreeNode
+    public void setPointer(int i, TreeNode<BasicEdgeLength> n) {
+        pointers[i] = n;
+    }
+
+    // set pointers[i] to the descendent of pointers[i] that contains l
+    public void place(int i, BasicEdgeLength l) {
+        if (i < 0 || i >= pointers.length) throw new IllegalArgumentException("We don't have a breakdown numbered " + i + ".");
+        for (TreeNode<BasicEdgeLength> n : pointers[i].getNext()) {
+            if (l.equals(n.getData())) {
+                pointers[i] = n;
+                return;
+            }
+        }
+        throw new IllegalArgumentException(l + " doesn't follow " + pointers[i].getData() + ".");
+    }
+
+    // set pointers[i] to the parent of pointers[i]
+    public void remove(int i) {
+        if (i < 0 || i >= pointers.length) throw new IllegalArgumentException("We don't have a breakdown numbered " + i + ".");
+        pointers[i] = pointers[i].getPrevious();
     }
 
     // output a String
@@ -142,6 +225,8 @@ public class EdgeBreakdownTree implements Serializable {
 
     // test client
     public static void main(String[] args) {
+
+        System.out.println(FULL_BREAKDOWNS.toString());
 
     }
 
