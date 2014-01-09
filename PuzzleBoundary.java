@@ -108,9 +108,16 @@ public class PuzzleBoundary implements Serializable {
 
     // lists of triangle edges that have been placed
     // along the boundaries
-    Stack<BasicEdge> placed0 = new Stack<>();
-    Stack<BasicEdge> placed1 = new Stack<>();
-    Stack<BasicEdge> placed2 = new Stack<>();
+    private Stack<BasicEdge> placed0 = new Stack<>();
+    private Stack<BasicEdge> placed1 = new Stack<>();
+    private Stack<BasicEdge> placed2 = new Stack<>();
+
+    // BytePoints indicating how far we've covered along each edge
+    // the main purpose is to make sure we don't add things to
+    // the end instead of the beginning
+    private BytePoint frontier0;
+    private BytePoint frontier1;
+    private BytePoint frontier2;
 
     static { // load the previous edge breakdown for use here
 
@@ -233,6 +240,9 @@ public class PuzzleBoundary implements Serializable {
         block1 = new boolean[E1.length];
         block2 = new boolean[E2.length];
         breakdown = EdgeBreakdownTree.createEdgeBreakdownTree(BREAKDOWNS);
+        frontier0 = E0[E0.length-1];
+        frontier1 = E1[E1.length-1];
+        frontier2 = E2[E2.length-1];
     }
 
     // private constructor
@@ -242,10 +252,13 @@ public class PuzzleBoundary implements Serializable {
         block2 = new boolean[E2.length];
         add(e);
         breakdown = EdgeBreakdownTree.createEdgeBreakdownTree(BREAKDOWNS,e.getLength());
+        frontier0 = E0[E0.length-1];
+        frontier1 = E1[E1.length-1];
+        frontier2 = E2[E2.length-1];
     }
 
     // private constructor
-    private PuzzleBoundary(boolean[] b0,boolean[] b1,boolean[] b2,Stack<BasicEdge> e0,Stack<BasicEdge> e1,Stack<BasicEdge> e2,EdgeBreakdownTree t) {
+    private PuzzleBoundary(boolean[] b0,boolean[] b1,boolean[] b2,Stack<BasicEdge> e0,Stack<BasicEdge> e1,Stack<BasicEdge> e2,EdgeBreakdownTree t,BytePoint f0,BytePoint f1,BytePoint f2) {
         block0 = b0;
         block1 = b1;
         block2 = b2;
@@ -253,6 +266,9 @@ public class PuzzleBoundary implements Serializable {
         placed1 = e1;
         placed2 = e2;
         breakdown = t;
+        frontier0 = f0;
+        frontier1 = f1;
+        frontier2 = f2;
     }
 
     // public static factory method
@@ -280,7 +296,7 @@ public class PuzzleBoundary implements Serializable {
         for (int i = 0; i < placed1.size(); i++) e1.push(placed1.get(i));
         for (int i = 0; i < placed2.size(); i++) e2.push(placed2.get(i));
         EdgeBreakdownTree t = breakdown.deepCopy();
-        return new PuzzleBoundary(b0,b1,b2,e0,e1,e2,t);
+        return new PuzzleBoundary(b0,b1,b2,e0,e1,e2,t,frontier0,frontier1,frontier2);
     }
 
     // increment an array of bytes, wrapping around if
@@ -359,29 +375,41 @@ public class PuzzleBoundary implements Serializable {
         BytePoint[] ends = e.getEnds();
         boolean hit = false;
         for (int i = 0; i < E0.length; i++) {
-            if (ends[0].equals(E0[i])&&i!=E0.length-1) hit = true;
+            if (ends[0].equals(E0[i])&&i!=E0.length-1) {
+                hit = true;
+            }
             if (hit) {
-                if (!breakdown.precedesLength(0,e.getLength())) return -1;
                 if (block0[i]) return -1;
-                if (ends[1].equals(E0[i])) return 1;
+                if (ends[1].equals(E0[i])) {
+                    if (ends[1].equals(frontier0)&&(!breakdown.precedesLength(0,e.getLength()))) return -1;
+                    return 1;
+                }
             }
         }
         hit = false;
         for (int i = 0; i < E1.length; i++) {
-            if (ends[0].equals(E1[i])&&i!=E1.length-1) hit = true;
+            if (ends[0].equals(E1[i])&&i!=E1.length-1) {
+                hit = true;
+            }
             if (hit) {
-                if (!breakdown.precedesLength(1,e.getLength())) return -1;
                 if (block1[i]) return -1;
-                if (ends[1].equals(E1[i])) return 1;
+                if (ends[1].equals(E1[i])) {
+                    if (ends[1].equals(frontier1)&&(!breakdown.precedesLength(1,e.getLength()))) return -1;
+                    return 1;
+                }
             }
         }
         hit = false;
         for (int i = 0; i < E2.length; i++) {
-            if (ends[0].equals(E2[i])&&i!=E2.length-1) hit = true;
+            if (ends[0].equals(E2[i])&&i!=E2.length-1) {
+                hit = true;
+            }
             if (hit) {
-                if (!breakdown.precedesLength(2,e.getLength())) return -1;
                 if (block2[i]) return -1;
-                if (ends[1].equals(E2[i])) return 1;
+                if (ends[1].equals(E2[i])) {
+                    if (ends[1].equals(frontier2)&&(!breakdown.precedesLength(2,e.getLength()))) return -1;
+                    return 1;
+                }
             }
         }
         return 0;
@@ -409,17 +437,26 @@ public class PuzzleBoundary implements Serializable {
     public void add(BasicEdge e) {
         if (flip(E0,block0,e)) {
             placed0.push(e);
-            breakdown.place(0,e.getLength());
+            if (e.getEnds()[1].equals(frontier0)) {
+                breakdown.place(0,e.getLength());
+                frontier0 = e.getEnds()[0];
+            }
             return;
         }
         if (flip(E1,block1,e)) {
             placed1.push(e);
-            breakdown.place(1,e.getLength());
+            if (e.getEnds()[1].equals(frontier1)) {
+                breakdown.place(1,e.getLength());
+                frontier1 = e.getEnds()[0];
+            }
             return;
         }
         if (flip(E2,block2,e)) {
             placed2.push(e);
-            breakdown.place(2,e.getLength());
+            if (e.getEnds()[1].equals(frontier2)) {
+                breakdown.place(2,e.getLength());
+                frontier2 = e.getEnds()[0];
+            }
             return;
         }
     }
@@ -428,17 +465,26 @@ public class PuzzleBoundary implements Serializable {
     public void remove(BasicEdge e) {
         if (flip(E0,block0,e)) {
             placed0.pop();
-            breakdown.remove(0);
+            if (e.getEnds()[0].equals(frontier0)) {
+                breakdown.remove(0);
+                frontier0 = e.getEnds()[1];
+            }
             return;
         }
         if (flip(E1,block1,e)) {
             placed1.pop();
-            breakdown.remove(1);
+            if (e.getEnds()[0].equals(frontier1)) {
+                breakdown.remove(1);
+                frontier1 = e.getEnds()[1];
+            }
             return;
         }
         if (flip(E2,block2,e)) {
             placed2.pop();
-            breakdown.remove(2);
+            if (e.getEnds()[0].equals(frontier2)) {
+                breakdown.remove(2);
+                frontier2 = e.getEnds()[1];
+            }
             return;
         }
     }
