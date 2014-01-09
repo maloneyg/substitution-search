@@ -17,7 +17,7 @@ class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 0;        // the tile we're searching
+    public static final int MY_TILE = 4;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
