@@ -161,7 +161,7 @@ public class Server
             }
             for (int i = 0; i < breakdown.numEdges(); i++) {
                 if (breakdown.isEmpty(i)) {
-                    for (List<BasicEdgeLength> l : EdgeBreakdownTree.FULL_BREAKDOWNS.getChains(i)) breakdown.addBreakdown(i,l,0);
+                    for (List<BasicEdgeLength> l : PuzzleBoundary.BREAKDOWNS.getChains(i)) breakdown.addBreakdown(i,l,0);
                 }
             }
 
@@ -181,15 +181,15 @@ public class Server
                 }
 
             // print the breakdowns
-            System.out.println("Breakdowns:\n");
-            try {
+//            System.out.println("Breakdowns:\n");
+//            try {
 //                System.out.println(breakdown.toString());
-                System.out.println(breakdown.chainString());
-            } catch (Exception e) {
-                StackTraceElement[] elmnt = e.getStackTrace();
-                for (int i = 0; i < 10; i++) System.out.println(elmnt[i]);
-                System.exit(1);
-            }
+//                System.out.println(breakdown.chainString());
+//            } catch (Exception e) {
+//                StackTraceElement[] elmnt = e.getStackTrace();
+//                for (int i = 0; i < 10; i++) System.out.println(elmnt[i]);
+//                System.exit(1);
+//            }
 
         System.out.println("Have a nice day!");
         System.exit(0);

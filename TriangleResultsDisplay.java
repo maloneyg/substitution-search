@@ -8,9 +8,8 @@ public class TriangleResultsDisplay
         {
             // deserialize data
             String filename = //"results/tile0-bc.chk";//
-                              //"results/tile0-abc.chk";//"results/tile0superhuge.chk";
                               //"result.chk";
-                                "errors0.chk";
+                                "results/tile4-116.chk";
 //            ArrayList<ImmutablePatch> patches = null;
             List<ImmutablePatch> patches = null;
             if ( ! new File(filename).isFile() )
@@ -36,9 +35,6 @@ public class TriangleResultsDisplay
             try
                 {
                     PointsDisplay display = new PointsDisplay(patches,filename);
-                    System.out.println(patches.get(0).openSize() + " open edges.");
-                    System.out.println(patches.get(0).closedSize() + " closed edges.");
-                    System.out.println(patches.get(0).triangleSize() + " triangles.");
                 }
             catch ( java.awt.HeadlessException e )
                 {
