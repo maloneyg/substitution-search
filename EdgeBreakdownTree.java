@@ -130,6 +130,21 @@ public class EdgeBreakdownTree implements Serializable {
         breakdowns[i].addChain(breakdown);
     }
 
+    // return true if the breakdown at i is empty
+    public boolean isEmpty(int i) {
+        return breakdowns[i].isEmpty();
+    }
+
+    // return the number of edges in this breakdown
+    public int numEdges() {
+        return breakdowns.length;
+    }
+
+    // return the chains of edge i
+    public List<List<BasicEdgeLength>> getChains(int i) {
+        return breakdowns[i].getChains();
+    }
+
     // add a new edge breakdown for length i
     public void addBreakdown(int i, ImmutableList<Integer> breakdown) {
         ArrayList<BasicEdgeLength> forward = new ArrayList<>(breakdown.size());

@@ -159,16 +159,21 @@ public class Server
                     breakdown.addBreakdown(Initializer.acute(Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE).get(2))-1,P.getEdge2());
                 }
             }
+            for (int i = 0; i < breakdown.numEdges(); i++) {
+                if (breakdown.isEmpty(i)) {
+                    for (List<BasicEdgeLength> l : EdgeBreakdownTree.FULL_BREAKDOWNS.getChains(i)) breakdown.addBreakdown(i,l,0);
+                }
+            }
 
             // write it to disk
             try
                 {
-                    FileOutputStream fileOut = new FileOutputStream(Preinitializer.BREAKDOWN_FILENAME);
+                    FileOutputStream fileOut = new FileOutputStream(Preinitializer.BREAKDOWN_OUTPUT_FILENAME);
                     ObjectOutputStream out = new ObjectOutputStream(fileOut);
                     out.writeObject(breakdown);
                     out.close();
                     fileOut.close();
-                    System.out.println("wrote breakdowns to " + Preinitializer.BREAKDOWN_FILENAME + ".");
+                    System.out.println("wrote breakdowns to " + Preinitializer.BREAKDOWN_OUTPUT_FILENAME + ".");
                 }
             catch (Exception e)
                 {
@@ -178,7 +183,7 @@ public class Server
             // print the breakdowns
             System.out.println("Breakdowns:\n");
             try {
-                System.out.println(breakdown.toString());
+//                System.out.println(breakdown.toString());
                 System.out.println(breakdown.chainString());
             } catch (Exception e) {
                 StackTraceElement[] elmnt = e.getStackTrace();

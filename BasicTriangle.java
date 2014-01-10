@@ -26,8 +26,6 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
     private final BytePoint[] vertices;
     private final Orientation[] orientations;
     private final BasicEdgeLength[] edgeLengths;
-    // direction vectors of the edges of this triangle
-    private final BytePoint[] directions;
 
     // the prototile of which this is an instance
     private final BasicPrototile prototile;
@@ -37,8 +35,6 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
     // helper fields for the contains(BytePoint) method
     // direction vectors for the edges
     private final BytePoint[] directions;
-    // signs of the cross products of opposite vertices with directions vectors
-    private final double[] signa;
 
     // constructor methods.
     private BasicTriangle(BasicAngle[] a, BytePoint[] p, Orientation[] o, BasicEdgeLength[] e, BasicPrototile P, boolean f) {

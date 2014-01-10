@@ -122,7 +122,7 @@ public class PuzzleBoundary implements Serializable {
     static { // load the previous edge breakdown for use here
 
             // deserialize data
-            String filename = Preinitializer.BREAKDOWN_FILENAME;
+            String filename = Preinitializer.BREAKDOWN_INPUT_FILENAME;
             if ( ! new File(filename).isFile() )
                 {
                     BREAKDOWNS = EdgeBreakdownTree.FULL_BREAKDOWNS;
