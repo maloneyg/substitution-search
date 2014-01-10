@@ -237,7 +237,7 @@ public class EmptyBoundaryEdgeList implements Serializable {
     public Iterable<BasicEdge> open() {
         // we could convert to an ArrayList if we're worried
         // about other methods accessing this directly
-        //return new ArrayList<>(openEdges);
+        //return new ArrayList<>(openEdges
         return openEdges;
     }
 
