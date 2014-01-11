@@ -702,13 +702,24 @@ public class EmptyBoundaryPatch implements Serializable {
                 if (debug) setMessage(e +"\n"+ DebugMessage.BOUNDARY_PROBLEM.toString() + "\n" + boundary);
                 return false;
             }
-            if (boundaryIncidence==1) break;
-            for (BasicEdge open : edges.open()) {
-                if (e.cross(open)) {
-                    if (debug) setMessage(e +"\n"+ DebugMessage.CROSS_OPEN.toString() +"\n"+ open);
-                    return false;
+
+//            if (boundaryIncidence==1) break;
+//            for (BasicEdge open : edges.open()) {
+//                if (e.cross(open)) {
+//                    if (debug) setMessage(e +"\n"+ DebugMessage.CROSS_OPEN.toString() +"\n"+ open);
+//                    return false;
+//                }
+//            }
+
+            if (boundaryIncidence==0) {
+                for (BasicEdge open : edges.open()) {
+                    if (e.cross(open)) {
+                        if (debug) setMessage(e +"\n"+ DebugMessage.CROSS_OPEN.toString() +"\n"+ open);
+                        return false;
+                    }
                 }
             }
+
 //            for (BasicEdge closed : edges.closed()) {
 //                if (e.cross(closed)) {
 //                    if (debug) setMessage(e +"\n"+ DebugMessage.CROSS_CLOSED.toString() +"\n"+ closed);
