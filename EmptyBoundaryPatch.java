@@ -808,8 +808,8 @@ public class EmptyBoundaryPatch implements Serializable {
         // make sure the new triangle doesn't have any old vertices inside it
         if (coversVertex(t)) {
             if (debug) setMessage(t + DebugMessage.VERTEX_COVER.toString());
-            //System.out.println("COVERS VERTEX.");
-            return false;
+            System.out.println("COVERS VERTEX.");
+            //return false;
         }
 
         return true;
