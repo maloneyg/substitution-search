@@ -165,6 +165,20 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
         }
     }
 
+    // add a list of data to the tree.
+    public boolean containsChain(List<E> chain) {
+        TreeNode<E> currentNode = head;
+        for (E e : chain) {
+            if (!currentNode.getNext().contains(e)) return false;
+                newNode = new TreeNode<>(data);
+                currentNode.addNext(newNode);
+                currentNode = newNode;
+            } else {
+                currentNode = nextNode;
+            }
+        }
+    }
+
     // output a list of chains represented by this tree
     public List<List<E>> getChains() {
         BetterIterator<E> i = iterator();
