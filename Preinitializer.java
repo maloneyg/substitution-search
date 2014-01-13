@@ -18,7 +18,7 @@ class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 3;        // the tile we're searching
+    public static final int MY_TILE = 0;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
@@ -45,8 +45,8 @@ class Preinitializer {
     public static final String MAIN_CLASS_NAME; // name of the class whose main method is running on this JVM
 
     public static final String RESULT_FILENAME = "result.chk"; // name of file to write the completed patches to at the end
-    public static final String BREAKDOWN_INPUT_FILENAME = "breakdowns1-abc.chk"; // name of file to which we write the edge breakdowns
-    public static final String BREAKDOWN_OUTPUT_FILENAME = "breakdowns3-abc.chk"; // name of file to which we write the edge breakdowns
+    public static final String BREAKDOWN_INPUT_FILENAME = "nuthin.chk"; // name of file to which we write the edge breakdowns
+    public static final String BREAKDOWN_OUTPUT_FILENAME = "breakdowns0-abc.chk"; // name of file to which we write the edge breakdowns
 
     public static final int LISTENING_PORT = 32007; // sockets will transmite/recieve on this port number
     
