@@ -130,12 +130,12 @@ public class EdgeBreakdownTree implements Serializable {
         breakdowns[i].addChain(breakdown);
     }
 
-    // return true if this contains breakdown bd at position i
+    // return true if this contains breakdown at position i
     public boolean containsBreakdown(int i, List<BasicEdgeLength> breakdown) {
         return breakdowns[i].containsChain(breakdown);
     }
 
-    // return true if this contains breakdown bd at position i
+    // return true if this contains breakdown at position i
     public boolean containsBreakdown(int i, ImmutableList<Integer> breakdown) {
         ArrayList<BasicEdgeLength> forward = new ArrayList<>(breakdown.size());
         for (int j = 0; j < breakdown.size(); j++) {
@@ -143,6 +143,16 @@ public class EdgeBreakdownTree implements Serializable {
         }
         return containsBreakdown(i, ImmutableList.copyOf(forward));
     }
+
+    // return the subset of res consisting of those patches, the 
+    // edge breakdowns of which lie in the tree at position i
+//    public TriangleResults cull(TriangleResults res) {
+//        ArrayList<BasicEdgeLength> forward = new ArrayList<>(breakdown.size());
+//        for (int j = 0; j < breakdown.size(); j++) {
+//            forward.add(BasicEdgeLength.createBasicEdgeLength(breakdown.get(j)));
+//        }
+//        return containsBreakdown(i, ImmutableList.copyOf(forward));
+//    }
 
     // return true if the breakdown at i is empty
     public boolean isEmpty(int i) {
