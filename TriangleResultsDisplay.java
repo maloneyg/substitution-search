@@ -10,7 +10,7 @@ public class TriangleResultsDisplay
             String filename = //"results/tile0-bc.chk";//
                               //"result.chk";
                               //"interim.chk";
-                                "crash2.chk";
+                                "results/tile1-abc.chk";
             List<ImmutablePatch> patches = null;
             if ( ! new File(filename).isFile() )
                 {
