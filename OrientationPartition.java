@@ -69,6 +69,22 @@ public final class OrientationPartition implements Serializable {
         return result;
     }
 
+    // return a mutable version of this
+    public MutableOrientationPartition dumpMutableOrientationPartition() {
+        Orientation oo = partition.get(0).get(0);
+        MutableOrientationPartition output = MutableOrientationPartition.createMutableOrientationPartition(oo);
+        for (HashSet<Orientation> s : partition) {
+            Orientation first = s.get(0);
+            for (Orientation o : s) {
+                if (!o.equals(oo)) {
+                    output.add(o);
+                    if (!first.equals(o)) output.identify(first,o);
+                }
+            }
+        }
+        return output;
+    }
+
     // check if a partition is valid.
     // return false if any Orientation lies in the same
     // subset as its opposite, otherwise return true.

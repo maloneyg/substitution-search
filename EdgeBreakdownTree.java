@@ -145,14 +145,21 @@ public class EdgeBreakdownTree implements Serializable {
     }
 
     // return the subset of res consisting of those patches, the 
-    // edge breakdowns of which lie in the tree at position i
-//    public TriangleResults cull(TriangleResults res) {
-//        ArrayList<BasicEdgeLength> forward = new ArrayList<>(breakdown.size());
-//        for (int j = 0; j < breakdown.size(); j++) {
-//            forward.add(BasicEdgeLength.createBasicEdgeLength(breakdown.get(j)));
-//        }
-//        return containsBreakdown(i, ImmutableList.copyOf(forward));
-//    }
+    // edge breakdowns of which lie in the tree at the appropriate positions.
+    // the index prototile points to the position in Preinitializer.PROTOTILES 
+    // of the prototile, subsitutions for which appear in res
+    public TriangleResults cull(int prototile, TriangleResults res) {
+        List<ImmutablePatch> patches = res.getPatches();
+        List<ImmutablePatch> output = new ArrayList<>();
+        List<Integer> angles = Preinitializer.PROTOTILES.get(prototile);
+        for (ImmutablePatch p : patches) {
+            if (containsBreakdown(Initializer.acute(angles.get(0)),p.getEdge0())
+              &&containsBreakdown(Initializer.acute(angles.get(1)),p.getEdge1())
+              &&containsBreakdown(Initializer.acute(angles.get(2)),p.getEdge2())
+               ) output.add(p);
+        }
+        return new TriangleRestults(output);
+    }
 
     // return true if the breakdown at i is empty
     public boolean isEmpty(int i) {
