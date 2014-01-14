@@ -24,15 +24,17 @@ public class PatchEnsemble implements Serializable {
     private EdgeBreakdownTree breakdown;
 
     // private constructor
+    // we assume the TriangleResults are entered in the same order
+    // as the prototiles to which they correspond
     private PatchEnsemble(List<TriangleResults> inList, EdgeBreakdownTree bd) {
         breakdown = bd;
-        TriangleResults[] eventualPatches = new TriangleResults[inlist.size()];
-        for (int i = 0; i < eventualPatches.length; i++) eventualPatches[i] = bd.cull(inList.get(i));
+        TriangleResults[] eventualPatches = new TriangleResults[inList.size()];
+        for (int i = 0; i < eventualPatches.length; i++) eventualPatches[i] = bd.cull(i,inList.get(i));
         patches = eventualPatches;
     }
 
     // public static factory method
-    public static createPatchEnsemble(List<TriangleResults> inList, EdgeBreakdownTree bd) {
+    public static PatchEnsemble createPatchEnsemble(List<TriangleResults> inList, EdgeBreakdownTree bd) {
         return new PatchEnsemble(inList,bd);
     }
 

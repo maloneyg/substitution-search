@@ -158,7 +158,7 @@ public class EdgeBreakdownTree implements Serializable {
               &&containsBreakdown(Initializer.acute(angles.get(2)),p.getEdge2())
                ) output.add(p);
         }
-        return new TriangleRestults(output);
+        return new TriangleResults(output);
     }
 
     // return true if the breakdown at i is empty
