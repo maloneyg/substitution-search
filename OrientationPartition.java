@@ -69,6 +69,38 @@ public final class OrientationPartition implements Serializable {
         return result;
     }
 
+    // return a mutable version of this
+    // the mutable version contains only Orientations that appear on 
+    // edges of prototiles
+    public MutableOrientationPartition dumpMutableOrientationPartition() {
+        Orientation oo = BasicPrototile.ALL_PROTOTILES.get(0).getOrientations()[0];
+        MutableOrientationPartition output = MutableOrientationPartition.createMutableOrientationPartition(oo);
+        output.add(oo.getOpposite());
+        for (BasicPrototile p : BasicPrototile.ALL_PROTOTILES) {
+            for (Orientation o : p.getOrientations()) {
+                if (!o.equals(oo)) {
+                    output.add(o);
+                    output.add(o.getOpposite());
+                }
+            }
+        }
+
+        for (HashSet<Orientation> s : partition) {
+            Orientation previous = oo;
+            boolean onFirst = true;
+            for (Orientation o : s) {
+                if (output.contains(o)) {
+                    if (!onFirst) {
+                        output.identify(o,previous);
+                    }
+                    previous = o;
+                    onFirst = false;
+                }
+            }
+        }
+        return output;
+    }
+
     // check if a partition is valid.
     // return false if any Orientation lies in the same
     // subset as its opposite, otherwise return true.

@@ -55,6 +55,24 @@ public class MutableOrientationPartition extends MutablePartition<Orientation> i
         return output;
     }
 
+    // modify this to obtain a refinement of this and p
+    // we assume that this and p represent partitions of the same set
+    public MutableOrientationPartition refine(MutableOrientationPartition p) {
+        PartitionNode<Orientation> current = p.getHead();
+        while (current != null) {
+            PartitionNode<Orientation> next = current.getNext();
+            if (next != null && !next.isHead())
+                this.identify(current.getData(),next.getData());
+            next = current;
+        }
+        return this;
+    }
+
+    // return true if the joint refinement of these two partitions is consistent
+    public boolean consistent(MutableOrientationPartition p) {
+        return this.deepCopy().refine(p).valid();
+    }
+
     // identify two orientations with each other.
     // do the same for their opposites.
     public void identify(Orientation one, Orientation two) {

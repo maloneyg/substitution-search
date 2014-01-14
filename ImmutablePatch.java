@@ -173,6 +173,11 @@ public class ImmutablePatch implements Serializable {
         return output;
     }
 
+    // getter method for OrientationPartition
+    public OrientationPartition getOrientationPartition() {
+        return partition;
+    }
+
     public int openSize() {
         return openEdges.length;
     }
