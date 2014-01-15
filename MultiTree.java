@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.Arrays.*;
+import java.util.Arrays;
 import java.util.Stack;
 import java.io.Serializable;
 import java.util.LinkedList;
@@ -185,7 +185,7 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
 
     // same as above, but with an array
     public boolean containsChain(E[] chain) {
-        containsChain(Arrays.asList(chain));
+        return containsChain(Arrays.asList(chain));
     }
 
     // output a list of chains represented by this tree

@@ -183,6 +183,20 @@ public class EdgeBreakdownTree implements Serializable {
         addBreakdown(i,breakdown.reverse().getLengths(),0);
     }
 
+    // same as above, but with ImmutableList<Integer>
+    public void addBreakdown(int i, ImmutableList<Integer> breakdown) {
+        ArrayList<BasicEdgeLength> forward = new ArrayList<>(breakdown.size());
+        ArrayList<BasicEdgeLength> reverse = new ArrayList<>(breakdown.size());
+        for (int j = 0; j < breakdown.size(); j++) {
+            forward.add(BasicEdgeLength.createBasicEdgeLength(breakdown.get(j)));
+        }
+        for (int j = 0; j < breakdown.size(); j++) {
+            reverse.add(forward.get(forward.size()-j-1));
+        }
+        addBreakdown(i,forward,0);
+        addBreakdown(i,reverse,0);
+    }
+
     // return the descendent of pointers[i] that contains l
     // if there is none, return null
     public TreeNode<BasicEdgeLength> getDescendent(int i, BasicEdgeLength l) {

@@ -40,18 +40,18 @@ class PatchAndIndex implements Serializable {
 
     // check if the partition and edge breakdowns are compatible
     public boolean compatible(PatchAndIndex p) {
-        MutableOrientationPartition part1 = this.patch.getOrientationPartition().dumpMutableOrientationPartition();
-        MutableOrientationPartition part2 = p.patch.getOrientationPartition().dumpMutableOrientationPartition();
-        if (!part1.consistent(part2)) return false;
+        MutableOrientationPartition part = this.patch.getOrientationPartition().dumpMutableOrientationPartition().deepCopy().refine(p.patch.getOrientationPartition().dumpMutableOrientationPartition());
+        if (!part.valid()) return false;
         EdgeBreakdown e0 = p.patch.getEdge0();
         EdgeBreakdown e1 = p.patch.getEdge1();
         EdgeBreakdown e2 = p.patch.getEdge2();
         EdgeBreakdown f0 = this.patch.getEdge0();
         EdgeBreakdown f1 = this.patch.getEdge1();
         EdgeBreakdown f2 = this.patch.getEdge2();
-        int i1 = this.getIndex();
-        int i2 = p.getIndex();
-        if (i1==i2) return (e0.equals(f0)&&e1.equals(f1)&&e2.equals(f2));
+        BasicPrototile t1 = BasicPrototile.ALL_PROTOTILES.get(this.getIndex());
+        BasicPrototile t2 = BasicPrototile.ALL_PROTOTILES.get(p.getIndex());
+        Orientation[] o1 = t1.getOrientations();
+        Orientation[] o2 = t2.getOrientations();
         return true;
     }
 

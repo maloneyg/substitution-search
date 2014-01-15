@@ -151,6 +151,14 @@ public class MutablePartition<E> implements Serializable {
         }
     }
 
+    // return true if these two things have been identified
+    public boolean equivalent(E data1, E data2) {
+        for (E candidate : equivalenceClass(data1)) {
+            if (candidate.equals(data2)) return true;
+        }
+        return false;
+    }
+
     // identify the classes containing one and two
     public void identify(E one, E two) {
         PartitionNode<E> c1 = subset(one);
