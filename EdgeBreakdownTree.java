@@ -126,22 +126,23 @@ public class EdgeBreakdownTree implements Serializable {
     }
 
     // add a new edge breakdown for length i
+    public void addBreakdown(int i, BasicEdgeLength[] breakdown, int dummy) {
+        breakdowns[i].addChain(breakdown);
+    }
+
+    // same as above, but with a List
     public void addBreakdown(int i, List<BasicEdgeLength> breakdown, int dummy) {
         breakdowns[i].addChain(breakdown);
     }
 
     // return true if this contains breakdown at position i
-    public boolean containsBreakdown(int i, List<BasicEdgeLength> breakdown) {
+    public boolean containsBreakdown(int i, BasicEdgeLength[] breakdown) {
         return breakdowns[i].containsChain(breakdown);
     }
 
     // return true if this contains breakdown at position i
-    public boolean containsBreakdown(int i, ImmutableList<Integer> breakdown) {
-        ArrayList<BasicEdgeLength> forward = new ArrayList<>(breakdown.size());
-        for (int j = 0; j < breakdown.size(); j++) {
-            forward.add(BasicEdgeLength.createBasicEdgeLength(breakdown.get(j)));
-        }
-        return containsBreakdown(i, ImmutableList.copyOf(forward));
+    public boolean containsBreakdown(int i, EdgeBreakdown breakdown) {
+        return containsBreakdown(i, breakdown.getLengths());
     }
 
     // return the subset of res consisting of those patches, the 
@@ -177,17 +178,9 @@ public class EdgeBreakdownTree implements Serializable {
     }
 
     // add a new edge breakdown for length i
-    public void addBreakdown(int i, ImmutableList<Integer> breakdown) {
-        ArrayList<BasicEdgeLength> forward = new ArrayList<>(breakdown.size());
-        ArrayList<BasicEdgeLength> reverse = new ArrayList<>(breakdown.size());
-        for (int j = 0; j < breakdown.size(); j++) {
-            forward.add(BasicEdgeLength.createBasicEdgeLength(breakdown.get(j)));
-        }
-        for (int j = 0; j < breakdown.size(); j++) {
-            reverse.add(forward.get(forward.size()-j-1));
-        }
-        addBreakdown(i,forward,0);
-        addBreakdown(i,reverse,0);
+    public void addBreakdown(int i, EdgeBreakdown breakdown) {
+        addBreakdown(i,breakdown.getLengths(),0);
+        addBreakdown(i,breakdown.reverse().getLengths(),0);
     }
 
     // return the descendent of pointers[i] that contains l

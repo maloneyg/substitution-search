@@ -489,26 +489,28 @@ public class PuzzleBoundary implements Serializable {
         }
     }
 
-    // get an edge breakdown (ImmutableList<Integer>)
+    // get an EdgeBreakdown
     // the int i should be 0, 1, or 2 depending on which edge we want
-    public ImmutableList<Integer> getBreakdown(int i) {
+    public EdgeBreakdown getBreakdown(int i) {
         if (i < 0||i > 2) throw new IllegalArgumentException("Can't get breakdown number " + i + ".");
         Stack<BasicEdge> E = (i==0)? placed0 : ((i==1)? placed1 : placed2);
         BytePoint lastVertex = VERTICES[(i+1)%3];
         boolean notDone = false;
-        List<Integer> output = new ArrayList<>();
+        List<BasicEdgeLength> l = new ArrayList<>();
+        List<Orientation> o = new ArrayList<>();
         do {
             notDone = false;
             for (BasicEdge e : E) {
                 if (e.getEnds()[0].equals(lastVertex)) {
-                    output.add(BasicEdgeLength.ALL_EDGE_LENGTHS.indexOf(e.getLength()));
+                    l.add(e.getLength());
+                    o.add(e.getOrientation()); // I hope this is the right way
                     lastVertex = e.getEnds()[1];
                     notDone = true;
                     break;
                 }
             }
         } while (notDone);
-        return ImmutableList.copyOf(output);
+        return EdgeBreakdown.createEdgeBreakdown(l,o);
     }
 
     // get an edge breakdown (ImmutableList<Integer>)

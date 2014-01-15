@@ -27,9 +27,9 @@ public class MutablePatch implements Serializable {
     private boolean debug = false;
 
     // the edge breakdown
-    private ImmutableList<Integer> edge0;
-    private ImmutableList<Integer> edge1;
-    private ImmutableList<Integer> edge2;
+    private EdgeBreakdown edge0;
+    private EdgeBreakdown edge1;
+    private EdgeBreakdown edge2;
 
     // the completed patches that have been found
 //    private static List<ImmutablePatch> completedPatches;
@@ -111,7 +111,7 @@ public class MutablePatch implements Serializable {
     private final boolean initialFlip = false;
 
     // initial constructor
-    private MutablePatch(BasicEdge[] e, BytePoint[] v, MutablePrototileList TL,ImmutableList<Integer> bd0,ImmutableList<Integer> bd1,ImmutableList<Integer> bd2) {
+    private MutablePatch(BasicEdge[] e, BytePoint[] v, MutablePrototileList TL,EdgeBreakdown bd0,EdgeBreakdown bd1,EdgeBreakdown bd2) {
         edge0 = bd0;
         edge1 = bd1;
         edge2 = bd2;
@@ -145,7 +145,7 @@ public class MutablePatch implements Serializable {
     }
 
     // public static factory method
-    public static MutablePatch createMutablePatch(BasicEdge[] e, BytePoint[] v, MutablePrototileList TL,ImmutableList<Integer> bd0,ImmutableList<Integer> bd1,ImmutableList<Integer> bd2) {
+    public static MutablePatch createMutablePatch(BasicEdge[] e, BytePoint[] v, MutablePrototileList TL,EdgeBreakdown bd0,EdgeBreakdown bd1,EdgeBreakdown bd2) {
         return new MutablePatch(e,v,TL,bd0,bd1,bd2);
     }
 
@@ -165,13 +165,13 @@ public class MutablePatch implements Serializable {
     }
 
     // get edge0, edge1, and edge2
-    public ImmutableList<Integer> getEdge0() {
+    public EdgeBreakdown getEdge0() {
         return edge0;
     }
-    public ImmutableList<Integer> getEdge1() {
+    public EdgeBreakdown getEdge1() {
         return edge1;
     }
-    public ImmutableList<Integer> getEdge2() {
+    public EdgeBreakdown getEdge2() {
         return edge2;
     }
 

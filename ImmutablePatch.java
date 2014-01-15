@@ -30,12 +30,12 @@ public class ImmutablePatch implements Serializable {
     private final BytePoint[] bigVertices;
 
     // the edge breakdown data
-    private final ImmutableList<Integer> edge0;
-    private final ImmutableList<Integer> edge1;
-    private final ImmutableList<Integer> edge2;
+    private final EdgeBreakdown edge0;
+    private final EdgeBreakdown edge1;
+    private final EdgeBreakdown edge2;
 
     // private constructor
-    private ImmutablePatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, BytePoint[] v,ImmutableList<Integer> bd0,ImmutableList<Integer> bd1,ImmutableList<Integer> bd2) {
+    private ImmutablePatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, BytePoint[] v,EdgeBreakdown bd0,EdgeBreakdown bd1,EdgeBreakdown bd2) {
         triangles = t;
         openEdges = e1;
         closedEdges = e2;
@@ -47,18 +47,18 @@ public class ImmutablePatch implements Serializable {
     }
 
     // public static factory method 
-    public static ImmutablePatch createImmutablePatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, BytePoint[] v,ImmutableList<Integer> bd0,ImmutableList<Integer> bd1,ImmutableList<Integer> bd2) {
+    public static ImmutablePatch createImmutablePatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, BytePoint[] v,EdgeBreakdown bd0,EdgeBreakdown bd1,EdgeBreakdown bd2) {
         return new ImmutablePatch(t,e1,e2,o,v,bd0,bd1,bd2);
     }
 
     // getters
-    public ImmutableList<Integer> getEdge0() {
+    public EdgeBreakdown getEdge0() {
         return edge0;
     }
-    public ImmutableList<Integer> getEdge1() {
+    public EdgeBreakdown getEdge1() {
         return edge1;
     }
-    public ImmutableList<Integer> getEdge2() {
+    public EdgeBreakdown getEdge2() {
         return edge2;
     }
 

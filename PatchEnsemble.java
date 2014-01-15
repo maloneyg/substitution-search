@@ -43,7 +43,15 @@ class PatchAndIndex implements Serializable {
         MutableOrientationPartition part1 = this.patch.getOrientationPartition().dumpMutableOrientationPartition();
         MutableOrientationPartition part2 = p.patch.getOrientationPartition().dumpMutableOrientationPartition();
         if (!part1.consistent(part2)) return false;
-        ImmutableList<Integer> e0 = p.patch.getEdge0();
+        EdgeBreakdown e0 = p.patch.getEdge0();
+        EdgeBreakdown e1 = p.patch.getEdge1();
+        EdgeBreakdown e2 = p.patch.getEdge2();
+        EdgeBreakdown f0 = this.patch.getEdge0();
+        EdgeBreakdown f1 = this.patch.getEdge1();
+        EdgeBreakdown f2 = this.patch.getEdge2();
+        int i1 = this.getIndex();
+        int i2 = p.getIndex();
+        if (i1==i2) return (e0.equals(f0)&&e1.equals(f1)&&e2.equals(f2));
         return true;
     }
 
