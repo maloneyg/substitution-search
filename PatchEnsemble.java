@@ -41,19 +41,76 @@ class PatchAndIndex implements Serializable {
     // check if the partition and edge breakdowns are compatible
     public boolean compatible(PatchAndIndex p) {
         MutableOrientationPartition part = this.patch.getOrientationPartition().dumpMutableOrientationPartition().deepCopy().refine(p.patch.getOrientationPartition().dumpMutableOrientationPartition());
+        // do the easy test first: make sure their Orientations are compatible
         if (!part.valid()) return false;
-        EdgeBreakdown e0 = p.patch.getEdge0();
-        EdgeBreakdown e1 = p.patch.getEdge1();
-        EdgeBreakdown e2 = p.patch.getEdge2();
-        EdgeBreakdown f0 = this.patch.getEdge0();
-        EdgeBreakdown f1 = this.patch.getEdge1();
-        EdgeBreakdown f2 = this.patch.getEdge2();
+        // now pull out the relevant data from the patches
+        EdgeBreakdown[] bd1 = new EdgeBreakdown[3];
+        bd1[0] = this.patch.getEdge0();
+        bd1[1] = this.patch.getEdge1();
+        bd1[2] = this.patch.getEdge2();
+        EdgeBreakdown[] bd2 = new EdgeBreakdown[3];
+        bd2[0] = p.patch.getEdge0();
+        bd2[1] = p.patch.getEdge1();
+        bd2[2] = p.patch.getEdge2();
         BasicPrototile t1 = BasicPrototile.ALL_PROTOTILES.get(this.getIndex());
         BasicPrototile t2 = BasicPrototile.ALL_PROTOTILES.get(p.getIndex());
         Orientation[] o1 = t1.getOrientations();
         Orientation[] o2 = t2.getOrientations();
+        BasicEdgeLength[] e1 = t1.getLengths();
+        BasicEdgeLength[] e2 = t2.getLengths();
+
+        // now identify Orientations based on EdgeBreakdowns
+        // for this purpose, first determine which edge lengths they share
+        List<IndexPair> shared = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (e1[i].equals(e2[j])) shared.add(new IndexPair(i,j));
+            }
+        }
+
+        // now identify Orientations over and over until you can't identify more
+        boolean done = true;
+        int k = 0;
+        int i = 0;
+        int j = 0;
+        do {
+            if (!done) shared.remove(k);
+            done = true;
+            for (k = 0; k < shared.size(); k++) {
+                i = shared.get(i).getIndices()[0];
+                j = shared.get(i).getIndices()[1];
+
+                // if they're equivalent
+                if (part.equivalent(o1[i],o2[j])) {
+                    Orientation[] list1 = bd1[i].getOrientations();
+                    Orientation[] list2 = bd2[j].getOrientations();
+                    if (list1.length!=list2.length) throw new IllegalArgumentException("Trying to match edge breakdowns with differing lengths.");
+                    for (int l = 0; l < bd1[i].size(); l++)
+                        part.identify(list1[l],list2[l]);
+                    // breaking here causes shared(k) to be removed
+                    done = false;
+                    break;
+                }
+
+                // if they're opposite
+                if (part.equivalent(o1[i],o2[j].getOpposite())) {
+                    Orientation[] list1 = bd1[i].getOrientations();
+                    Orientation[] list2 = bd2[j].reverse().getOrientations();
+                    if (list1.length!=list2.length) throw new IllegalArgumentException("Trying to match edge breakdowns with differing lengths.");
+                    for (int l = 0; l < bd1[i].size(); l++)
+                        part.identify(list1[l],list2[l]);
+                    // breaking here causes shared(k) to be removed
+                    done = false;
+                    break;
+                }
+
+                k++;
+            }
+        } while (!done);
+
         return true;
-    }
+
+    } // compatible method ends here
 
     // equals method.
     public boolean equals(Object obj) {
