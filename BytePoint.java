@@ -82,11 +82,6 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
         return new BytePoint(vector);
     }
 
-    // public static factory method for creating a brand new point
-    //static protected BytePoint createExNihilo(int[] vector) {
-   //     return new BytePoint(vector);
-    //}
-
     // toString method.
     public String toString() {
         String outString = "(";
@@ -94,6 +89,16 @@ final public class BytePoint implements AbstractPoint<BytePoint, BasicAngle>, Se
             outString = outString + point[i] + ",";
         }
         outString = outString + point[point.length-1] + ")";
+        return outString;
+    }
+
+    // toString method for writing gap files.
+    public String gapString() {
+        String outString = "[";
+        for (int i = 0; i < point.length - 1; i++) {
+            outString = outString + point[i] + ",";
+        }
+        outString = outString + point[point.length-1] + "]";
         return outString;
     }
 

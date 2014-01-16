@@ -135,6 +135,18 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
         }
     }
 
+    // return the angle by which this has been rotated from standard position
+    public BasicAngle angle() {
+        BytePoint direction = directions[(flip) ? 0 : 1];
+        BasicAngle output = BasicAngle.createBasicAngle(0);
+        BasicEdgeLength one = BasicEdgeLength.createBasicEdgeLength(0);
+        for (int i = 0; i < 2*BasicAngle.ANGLE_SUM; i++) {
+            output = BasicAngle.createBasicAngle(i);
+            if (one.getAsVector(output).equals(direction)) break;
+        }
+        return output;
+    }
+
     // equals method
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())
@@ -156,6 +168,30 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
     // toString method
     public String toString() {
         return "Triangle\n    angles: (" + angles[0] + "," + angles[1] + "," + angles[2] + ")\n  vertices: " + vertices[0] + "\n            " + vertices[1] + "\n            " + vertices[2];
+    }
+
+    // toString method for writing the corresponding prototile in gap
+    public String prototileGapString() {
+        String output = "    rec( vertices := [ ";
+        output += vertices[1].gapString() + ", ";
+        output += vertices[2].gapString() + ", ";
+        output += vertices[0].gapString() + " ],\n";
+        output += "         angles   := [";
+        output += angles[1].fractionString() + ", ";
+        output += angles[2].fractionString() + ", ";
+        output += angles[0].fractionString() + "] )";
+        return output;
+    }
+
+    // toString method giving gap code representing this in a substitution rule
+    // left tells us whether the rule is for a prototile or its reflection
+    public String functionGapString(boolean left) {
+        String output = "         MkSubtile" + Preinitializer.N + "( t, T, ";
+        output += ((left)? vertices[1].reflect() : vertices[1]).gapString() + ", ";
+        int tileIndex = 2 * BasicPrototile.ALL_PROTOTILES.indexOf(prototile) + ((left) ? 1 : 0);
+        output += tileIndex + ", ";
+        output += ((left) ? angle().supplement() : angle()).toString() + " )";
+        return output;
     }
 
     // toArray method. For drawing
@@ -325,6 +361,42 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
         BytePoint p6 = BasicEdgeLength.createBasicEdgeLength(2).getAsVector(BasicAngle.createBasicAngle(6)).add(test.vertices[0]);
         System.out.println("p5: " + test.covers(p5) + ". Expected: false.");
         System.out.println("p6: " + test.covers(p6) + ". Expected: false.");
+
+        // a printout to help identify the vertices of the standard triangles
+        System.out.println("\nTiles in standard position:");
+        BasicTriangle t0r = BasicPrototile.createBasicPrototile(new int[] {1, 4, 6}).place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false);
+        BasicTriangle t0l = BasicPrototile.createBasicPrototile(new int[] {1, 4, 6}).place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),true);
+        BasicTriangle t1r = BasicPrototile.createBasicPrototile(new int[] {1, 5, 5}).place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false);
+        BasicTriangle t1l = BasicPrototile.createBasicPrototile(new int[] {1, 5, 5}).place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),true);
+        BasicTriangle t2r = BasicPrototile.createBasicPrototile(new int[] {2, 4, 5}).place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false);
+        BasicTriangle t2l = BasicPrototile.createBasicPrototile(new int[] {2, 4, 5}).place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),true);
+        BasicTriangle t3r = BasicPrototile.createBasicPrototile(new int[] {2, 3, 6}).place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false);
+        BasicTriangle t3l = BasicPrototile.createBasicPrototile(new int[] {2, 3, 6}).place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),true);
+        BasicTriangle t4r = BasicPrototile.createBasicPrototile(new int[] {3, 3, 5}).place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false);
+        BasicTriangle t4l = BasicPrototile.createBasicPrototile(new int[] {3, 3, 5}).place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),true);
+
+        // now print them all
+        System.out.println("t0r:");
+        System.out.println(t0r);
+        System.out.println("t0l:");
+        System.out.println(t0l);
+        System.out.println("t1r:");
+        System.out.println(t1r);
+        System.out.println("t1l:");
+        System.out.println(t1l);
+        System.out.println("t2r:");
+        System.out.println(t2r);
+        System.out.println("t2l:");
+        System.out.println(t2l);
+        System.out.println("t3r:");
+        System.out.println(t3r);
+        System.out.println("t3l:");
+        System.out.println(t3l);
+        System.out.println("t4r:");
+        System.out.println(t4r);
+        System.out.println("t4l:");
+        System.out.println(t4l);
+        System.out.println(t4l.prototileGapString());
 
     }
 

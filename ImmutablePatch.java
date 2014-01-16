@@ -107,6 +107,18 @@ public class ImmutablePatch implements Serializable {
         return output;
     }
 
+    // gap function representing this substitution
+    // left tells us whether this is a left- or right-handed tile
+    public String functionGapString(boolean left) {
+        String output = "    function(t,T) return\n      [\n";
+        for (int i = 0; i < triangles.length; i++) {
+            output += "         " + triangles[i].functionGapString(left);
+            output += ((i<triangles.length-1) ? "," : "") + "\n";
+        }
+        output += "      ];\n    end";
+        return output;
+    }
+
     /*
     * produce some stuff for drawing the patch
     */

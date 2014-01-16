@@ -180,6 +180,26 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
         return "Prototile\n        angles: (" + angles[0] + "," + angles[1] + "," + angles[2] + ")\n  edge lengths: " + lengths[0] + "\n                " +  lengths[1] + "\n                " +  lengths[2];
     }
 
+    // produce String output for writing to a gap file
+    // flip tells us whether to produce the left- or right-handed version
+    public String gapString(boolean flip) {
+        return this.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),flip).prototileGapString();
+    }
+
+    // produce a String with all prototiles for gap
+    public static String allPrototilesGapString() {
+        String output = "  prototiles := [\n";
+        UnmodifiableListIterator<BasicPrototile> i = ALL_PROTOTILES.listIterator();
+        while (i.hasNext()) {
+            BasicPrototile current = i.next();
+            output += current.gapString(false);
+            output += ",\n";
+            output += current.gapString(true);
+            output += ((i.hasNext())? ",\n" : "\n  ],\n\n");
+        }
+        return output;
+    }
+
     /*
     * return all the lengths
     */
@@ -635,6 +655,8 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
         }
         System.out.println("MIN_ANGLE: " + MIN_ANGLE);
         System.out.println("MIN_ANGLE_LENGTH: " + MIN_ANGLE_LENGTH);
+        System.out.println("\n\nPrototile data for gap:");
+        System.out.println(allPrototilesGapString());
 
     }
 

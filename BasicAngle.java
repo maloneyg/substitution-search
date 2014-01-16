@@ -57,6 +57,12 @@ public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle>, 
         return "" + a;
     }
 
+    // toString method. representing this as a fraction of a whole angle  
+    public String fractionString() {
+        int gcd = ByteMatrix.GCD(a,Preinitializer.N);
+        return a/gcd + "/" + Preinitializer.N/gcd;
+    }
+
     // equals override.  
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())
