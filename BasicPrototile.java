@@ -200,6 +200,37 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
         return output;
     }
 
+    // produce a String with all drawing functions of prototiles for gap
+    public static String drawAllPrototilesGapString() {
+        String output = "  drawfuncs := [\n";
+        double ang = ((double)180 / (double) Preinitializer.N);
+        for (int i = 0; i < ALL_PROTOTILES.size(); i++) {
+            // right tile
+            output += "    function( tile, psfile )\n";
+            output += "      AppendTo( psfile, \"gsave \",\n               ";
+            for (int j = 0; j < Preinitializer.N; j++) {
+                output += (j==0) ? "" : "\" \",";
+                output += "tile.pos[" + j + "],";
+            }
+            output += "\n               \" heptorth translate \",tile.orient*";
+            output += ang + ",\n               \" rotate t";
+            output += i + "r grestore\\n\");\n    end,\n";
+
+            // left tile
+            output += "    function( tile, psfile )\n";
+            output += "      AppendTo( psfile, \"gsave \",\n               ";
+            for (int j = 0; j < Preinitializer.N; j++) {
+                output += (j==0) ? "" : "\" \",";
+                output += "tile.pos[" + j + "],";
+            }
+            output += "\n               \" heptorth translate \",tile.orient*";
+            output += ang + ",\n               \" rotate t";
+            output += i + "l grestore\\n\");\n    end";
+            output += (i==ALL_PROTOTILES.size()-1) ? "\n  ],\n" : ",\n";
+        }
+        return output;
+    }
+
     /*
     * return all the lengths
     */
@@ -657,6 +688,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
         System.out.println("MIN_ANGLE_LENGTH: " + MIN_ANGLE_LENGTH);
         System.out.println("\n\nPrototile data for gap:");
         System.out.println(allPrototilesGapString());
+        System.out.println(drawAllPrototilesGapString());
 
     }
 
