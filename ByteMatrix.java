@@ -176,6 +176,20 @@ final public class ByteMatrix implements Serializable {
         return output;
     }
 
+    // print matrix in gap-readable form
+    public String gapString() {
+        String output = "[ ";
+        for (int i = 0; i < M; i++) {
+            output += "[";
+            for (int j = 0; j < N; j++) {
+                output += data[i][j];
+                output += (j==N-1) ? "]" : ",";
+            }
+            output += (i==M-1) ? " ]" : ", ";
+        }
+        return output;
+    }
+
     // extract a column
     public ImmutableList<Integer> getColumn(int i) {
         if (i < 0 || i >= N) 

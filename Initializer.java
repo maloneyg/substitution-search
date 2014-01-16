@@ -227,6 +227,21 @@ class Initializer {
         }
     }
 
+    // return String of preamble for gap file
+    public static String gapPreambleString(String name) {
+        String output = name + " := rec(\n\n  inf := ";
+        output += INFL.gapString() + ",\n\n";
+        output += "  rot := List( [1.." + (2*N) + "], i->Rot" + N + "^(i-1) ),\n\n";
+        output += "  seed := [ rec( pos := [";
+        for (int i = 0; i < N-1; i++) {
+            output += "0";
+            output += ((i==N-2) ? "]" : ",");
+        }
+        output += ", typ := 1, orient := 0) ],\n\n";
+        output += "  basis := List( [0.." + (N-2) + "], i->[Cos(i*Phi" + N + "), Sin(i*Phi" + N + ")]),\n\n";
+        return output;
+    }
+
     // return i or N - i, depending on whether i > N/2
     public static int acute(int n) {
         if (n <= N/2) {

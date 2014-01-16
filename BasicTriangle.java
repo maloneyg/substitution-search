@@ -188,7 +188,7 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
     public String functionGapString(boolean left) {
         String output = "         MkSubtile" + Preinitializer.N + "( t, T, ";
         output += ((left)? vertices[1].reflect() : vertices[1]).gapString() + ", ";
-        int tileIndex = 2 * BasicPrototile.ALL_PROTOTILES.indexOf(prototile) + ((left) ? 1 : 0);
+        int tileIndex = 2 * BasicPrototile.ALL_PROTOTILES.indexOf(prototile) + ((left) ? 2 : 1);
         output += tileIndex + ", ";
         output += ((left) ? angle().supplement() : angle()).toString() + " )";
         return output;
