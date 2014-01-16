@@ -108,7 +108,7 @@ class PatchAndIndex implements Serializable {
             }
         } while (!done);
 
-        return true;
+        return part.valid();
 
     } // compatible method ends here
 
@@ -186,17 +186,45 @@ public class PatchEnsemble implements Serializable {
         }
 
         for (PatchAndIndex p1 : patches.vertexSet()) {
-            MutableOrientationPartition part1 = p1.getPatch().getOrientationPartition().dumpMutableOrientationPartition();
             for (PatchAndIndex p2 : patches.vertexSet()) {
-                MutableOrientationPartition part2 = p1.getPatch().getOrientationPartition().dumpMutableOrientationPartition();
-                if (part1.consistent(part2)) patches.addEdge(p1,p2,new IndexPair(p1.getIndex(),p2.getIndex()));
+                if (p1.compatible(p2)) patches.addEdge(p1,p2,new IndexPair(p1.getIndex(),p2.getIndex()));
             }
         }
     }
 
     // public static factory method
     public static PatchEnsemble createPatchEnsemble(List<TriangleResults> inList, EdgeBreakdownTree bd) {
-        return new PatchEnsemble(inList,bd);
+        PatchEnsemble output = new PatchEnsemble(inList,bd);
+        output.dropLoners();
+        return output;
+    }
+
+    // remove all vertices that don't have edges connected to all indices
+    // removing one such vertex might produce another one, so loop until
+    // no more are created
+    public void dropLoners() {
+        // we have to create this outside of the loop, I think
+        PatchAndIndex drop = null;
+        boolean done = true;
+        do {
+            if (!done) patches.removeVertex(drop);
+            done = true;
+            // now we loop through all vertices and check for loners
+            for (PatchAndIndex p : patches.vertexSet()) {
+                // check boxes to see if p has neighbours of all indices
+                boolean[] check = new boolean[Preinitializer.PROTOTILES.size()];
+                for (IndexPair i : patches.outgoingEdgesOf(p)) {
+                    for (int j = 0; j < 2; j ++) check[i.getIndices()[j]] = true;
+                }
+                // if we missed any index, we're not done
+                for (int j = 0; j < check.length; j++) done = (done&&check[j]);
+                // drop this one and start again
+                if (!done) {
+                    drop = p;
+                    break;
+                }
+            }
+        } while (!done);
     }
 
     // equals method.

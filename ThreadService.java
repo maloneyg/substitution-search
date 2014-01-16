@@ -157,7 +157,7 @@ public class ThreadService
                     totalTimeString = String.format("%6.3 s", totalTime);
                 }
 
-            String reportString = String.format("Queue: %6d   Running: %2d   Done: %5d   Complete: %5d   Avg: %6.0f /s   Now: %6.0f /s   Elapsed: %s\r",
+            String reportString = String.format("Queue: %6d   Running: %2d   Done: %5d   Found: %5d   Solves: %6.0f /s   Now: %6.0f /s   Elapsed: %s\r",
             getQueue().size(), numberOfRunningJobs.get(), numberOfJobsRun.get(), numberOfCompletedPatches, average, throughput, totalTimeString);
             System.out.print(reportString);
         }
