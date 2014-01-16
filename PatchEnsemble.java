@@ -244,4 +244,9 @@ public class PatchEnsemble implements Serializable {
         return result;
     }
 
+    // output a String of gap-readable code
+    public String gapString(String name) {
+        return name;
+    }
+
 } // end of class PatchEnsemble
