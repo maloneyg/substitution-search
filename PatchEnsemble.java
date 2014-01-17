@@ -86,8 +86,10 @@ class PatchAndIndex implements Serializable {
                     Orientation[] list1 = bd1[i].getOrientations();
                     Orientation[] list2 = bd2[j].getOrientations();
                     if (list1.length!=list2.length) throw new IllegalArgumentException("Trying to match edge breakdowns with differing lengths.");
-                    for (int l = 0; l < bd1[i].size(); l++)
+                    for (int l = 0; l < bd1[i].size(); l++) {
+                        if (!bd1[i].getLengths()[l].equals(bd2[j].getLengths()[l])) return false;
                         part.identify(list1[l],list2[l]);
+                    }
                     // breaking here causes shared(k) to be removed
                     done = false;
                     break;
@@ -98,8 +100,10 @@ class PatchAndIndex implements Serializable {
                     Orientation[] list1 = bd1[i].getOrientations();
                     Orientation[] list2 = bd2[j].reverse().getOrientations();
                     if (list1.length!=list2.length) throw new IllegalArgumentException("Trying to match edge breakdowns with differing lengths.");
-                    for (int l = 0; l < bd1[i].size(); l++)
+                    for (int l = 0; l < bd1[i].size(); l++) {
+                        if (!bd1[i].getLengths()[l].equals(bd2[j].getLengths()[bd1[i].size()-1-l])) return false;
                         part.identify(list1[l],list2[l]);
+                    }
                     // breaking here causes shared(k) to be removed
                     done = false;
                     break;
