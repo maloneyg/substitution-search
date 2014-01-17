@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.io.PrintWriter;
+import java.io.*;
 
 // a class that stores a patch and an index
 // the index tells us which prototile it represents
@@ -267,6 +268,115 @@ public class PatchEnsemble implements Serializable {
             }
         }
         return name;
+    }
+
+    public static void main(String[] args) {
+
+            List<TriangleResults> resultsList = new LinkedList<>();
+
+            // deserialize data
+            String filename = "results/tile0-106.chk";
+            if ( ! new File(filename).isFile() )
+                {
+                    System.out.println(filename + " not found!");
+                    return;
+                }
+            try
+                {
+                    FileInputStream fileIn = new FileInputStream(filename);
+                    ObjectInputStream in = new ObjectInputStream(fileIn);
+                    resultsList.add((TriangleResults)in.readObject());
+                    System.out.println(filename + " have been read.");
+                }
+            catch (Exception e)
+                {
+                    e.printStackTrace();
+                    System.exit(1);
+                }
+
+            // deserialize data
+            filename = "results/tile1-106.chk";
+            if ( ! new File(filename).isFile() )
+                {
+                    System.out.println(filename + " not found!");
+                    return;
+                }
+            try
+                {
+                    FileInputStream fileIn = new FileInputStream(filename);
+                    ObjectInputStream in = new ObjectInputStream(fileIn);
+                    resultsList.add((TriangleResults)in.readObject());
+                    System.out.println(filename + " have been read.");
+                }
+            catch (Exception e)
+                {
+                    e.printStackTrace();
+                    System.exit(1);
+                }
+
+            // deserialize data
+            filename = "results/tile2-106.chk";
+            if ( ! new File(filename).isFile() )
+                {
+                    System.out.println(filename + " not found!");
+                    return;
+                }
+            try
+                {
+                    FileInputStream fileIn = new FileInputStream(filename);
+                    ObjectInputStream in = new ObjectInputStream(fileIn);
+                    resultsList.add((TriangleResults)in.readObject());
+                    System.out.println(filename + " have been read.");
+                }
+            catch (Exception e)
+                {
+                    e.printStackTrace();
+                    System.exit(1);
+                }
+
+            // deserialize data
+            filename = "results/tile3-106.chk";
+            if ( ! new File(filename).isFile() )
+                {
+                    System.out.println(filename + " not found!");
+                    return;
+                }
+            try
+                {
+                    FileInputStream fileIn = new FileInputStream(filename);
+                    ObjectInputStream in = new ObjectInputStream(fileIn);
+                    resultsList.add((TriangleResults)in.readObject());
+                    System.out.println(filename + " have been read.");
+                }
+            catch (Exception e)
+                {
+                    e.printStackTrace();
+                    System.exit(1);
+                }
+
+            // deserialize data
+            filename = "results/tile4-106.chk";
+            if ( ! new File(filename).isFile() )
+                {
+                    System.out.println(filename + " not found!");
+                    return;
+                }
+            try
+                {
+                    FileInputStream fileIn = new FileInputStream(filename);
+                    ObjectInputStream in = new ObjectInputStream(fileIn);
+                    resultsList.add((TriangleResults)in.readObject());
+                    System.out.println(filename + " have been read.");
+                }
+            catch (Exception e)
+                {
+                    e.printStackTrace();
+                    System.exit(1);
+                }
+
+                PatchEnsemble testo = createPatchEnsemble(resultsList, PuzzleBoundary.BREAKDOWNS);
+                testo.gapString("test.g","test");
+
     }
 
 } // end of class PatchEnsemble
