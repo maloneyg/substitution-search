@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
+import java.io.PrintWriter;
 
 // a class that stores a patch and an index
 // the index tells us which prototile it represents
@@ -245,7 +246,22 @@ public class PatchEnsemble implements Serializable {
     }
 
     // output a String of gap-readable code
-    public String gapString(String name) {
+    // name is the name of the gap record we will produce
+    public String gapString(String fileName, String name) {
+        PrintWriter out = null;
+        try {
+            out = new PrintWriter(fileName);
+            out.write(Initializer.gapPreambleString(name));
+            out.write(BasicPrototile.allPrototilesGapString());
+
+        } catch ( Exception e ) {
+        } finally {
+            try {
+                if ( out != null)
+                out.close( );
+            } catch ( Exception e) {
+            }
+        }
         return name;
     }
 
