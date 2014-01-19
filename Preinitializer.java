@@ -46,7 +46,7 @@ class Preinitializer {
 
     public static final String RESULT_FILENAME = "result.chk"; // name of file to write the completed patches to at the end
     public static final String BREAKDOWN_INPUT_FILENAME = "nuthin.chk"; // name of file to which we write the edge breakdowns
-    public static final String BREAKDOWN_OUTPUT_FILENAME = "breakdowns4-abc.chk"; // name of file to which we write the edge breakdowns
+    public static final String BREAKDOWN_OUTPUT_FILENAME = "breakdownsx-abc.chk"; // name of file to which we write the edge breakdowns
 
     public static final int LISTENING_PORT = 32007; // sockets will transmite/recieve on this port number
     
@@ -61,7 +61,7 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, 0, 1); // quite big search (110)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 0, -3, 0, 1); // huge search (115)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, -2, 0, 1); // b+d (118)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121) use this one

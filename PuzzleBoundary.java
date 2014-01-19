@@ -295,7 +295,7 @@ public class PuzzleBoundary implements Serializable {
         for (int i = 0; i < placed0.size(); i++) e0.push(placed0.get(i));
         for (int i = 0; i < placed1.size(); i++) e1.push(placed1.get(i));
         for (int i = 0; i < placed2.size(); i++) e2.push(placed2.get(i));
-        EdgeBreakdownTree t = breakdown.deepCopy();
+        EdgeBreakdownTree t = (breakdown == null) ? null : breakdown.deepCopy();
         return new PuzzleBoundary(b0,b1,b2,e0,e1,e2,t,frontier0,frontier1,frontier2);
     }
 
@@ -381,7 +381,7 @@ public class PuzzleBoundary implements Serializable {
             if (hit) {
                 if (block0[i]) return -1;
                 if (ends[1].equals(E0[i])) {
-                    if (ends[1].equals(frontier0)&&(!breakdown.precedesLength(0,e.getLength()))) return -1;
+                    if (ends[1].equals(frontier0)&&(breakdown==null||!breakdown.precedesLength(0,e.getLength()))) return -1;
                     return 1;
                 }
             }
@@ -394,7 +394,7 @@ public class PuzzleBoundary implements Serializable {
             if (hit) {
                 if (block1[i]) return -1;
                 if (ends[1].equals(E1[i])) {
-                    if (ends[1].equals(frontier1)&&(!breakdown.precedesLength(1,e.getLength()))) return -1;
+                    if (ends[1].equals(frontier1)&&(breakdown==null||!breakdown.precedesLength(1,e.getLength()))) return -1;
                     return 1;
                 }
             }
@@ -407,7 +407,7 @@ public class PuzzleBoundary implements Serializable {
             if (hit) {
                 if (block2[i]) return -1;
                 if (ends[1].equals(E2[i])) {
-                    if (ends[1].equals(frontier2)&&(!breakdown.precedesLength(2,e.getLength()))) return -1;
+                    if (ends[1].equals(frontier2)&&(breakdown==null||!breakdown.precedesLength(2,e.getLength()))) return -1;
                     return 1;
                 }
             }
@@ -438,7 +438,7 @@ public class PuzzleBoundary implements Serializable {
         if (flip(E0,block0,e)) {
             placed0.push(e);
             if (e.getEnds()[1].equals(frontier0)) {
-                breakdown.place(0,e.getLength());
+                if (!(breakdown==null)) breakdown.place(0,e.getLength());
                 frontier0 = e.getEnds()[0];
             }
             return;
@@ -446,7 +446,7 @@ public class PuzzleBoundary implements Serializable {
         if (flip(E1,block1,e)) {
             placed1.push(e);
             if (e.getEnds()[1].equals(frontier1)) {
-                breakdown.place(1,e.getLength());
+                if (!(breakdown==null)) breakdown.place(1,e.getLength());
                 frontier1 = e.getEnds()[0];
             }
             return;
@@ -454,7 +454,7 @@ public class PuzzleBoundary implements Serializable {
         if (flip(E2,block2,e)) {
             placed2.push(e);
             if (e.getEnds()[1].equals(frontier2)) {
-                breakdown.place(2,e.getLength());
+                if (!(breakdown==null)) breakdown.place(2,e.getLength());
                 frontier2 = e.getEnds()[0];
             }
             return;
@@ -466,7 +466,7 @@ public class PuzzleBoundary implements Serializable {
         if (flip(E0,block0,e)) {
             placed0.pop();
             if (e.getEnds()[0].equals(frontier0)) {
-                breakdown.remove(0);
+                if (!(breakdown==null)) breakdown.remove(0);
                 frontier0 = e.getEnds()[1];
             }
             return;
@@ -474,7 +474,7 @@ public class PuzzleBoundary implements Serializable {
         if (flip(E1,block1,e)) {
             placed1.pop();
             if (e.getEnds()[0].equals(frontier1)) {
-                breakdown.remove(1);
+                if (!(breakdown==null)) breakdown.remove(1);
                 frontier1 = e.getEnds()[1];
             }
             return;
@@ -482,7 +482,7 @@ public class PuzzleBoundary implements Serializable {
         if (flip(E2,block2,e)) {
             placed2.pop();
             if (e.getEnds()[0].equals(frontier2)) {
-                breakdown.remove(2);
+                if (!(breakdown==null)) breakdown.remove(2);
                 frontier2 = e.getEnds()[1];
             }
             return;

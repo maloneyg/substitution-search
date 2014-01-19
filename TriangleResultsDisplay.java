@@ -8,9 +8,9 @@ public class TriangleResultsDisplay
         {
             // deserialize data
             String filename = //"results/tile0-bc.chk";//
-                              //"result.chk";
+                                "result.chk";
                               //"interim.chk";
-                                "results/tile1-abc.chk";
+                              //"results/tile1-abc.chk";
             List<ImmutablePatch> patches = null;
             if ( ! new File(filename).isFile() )
                 {
