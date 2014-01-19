@@ -239,7 +239,7 @@ public class PuzzleBoundary implements Serializable {
         block0 = new boolean[E0.length];
         block1 = new boolean[E1.length];
         block2 = new boolean[E2.length];
-        breakdown = EdgeBreakdownTree.createEdgeBreakdownTree(BREAKDOWNS);
+        breakdown = null;//EdgeBreakdownTree.createEdgeBreakdownTree(BREAKDOWNS);
         frontier0 = E0[E0.length-1];
         frontier1 = E1[E1.length-1];
         frontier2 = E2[E2.length-1];
@@ -251,7 +251,7 @@ public class PuzzleBoundary implements Serializable {
         block1 = new boolean[E1.length];
         block2 = new boolean[E2.length];
         add(e);
-        breakdown = EdgeBreakdownTree.createEdgeBreakdownTree(BREAKDOWNS,e.getLength());
+        breakdown = null;//EdgeBreakdownTree.createEdgeBreakdownTree(BREAKDOWNS,e.getLength());
         frontier0 = E0[E0.length-1];
         frontier1 = E1[E1.length-1];
         frontier2 = E2[E2.length-1];
@@ -381,7 +381,7 @@ public class PuzzleBoundary implements Serializable {
             if (hit) {
                 if (block0[i]) return -1;
                 if (ends[1].equals(E0[i])) {
-                    if (ends[1].equals(frontier0)&&(breakdown==null||!breakdown.precedesLength(0,e.getLength()))) return -1;
+                    if (breakdown!=null&&ends[1].equals(frontier0)&&(!breakdown.precedesLength(0,e.getLength()))) return -1;
                     return 1;
                 }
             }
@@ -394,7 +394,7 @@ public class PuzzleBoundary implements Serializable {
             if (hit) {
                 if (block1[i]) return -1;
                 if (ends[1].equals(E1[i])) {
-                    if (ends[1].equals(frontier1)&&(breakdown==null||!breakdown.precedesLength(1,e.getLength()))) return -1;
+                    if (breakdown!=null&&ends[1].equals(frontier1)&&(!breakdown.precedesLength(1,e.getLength()))) return -1;
                     return 1;
                 }
             }
@@ -407,7 +407,7 @@ public class PuzzleBoundary implements Serializable {
             if (hit) {
                 if (block2[i]) return -1;
                 if (ends[1].equals(E2[i])) {
-                    if (ends[1].equals(frontier2)&&(breakdown==null||!breakdown.precedesLength(2,e.getLength()))) return -1;
+                    if (breakdown!=null&&ends[1].equals(frontier2)&&(!breakdown.precedesLength(2,e.getLength()))) return -1;
                     return 1;
                 }
             }
