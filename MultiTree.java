@@ -175,12 +175,18 @@ public class MultiTree<E> implements Serializable, Iterable<E> {
     public boolean containsChain(List<E> chain) {
         TreeNode<E> currentNode = head;
         for (E e : chain) {
-            if (!currentNode.getNext().contains(e)) return false;
+            boolean hit = false;
             for (TreeNode<E> n : currentNode.getNext()) {
-                if (n.getData().equals(e)) currentNode = n;
+                if (n.getData().equals(e)) {
+                    currentNode = n;
+                    hit = true;
+                    break;
+                }
             }
+            if (!hit) return false;
         }
         return currentNode.getNext().isEmpty();
+        //return true;
     }
 
     // same as above, but with an array

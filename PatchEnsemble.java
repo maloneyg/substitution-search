@@ -79,8 +79,8 @@ class PatchAndIndex implements Serializable {
             if (!done) shared.remove(k);
             done = true;
             for (k = 0; k < shared.size(); k++) {
-                i = shared.get(i).getIndices()[0];
-                j = shared.get(i).getIndices()[1];
+                i = shared.get(k).getIndices()[0];
+                j = shared.get(k).getIndices()[1];
 
                 // if they're equivalent
                 if (part.equivalent(o1[i],o2[j])) {
@@ -155,13 +155,18 @@ class IndexPair implements Serializable {
         return new int[] {(i1<i2)? i1 : i2, (i1<i2)? i2 : i1};
     }
 
-    // equals method.
-    public boolean equals(Object obj) {
-        if (obj == null || getClass() != obj.getClass())
-            return false;
-        IndexPair l = (IndexPair) obj;
-        return ((this.i1==l.i1&&this.i2==l.i2)||(this.i1==l.i2&&this.i2==l.i1));
+    // toString method.
+    public String toString() {
+        return "IndexPair (" + i1 + ", " + i2 + ")";
     }
+
+    // equals method.
+//    public boolean equals(Object obj) {
+//        if (obj == null || getClass() != obj.getClass())
+//            return false;
+//        IndexPair l = (IndexPair) obj;
+//        return ((this.i1==l.i1&&this.i2==l.i2)||(this.i1==l.i2&&this.i2==l.i1));
+//    }
 
     // hashCode method.
     public int hashCode() {
@@ -183,6 +188,8 @@ public class PatchEnsemble implements Serializable {
     // we assume the TriangleResults are entered in the same order
     // as the prototiles to which they correspond
     private PatchEnsemble(List<TriangleResults> inList, EdgeBreakdownTree bd) {
+        System.out.println("Building PatchEnsemble.");
+        System.out.print("Loading vertices ... ");
         breakdown = bd;
         patches = new SimpleGraph<>(IndexPair.class);
         for (int i = 0; i < inList.size(); i++) {
@@ -191,17 +198,25 @@ public class PatchEnsemble implements Serializable {
             }
         }
 
+        System.out.println("done loading vertices. Loaded " + patches.vertexSet().size() + " vertices.");
+        System.out.print("Building edges ... ");
         for (PatchAndIndex p1 : patches.vertexSet()) {
             for (PatchAndIndex p2 : patches.vertexSet()) {
-                if (p1.compatible(p2)) patches.addEdge(p1,p2,new IndexPair(p1.getIndex(),p2.getIndex()));
+                //if (p1.getIndex()!=p2.getIndex()&&!patches.containsEdge(p2,p1)) {
+                if (p1.getIndex()!=p2.getIndex()) {
+                    if (p1.compatible(p2)) patches.addEdge(p1,p2,new IndexPair(p1.getIndex(),p2.getIndex()));
+                }
             }
         }
+        System.out.println("done building edges. Built " + patches.edgeSet().size() + " edges.");
     }
 
     // public static factory method
     public static PatchEnsemble createPatchEnsemble(List<TriangleResults> inList, EdgeBreakdownTree bd) {
         PatchEnsemble output = new PatchEnsemble(inList,bd);
+        System.out.print("Expunging lone vertices ... ");
         output.dropLoners();
+        System.out.println("done expunging lone vertices.");
         return output;
     }
 
@@ -219,7 +234,7 @@ public class PatchEnsemble implements Serializable {
             for (PatchAndIndex p : patches.vertexSet()) {
                 // check boxes to see if p has neighbours of all indices
                 boolean[] check = new boolean[Preinitializer.PROTOTILES.size()];
-                for (IndexPair i : patches.outgoingEdgesOf(p)) {
+                for (IndexPair i : patches.edgesOf(p)) {
                     for (int j = 0; j < 2; j ++) check[i.getIndices()[j]] = true;
                 }
                 // if we missed any index, we're not done
@@ -231,6 +246,24 @@ public class PatchEnsemble implements Serializable {
                 }
             }
         } while (!done);
+    }
+
+    // drop down to the set of vertices adjacent to root
+    public void dropToNeighbours(PatchAndIndex root) {
+        List<PatchAndIndex> neighbours = new ArrayList<>();
+        neighbours.add(root);
+        for (IndexPair ip : patches.edgesOf(root)) {
+            neighbours.add(patches.getEdgeTarget(ip));
+            neighbours.add(patches.getEdgeSource(ip));
+        }
+        List<PatchAndIndex> remove = new ArrayList<>();
+        for (PatchAndIndex pp : patches.vertexSet()) if (!neighbours.contains(pp)) remove.add(pp);
+        patches.removeAllVertices(remove);
+    }
+
+    // size of the graph
+    public int size() {
+        return patches.vertexSet().size();
     }
 
     // equals method.
@@ -258,6 +291,34 @@ public class PatchEnsemble implements Serializable {
             out = new PrintWriter(fileName);
             out.write(Initializer.gapPreambleString(name));
             out.write(BasicPrototile.allPrototilesGapString());
+            out.write("  subst_tiles := [\n");
+
+            for (int i = 0; i < Preinitializer.PROTOTILES.size(); i++) {
+                // dump all the right-handed substitution rules
+                boolean first = true;
+                out.write("               [\n");
+                for (PatchAndIndex pi : patches.vertexSet()) {
+                    if (!first) out.write(",\n");
+                    first = false;
+                    out.write(pi.getPatch().functionGapString(false));
+                }
+                out.write("\n               ]");
+                out.write((i==Preinitializer.PROTOTILES.size()-1)? "\n  ],\n" : ",\n");
+
+                // dump all the left-handed substitution rules
+                first = true;
+                out.write("               [\n");
+                for (PatchAndIndex pi : patches.vertexSet()) {
+                    if (!first) out.write(",\n");
+                    first = false;
+                    out.write(pi.getPatch().functionGapString(true));
+                }
+                out.write("\n               ]");
+                out.write((i==Preinitializer.PROTOTILES.size()-1)? "\n  ],\n" : ",\n");
+
+            } // end of substitution rule dump
+            out.write(BasicPrototile.drawAllPrototilesGapString());
+            out.write("\n\n);");
 
         } catch ( Exception e ) {
         } finally {
@@ -272,10 +333,15 @@ public class PatchEnsemble implements Serializable {
 
     public static void main(String[] args) {
 
-            List<TriangleResults> resultsList = new LinkedList<>();
 
+        List<TriangleResults> resultsList = new LinkedList<>();
+        String[] files = new String[3];
+        files[0] = "results/seven1a-0.chk";
+        files[1] = "results/seven1a-1.chk";
+        files[2] = "results/seven1a-2.chk";
+
+        for (String filename : files) {
             // deserialize data
-            String filename = "results/tile0-106.chk";
             if ( ! new File(filename).isFile() )
                 {
                     System.out.println(filename + " not found!");
@@ -286,96 +352,22 @@ public class PatchEnsemble implements Serializable {
                     FileInputStream fileIn = new FileInputStream(filename);
                     ObjectInputStream in = new ObjectInputStream(fileIn);
                     resultsList.add((TriangleResults)in.readObject());
-                    System.out.println(filename + " have been read.");
+                    System.out.println(filename + " has been read. " + resultsList.get(resultsList.size()-1).size() + " patches found.");
                 }
             catch (Exception e)
                 {
                     e.printStackTrace();
                     System.exit(1);
                 }
-
-            // deserialize data
-            filename = "results/tile1-106.chk";
-            if ( ! new File(filename).isFile() )
-                {
-                    System.out.println(filename + " not found!");
-                    return;
-                }
-            try
-                {
-                    FileInputStream fileIn = new FileInputStream(filename);
-                    ObjectInputStream in = new ObjectInputStream(fileIn);
-                    resultsList.add((TriangleResults)in.readObject());
-                    System.out.println(filename + " have been read.");
-                }
-            catch (Exception e)
-                {
-                    e.printStackTrace();
-                    System.exit(1);
-                }
-
-            // deserialize data
-            filename = "results/tile2-106.chk";
-            if ( ! new File(filename).isFile() )
-                {
-                    System.out.println(filename + " not found!");
-                    return;
-                }
-            try
-                {
-                    FileInputStream fileIn = new FileInputStream(filename);
-                    ObjectInputStream in = new ObjectInputStream(fileIn);
-                    resultsList.add((TriangleResults)in.readObject());
-                    System.out.println(filename + " have been read.");
-                }
-            catch (Exception e)
-                {
-                    e.printStackTrace();
-                    System.exit(1);
-                }
-
-            // deserialize data
-            filename = "results/tile3-106.chk";
-            if ( ! new File(filename).isFile() )
-                {
-                    System.out.println(filename + " not found!");
-                    return;
-                }
-            try
-                {
-                    FileInputStream fileIn = new FileInputStream(filename);
-                    ObjectInputStream in = new ObjectInputStream(fileIn);
-                    resultsList.add((TriangleResults)in.readObject());
-                    System.out.println(filename + " have been read.");
-                }
-            catch (Exception e)
-                {
-                    e.printStackTrace();
-                    System.exit(1);
-                }
-
-            // deserialize data
-            filename = "results/tile4-106.chk";
-            if ( ! new File(filename).isFile() )
-                {
-                    System.out.println(filename + " not found!");
-                    return;
-                }
-            try
-                {
-                    FileInputStream fileIn = new FileInputStream(filename);
-                    ObjectInputStream in = new ObjectInputStream(fileIn);
-                    resultsList.add((TriangleResults)in.readObject());
-                    System.out.println(filename + " have been read.");
-                }
-            catch (Exception e)
-                {
-                    e.printStackTrace();
-                    System.exit(1);
-                }
+        }
 
                 PatchEnsemble testo = createPatchEnsemble(resultsList, PuzzleBoundary.BREAKDOWNS);
+                System.out.println(testo.size());
+                PatchAndIndex ummm = null;
+                for (PatchAndIndex pp: testo.patches.vertexSet()) { if (pp.getIndex() == 0) { ummm = pp; break; }}
+                testo.dropToNeighbours(ummm);
                 testo.gapString("test.g","test");
+                System.out.println(testo.size());
 
     }
 

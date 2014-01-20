@@ -154,9 +154,9 @@ public class EdgeBreakdownTree implements Serializable {
         List<ImmutablePatch> output = new ArrayList<>();
         List<Integer> angles = Preinitializer.PROTOTILES.get(prototile);
         for (ImmutablePatch p : patches) {
-            if (containsBreakdown(Initializer.acute(angles.get(0)),p.getEdge0())
-              &&containsBreakdown(Initializer.acute(angles.get(1)),p.getEdge1())
-              &&containsBreakdown(Initializer.acute(angles.get(2)),p.getEdge2())
+            if (containsBreakdown(Initializer.acute(angles.get(0))-1,p.getEdge0())
+              &&containsBreakdown(Initializer.acute(angles.get(1))-1,p.getEdge1())
+              &&containsBreakdown(Initializer.acute(angles.get(2))-1,p.getEdge2())
                ) output.add(p);
         }
         return output;

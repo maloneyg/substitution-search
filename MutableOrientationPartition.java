@@ -63,7 +63,7 @@ public class MutableOrientationPartition extends MutablePartition<Orientation> i
             PartitionNode<Orientation> next = current.getNext();
             if (next != null && !next.isHead())
                 this.identify(current.getData(),next.getData());
-            next = current;
+            current = next;
         }
         return this;
     }

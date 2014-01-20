@@ -59,7 +59,7 @@ public final class BasicAngle implements AbstractAngle, Comparable<BasicAngle>, 
 
     // toString method. representing this as a fraction of a whole angle  
     public String fractionString() {
-        int gcd = ByteMatrix.GCD(a,Preinitializer.N);
+        int gcd = ByteMatrix.GCD(a,2*Preinitializer.N);
         return a/gcd + "/" + Preinitializer.N/gcd;
     }
 

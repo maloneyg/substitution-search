@@ -14,4 +14,9 @@ public class TriangleResults implements Serializable
     {
         return allCompletedPatches;
     }
+ 
+    public int size()
+    {
+        return allCompletedPatches.size();
+    }
 }

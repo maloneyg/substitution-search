@@ -250,7 +250,7 @@ public class PuzzleBoundary implements Serializable {
         block0 = new boolean[E0.length];
         block1 = new boolean[E1.length];
         block2 = new boolean[E2.length];
-        add(e);
+        //add(e);
         breakdown = null;//EdgeBreakdownTree.createEdgeBreakdownTree(BREAKDOWNS,e.getLength());
         frontier0 = E0[E0.length-1];
         frontier1 = E1[E1.length-1];

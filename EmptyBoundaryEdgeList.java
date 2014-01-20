@@ -116,7 +116,7 @@ public class EmptyBoundaryEdgeList implements Serializable {
         List<Integer> indexList = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             int thisIndex = openEdges.indexOf(matches[i]);
-            if (thisIndex == -1) {
+            if (thisIndex == -1 || starter.congruent(matches[i])) {
                 if (boundary.incident(matches[i])==1) {
                     boundary.add(matches[i]);
                 } else {
@@ -170,9 +170,9 @@ public class EmptyBoundaryEdgeList implements Serializable {
         // remove edges from boundary
         // technically we don't need to know if they're incident
         for (BasicEdge e : matches) {
-            if (!e.compatible(starter)) {
+            //if (!e.compatible(starter)) {
                 boundary.remove(e);
-            }
+            //}
         }
 
         // return BasicEdges from closedEdges to openEdges
