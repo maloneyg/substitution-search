@@ -44,78 +44,83 @@ class PatchAndIndex implements Serializable {
     public boolean compatible(PatchAndIndex p) {
         MutableOrientationPartition part = this.patch.getOrientationPartition().dumpMutableOrientationPartition().deepCopy().refine(p.patch.getOrientationPartition().dumpMutableOrientationPartition());
         // do the easy test first: make sure their Orientations are compatible
-        if (!part.valid()) return false;
-        // now pull out the relevant data from the patches
-        EdgeBreakdown[] bd1 = new EdgeBreakdown[3];
-        bd1[0] = this.patch.getEdge0();
-        bd1[1] = this.patch.getEdge1();
-        bd1[2] = this.patch.getEdge2();
-        EdgeBreakdown[] bd2 = new EdgeBreakdown[3];
-        bd2[0] = p.patch.getEdge0();
-        bd2[1] = p.patch.getEdge1();
-        bd2[2] = p.patch.getEdge2();
-        BasicPrototile t1 = BasicPrototile.ALL_PROTOTILES.get(this.getIndex());
-        BasicPrototile t2 = BasicPrototile.ALL_PROTOTILES.get(p.getIndex());
-        Orientation[] o1 = t1.getOrientations();
-        Orientation[] o2 = t2.getOrientations();
-        BasicEdgeLength[] e1 = t1.getLengths();
-        BasicEdgeLength[] e2 = t2.getLengths();
-
-        // now identify Orientations based on EdgeBreakdowns
-        // for this purpose, first determine which edge lengths they share
-        List<IndexPair> shared = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (e1[i].equals(e2[j])) shared.add(new IndexPair(i,j));
-            }
-        }
-
-        // now identify Orientations over and over until you can't identify more
-        boolean done = true;
-        int k = 0;
-        int i = 0;
-        int j = 0;
-        do {
-            if (!done) shared.remove(k);
-            done = true;
-            for (k = 0; k < shared.size(); k++) {
-                i = shared.get(k).getIndices()[0];
-                j = shared.get(k).getIndices()[1];
-
-                // if they're equivalent
-                if (part.equivalent(o1[i],o2[j])) {
-                    Orientation[] list1 = bd1[i].getOrientations();
-                    Orientation[] list2 = bd2[j].getOrientations();
-                    if (list1.length!=list2.length) throw new IllegalArgumentException("Trying to match edge breakdowns with differing lengths.");
-                    for (int l = 0; l < bd1[i].size(); l++) {
-                        if (!bd1[i].getLengths()[l].equals(bd2[j].getLengths()[l])) return false;
-                        part.identify(list1[l],list2[l]);
-                    }
-                    // breaking here causes shared(k) to be removed
-                    done = false;
-                    break;
-                }
-
-                // if they're opposite
-                if (part.equivalent(o1[i],o2[j].getOpposite())) {
-                    Orientation[] list1 = bd1[i].getOrientations();
-                    Orientation[] list2 = bd2[j].reverse().getOrientations();
-                    if (list1.length!=list2.length) throw new IllegalArgumentException("Trying to match edge breakdowns with differing lengths.");
-                    for (int l = 0; l < bd1[i].size(); l++) {
-                        if (!bd1[i].getLengths()[l].equals(bd2[j].getLengths()[bd1[i].size()-1-l])) return false;
-                        part.identify(list1[l],list2[l]);
-                    }
-                    // breaking here causes shared(k) to be removed
-                    done = false;
-                    break;
-                }
-
-                k++;
-            }
-        } while (!done);
-
         return part.valid();
-
+//        if (!part.valid()) return false;
+//        // now pull out the relevant data from the patches
+//        EdgeBreakdown[] bd1 = new EdgeBreakdown[3];
+//        bd1[0] = this.patch.getEdge0();
+//        bd1[1] = this.patch.getEdge1();
+//        bd1[2] = this.patch.getEdge2();
+//        EdgeBreakdown[] bd2 = new EdgeBreakdown[3];
+//        bd2[0] = p.patch.getEdge0();
+//        bd2[1] = p.patch.getEdge1();
+//        bd2[2] = p.patch.getEdge2();
+//        BasicPrototile t1 = BasicPrototile.ALL_PROTOTILES.get(this.getIndex());
+//        BasicPrototile t2 = BasicPrototile.ALL_PROTOTILES.get(p.getIndex());
+//        Orientation[] o1 = t1.getOrientations();
+//        Orientation[] o2 = t2.getOrientations();
+//        BasicEdgeLength[] e1 = t1.getLengths();
+//        BasicEdgeLength[] e2 = t2.getLengths();
+//
+//        // now identify Orientations based on EdgeBreakdowns
+//        // for this purpose, first determine which edge lengths they share
+//        List<IndexPair> shared = new ArrayList<>();
+//        for (int i = 0; i < 3; i++) {
+//            for (int j = 0; j < 3; j++) {
+//                if (e1[i].equals(e2[j])) shared.add(new IndexPair(i,j));
+//            }
+//        }
+//
+//        // now identify Orientations over and over until you can't identify more
+//        boolean done = true;
+//        int k = 0;
+//        int i = 0;
+//        int j = 0;
+//        do {
+//            if (!done) shared.remove(k);
+//            done = true;
+//            for (k = 0; k < shared.size(); k++) {
+//                i = shared.get(k).getIndices()[0];
+//                j = shared.get(k).getIndices()[1];
+//
+//                // if they're equivalent
+//                if (part.equivalent(o1[i],o2[j])) {
+//                    Orientation[] list1 = bd1[i].getOrientations();
+//                    Orientation[] list2 = bd2[j].getOrientations();
+//                    BasicEdgeLength[] lengths1 = bd1[i].getLengths();
+//                    BasicEdgeLength[] lengths2 = bd2[j].getLengths();
+//                    if (list1.length!=list2.length) throw new IllegalArgumentException("Trying to match edge breakdowns with differing lengths.");
+//                    for (int l = 0; l < bd1[i].size(); l++) {
+//                        if (!lengths1[l].equals(lengths2[l])) return false;
+//                        part.identify(list1[l],list2[l]);
+//                    }
+//                    // breaking here causes shared(k) to be removed
+//                    done = false;
+//                    break;
+//                }
+//
+//                // if they're opposite
+//                if (part.equivalent(o1[i],o2[j].getOpposite())) {
+//                    Orientation[] list1 = bd1[i].getOrientations();
+//                    Orientation[] list2 = bd2[j].reverse().getOrientations();
+//                    BasicEdgeLength[] lengths1 = bd1[i].getLengths();
+//                    BasicEdgeLength[] lengths2 = bd2[j].reverse().getLengths();
+//                    if (list1.length!=list2.length) throw new IllegalArgumentException("Trying to match edge breakdowns with differing lengths.");
+//                    for (int l = 0; l < bd1[i].size(); l++) {
+//                        if (!lengths1[l].equals(lengths2[l])) return false;
+//                        part.identify(list1[l],list2[l]);
+//                    }
+//                    // breaking here causes shared(k) to be removed
+//                    done = false;
+//                    break;
+//                }
+//
+//                //k++;
+//            }
+//        } while (!done);
+//
+//        return part.valid();
+//
     } // compatible method ends here
 
     // equals method.
@@ -204,6 +209,7 @@ public class PatchEnsemble implements Serializable {
             for (PatchAndIndex p2 : patches.vertexSet()) {
                 //if (p1.getIndex()!=p2.getIndex()&&!patches.containsEdge(p2,p1)) {
                 if (p1.getIndex()!=p2.getIndex()) {
+                    if (p1.compatible(p2) != p2.compatible(p1)) System.out.println(p1.compatible(p2) + " " + p2.compatible(p1));
                     if (p1.compatible(p2)) patches.addEdge(p1,p2,new IndexPair(p1.getIndex(),p2.getIndex()));
                 }
             }
@@ -258,6 +264,7 @@ public class PatchEnsemble implements Serializable {
         }
         List<PatchAndIndex> remove = new ArrayList<>();
         for (PatchAndIndex pp : patches.vertexSet()) if (!neighbours.contains(pp)) remove.add(pp);
+        System.out.println(remove.size());
         patches.removeAllVertices(remove);
     }
 
@@ -298,26 +305,36 @@ public class PatchEnsemble implements Serializable {
                 boolean first = true;
                 out.write("               [\n");
                 for (PatchAndIndex pi : patches.vertexSet()) {
-                    if (!first) out.write(",\n");
-                    first = false;
-                    out.write(pi.getPatch().functionGapString(false));
+                    if (pi.getIndex()==i) {
+                        if (!first) out.write(",\n");
+                        first = false;
+                        out.write(pi.getPatch().functionGapString(false));
+                    }
                 }
-                out.write("\n               ]");
-                out.write((i==Preinitializer.PROTOTILES.size()-1)? "\n  ],\n" : ",\n");
+                out.write("\n               ],\n");
 
                 // dump all the left-handed substitution rules
                 first = true;
                 out.write("               [\n");
                 for (PatchAndIndex pi : patches.vertexSet()) {
-                    if (!first) out.write(",\n");
-                    first = false;
-                    out.write(pi.getPatch().functionGapString(true));
+                    if (pi.getIndex()==i) {
+                        if (!first) out.write(",\n");
+                        first = false;
+                        out.write(pi.getPatch().functionGapString(true));
+                    }
                 }
                 out.write("\n               ]");
                 out.write((i==Preinitializer.PROTOTILES.size()-1)? "\n  ],\n" : ",\n");
 
             } // end of substitution rule dump
             out.write(BasicPrototile.drawAllPrototilesGapString());
+            out.write("\n\n  drawdot := function( v, psfile )\n");
+            out.write("    AppendTo(psfile, ");
+            for (int m = 1; m < Preinitializer.N; m++) {
+                out.write("v[" + m + "], ");
+                out.write((m==Preinitializer.N-1) ? "" : "\" \", ");
+            }
+            out.write("\" dot\\n\" );\n  end");
             out.write("\n\n);");
 
         } catch ( Exception e ) {
@@ -366,7 +383,14 @@ public class PatchEnsemble implements Serializable {
                 PatchAndIndex ummm = null;
                 for (PatchAndIndex pp: testo.patches.vertexSet()) { if (pp.getIndex() == 0) { ummm = pp; break; }}
                 testo.dropToNeighbours(ummm);
-                testo.gapString("test.g","test");
+                int yy = 0;
+                for (PatchAndIndex ppp : testo.patches.vertexSet()) {
+                    for (PatchAndIndex qqq : testo.patches.vertexSet()) {
+//                        System.out.print(yy++ + " ");
+//                        System.out.println(ppp.compatible(qqq));
+                    }
+                }
+                testo.gapString("test7.g","test7");
                 System.out.println(testo.size());
 
     }

@@ -202,7 +202,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
 
     // produce a String with all drawing functions of prototiles for gap
     public static String drawAllPrototilesGapString() {
-        String output = "\n  header := " + ((Preinitializer.N==7) ? "hept" : "elf" ) + "_header.pdf,\n\n";
+        String output = "\n  header := " + ((Preinitializer.N==7) ? "\"hept" : "elf" ) + "_header.ps\",\n\n";
         output += "  drawfuncs := [\n";
         int n = Preinitializer.N;
         double ang = ((double)180 / (double) n);
@@ -210,8 +210,8 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
             // right tile
             output += "    function( tile, psfile )\n";
             output += "      AppendTo( psfile, \"gsave \",\n               ";
-            for (int j = 0; j < n; j++) {
-                output += (j==0) ? "" : "\" \",";
+            for (int j = 1; j < n; j++) {
+                output += (j==1) ? "" : "\" \",";
                 output += "tile.pos[" + j + "],";
             }
             output += "\n               \" ";
@@ -223,8 +223,8 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
             // left tile
             output += "    function( tile, psfile )\n";
             output += "      AppendTo( psfile, \"gsave \",\n               ";
-            for (int j = 0; j < n; j++) {
-                output += (j==0) ? "" : "\" \",";
+            for (int j = 1; j < n; j++) {
+                output += (j==1) ? "" : "\" \",";
                 output += "tile.pos[" + j + "],";
             }
             output += "\n               \" ";
