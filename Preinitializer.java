@@ -16,7 +16,7 @@ import java.nio.file.*;
 
 class Preinitializer {
 
-    public static final int N = 7;             // the order of symmetry
+    public static final int N = 11;             // the order of symmetry
 
     public static final int MY_TILE = 2;        // the tile we're searching
 
@@ -54,7 +54,7 @@ class Preinitializer {
     public static final String INTERIM_RESULT_FILENAME = "interim.chk";
     public static final String INTERIM_RESULT_BACKUP_FILENAME = "interim_backup.chk";
 
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2, 1); // the square of the really small search (1+a)^2 won't work with tile 3 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search (104)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
@@ -64,7 +64,7 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, -2, 0, 1); // b+d (118)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121) use this one
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121) use this one
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, -2, -3, 1, 1); // even huger search (122)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, -2, 1, 1); // even huger search (124)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
@@ -72,14 +72,14 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -2, 0, 1); // 1 + b + d 
 
     public static final ImmutableList<ImmutableList<Integer>> PROTOTILES = ImmutableList.of( 
-                                 ImmutableList.of( 1, 2, 4 ),  // seven
-                                 ImmutableList.of( 1, 3, 3 ),  // seven
-                                 ImmutableList.of( 2, 2, 3 )   // seven
-                             //  ImmutableList.of( 1, 4, 6 ),  // eleven
-                             //  ImmutableList.of( 1, 5, 5 ),  // eleven
-                             //  ImmutableList.of( 2, 4, 5 ),  // eleven
-                             //  ImmutableList.of( 2, 3, 6 ),  // eleven
-                             //  ImmutableList.of( 3, 3, 5 )   // eleven
+                             //  ImmutableList.of( 1, 2, 4 ),  // seven
+                             //  ImmutableList.of( 1, 3, 3 ),  // seven
+                             //  ImmutableList.of( 2, 2, 3 )   // seven
+                                 ImmutableList.of( 1, 4, 6 ),  // eleven
+                                 ImmutableList.of( 1, 5, 5 ),  // eleven
+                                 ImmutableList.of( 2, 4, 5 ),  // eleven
+                                 ImmutableList.of( 2, 3, 6 ),  // eleven
+                                 ImmutableList.of( 3, 3, 5 )   // eleven
                                          );
 
     static
