@@ -229,6 +229,26 @@ public class EmptyBoundaryPatch implements Serializable {
         return new EmptyBoundaryPatch(currentPrototile, secondEdge, flip, newInitialTriangles, newTriangles, boundary.deepCopy(), newVertices, edges.deepCopy(), partition.deepCopy(), tileList.deepCopy());
     }
 
+    // a method to clean up after ourselves (and prevent memory leaks)
+    public void nullThemAll() {
+
+        lastUpdateTime = null;
+        message = null;
+        localCompletedPatches = null;
+        count = null;
+        triangles = null;
+        boundary = null;
+        vertices = null;
+        edges = null;
+        partition = null;
+        tileList = null;
+        spawnList = null;
+        currentEdge = null;
+        currentPrototile = null;
+        initialTriangles = null;
+
+    } // nullThemAll() ends here
+
     // get all the completed patches
     public static List<ImmutablePatch> getCompletedPatches() {
         return completedPatches;

@@ -45,8 +45,8 @@ class Preinitializer {
     public static final String MAIN_CLASS_NAME; // name of the class whose main method is running on this JVM
 
     public static final String RESULT_FILENAME = "result.chk"; // name of file to write the completed patches to at the end
-    public static final String BREAKDOWN_INPUT_FILENAME = "nuthin.chk"; // name of file to which we write the edge breakdowns
-    public static final String BREAKDOWN_OUTPUT_FILENAME = "nohow.chk"; // name of file to which we write the edge breakdowns
+    public static final String BREAKDOWN_INPUT_FILENAME = "breakdown3-111.chk"; // name of file to which we write the edge breakdowns
+    public static final String BREAKDOWN_OUTPUT_FILENAME = "breakdown2-111.chk"; // name of file to which we write the edge breakdowns
 
     public static final int LISTENING_PORT = 32007; // sockets will transmite/recieve on this port number
     
