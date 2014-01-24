@@ -380,11 +380,11 @@ public class PatchEnsemble implements Serializable {
 //        files[0] = "results/seven1a-0.chk";
 //        files[1] = "results/seven1a-1.chk";
 //        files[2] = "results/seven1a-2.chk";
-        files[0] = "results/tile0-106.chk";
-        files[1] = "results/tile1-106.chk";
-        files[2] = "results/tile2-106.chk";
-        files[3] = "results/tile3-106.chk";
-        files[4] = "results/tile4-106.chk";
+        files[0] = "results/tile0-105.chk";
+        files[1] = "results/tile1-105.chk";
+        files[2] = "results/tile2-105.chk";
+        files[3] = "results/tile3-105.chk";
+        files[4] = "results/tile4-105.chk";
 
         for (String filename : files) {
             // deserialize data
