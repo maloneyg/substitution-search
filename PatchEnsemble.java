@@ -376,13 +376,15 @@ public class PatchEnsemble implements Serializable {
 
 
         List<TriangleResults> resultsList = new LinkedList<>();
-        String[] files = new String[3];
-        files[0] = "results/seven1a-0.chk";
-        files[1] = "results/seven1a-1.chk";
-        files[2] = "results/seven1a-2.chk";
-//        files[0] = "results/vertex-test0.chk";
-//        files[1] = "results/vertex-test1.chk";
-//        files[2] = "results/vertex-test2.chk";
+        String[] files = new String[Preinitializer.PROTOTILES.size()];
+//        files[0] = "results/seven1a-0.chk";
+//        files[1] = "results/seven1a-1.chk";
+//        files[2] = "results/seven1a-2.chk";
+        files[0] = "results/tile0-106.chk";
+        files[1] = "results/tile1-106.chk";
+        files[2] = "results/tile2-106.chk";
+        files[3] = "results/tile3-106.chk";
+        files[4] = "results/tile4-106.chk";
 
         for (String filename : files) {
             // deserialize data
@@ -410,14 +412,7 @@ public class PatchEnsemble implements Serializable {
         PatchAndIndex ummm = null;
         for (PatchAndIndex pp: testo.patches.vertexSet()) { if (pp.getIndex() == 0) { ummm = pp; break; }}
         testo.dropToNeighbours(ummm);
-//        int yy = 0;
-//        for (PatchAndIndex ppp : testo.patches.vertexSet()) {
-//            for (PatchAndIndex qqq : testo.patches.vertexSet()) {
-//                System.out.print(yy++ + " ");
-//                System.out.println(ppp.compatible(qqq));
-//            }
-//        }
-        testo.gapString("test7.g","test7");
+        testo.gapString("test11.g","test11");
         System.out.println(testo.size());
 
 

@@ -218,6 +218,8 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
             }
         }
 
+        patch.nullThemAll();
+
         //if ( patch.getLocalCompletedPatches().size() > 0 )
         //    System.out.println("\n" + thisResult.toString());
 
