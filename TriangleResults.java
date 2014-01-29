@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+import com.google.common.collect.ImmutableList;
 
 public class TriangleResults implements Serializable
 {
@@ -7,7 +8,8 @@ public class TriangleResults implements Serializable
 
     public TriangleResults(List<ImmutablePatch> allCompletedPatches)
     {
-        this.allCompletedPatches = Collections.unmodifiableList(allCompletedPatches);
+        //this.allCompletedPatches = Collections.unmodifiableList(allCompletedPatches);
+        this.allCompletedPatches = ImmutableList.copyOf(allCompletedPatches);
     }
 
     public List<ImmutablePatch> getPatches()
@@ -19,4 +21,4 @@ public class TriangleResults implements Serializable
     {
         return allCompletedPatches.size();
     }
-}
+} // end of class TriangleResults

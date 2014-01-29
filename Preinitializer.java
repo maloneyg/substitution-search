@@ -61,9 +61,9 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2, 1); // the square of the really small search (1+a)^2 won't work with tile 3 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search (104)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, 0, 1); // c (107)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, 0, 1); // 1 + c (108)
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, 0, 1); // 1 + c (108)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -1, 0, 1); // a + c (109)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, 0, 1); // quite big search (110)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
@@ -83,21 +83,20 @@ class Preinitializer {
                              //  ImmutableList.of( 1, 2, 4 ),  // seven
                              //  ImmutableList.of( 1, 3, 3 ),  // seven
                              //  ImmutableList.of( 2, 2, 3 )   // seven
-                                 ImmutableList.of( 1, 3, 7 ),  // eleven option
                                  ImmutableList.of( 1, 4, 6 ),  // eleven
-                             //  ImmutableList.of( 1, 5, 5 ),  // eleven
+                                 ImmutableList.of( 1, 5, 5 ),  // eleven
                                  ImmutableList.of( 2, 4, 5 ),  // eleven
                                  ImmutableList.of( 2, 3, 6 ),  // eleven
                                  ImmutableList.of( 3, 3, 5 )   // eleven
                                          );
 
     public static final ImmutableList<Integer> SEARCH_TILE = // a lot of options
-                             //  null;
+                                 null;
                              //  ImmutableList.of( 1, 1, 9 );  // eleven
                              //  ImmutableList.of( 1, 2, 8 );  // eleven
                              //  ImmutableList.of( 1, 3, 7 );  // eleven
                              //  ImmutableList.of( 2, 2, 7 );  // eleven
-                                 ImmutableList.of( 3, 4, 4 );  // eleven
+                             //  ImmutableList.of( 3, 4, 4 );  // eleven
 
     static
         {
