@@ -202,7 +202,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
 
     // produce a String with all drawing functions of prototiles for gap
     public static String drawAllPrototilesGapString() {
-        String output = "\n  header := " + ((Preinitializer.N==7) ? "\"hept" : "elf" ) + "_header.ps\",\n\n";
+        String output = "\n  header := " + ((Preinitializer.N==7) ? "\"hept" : "\"elf" ) + "_header.ps\",\n\n";
         output += "  drawfuncs := [\n";
         int n = Preinitializer.N;
         double ang = ((double)180 / (double) n);

@@ -150,8 +150,9 @@ public class PuzzleBoundary implements Serializable {
 
         int tileNum = Preinitializer.MY_TILE;
         BasicTriangle placed = BasicPrototile.ALL_PROTOTILES.get(tileNum).place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false);
-        BasicAngle[] angles = placed.getAngles();
-        BytePoint[] preVertices = placed.getVertices();
+        List<Integer> search = Preinitializer.SEARCH_TILE;
+        BasicAngle[] angles = (search == null) ? placed.getAngles() : new BasicAngle[] {BasicAngle.createBasicAngle(search.get(0)),BasicAngle.createBasicAngle(search.get(1)),BasicAngle.createBasicAngle(search.get(2))};
+        BytePoint[] preVertices = (search == null) ? placed.getVertices() : new BytePoint[] {BasicEdgeLength.lengthOpposite(angles[0]).getAsVector(BasicAngle.createBasicAngle(0)),BytePoint.ZERO_VECTOR,BasicEdgeLength.lengthOpposite(angles[2]).getAsVector(angles[1])};
         BytePoint[] vertices = new BytePoint[3];
         for (int i = 0; i < 3; i++) vertices[i] = preVertices[i].inflate();
         VERTICES = vertices;
