@@ -17,6 +17,10 @@ public class Server
 
     // this stores all the completed puzzles
     public static final List<ImmutablePatch> completedPatches = new LinkedList<ImmutablePatch>();
+    // this stores the number of completed puzzles
+    public static int totalFound = 0;
+    // this stores the number of puzzles that have been serialized
+    public static int dumpCount = 0;
 
     // parameters for networking
     public static final int LISTENING_PORT = Preinitializer.LISTENING_PORT;
@@ -126,19 +130,24 @@ public class Server
         System.out.print("\nAll jobs complete!  Writing completed patches to disk...");
         synchronized (completedPatches)
             {
-                if ( completedPatches.size() == 0 )
+                if ( completedPatches.size() == 0 ) {
                     System.out.println("no results to write.");
+                    System.out.println(Server.totalFound + " results already written to /interim/.");
+                }
                 else
                     {
                         try
                             {
                                 TriangleResults triangleResults = new TriangleResults(completedPatches);
-                                FileOutputStream fileOut = new FileOutputStream(Preinitializer.RESULT_FILENAME);
+                                Server.totalFound += completedPatches.size();
+                                //FileOutputStream fileOut = new FileOutputStream(Preinitializer.RESULT_FILENAME);
+                                FileOutputStream fileOut = new FileOutputStream(String.format("interim/tile%d-final.chk",Preinitializer.MY_TILE));
                                 ObjectOutputStream out = new ObjectOutputStream(fileOut);
                                 out.writeObject(triangleResults);
                                 out.close();
                                 fileOut.close();
-                                System.out.println("wrote " + completedPatches.size() + " results to " + Preinitializer.RESULT_FILENAME + ".");
+                                //System.out.println("wrote " + completedPatches.size() + " results to " + Preinitializer.RESULT_FILENAME + ".");
+                                System.out.println(String.format("wrote %d results to interim/tile%d-final",completedPatches.size(),Preinitializer.MY_TILE));
                             }
                         catch (Exception e)
                             {
@@ -149,48 +158,38 @@ public class Server
 
 
             // begin writing edge breakdowns
-            System.out.print("Writing edge breakdowns to disk...");
-            EdgeBreakdownTree breakdown = EdgeBreakdownTree.createEdgeBreakdownTree();
-            // make the edge breakdown file
-            synchronized (completedPatches) {
-                for (ImmutablePatch P : completedPatches) {
-                    breakdown.addBreakdown(Initializer.acute(Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE).get(0))-1,P.getEdge0());
-                    breakdown.addBreakdown(Initializer.acute(Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE).get(1))-1,P.getEdge1());
-                    breakdown.addBreakdown(Initializer.acute(Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE).get(2))-1,P.getEdge2());
-                }
-            }
-            for (int i = 0; i < breakdown.numEdges(); i++) {
-                if (breakdown.isEmpty(i)) {
-                    for (List<BasicEdgeLength> l : PuzzleBoundary.BREAKDOWNS.getChains(i)) breakdown.addBreakdown(i,l,0);
-                }
-            }
-
-            // write it to disk
-            try
-                {
-                    FileOutputStream fileOut = new FileOutputStream(Preinitializer.BREAKDOWN_OUTPUT_FILENAME);
-                    ObjectOutputStream out = new ObjectOutputStream(fileOut);
-                    out.writeObject(breakdown);
-                    out.close();
-                    fileOut.close();
-                    System.out.println("wrote breakdowns to " + Preinitializer.BREAKDOWN_OUTPUT_FILENAME + ".");
-                }
-            catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-
-            // print the breakdowns
-//            System.out.println("Breakdowns:\n");
-//            try {
-//                System.out.println(breakdown.toString());
-//                System.out.println(breakdown.chainString());
-//            } catch (Exception e) {
-//                StackTraceElement[] elmnt = e.getStackTrace();
-//                for (int i = 0; i < 10; i++) System.out.println(elmnt[i]);
-//                System.exit(1);
+//            System.out.print("Writing edge breakdowns to disk...");
+//            EdgeBreakdownTree breakdown = EdgeBreakdownTree.createEdgeBreakdownTree();
+//            // make the edge breakdown file
+//            synchronized (completedPatches) {
+//                for (ImmutablePatch P : completedPatches) {
+//                    breakdown.addBreakdown(Initializer.acute(Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE).get(0))-1,P.getEdge0());
+//                    breakdown.addBreakdown(Initializer.acute(Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE).get(1))-1,P.getEdge1());
+//                    breakdown.addBreakdown(Initializer.acute(Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE).get(2))-1,P.getEdge2());
+//                }
 //            }
+//            for (int i = 0; i < breakdown.numEdges(); i++) {
+//                if (breakdown.isEmpty(i)) {
+//                    for (List<BasicEdgeLength> l : PuzzleBoundary.BREAKDOWNS.getChains(i)) breakdown.addBreakdown(i,l,0);
+//                }
+//            }
+//
+//            // write it to disk
+//            try
+//                {
+//                    FileOutputStream fileOut = new FileOutputStream(Preinitializer.BREAKDOWN_OUTPUT_FILENAME);
+//                    ObjectOutputStream out = new ObjectOutputStream(fileOut);
+//                    out.writeObject(breakdown);
+//                    out.close();
+//                    fileOut.close();
+//                    System.out.println("wrote breakdowns to " + Preinitializer.BREAKDOWN_OUTPUT_FILENAME + ".");
+//                }
+//            catch (Exception e)
+//                {
+//                    e.printStackTrace();
+//                }
 
+        System.out.println(totalFound + " results found in total.");
         System.out.println("Have a nice day!");
         System.exit(0);
     }
@@ -475,6 +474,7 @@ public class Server
 
         private class CustomTimerTask extends TimerTask
         {
+
             public void run()
             {
                 // abort if cancelled
@@ -535,14 +535,17 @@ public class Server
                      && currentTime.getTime() - lastInterimWrite.getTime() > 30 * 1000 )
                     {
                         TriangleResults interimResults = null;
+                        Server.totalFound += numberOfCompletedPatches;
                         synchronized (Server.completedPatches)
                             {
                                 interimResults = new TriangleResults(Server.completedPatches);
+                                Server.completedPatches.clear();
                             }
 
                         try
                             {
-                                FileOutputStream fileOut = new FileOutputStream(INTERIM_RESULT_FILENAME);
+                                FileOutputStream fileOut = new FileOutputStream(String.format("interim/tile%d-%08d-%s",Preinitializer.MY_TILE, Server.dumpCount,INTERIM_RESULT_FILENAME));
+                                Server.dumpCount++;
                                 ObjectOutputStream out = new ObjectOutputStream(fileOut);
                                 out.writeObject(interimResults);
                                 out.close();
@@ -592,7 +595,7 @@ public class Server
 
                 // print statistics
                 lastUpdateTime = currentTime;
-                ThreadService.INSTANCE.getExecutor().printQueues(throughput, average, totalTime, numberOfCompletedPatches);
+                ThreadService.INSTANCE.getExecutor().printQueues(throughput, average, totalTime, totalFound + completedPatches.size());
             }
         }
     }
