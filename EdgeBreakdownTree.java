@@ -57,7 +57,7 @@ public class EdgeBreakdownTree implements Serializable {
     // that we're searching
     private EdgeBreakdownTree(EdgeBreakdownTree base, BasicEdgeLength l) {
         breakdowns = new MultiTree[3];
-        List<Integer> angles = Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE);
+        List<Integer> angles = (Preinitializer.SEARCH_TILE==null) ? Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE) : Preinitializer.SEARCH_TILE;
         for (int i = 0; i < 3; i++) {
             breakdowns[i] = base.breakdowns[Initializer.acute(angles.get(i))-1];
         }
@@ -74,7 +74,7 @@ public class EdgeBreakdownTree implements Serializable {
     // same as above, but without the starter
     private EdgeBreakdownTree(EdgeBreakdownTree base) {
         breakdowns = new MultiTree[3];
-        List<Integer> angles = Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE);
+        List<Integer> angles = (Preinitializer.SEARCH_TILE==null) ? Preinitializer.PROTOTILES.get(Preinitializer.MY_TILE) : Preinitializer.SEARCH_TILE;
         for (int i = 0; i < 3; i++) {
             breakdowns[i] = base.breakdowns[Initializer.acute(angles.get(i))-1];
         }
