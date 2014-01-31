@@ -46,6 +46,10 @@ final public class LengthAndAreaCalculator {
     public static final Matrix LENGTH_MATRIX;
     // the coefficient matrix of the area polynomials for the prototiles
     public static final Matrix AREA_MATRIX;
+    // the coefficient matrix of the area polynomial for the tile we're 
+    // searching (which might not be one of the prototiles)
+    // it's just a column matrix
+    public static final Matrix SEARCH_AREA_COLUMN;
 
     // the minimal polynomial of Cos(pi/N)
     public static final ShortPolynomial HALF_MIN_POLY;
@@ -137,8 +141,8 @@ final public class LengthAndAreaCalculator {
     // turn a Matrix into an ByteMatrix.
     // Round and cast to Int.
     public static ByteMatrix MatrixToByteMatrix(Matrix m) {
-        int L = m.getColumnDimension();
         int M = m.getColumnDimension();
+        int L = m.getRowDimension();
         double[][] a = m.getArrayCopy();
         byte[][] preMatrix = new byte[L][M];
         for (int i = 0; i < L; i++) {
@@ -189,6 +193,7 @@ final public class LengthAndAreaCalculator {
         for (int i = 1; i < N/2; i++)
             narrowAreas[i] = EDGE_LIST.get(i).times(EDGE_LIST.get(i)).minus(narrowAreas[i-1]);
         ShortPolynomial[] prototileAreas = new ShortPolynomial[Preinitializer.PROTOTILES.size()];
+
         // three int variables used in identifying which 
         // narrow triangle l represents
         int alreadyOne = 0;
@@ -236,9 +241,73 @@ final public class LengthAndAreaCalculator {
             }
         }
 
+
         AREA_MATRIX = ShortPolynomial.coefficientMatrix(prototileAreas);
 
     } // initialization of area polynomials ends here
+
+    static { // now do the same thing with SEARCH_TILE
+
+        /*
+        * a list of polynomials representing areas of
+        * triangles that contain an angle of pi/N.
+        * expressed as polynomials in the ring of integers
+        * extended by 2*cos(pi/N), with the area of the
+        * triangle with angles (1,1,N-2) normalized to be 1.
+        */
+        ShortPolynomial[] narrowAreas = new ShortPolynomial[N/2];
+        narrowAreas[0] = ShortPolynomial.ONE;
+        for (int i = 1; i < N/2; i++)
+            narrowAreas[i] = EDGE_LIST.get(i).times(EDGE_LIST.get(i)).minus(narrowAreas[i-1]);
+        ShortPolynomial[] searchArea = new ShortPolynomial[1];;
+
+        // three int variables used in identifying which 
+        // narrow triangle l represents
+        int alreadyOne = 0;
+        int secondMin = N;
+        // the two angles in l that are less than 90 degrees
+        int a0 = 0;
+        int a1 = 0;
+        ImmutableList<Integer> l = Preinitializer.SEARCH_TILE;
+
+        if (l.contains(1)) { // in this case l is a narrow triangle
+            secondMin = N; // the second-smallest angle
+            alreadyOne = 0;
+            for (Integer j : l) {
+                if (j == 1) {
+                    // find the second-smallest angle
+                    if (alreadyOne > 0) {
+                        secondMin = 1;
+                        break;
+                    } else {
+                        alreadyOne++;
+                    }
+                } else { // this angle is not 1
+                    if (j < secondMin) secondMin = j;
+                }
+            }
+            searchArea[0] = narrowAreas[secondMin-1].mod(MIN_POLY);
+        } else { // in this case l is not a narrow triangle
+            a0 = 0;
+            a1 = 0;
+            alreadyOne = 0;
+            for (Integer j : l) {
+                if (j <= N/2) {
+                    if (alreadyOne > 0) {
+                        a1 = j;
+                        break;
+                    } else {
+                        a0 = j;
+                        alreadyOne++;
+                    }
+                }
+            }
+            searchArea[0] = (narrowAreas[a0-1].times(EDGE_LIST.get(a1-1)).times(EDGE_LIST.get(a1-1)).minus(narrowAreas[a1-2].times(EDGE_LIST.get(a0-1)).times(EDGE_LIST.get(a0-1)))).mod(MIN_POLY);
+        }
+
+        SEARCH_AREA_COLUMN = ShortPolynomial.coefficientMatrix(searchArea,Preinitializer.PROTOTILES.size()-1);
+
+    } // initialization of SEARCH_TILE stuff ends here
 
     public static void main(String[] args) {
         for (int i = 0; i < SIN_LIST.size(); i++) System.out.println(SIN_LIST.get(i));

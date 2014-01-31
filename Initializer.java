@@ -50,16 +50,22 @@ class Initializer {
     }
 
     /*
-    * An ByteMatrix, the (i,j)th entry of which is the number
+    * A ByteMatrix, the (i,j)th entry of which is the number
     * of occurrences of EdgeLength i in inflated EdgeLength j.
     */
     public static final ByteMatrix INFLATED_LENGTHS;
 
     /*
-    * An ByteMatrix, the (i,j)th entry of which is the number
+    * A ByteMatrix, the (i,j)th entry of which is the number
     * of occurrences of prototile i in inflated prototile j.
     */
     public static final ByteMatrix SUBSTITUTION_MATRIX;
+
+    /*
+    * A column ByteMatrix, the j-th entry of which is the number
+    * of occurrences of prototile j in the inflated search tile.
+    */
+    public static final ByteMatrix TILE_LIST;
 
     /*
     * A list representing the edge lengths we have actually selected.  
@@ -192,6 +198,7 @@ class Initializer {
 
         INFLATED_LENGTHS = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.LENGTH_MATRIX.inverse()).times(otherInfl).times(LengthAndAreaCalculator.LENGTH_MATRIX));
         SUBSTITUTION_MATRIX = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.AREA_MATRIX.inverse()).times(otherInfl).times(otherInfl).times(LengthAndAreaCalculator.AREA_MATRIX));
+        TILE_LIST = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.AREA_MATRIX.inverse()).times(otherInfl).times(otherInfl).times(LengthAndAreaCalculator.SEARCH_AREA_COLUMN));
 
         int total = 1;
         List<Integer> hitsYet = new ArrayList<>(3);
@@ -266,6 +273,10 @@ class Initializer {
         System.out.println(INFLATED_LENGTHS);
         System.out.println("SUBSTITUTION_MATRIX");
         System.out.println(SUBSTITUTION_MATRIX);
+        System.out.println("TILE_LIST");
+        System.out.println(TILE_LIST);
+        System.out.println("SEARCH_AREA_COLUMN");
+        System.out.println(LengthAndAreaCalculator.MatrixToByteMatrix(LengthAndAreaCalculator.SEARCH_AREA_COLUMN));
         System.out.println(TOTAL_EDGE_BREAKDOWNS);
 
     }

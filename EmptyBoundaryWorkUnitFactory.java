@@ -18,7 +18,11 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
     private static final BasicPrototile P0 = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(myTile));
 
     // the numbers of the different prototiles that fit in INFL.P0
-    private static final PrototileList tiles = PrototileList.createPrototileList(BasicPrototile.getPrototileList(Initializer.SUBSTITUTION_MATRIX.getColumn(myTile)));
+    private static final PrototileList tiles = PrototileList.createPrototileList(BasicPrototile.getPrototileList( //
+                        (Preinitializer.SEARCH_TILE==null) ? //
+                        Initializer.SUBSTITUTION_MATRIX.getColumn(myTile) : //
+                        Initializer.TILE_LIST.getColumn(0) //
+                                ));
 
     // vertices of INFL.P0
     private static final BytePoint[] vertices = P0.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
