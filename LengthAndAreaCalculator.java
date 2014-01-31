@@ -270,40 +270,44 @@ final public class LengthAndAreaCalculator {
         int a1 = 0;
         ImmutableList<Integer> l = Preinitializer.SEARCH_TILE;
 
-        if (l.contains(1)) { // in this case l is a narrow triangle
-            secondMin = N; // the second-smallest angle
-            alreadyOne = 0;
-            for (Integer j : l) {
-                if (j == 1) {
-                    // find the second-smallest angle
-                    if (alreadyOne > 0) {
-                        secondMin = 1;
-                        break;
-                    } else {
-                        alreadyOne++;
-                    }
-                } else { // this angle is not 1
-                    if (j < secondMin) secondMin = j;
-                }
-            }
-            searchArea[0] = narrowAreas[secondMin-1].mod(MIN_POLY);
-        } else { // in this case l is not a narrow triangle
-            a0 = 0;
-            a1 = 0;
-            alreadyOne = 0;
-            for (Integer j : l) {
-                if (j <= N/2) {
-                    if (alreadyOne > 0) {
-                        a1 = j;
-                        break;
-                    } else {
-                        a0 = j;
-                        alreadyOne++;
+        if (l==null) {
+            searchArea[0] = ShortPolynomial.ZERO;
+        } else {
+            if (l.contains(1)) { // in this case l is a narrow triangle
+                secondMin = N; // the second-smallest angle
+                alreadyOne = 0;
+                for (Integer j : l) {
+                    if (j == 1) {
+                        // find the second-smallest angle
+                        if (alreadyOne > 0) {
+                            secondMin = 1;
+                            break;
+                        } else {
+                            alreadyOne++;
+                        }
+                    } else { // this angle is not 1
+                        if (j < secondMin) secondMin = j;
                     }
                 }
+                searchArea[0] = narrowAreas[secondMin-1].mod(MIN_POLY);
+            } else { // in this case l is not a narrow triangle
+                a0 = 0;
+                a1 = 0;
+                alreadyOne = 0;
+                for (Integer j : l) {
+                    if (j <= N/2) {
+                        if (alreadyOne > 0) {
+                            a1 = j;
+                            break;
+                        } else {
+                            a0 = j;
+                            alreadyOne++;
+                        }
+                    }
+                }
+                searchArea[0] = (narrowAreas[a0-1].times(EDGE_LIST.get(a1-1)).times(EDGE_LIST.get(a1-1)).minus(narrowAreas[a1-2].times(EDGE_LIST.get(a0-1)).times(EDGE_LIST.get(a0-1)))).mod(MIN_POLY);
             }
-            searchArea[0] = (narrowAreas[a0-1].times(EDGE_LIST.get(a1-1)).times(EDGE_LIST.get(a1-1)).minus(narrowAreas[a1-2].times(EDGE_LIST.get(a0-1)).times(EDGE_LIST.get(a0-1)))).mod(MIN_POLY);
-        }
+        } // here ends if(l==null)
 
         SEARCH_AREA_COLUMN = ShortPolynomial.coefficientMatrix(searchArea,Preinitializer.PROTOTILES.size()-1);
 

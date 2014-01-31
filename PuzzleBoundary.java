@@ -148,18 +148,34 @@ public class PuzzleBoundary implements Serializable {
 
     static { // figure out where the points can go on the edges
 
+        // figure out which tile we're searching by looking in Preinitializer
+        // if SEARCH_TILE is null, we're searching a prototile
+        // otherwise we're searching SEARCH_TILE
         int tileNum = Preinitializer.MY_TILE;
-        BasicTriangle placed = BasicPrototile.ALL_PROTOTILES.get(tileNum).place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false);
         List<Integer> search = Preinitializer.SEARCH_TILE;
+
+        BasicTriangle placed = BasicPrototile.ALL_PROTOTILES.get(tileNum).place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false);
+
         BasicAngle[] angles = (search == null) ? placed.getAngles() : new BasicAngle[] {BasicAngle.createBasicAngle(search.get(0)),BasicAngle.createBasicAngle(search.get(1)),BasicAngle.createBasicAngle(search.get(2))};
-        BytePoint[] preVertices = (search == null) ? placed.getVertices() : new BytePoint[] {BasicEdgeLength.lengthOpposite(angles[0]).getAsVector(BasicAngle.createBasicAngle(0)),BytePoint.ZERO_VECTOR,BasicEdgeLength.lengthOpposite(angles[2]).getAsVector(angles[1])};
+        BytePoint[] preVertices = (search == null) ? placed.getVertices() : new BytePoint[] {//
+            BasicEdgeLength.lengthOpposite(angles[2]).getAsVector(angles[1]),//
+            BytePoint.ZERO_VECTOR,//
+            BasicEdgeLength.lengthOpposite(angles[0]).getAsVector(BasicAngle.createBasicAngle(0))//
+            };
+
         BytePoint[] vertices = new BytePoint[3];
         for (int i = 0; i < 3; i++) vertices[i] = preVertices[i].inflate();
         VERTICES = vertices;
 
         BasicAngle[] preAngles = new BasicAngle[3];
         BasicEdge[] tempEdges = placed.getEdges();
-        for (int i = 0; i < 3; i++) preAngles[i] = tempEdges[i].angle().piPlus();
+        if (search == null) {
+            for (int i = 0; i < 3; i++) preAngles[i] = tempEdges[i].angle().piPlus();
+        } else {
+            preAngles[0] = BasicAngle.createBasicAngle(0);
+            preAngles[1] = BasicAngle.createBasicAngle(search.get(2)).supplement();
+            preAngles[2] = BasicAngle.createBasicAngle(search.get(1));
+        }
         ANGLES = preAngles;
 
         // in order to avoid a compile-time error, I can't assign

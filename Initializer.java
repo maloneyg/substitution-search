@@ -277,7 +277,9 @@ class Initializer {
         System.out.println(TILE_LIST);
         System.out.println("SEARCH_AREA_COLUMN");
         System.out.println(LengthAndAreaCalculator.MatrixToByteMatrix(LengthAndAreaCalculator.SEARCH_AREA_COLUMN));
-        System.out.println(TOTAL_EDGE_BREAKDOWNS);
+        System.out.println("TILE_LIST as row vector");
+        for (Integer b : TILE_LIST.getColumn(0)) System.out.print(b + " ");
+        System.out.println();
 
     }
 

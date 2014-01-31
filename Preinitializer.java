@@ -66,11 +66,11 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, 0, 1); // 1 + c (108)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -1, 0, 1); // a + c (109)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, 0, 1); // quite big search (110)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -3, 0, 1); // (114)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 0, -3, 0, 1); // huge search (115)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, -2, 0, 1); // b+d (118)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121) use this one
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, -2, -3, 1, 1); // even huger search (122)
@@ -91,12 +91,12 @@ class Preinitializer {
                                          );
 
     public static final ImmutableList<Integer> SEARCH_TILE = // a lot of options
-                             //  null;
+                                 null;
                              //  ImmutableList.of( 1, 1, 9 );  // eleven
                              //  ImmutableList.of( 1, 2, 8 );  // eleven
                              //  ImmutableList.of( 1, 3, 7 );  // eleven
                              //  ImmutableList.of( 2, 2, 7 );  // eleven
-                                 ImmutableList.of( 3, 4, 4 );  // eleven
+                             //  ImmutableList.of( 3, 4, 4 );  // eleven
 
     static
         {
