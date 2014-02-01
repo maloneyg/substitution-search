@@ -30,6 +30,7 @@ public final class Client
 
     private static ThreadService executorService = ThreadService.INSTANCE;
 
+    // maps work unit IDs to their corresponding futures
     private static final HashMap<Long,Future<Result>> allFutures = new HashMap<Long,Future<Result>>();
 
     private static Object sendLock = new Object();
@@ -192,7 +193,7 @@ public final class Client
                                         else
                                             {
                                                 // we have work to do, so tell work units to die
-                                                kill.lazySet(true);
+                                                kill.set(true);
                                                 System.out.println("\nKill request received: kill switch set.");
                                             }
                                     }
@@ -313,8 +314,8 @@ public final class Client
                                 if ( EmptyBoundaryWorkUnit.returnSpawnList.size() == 0 &&
                                      EmptyBoundaryWorkUnit.returnResultsList.size() == 0 )
                                     {
-                                        System.out.println("nothing to send back");
                                         kill.set(false);
+                                        System.out.println("nothing to send back, kill switch unset");
                                         return;
                                     }
 
@@ -338,24 +339,30 @@ public final class Client
                                                         outgoingObjectStream.flush();
                                                         outgoingObjectStream.reset();
                                                         
-                                                        //System.out.println(allFutures.keySet());
+                                                        System.out.println("sent back results for IDs:");
+                                                        for ( EmptyWorkUnitResult r : EmptyBoundaryWorkUnit.returnResultsList )
+                                                            System.out.print(r.uniqueID() + " ");
+                                                        System.out.println();
+                                                        System.out.println("before: " + allFutures.keySet());
                                                         synchronized (EmptyBoundaryWorkUnit.returnResultsList)
                                                             {
                                                                 for (EmptyWorkUnitResult r : EmptyBoundaryWorkUnit.returnResultsList)
                                                                     {
                                                                         Long i = Long.valueOf(r.uniqueID());
                                                                         //System.out.println("2: removing " + i);
-                                                                        //String contents = allFutures.keySet().toString();
+                                                                        String contents = allFutures.keySet().toString();
                                                                         Future<Result> f = allFutures.remove(i);
                                                                         if ( f == null )
                                                                             {
                                                                                 System.out.println("unexpected error in allFutures 2");
-                                                                                //System.out.println("fail: " + i + "   " + contents);
+                                                                                System.out.println("failed to remove ID: " + i);
+                                                                                System.out.println(contents);
                                                                             }
                                                                         //else
                                                                             //System.out.println("success: " + i + "   " + contents);
                                                                     }
                                                             }
+                                                        System.out.println("after: " + allFutures.keySet());
                                                     }
                                             
                                                 synchronized (EmptyBoundaryWorkUnit.returnSpawnList)
@@ -367,7 +374,7 @@ public final class Client
                                                         EmptyBoundaryWorkUnit.returnResultsList.clear();
                                                     }
                                                 Client.kill.set(false);
-                                                //System.out.println("sent batch to server");
+                                                System.out.println("sent batch to server, kill switch unset");
                                             }
                                     }
                                 catch (SocketException e)
@@ -385,7 +392,7 @@ public final class Client
                                 System.out.println("doing nothing: " + allFutures.size());
                                 // do nothing
                             }
-                        kill.set(false);
+                        //kill.set(false);
                         return;
                     }
 
@@ -432,7 +439,9 @@ public final class Client
 
                 // if the number of jobs in the queue is below the threshold, request more work
                 int currentSize = executorService.getExecutor().getQueue().size();
-                if ( currentSize < Preinitializer.NUMBER_OF_THREADS )
+
+                // don't request more work if the kill switch has been set
+                if ( currentSize < Preinitializer.NUMBER_OF_THREADS && Client.checkKillSwitch() == false )
                     {
                         if ( TaskMonitor.lastUpdate == null || 
                              new Date().getTime() - TaskMonitor.lastUpdate.getTime() < 5000 )

@@ -147,7 +147,7 @@ public class Server
                                 out.close();
                                 fileOut.close();
                                 //System.out.println("wrote " + completedPatches.size() + " results to " + Preinitializer.RESULT_FILENAME + ".");
-                                System.out.println(String.format("wrote %d results to interim/tile%d-final",completedPatches.size(),Preinitializer.MY_TILE));
+                                System.out.println(String.format("wrote %d results to interim/tile%d-final.chk",completedPatches.size(),Preinitializer.MY_TILE));
                             }
                         catch (Exception e)
                             {
@@ -394,6 +394,7 @@ public class Server
                         {
                             System.out.println("Unexpected exception in Server.ConnectionThread.run():");
                             e.printStackTrace();
+                            System.out.println();
                             break;
                         }
             }
@@ -544,7 +545,8 @@ public class Server
 
                         try
                             {
-                                FileOutputStream fileOut = new FileOutputStream(String.format("interim/tile%d-%08d-%s",Preinitializer.MY_TILE, Server.dumpCount,INTERIM_RESULT_FILENAME));
+                                String outputFilename = String.format("interim/tile%d-%08d-%s",Preinitializer.MY_TILE, Server.dumpCount,INTERIM_RESULT_FILENAME);
+                                FileOutputStream fileOut = new FileOutputStream(outputFilename);
                                 Server.dumpCount++;
                                 ObjectOutputStream out = new ObjectOutputStream(fileOut);
                                 out.writeObject(interimResults);
@@ -552,7 +554,7 @@ public class Server
                                 fileOut.close();
                                 int newResults = numberOfCompletedPatches - lastNumberOfCompletedPatches;
                                 System.out.println("\n" + newResults + " new results, so wrote " + numberOfCompletedPatches
-                                                   + " interim results to " + INTERIM_RESULT_FILENAME + ".\n");
+                                                   + " interim results to " + outputFilename + ".\n");
                             }
                         catch (Exception e)
                             {
