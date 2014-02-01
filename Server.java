@@ -392,7 +392,7 @@ public class Server
                         }
                     catch (Exception e)
                         {
-                            System.out.println("Unexpected exception in Server.ConnectionThread.run():");
+                            System.out.println("Unexpected exception in Server.ConnectionThread.run() of " + address + ":");
                             e.printStackTrace();
                             System.out.println();
                             break;
