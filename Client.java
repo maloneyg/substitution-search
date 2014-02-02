@@ -30,6 +30,11 @@ public final class Client
 
     private static ThreadService executorService = ThreadService.INSTANCE;
 
+    // a dummy object used for synchronization
+    // we don't want to flip the kill switch when we're in the middle
+    // of returning results
+    private static String DUMMY_SYNCH = "DUMMY";
+
     // maps work unit IDs to their corresponding futures
     private static final HashMap<Long,Future<Result>> allFutures = new HashMap<Long,Future<Result>>();
 
@@ -193,8 +198,10 @@ public final class Client
                                         else
                                             {
                                                 // we have work to do, so tell work units to die
-                                                kill.set(true);
-                                                System.out.println("\nKill request received: kill switch set.");
+                                                synchronized( DUMMY_SYNCH ) {
+                                                    kill.set(true);
+                                                    System.out.println("\nKill request received: kill switch set.");
+                                                }
                                             }
                                     }
                             }
@@ -397,45 +404,47 @@ public final class Client
                     }
 
                 // if any of the work units are complete, send the result
-                List<Future<Result>> completedJobs = new LinkedList<>();
-                synchronized( allFutures )
-                    {
-                        // find out which jobs are finished
-                        for (Future<Result> f : allFutures.values())
-                            if (f.isDone())
-                                completedJobs.add(f);
-                    }
+                synchronized( DUMMY_SYNCH ) { // avoid racing with kill switch
+                    List<Future<Result>> completedJobs = new LinkedList<>();
+                    synchronized( allFutures )
+                        {
+                            // find out which jobs are finished
+                            for (Future<Result> f : allFutures.values())
+                                if (f.isDone())
+                                    completedJobs.add(f);
+                        }
 
-                for (Future<Result> f : completedJobs)
-                    {
-                        // send each result
-                        Result thisResult = null;
-                        try
-                            {
-                                thisResult = f.get();
-                                EmptyWorkUnitResult r = (EmptyWorkUnitResult)thisResult;
-                                Client.sendResult(r);
-                                Long i = Long.valueOf(r.uniqueID());
-                                //System.out.println("1: removing " + i);
-                                synchronized( allFutures )
-                                    {
-                                        Future<Result> f2 = allFutures.remove(i);
-                                        if ( f2 == null )
-                                             System.out.println("unexpected error in allFutures 1");
-                                    }
-                            }
-                        catch (Exception e)
-                            {
-                                e.printStackTrace();
-                                System.out.println("error in client while trying to send back result!");
-                                continue;
-                            }
-                        if ( thisResult == null )
-                            {
-                                System.out.println("null error in client while trying to send back result!");
-                                continue;
-                            }
-                    }
+                    for (Future<Result> f : completedJobs)
+                        {
+                            // send each result
+                            Result thisResult = null;
+                            try
+                                {
+                                    thisResult = f.get();
+                                    EmptyWorkUnitResult r = (EmptyWorkUnitResult)thisResult;
+                                    Client.sendResult(r);
+                                    Long i = Long.valueOf(r.uniqueID());
+                                    //System.out.println("1: removing " + i);
+                                    synchronized( allFutures )
+                                        {
+                                            Future<Result> f2 = allFutures.remove(i);
+                                            if ( f2 == null )
+                                                 System.out.println("unexpected error in allFutures 1");
+                                        }
+                                }
+                            catch (Exception e)
+                                {
+                                    e.printStackTrace();
+                                    System.out.println("error in client while trying to send back result!");
+                                    continue;
+                                }
+                            if ( thisResult == null )
+                                {
+                                    System.out.println("null error in client while trying to send back result!");
+                                    continue;
+                                }
+                        }
+                } // here ends synchronization to avoid racing kill switch
 
                 // if the number of jobs in the queue is below the threshold, request more work
                 int currentSize = executorService.getExecutor().getQueue().size();

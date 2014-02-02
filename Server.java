@@ -458,6 +458,9 @@ public class Server
         private final String INTERIM_RESULT_FILENAME = Preinitializer.INTERIM_RESULT_FILENAME;
         private Date lastInterimWrite = new Date();
 
+        // a pointer that tells us which thread most recently sent back spawn
+        private ConnectionThread lastSpawned = null;
+
         public ThreadMonitor(double updateInterval) // seconds
         {
             this.updateInterval = updateInterval;
@@ -499,8 +502,18 @@ public class Server
                         lastRespawn = currentTime;
                         synchronized(LIVE_CONNECTIONS)
                             {
-                                for (ConnectionThread t : LIVE_CONNECTIONS)
+                                if (!LIVE_CONNECTIONS.isEmpty())
                                     {
+
+                                        // iterate lastSpawned
+                                        int i = LIVE_CONNECTIONS.indexOf(lastSpawned);
+                                        if (lastSpawned==null||(!lastSpawned.connection.isConnected())||i<0||i>LIVE_CONNECTIONS.size()-2) {
+                                            lastSpawned = LIVE_CONNECTIONS.get(0);
+                                        } else {
+                                            lastSpawned = LIVE_CONNECTIONS.get(i+1);
+                                        }
+                                        ConnectionThread t = lastSpawned;
+
                                         if ( t.connection.isConnected() )
                                             {
                                                 System.out.println("\nSignaling " + t.address + " to return spawn."); 
@@ -517,7 +530,7 @@ public class Server
                                                         e.printStackTrace();
                                                     }
                                             }
-                                    }
+                                    } // here ends if LIVE_CONNECTIONS not empty
                             }
                     }
 
@@ -532,7 +545,7 @@ public class Server
                     }
 
                 if (    Preinitializer.WRITE_INTERIM_RESULTS == true
-                     && numberOfCompletedPatches > lastNumberOfCompletedPatches
+                     && numberOfCompletedPatches > 0
                      && currentTime.getTime() - lastInterimWrite.getTime() > 30 * 1000 )
                     {
                         TriangleResults interimResults = null;
