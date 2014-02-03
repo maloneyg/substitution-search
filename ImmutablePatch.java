@@ -202,4 +202,8 @@ public class ImmutablePatch implements Serializable {
         return triangles.length;
     }
 
+    public BasicTriangle[] getTriangles() {
+        return triangles;
+    }
+
 } // end of class ImmutablePatch

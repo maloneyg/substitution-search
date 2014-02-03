@@ -147,7 +147,7 @@ public class Server
                                 out.close();
                                 fileOut.close();
                                 //System.out.println("wrote " + completedPatches.size() + " results to " + Preinitializer.RESULT_FILENAME + ".");
-                                System.out.println(String.format("wrote %d results to interim/tile%d-final",completedPatches.size(),Preinitializer.MY_TILE));
+                                System.out.println(String.format("wrote %d results to interim/tile%d-final.chk",completedPatches.size(),Preinitializer.MY_TILE));
                             }
                         catch (Exception e)
                             {
@@ -397,8 +397,9 @@ public class Server
                         }
                     catch (Exception e)
                         {
-                            System.out.println("Unexpected exception in Server.ConnectionThread.run():");
+                            System.out.println("Unexpected exception in Server.ConnectionThread.run() of " + address + ":");
                             e.printStackTrace();
+                            System.out.println();
                             break;
                         }
             }
@@ -462,6 +463,9 @@ public class Server
         private final String INTERIM_RESULT_FILENAME = Preinitializer.INTERIM_RESULT_FILENAME;
         private Date lastInterimWrite = new Date();
 
+        // a pointer that tells us which thread most recently sent back spawn
+        private ConnectionThread lastSpawned = null;
+
         public ThreadMonitor(double updateInterval) // seconds
         {
             this.updateInterval = updateInterval;
@@ -503,8 +507,18 @@ public class Server
                         lastRespawn = currentTime;
                         synchronized(LIVE_CONNECTIONS)
                             {
-                                for (ConnectionThread t : LIVE_CONNECTIONS)
+                                if (!LIVE_CONNECTIONS.isEmpty())
                                     {
+
+                                        // iterate lastSpawned
+                                        int i = LIVE_CONNECTIONS.indexOf(lastSpawned);
+                                        if (lastSpawned==null||(!lastSpawned.connection.isConnected())||i<0||i>LIVE_CONNECTIONS.size()-2) {
+                                            lastSpawned = LIVE_CONNECTIONS.get(0);
+                                        } else {
+                                            lastSpawned = LIVE_CONNECTIONS.get(i+1);
+                                        }
+                                        ConnectionThread t = lastSpawned;
+
                                         if ( t.connection.isConnected() )
                                             {
                                                 System.out.println("\nSignaling " + t.address + " to return spawn."); 
@@ -521,7 +535,7 @@ public class Server
                                                         e.printStackTrace();
                                                     }
                                             }
-                                    }
+                                    } // here ends if LIVE_CONNECTIONS not empty
                             }
                     }
 
@@ -536,7 +550,7 @@ public class Server
                     }
 
                 if (    Preinitializer.WRITE_INTERIM_RESULTS == true
-                     && numberOfCompletedPatches > lastNumberOfCompletedPatches
+                     && numberOfCompletedPatches > 0
                      && currentTime.getTime() - lastInterimWrite.getTime() > 30 * 1000 )
                     {
                         TriangleResults interimResults = null;
@@ -549,7 +563,8 @@ public class Server
 
                         try
                             {
-                                FileOutputStream fileOut = new FileOutputStream(String.format("interim/tile%d-%08d-%s",Preinitializer.MY_TILE, Server.dumpCount,INTERIM_RESULT_FILENAME));
+                                String outputFilename = String.format("interim/tile%d-%08d-%s",Preinitializer.MY_TILE, Server.dumpCount,INTERIM_RESULT_FILENAME);
+                                FileOutputStream fileOut = new FileOutputStream(outputFilename);
                                 Server.dumpCount++;
                                 ObjectOutputStream out = new ObjectOutputStream(fileOut);
                                 out.writeObject(interimResults);
@@ -557,7 +572,7 @@ public class Server
                                 fileOut.close();
                                 int newResults = numberOfCompletedPatches - lastNumberOfCompletedPatches;
                                 System.out.println("\n" + newResults + " new results, so wrote " + numberOfCompletedPatches
-                                                   + " interim results to " + INTERIM_RESULT_FILENAME + ".\n");
+                                                   + " interim results to " + outputFilename + ".\n");
                             }
                         catch (Exception e)
                             {

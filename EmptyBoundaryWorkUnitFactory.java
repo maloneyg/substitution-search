@@ -18,10 +18,23 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
     private static final BasicPrototile P0 = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(myTile));
 
     // the numbers of the different prototiles that fit in INFL.P0
-    private static final PrototileList tiles = PrototileList.createPrototileList(BasicPrototile.getPrototileList(Initializer.SUBSTITUTION_MATRIX.getColumn(myTile)));
+    private static final PrototileList tiles = PrototileList.createPrototileList(BasicPrototile.getPrototileList( //
+                        (Preinitializer.SEARCH_TILE==null) ? //
+                        Initializer.SUBSTITUTION_MATRIX.getColumn(myTile) : //
+                        Initializer.TILE_LIST.getColumn(0) //
+                                ));
 
     // vertices of INFL.P0
-    private static final BytePoint[] vertices = P0.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices();
+    // or of inflated SEARCH_TILE if we're using it
+    private static BasicAngle[] angles = (Preinitializer.SEARCH_TILE==null) ? (new BasicAngle[3]) : (new BasicAngle[] {BasicAngle.createBasicAngle(Preinitializer.SEARCH_TILE.get(0)),BasicAngle.createBasicAngle(Preinitializer.SEARCH_TILE.get(1)),BasicAngle.createBasicAngle(Preinitializer.SEARCH_TILE.get(2))});
+    private static final BytePoint[] vertices = //
+                (Preinitializer.SEARCH_TILE==null) ? //
+                P0.place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false).getVertices() : //
+                new BytePoint[] {//
+                    BasicEdgeLength.lengthOpposite(angles[2]).getAsVector(angles[1]),//
+                    BytePoint.ZERO_VECTOR,//
+                    BasicEdgeLength.lengthOpposite(angles[0]).getAsVector(BasicAngle.createBasicAngle(0))//
+                };
     private static final BytePoint[] bigVertices = new BytePoint[] {vertices[0].inflate(),vertices[1].inflate(),vertices[2].inflate()};
 
     // the starting edge breakdowns

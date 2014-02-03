@@ -18,7 +18,7 @@ class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 2;        // the tile we're searching
+    public static final int MY_TILE = 0;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
@@ -54,6 +54,7 @@ class Preinitializer {
     public static final String INTERIM_RESULT_FILENAME = "interim.chk";
     public static final String INTERIM_RESULT_BACKUP_FILENAME = "interim_backup.chk";
 
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, 1); // small search. turned up in some calculations, so I thought I'd try it. (1+b)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1); // really small search. might as well try it (2+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 2, 1); // unusual search. might as well try it (2a+b)
@@ -70,7 +71,7 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -3, 0, 1); // (114)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 0, -3, 0, 1); // huge search (115)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, -2, 0, 1); // b+d (118)
     public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121) use this one
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, -2, -3, 1, 1); // even huger search (122)
@@ -91,12 +92,12 @@ class Preinitializer {
                                          );
 
     public static final ImmutableList<Integer> SEARCH_TILE = // a lot of options
-                                 null;
+                             //  null;
                              //  ImmutableList.of( 1, 1, 9 );  // eleven
                              //  ImmutableList.of( 1, 2, 8 );  // eleven
                              //  ImmutableList.of( 1, 3, 7 );  // eleven
                              //  ImmutableList.of( 2, 2, 7 );  // eleven
-                             //  ImmutableList.of( 3, 4, 4 );  // eleven
+                                 ImmutableList.of( 3, 4, 4 );  // eleven
 
     static
         {
@@ -112,7 +113,7 @@ class Preinitializer {
 
             // determine which host name to use
             if ( System.getProperty("user.name").toLowerCase().equals("ekwan") )
-                HOST_NAME = "enj06.rc.fas.harvard.edu";
+                HOST_NAME = "enj11.rc.fas.harvard.edu";
             else if ( System.getProperty("user.name").toLowerCase().equals("ngrm1") )
                 HOST_NAME = "corbridge";
             else

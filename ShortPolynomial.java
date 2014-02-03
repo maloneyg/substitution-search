@@ -286,6 +286,22 @@ public class ShortPolynomial implements Serializable {
         return new Matrix(preMatrix);
     }
 
+    // same as above, but force the matrix size
+    public static Matrix coefficientMatrix(ShortPolynomial[] p, int degree) {
+        short d = (short)degree;
+        double[][] preMatrix = new double[d+1][p.length];
+        for (int i = 0; i <= (int)d; i++) {
+            for (int j = 0; j < p.length; j++) {
+                if (i <= p[j].deg) {
+                    preMatrix[i][j] = (double)p[j].coef[i];
+                } else {
+                    preMatrix[i][j] = 0.0;
+                }
+            }
+        }
+        return new Matrix(preMatrix);
+    }
+
     // substitute 2x for x.
     public ShortPolynomial reParametrize(short n) {
         short[] newCoeffs = new short[(int)deg+1];
