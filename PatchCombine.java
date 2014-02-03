@@ -27,18 +27,20 @@ public class PatchCombine implements Serializable {
     // private constructor
     // we assume the TriangleResults are entered in the same order
     // as the prototiles to which they correspond
-    private PatchCombine(TriangleResults[] l1, TriangleResults[] l2) {
-        System.out.println("Building PatchCombine.");
-        System.out.print("Loading vertices ... ");
-        breakdown = bd;
-        patches = new SimpleGraph<>(IndexPair.class);
-        for (int i = 0; i < inList.size(); i++) {
-            for (ImmutablePatch p : bd.cull(i,inList.get(i))) {
-                patches.addVertex(new PatchAndIndex(p,i));
-            }
-        }
+    private PatchCombine(TriangleResults l1, TriangleResults l2) {
+        System.out.println("Building graph.");
 
+        // add all the patches
+        System.out.print("Loading vertices ... ");
+        patches = new SimpleGraph<>(IndexPair.class);
+        for (int i = 0; i < l1.size(); i++) {
+            patches.addVertex(new PatchAndIndex(l1.getPatches().get(i),1));
+        }
+        for (int i = 0; i < l2.size(); i++) {
+            patches.addVertex(new PatchAndIndex(l2.getPatches().get(i),2));
+        }
         System.out.println("done loading vertices. Loaded " + patches.vertexSet().size() + " vertices.");
+
         System.out.print("Building edges ... ");
         for (PatchAndIndex p1 : patches.vertexSet()) {
             for (PatchAndIndex p2 : patches.vertexSet()) {
@@ -55,8 +57,8 @@ public class PatchCombine implements Serializable {
     }
 
     // public static factory method
-    public static PatchCombine createPatchCombine(List<TriangleResults> inList, EdgeBreakdownTree bd) {
-        PatchCombine output = new PatchCombine(inList,bd);
+    public static PatchCombine createPatchCombine(TriangleResults l1, TriangleResults l2) {
+        PatchCombine output = new PatchCombine(l1,l2);
         System.out.print("Expunging lone vertices ... ");
         output.dropLoners();
         System.out.println("done expunging lone vertices.");
@@ -123,7 +125,7 @@ public class PatchCombine implements Serializable {
     public int hashCode() {
         int prime = 439;
         int result = 3;
-        result = prime*patches.hashCode() + breakdown.hashCode();
+        result = prime*patches.hashCode();
         return result;
     }
 
@@ -220,7 +222,7 @@ public class PatchCombine implements Serializable {
                 }
         }
 
-        PatchCombine testo = createPatchCombine(resultsList, PuzzleBoundary.BREAKDOWNS);
+        PatchCombine testo = createPatchCombine(resultsList.get(0), resultsList.get(1));
         System.out.println(testo.size());
         PatchAndIndex ummm = null;
         for (PatchAndIndex pp: testo.patches.vertexSet()) { if (pp.getIndex() == 0) { ummm = pp; break; }}
