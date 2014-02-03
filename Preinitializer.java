@@ -91,12 +91,12 @@ class Preinitializer {
                                          );
 
     public static final ImmutableList<Integer> SEARCH_TILE = // a lot of options
-                                 null;
+                             //  null;
                              //  ImmutableList.of( 1, 1, 9 );  // eleven
                              //  ImmutableList.of( 1, 2, 8 );  // eleven
                              //  ImmutableList.of( 1, 3, 7 );  // eleven
                              //  ImmutableList.of( 2, 2, 7 );  // eleven
-                             //  ImmutableList.of( 3, 4, 4 );  // eleven
+                                 ImmutableList.of( 3, 4, 4 );  // eleven
 
     static
         {
