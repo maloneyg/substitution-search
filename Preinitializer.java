@@ -18,7 +18,7 @@ class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 0;        // the tile we're searching
+    public static final int MY_TILE = 2;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
@@ -60,13 +60,13 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(3, 0, -6, 0, 2); // we're really scraping the bottom of the barrel here.  (2d+1)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2, 1); // the square of the really small search (1+a)^2 won't work with tile 3 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search (104)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, 0, 1); // c (107)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, 0, 1); // 1 + c (108)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -1, 0, 1); // a + c (109)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, 0, 1); // quite big search (110)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -3, 0, 1); // (114)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 0, -3, 0, 1); // huge search (115)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
@@ -112,7 +112,7 @@ class Preinitializer {
 
             // determine which host name to use
             if ( System.getProperty("user.name").toLowerCase().equals("ekwan") )
-                HOST_NAME = "enj06.rc.fas.harvard.edu";
+                HOST_NAME = "enj11.rc.fas.harvard.edu";
             else if ( System.getProperty("user.name").toLowerCase().equals("ngrm1") )
                 HOST_NAME = "corbridge";
             else

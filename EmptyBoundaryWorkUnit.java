@@ -189,7 +189,8 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
 
         // what we do with the spawn depends on whether spawning was 
         // triggered by a Client killswitch or not
-        if (Client.checkKillSwitch()) {
+        boolean clientKilled = Client.checkKillSwitch();
+        if (clientKilled) {
             synchronized ( returnSpawnList ) {
                 returnSpawnList.addAll(descendents);
             }
@@ -212,7 +213,7 @@ public class EmptyBoundaryWorkUnit implements WorkUnit, Serializable {
 
         // add thisResult to another list for dispatch if we've received
         // a kill signal on the Client side
-        if (Client.checkKillSwitch()) {
+        if (clientKilled) {
             synchronized ( returnResultsList ) {
                 returnResultsList.add(thisResult);
             }
