@@ -28,17 +28,19 @@ public class PatchCombine implements Serializable {
     // we assume the TriangleResults are entered in the same order
     // as the prototiles to which they correspond
     private PatchCombine(TriangleResults[] l1, TriangleResults[] l2) {
-        System.out.println("Building PatchCombine.");
-        System.out.print("Loading vertices ... ");
-        breakdown = bd;
-        patches = new SimpleGraph<>(IndexPair.class);
-        for (int i = 0; i < inList.size(); i++) {
-            for (ImmutablePatch p : bd.cull(i,inList.get(i))) {
-                patches.addVertex(new PatchAndIndex(p,i));
-            }
-        }
+        System.out.println("Building graph.");
 
+        // add all the patches
+        System.out.print("Loading vertices ... ");
+        patches = new SimpleGraph<>(IndexPair.class);
+        for (int i = 0; i < l1.length; i++) {
+            patches.addVertex(new PatchAndIndex(l1[i],1));
+        }
+        for (int i = 0; i < l2.length; i++) {
+            patches.addVertex(new PatchAndIndex(l2[i],2));
+        }
         System.out.println("done loading vertices. Loaded " + patches.vertexSet().size() + " vertices.");
+
         System.out.print("Building edges ... ");
         for (PatchAndIndex p1 : patches.vertexSet()) {
             for (PatchAndIndex p2 : patches.vertexSet()) {
