@@ -18,7 +18,7 @@ class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 3;        // the tile we're searching
+    public static final int MY_TILE = 2;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
@@ -63,7 +63,7 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, 0, 1); // c (107)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, 0, 1); // 1 + c (108)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, 0, 1); // 1 + c (108)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -1, 0, 1); // a + c (109)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, 0, 1); // quite big search (110)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
