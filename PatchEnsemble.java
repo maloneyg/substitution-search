@@ -374,14 +374,14 @@ public class PatchEnsemble implements Serializable {
 
         List<TriangleResults> resultsList = new LinkedList<>();
         String[] files = new String[Preinitializer.PROTOTILES.size()];
-//        files[0] = "results/seven1a-0.chk";
-//        files[1] = "results/seven1a-1.chk";
-//        files[2] = "results/seven1a-2.chk";
-        files[0] = "results/tile0-105.chk";
-        files[1] = "results/tile1-105.chk";
-        files[2] = "results/tile2-105.chk";
-        files[3] = "results/tile3-105.chk";
-        files[4] = "results/tile4-105.chk";
+        files[0] = "interim/tile0-final.chk";
+        files[1] = "interim/tile1-final.chk";
+        files[2] = "interim/tile2-final.chk";
+//        files[0] = "results/tile0-105.chk";
+//        files[1] = "results/tile1-105.chk";
+//        files[2] = "results/tile2-105.chk";
+//        files[3] = "results/tile3-105.chk";
+//        files[4] = "results/tile4-105.chk";
 
         for (String filename : files) {
             // deserialize data
@@ -409,7 +409,7 @@ public class PatchEnsemble implements Serializable {
         PatchAndIndex ummm = null;
         for (PatchAndIndex pp: testo.patches.vertexSet()) { if (pp.getIndex() == 0) { ummm = pp; break; }}
         testo.dropToNeighbours(ummm);
-        testo.gapString("test11.g","test11");
+        testo.gapString("test7.g","test7");
         System.out.println(testo.size());
 
 
