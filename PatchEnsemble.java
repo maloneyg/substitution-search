@@ -216,7 +216,7 @@ public class PatchEnsemble implements Serializable {
         private int i_start;
         private int j_start;
         private List<PatchAndIndex> patchList;
-        private HashMap<Integer,Integer> compatible = new HashMap<Integer,Integer>();
+        private List<IndexPair> compatible = new LinkedList<IndexPair>();
 
         public PatchEnsembleWorkUnit(int i_start, int j_start, List<PatchAndIndex> patchList)
         {
@@ -242,7 +242,7 @@ public class PatchEnsemble implements Serializable {
                             PatchAndIndex p1 = patchList.get(i);
                             PatchAndIndex p2 = patchList.get(j);
                             if ( p1.compatible(p2) )
-                                compatible.put(i,j);
+                                compatible.add(new IndexPair(i,j));
                         }
                 }
             PatchEnsembleResult result = new PatchEnsembleResult(compatible);
@@ -252,14 +252,14 @@ public class PatchEnsemble implements Serializable {
 
     private class PatchEnsembleResult implements Result
     {
-        private Map<Integer,Integer> compatible; // only compatible pairs will be stored
+        private List<IndexPair> compatible; // only compatible pairs will be stored
 
-        public PatchEnsembleResult(Map<Integer,Integer> compatible)
+        public PatchEnsembleResult(List<IndexPair> compatible)
         {
             this.compatible = compatible;
         }
 
-        public Map<Integer,Integer> getCompatible()
+        public List<IndexPair> getCompatible()
         {
             return compatible;
         }
@@ -303,8 +303,7 @@ public class PatchEnsemble implements Serializable {
                     {
                         currentTotal++;
                         //System.out.println(currentTotal + " : " + i + " " + j);
-                        if ( currentTotal > PatchEnsembleWorkUnit.BATCH_SIZE ||
-                             ( i == patchList.size()-2 && j == patchList.size()-1 ) )
+                        if ( currentTotal > PatchEnsembleWorkUnit.BATCH_SIZE )
                             {
                                 i_start = i;
                                 j_start = j;
@@ -351,13 +350,13 @@ public class PatchEnsemble implements Serializable {
         System.out.println();
 
         // concatenate all results
-        Map<Integer,Integer> allCompatible = new HashMap<Integer,Integer>();
+        List<IndexPair> allCompatible = new LinkedList<IndexPair>();
         for (Future<Result> thisFuture : listOfFutures)
             {
                 try
                     {
                         PatchEnsembleResult thisResult = (PatchEnsembleResult)thisFuture.get();
-                        allCompatible.putAll(thisResult.getCompatible());
+                        allCompatible.addAll(thisResult.getCompatible());
                     }
                 catch (Exception e)
                     {
@@ -367,11 +366,11 @@ public class PatchEnsemble implements Serializable {
 
         // add the new edges to the graph
         System.out.print("Adding " + allCompatible.size() + " edges to graph...");
-        for (Integer i : allCompatible.keySet())
+        for (IndexPair p : allCompatible)
             {
-                Integer j = allCompatible.get(i);
-                PatchAndIndex p1 = patchList.get(i);
-                PatchAndIndex p2 = patchList.get(j);
+                int[] pair = p.getIndices();
+                PatchAndIndex p1 = patchList.get(pair[0]);
+                PatchAndIndex p2 = patchList.get(pair[1]);
                 IndexPair indexPair = new IndexPair(p1.getIndex(),p2.getIndex());
                 patches.addEdge(p1,p2,indexPair);
             }
