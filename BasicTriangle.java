@@ -58,6 +58,11 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
         return new BasicTriangle(a,p,o,e,P,f);
     }
 
+    // create a new BasicTriangle by applying a transformation to this one
+//    public BasicTriangle move(boolean ref, BasicAngle rot, BytePoint shift) {
+//        return prototile.place();
+//    }
+
     public BasicPrototile getPrototile() {
         return prototile;
     }
@@ -214,24 +219,8 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
     * vector is the same as taking the 2d cross product with the 
     * original vector.
     */
-//    public boolean contains(BytePoint p) {
-//        BytePoint m; // the direction vector for a side
-//        BytePoint v; // the other vertex
-//        BytePoint t; // vertex on the given side, used to test cross product
-//        for (int i = 0; i < 3; i++) {
-//            m = vertices[(i+2)%3].subtract(vertices[(i+1)%3]);
-//            v = vertices[i];
-//            t = vertices[(i+1)%3];
-//            if (Math.signum((v.subtract(t)).crossProduct(m)) != Math.signum((p.subtract(t)).crossProduct(m)))
-//                return false;
-//        }
-//        return true;
-//    }
-
-    // alternative to the above method
     public boolean contains(BytePoint p) {
         for (int i = 0; i < 3; i++) {
-            //System.out.println((vertices[i].subtract(p)).crossProduct(directions[i]));
             if ((vertices[i].subtract(p)).crossProduct(directions[i]) < -BasicEdge.TOO_CLOSE)
                 return false;
         }
@@ -242,30 +231,11 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
     public boolean covers(BytePoint p) {
         if (p.equals(vertices[0])||p.equals(vertices[1])||p.equals(vertices[2])) return false;
         for (int i = 0; i < 3; i++) {
-            //System.out.println((vertices[i].subtract(p)).crossProduct(directions[i]));
             if ((vertices[i].subtract(p)).crossProduct(directions[i]) < 0)//-BasicEdge.TOO_CLOSE)
                 return false;
         }
         return true;
     }
-
-    /*
-    * old version
-    */
-//    public boolean contains(BytePoint p) {
-//        BytePoint m; // the direction vector for a side
-//        BytePoint v; // the other vertex
-//        BytePoint t; // vertex on the given side, used to test cross product
-//        for (int i = 0; i < 3; i++) {
-//            m = vertices[(i+2)%3].subtract(vertices[(i+1)%3]);
-//            v = vertices[i];
-//            t = vertices[(i+1)%3];
-////            if (Math.signum((v.subtract(t)).crossProduct(m)) != Math.signum((p.subtract(t)).crossProduct(m)))
-//            if (Math.signum((v.subtract(t)).crossProduct(m).evaluate(Initializer.COS)) != Math.signum((p.subtract(t)).crossProduct(m).evaluate(Initializer.COS)))
-//                return false;
-//        }
-//        return true;
-//    }
 
     /** 
     * Tricky incidence test.
