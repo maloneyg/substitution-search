@@ -60,6 +60,12 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
 
     // create a new BasicTriangle by applying a transformation to this one
 //    public BasicTriangle move(boolean ref, BasicAngle rot, BytePoint shift) {
+//        // we're going to get the output by placing a prototile
+//        // for this we need to know new flip, rotate, and shift values
+//        BytePoint newShift = vertices[1];
+//        if (ref) newShift = newShift.reflect();
+//        newShift = newShift.rotate(rot);
+//        BasicAngle newAngle = 
 //        return prototile.place();
 //    }
 

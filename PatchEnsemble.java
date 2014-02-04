@@ -536,9 +536,9 @@ public class PatchEnsemble implements Serializable {
 
         List<TriangleResults> resultsList = new LinkedList<>();
         String[] files = new String[Preinitializer.PROTOTILES.size()];
-        files[0] = "results/seven-tile0-aplusb.chk";
-        files[1] = "results/seven-tile1-aplusb.chk";
-        files[2] = "results/seven-tile2-aplusb.chk";
+        files[0] = "results/seven-tile0-1plusa.chk";
+        files[1] = "results/seven-tile1-1plusa.chk";
+        files[2] = "results/seven-tile2-1plusa.chk";
 //        files[0] = "results/tile0-105.chk";
 //        files[1] = "results/tile1-105.chk";
 //        files[2] = "results/tile2-105.chk";
