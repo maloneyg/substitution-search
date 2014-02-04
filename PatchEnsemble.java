@@ -75,7 +75,7 @@ class PatchAndIndex implements Serializable {
 //        System.out.println(t1); //
 //        System.out.println(t2); //
 //        System.out.println(part); //
-        for (int i = 0; i < 3; i++) System.out.println(e1[i] + " " + o1[i]); // 
+//        for (int i = 0; i < 3; i++) System.out.println(e1[i] + " " + o1[i]); // 
 //        for (int i = 0; i < 3; i++) System.out.println(e2[i] + " " + o2[i]); // 
 //        System.out.println(shared.size()); // 
 
@@ -221,6 +221,7 @@ public class PatchEnsemble implements Serializable {
         patches = new SimpleGraph<>(IndexPair.class);
         for (int i = 0; i < inList.size(); i++) {
             for (ImmutablePatch p : bd.cull(i,inList.get(i))) {
+            //for (ImmutablePatch p : inList.get(i).getPatches()) {
                 patches.addVertex(new PatchAndIndex(p,i));
             }
         }
