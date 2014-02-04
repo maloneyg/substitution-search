@@ -9,7 +9,7 @@ public class ClosedResultsDisplay
             // deserialize data
             String filename = //"results/tile0-bc.chk";//
                               //"results/tile0-abc.chk";//"results/tile0superhuge.chk";
-                              "errors8.chk";
+                              "errors5.chk";
             List<ImmutablePatch> patches = null;
             if ( ! new File(filename).isFile() )
                 {

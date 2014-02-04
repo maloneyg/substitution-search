@@ -62,9 +62,9 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
                              lengths[0]  //
                                                               };  
         orientations = new Orientation[] { //
-                             Orientation.createOrientation(), //
-                             Orientation.createOrientation(), //
-                             Orientation.createOrientation()  //
+                             Orientation.getPooledOrientation(), //
+                             Orientation.getPooledOrientation(), //
+                             Orientation.getPooledOrientation()  //
                                                               };  
         flipOrientations = new Orientation[] { //
                              orientations[2].getOpposite(), //

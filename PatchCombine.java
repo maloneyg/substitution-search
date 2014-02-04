@@ -27,7 +27,7 @@ public class PatchCombine implements Serializable {
     // private constructor
     // we assume the TriangleResults are entered in the same order
     // as the prototiles to which they correspond
-    private PatchCombine(TriangleResults l1, TriangleResults l2) {
+    private PatchCombine(TriangleResults l1, TriangleResults l2, int edge1, int edge2) {
         System.out.println("Building graph.");
 
         // add all the patches
@@ -43,13 +43,12 @@ public class PatchCombine implements Serializable {
 
         System.out.print("Building edges ... ");
         for (PatchAndIndex p1 : patches.vertexSet()) {
-            for (PatchAndIndex p2 : patches.vertexSet()) {
-                if (p1.getIndex()!=p2.getIndex()) {
-                    if (p1.compatible(p2) != p2.compatible(p1)) System.out.println(p1.compatible(p2) + " " + p2.compatible(p1));
-                    //if (p1.compatible(p2)) patches.addEdge(p1,p2,new IndexPair(p1.getIndex(),p2.getIndex()));
-                    boolean yup = p1.compatible(p2);
-//                    System.out.println(yup);
-                    if (yup) patches.addEdge(p1,p2,new IndexPair(p1.getIndex(),p2.getIndex()));
+            if (p1.getIndex()==1) {
+                for (PatchAndIndex p2 : patches.vertexSet()) {
+                    if (p2.getIndex()==2&&(!patches.containsEdge(p1,p2))) {
+                        boolean yup = p1.edgeMatch(p2,edge1,edge2);
+                        if (yup) patches.addEdge(p1,p2,new IndexPair(p1.getIndex(),p2.getIndex()));
+                    }
                 }
             }
         }
@@ -59,56 +58,17 @@ public class PatchCombine implements Serializable {
     // public static factory method
     public static PatchCombine createPatchCombine(TriangleResults l1, TriangleResults l2) {
         PatchCombine output = new PatchCombine(l1,l2);
-        System.out.print("Expunging lone vertices ... ");
-        output.dropLoners();
-        System.out.println("done expunging lone vertices.");
         return output;
-    }
-
-    // remove all vertices that don't have edges connected to all indices
-    // removing one such vertex might produce another one, so loop until
-    // no more are created
-    public void dropLoners() {
-        // we have to create this outside of the loop, I think
-        PatchAndIndex drop = null;
-        boolean done = true;
-        do {
-            if (!done) patches.removeVertex(drop);
-            done = true;
-            // now we loop through all vertices and check for loners
-            for (PatchAndIndex p : patches.vertexSet()) {
-                // check boxes to see if p has neighbours of all indices
-                boolean[] check = new boolean[Preinitializer.PROTOTILES.size()];
-                for (IndexPair i : patches.edgesOf(p)) {
-                    for (int j = 0; j < 2; j ++) check[i.getIndices()[j]] = true;
-                }
-                // if we missed any index, we're not done
-                for (int j = 0; j < check.length; j++) done = (done&&check[j]);
-                // drop this one and start again
-                if (!done) {
-                    drop = p;
-                    break;
-                }
-            }
-        } while (!done);
-    }
-
-    // drop down to the set of vertices adjacent to root
-    public void dropToNeighbours(PatchAndIndex root) {
-        List<PatchAndIndex> neighbours = new ArrayList<>();
-        neighbours.add(root);
-        for (IndexPair ip : patches.edgesOf(root)) {
-            neighbours.add(patches.getEdgeTarget(ip));
-            neighbours.add(patches.getEdgeSource(ip));
-        }
-        List<PatchAndIndex> remove = new ArrayList<>();
-        for (PatchAndIndex pp : patches.vertexSet()) if (!neighbours.contains(pp)) remove.add(pp);
-        System.out.println(remove.size());
-        patches.removeAllVertices(remove);
     }
 
     // size of the graph
     public int size() {
+        return patches.vertexSet().size();
+    }
+
+    // if it is known that p1 and p2 match, then combine them to get a new patch
+    public ImmutablePatch combine(ImmutablePatch p1, ImmutablePatch p2) {
+    public static ImmutablePatch createImmutablePatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, BytePoint[] v,EdgeBreakdown bd0,EdgeBreakdown bd1,EdgeBreakdown bd2) {
         return patches.vertexSet().size();
     }
 
@@ -127,64 +87,6 @@ public class PatchCombine implements Serializable {
         int result = 3;
         result = prime*patches.hashCode();
         return result;
-    }
-
-    // output a String of gap-readable code
-    // name is the name of the gap record we will produce
-    public String gapString(String fileName, String name) {
-        PrintWriter out = null;
-        try {
-            out = new PrintWriter(fileName);
-            out.write(Initializer.gapPreambleString(name));
-            out.write(BasicPrototile.allPrototilesGapString());
-            out.write("  subst_tiles := [\n");
-
-            for (int i = 0; i < Preinitializer.PROTOTILES.size(); i++) {
-                // dump all the right-handed substitution rules
-                boolean first = true;
-                out.write("               [\n");
-                for (PatchAndIndex pi : patches.vertexSet()) {
-                    if (pi.getIndex()==i) {
-                        if (!first) out.write(",\n");
-                        first = false;
-                        out.write(pi.getPatch().functionGapString(false));
-                    }
-                }
-                out.write("\n               ],\n");
-
-                // dump all the left-handed substitution rules
-                first = true;
-                out.write("               [\n");
-                for (PatchAndIndex pi : patches.vertexSet()) {
-                    if (pi.getIndex()==i) {
-                        if (!first) out.write(",\n");
-                        first = false;
-                        out.write(pi.getPatch().functionGapString(true));
-                    }
-                }
-                out.write("\n               ]");
-                out.write((i==Preinitializer.PROTOTILES.size()-1)? "\n  ],\n" : ",\n");
-
-            } // end of substitution rule dump
-            out.write(BasicPrototile.drawAllPrototilesGapString());
-            out.write("\n\n  drawdot := function( v, psfile )\n");
-            out.write("    AppendTo(psfile, ");
-            for (int m = 1; m < Preinitializer.N; m++) {
-                out.write("v[" + m + "], ");
-                out.write((m==Preinitializer.N-1) ? "" : "\" \", ");
-            }
-            out.write("\" dot\\n\" );\n  end");
-            out.write("\n\n);");
-
-        } catch ( Exception e ) {
-        } finally {
-            try {
-                if ( out != null)
-                out.close( );
-            } catch ( Exception e) {
-            }
-        }
-        return name;
     }
 
     public static void main(String[] args) {
@@ -226,8 +128,6 @@ public class PatchCombine implements Serializable {
         System.out.println(testo.size());
         PatchAndIndex ummm = null;
         for (PatchAndIndex pp: testo.patches.vertexSet()) { if (pp.getIndex() == 0) { ummm = pp; break; }}
-        testo.dropToNeighbours(ummm);
-        testo.gapString("test11.g","test11");
         System.out.println(testo.size());
 
 
