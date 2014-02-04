@@ -570,8 +570,7 @@ public class Server
                                 out.writeObject(interimResults);
                                 out.close();
                                 fileOut.close();
-                                int newResults = numberOfCompletedPatches - lastNumberOfCompletedPatches;
-                                System.out.println("\n" + newResults + " new results, so wrote " + numberOfCompletedPatches
+                                System.out.println("\n" + numberOfCompletedPatches + " new results, so wrote " + numberOfCompletedPatches
                                                    + " interim results to " + outputFilename + ".\n");
                             }
                         catch (Exception e)
