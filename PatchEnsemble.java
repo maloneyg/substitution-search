@@ -17,6 +17,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.io.PrintWriter;
 import java.io.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 
 // a class that stores a patch and an index
 // the index tells us which prototile it represents
@@ -211,6 +213,90 @@ public class PatchEnsemble implements Serializable {
     // each prototile that contains an edge of the corresponding size
     private EdgeBreakdownTree breakdown;
 
+    private class PatchAndIndexPair
+    {
+        private final PatchAndIndex p1;
+        private final PatchAndIndex p2;
+
+        public PatchAndIndexPair(PatchAndIndex p1, PatchAndIndex p2)
+        {
+            this.p1 = p1;
+            this.p2 = p2;
+        }
+
+        public PatchAndIndex p1()
+        {
+            return p1;
+        }
+
+        public PatchAndIndex p2()
+        {
+            return p2;
+        }
+    }
+
+    private class PatchEnsembleWorkUnit implements WorkUnit
+    {
+        public static final int BATCH_SIZE = 1000; // how many IndexPairs can go into one of these
+        private LinkedList<PatchAndIndexPair> listOfPairs = new LinkedList<>();
+        private AtomicBoolean started = new AtomicBoolean(false); // prevents more stuff from being added once the work unit has started
+
+        public PatchEnsembleWorkUnit()
+        {
+        }
+
+        public PatchEnsembleResult call()
+        {
+            started.set(true);
+            LinkedList<PatchAndIndexPair> compatible = new LinkedList<PatchAndIndexPair>();
+            for ( PatchAndIndexPair thisPair : listOfPairs )
+                {
+                    PatchAndIndex p1 = thisPair.p1();
+                    PatchAndIndex p2 = thisPair.p2();
+                    if ( p1.compatible(p2) )
+                        compatible.add(thisPair);
+                }
+            PatchEnsembleResult result = new PatchEnsembleResult(compatible);
+            return result;
+        }
+
+        public void addPair(PatchAndIndexPair somePair)
+        {
+            if ( started.get() )
+                throw new IllegalStateException("cannot add IndexPairs to a PatchEnsembleWorkUnit that has already started!");
+            else if ( full() )
+                throw new IllegalStateException("this PatchEnsembleWorkUnit is full");
+            listOfPairs.add(somePair);
+        }
+
+        public boolean full()
+        {
+            if ( listOfPairs.size() > BATCH_SIZE )
+                return true;
+            return false;
+        }
+    }
+
+    private class PatchEnsembleResult implements Result
+    {
+        private LinkedList<PatchAndIndexPair> compatible; // only compatible pairs will be stored
+
+        public PatchEnsembleResult(List<PatchAndIndexPair> compatible)
+        {
+            this.compatible = new LinkedList<PatchAndIndexPair>(compatible);
+        }
+
+        public List<PatchAndIndexPair> getCompatible()
+        {
+            return compatible;
+        }
+
+        public String toString()
+        {
+            return compatible.size() + " pairs";
+        }
+    }
+
     // private constructor
     // we assume the TriangleResults are entered in the same order
     // as the prototiles to which they correspond
@@ -227,16 +313,91 @@ public class PatchEnsemble implements Serializable {
         }
 
         System.out.println("done loading vertices. Loaded " + patches.vertexSet().size() + " vertices.");
-        System.out.print("Building edges ... ");
-        for (PatchAndIndex p1 : patches.vertexSet()) {
-            for (PatchAndIndex p2 : patches.vertexSet()) {
-                if (p1.getIndex()!=p2.getIndex()) {
-                    boolean yup = p1.compatible(p2);
-                    if (yup) patches.addEdge(p1,p2,new IndexPair(p1.getIndex(),p2.getIndex()));
-                }
+
+        // convert set to list and iterate the upper triangle
+        List<PatchAndIndex> patchList = new LinkedList<PatchAndIndex>(patches.vertexSet());
+
+        // create work units
+        System.out.print("Populating work units...");
+        LinkedList<PatchEnsembleWorkUnit> listOfUnits = new LinkedList<PatchEnsembleWorkUnit>();
+        PatchEnsembleWorkUnit thisUnit = new PatchEnsembleWorkUnit();
+        for (int i=0; i < patchList.size(); i++)
+            {
+                for (int j=i+1; j < patchList.size(); j++)
+                    {
+                        // if this work unit is full, make a new one
+                        if ( thisUnit.full() )
+                            {
+                                listOfUnits.add(thisUnit);
+                                thisUnit = new PatchEnsembleWorkUnit();
+                            }
+                        PatchAndIndexPair thisPair = new PatchAndIndexPair(patchList.get(i),patchList.get(j));
+                        thisUnit.addPair(thisPair);
+                    }
             }
-        }
-        System.out.println("done building edges. Built " + patches.edgeSet().size() + " edges.");
+        listOfUnits.add(thisUnit);
+        System.out.print(listOfUnits.size() + " units created...submitting...");
+
+        // submit jobs
+        LinkedList<Future<Result>> listOfFutures = new LinkedList<>();
+        for (PatchEnsembleWorkUnit u : listOfUnits)
+            {
+                Future<Result> thisFuture = GeneralThreadService.INSTANCE.getExecutor().submit(u);
+                listOfFutures.add(thisFuture);
+            }
+        System.out.println("done.");
+
+        // poll the futures
+        while (true)
+            {
+                // poll every 250 milliseconds
+                try
+                    {
+                        Thread.sleep(250L);
+                    }
+                catch (InterruptedException e)
+                    {
+                    }
+
+                int numberComplete = 0;
+                for (Future<Result> thisFuture : listOfFutures)
+                    {
+                        if ( thisFuture.isDone() )
+                            numberComplete++;
+                    }
+                System.out.print(String.format("%d of %d work units complete\r", numberComplete, listOfFutures.size()));
+                if ( numberComplete == listOfFutures.size() )
+                    break;
+            }
+        System.out.println();
+
+        // concatenate all results
+        LinkedList<PatchAndIndexPair> allCompatible = new LinkedList<>();
+        for (Future<Result> thisFuture : listOfFutures)
+            {
+                try
+                    {
+                        PatchEnsembleResult thisResult = (PatchEnsembleResult)thisFuture.get();
+                        allCompatible.addAll(thisResult.getCompatible());
+                    }
+                catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+            }
+
+        // add the new edges to the graph
+        System.out.print("Adding " + allCompatible.size() + " edges to graph...");
+        for (PatchAndIndexPair p : allCompatible)
+            {
+                PatchAndIndex p1 = p.p1();
+                PatchAndIndex p2 = p.p2();
+                IndexPair indexPair = new IndexPair(p1.getIndex(),p2.getIndex());
+                patches.addEdge(p1,p2,indexPair);
+            }
+        System.out.println("done!");
+
+        System.out.println("All done.  Built " + patches.edgeSet().size() + " edges.");
     }
 
     // public static factory method
@@ -440,7 +601,7 @@ public class PatchEnsemble implements Serializable {
             } // here ends loop through vertices
         } // here ends big for loop
 
-
+        System.exit(0);
 
     }
 
