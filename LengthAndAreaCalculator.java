@@ -313,8 +313,33 @@ final public class LengthAndAreaCalculator {
 
     } // initialization of SEARCH_TILE stuff ends here
 
+    // return a ShortPolynomial representing the length of edge number i
+    public static ShortPolynomial getLengthPolynomial(int i) {
+        if (i<0||i>LENGTH_MATRIX.getRowDimension()) throw new IllegalArgumentException("Can't get length number " + i + ".");
+        return ShortPolynomial.createShortPolynomial(MatrixToByteMatrix(LENGTH_MATRIX).getColumn(i));
+    }
+
     public static void main(String[] args) {
+        System.out.println("SIN_LIST:");
         for (int i = 0; i < SIN_LIST.size(); i++) System.out.println(SIN_LIST.get(i));
+        System.out.println("COS_LIST:");
+        for (int i = 0; i < COS_LIST.size(); i++) System.out.println(COS_LIST.get(i));
+//        System.out.println("INFL:");
+//        System.out.println((ShortPolynomial.createShortPolynomial(Preinitializer.INFL)));
+//        System.out.println("MIN_POLY:");
+//        System.out.println(MIN_POLY);
+//        System.out.println("c * d / a:");
+//        System.out.println(getLengthPolynomial(3).times(getLengthPolynomial(4)).quotient(getLengthPolynomial(1)).mod(MIN_POLY));
+//        System.out.println("a:");
+//        System.out.println(getLengthPolynomial(1));
+//        System.out.println("d:");
+//        System.out.println(getLengthPolynomial(4));
+//        System.out.println("INFL * a:");
+//        System.out.println((ShortPolynomial.createShortPolynomial(Preinitializer.INFL).times(getLengthPolynomial(1))));
+//        System.out.println(getLengthPolynomial(4).times(dinv).mod(MIN_POLY));
+        System.out.println("\nGood stuff:\n");
+        ShortPolynomial dinv = ShortPolynomial.createShortPolynomial(new short[] {(short)1,(short)2,(short)-3,(short)-1,(short)1});
+        System.out.println((ShortPolynomial.createShortPolynomial(Preinitializer.INFL).times(getLengthPolynomial(3))).times(dinv).mod(MIN_POLY));
     }
 
 } // end of class LengthAndAreaCalculator

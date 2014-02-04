@@ -332,7 +332,12 @@ public class Server
                                     for (int i=0; i < jobCount; i++)
                                         {
                                             // don't send out any new jobs until there's been enough time to build up more stuff in the queue
-                                            if ( new Date().getTime() - Server.lastRespawn.getTime()< 3*Preinitializer.SPAWN_MIN_TIME)
+                                            // if we are trying to send the first job and there aren't enjough jobs in the queue and
+                                            // it hasn't been that long since we last called for all the clients to respawn then ignore
+                                            // the request for new jobs
+                                            if ( i==0 &&
+                                                 ThreadService.INSTANCE.getExecutor().getQueue().size() < jobCount &&
+                                                 new Date().getTime() - Server.lastRespawn.getTime()< 3*Preinitializer.SPAWN_MIN_TIME )
                                                 break;
 
 
