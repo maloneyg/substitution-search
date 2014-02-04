@@ -4,6 +4,10 @@ import com.google.common.collect.ImmutableList;
 
 public class TriangleResults implements Serializable
 {
+
+    // make it serializable
+    static final long serialVersionUID = 669400879665970467L;
+
     private final List<ImmutablePatch> allCompletedPatches;
 
     public TriangleResults(List<ImmutablePatch> allCompletedPatches)
