@@ -206,4 +206,16 @@ public class ImmutablePatch implements Serializable {
         return triangles;
     }
 
+    public BasicEdge[] getOpenEdges() {
+        return openEdges;
+    }
+
+    public BasicEdge[] getClosedEdges() {
+        return closedEdges;
+    }
+
+    public BytePoint[] getVertices() {
+        return bigVertices;
+    }
+
 } // end of class ImmutablePatch

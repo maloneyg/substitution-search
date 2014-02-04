@@ -46,7 +46,8 @@ public class PatchCombine implements Serializable {
             if (p1.getIndex()==1) {
                 for (PatchAndIndex p2 : patches.vertexSet()) {
                     if (p2.getIndex()==2&&(!patches.containsEdge(p1,p2))) {
-                        boolean yup = p1.edgeMatch(p2,edge1,edge2);
+                        //boolean yup = p1.edgeMatch(p2,edge1,edge2);
+                        boolean yup = true;
                         if (yup) patches.addEdge(p1,p2,new IndexPair(p1.getIndex(),p2.getIndex()));
                     }
                 }
@@ -57,7 +58,7 @@ public class PatchCombine implements Serializable {
 
     // public static factory method
     public static PatchCombine createPatchCombine(TriangleResults l1, TriangleResults l2) {
-        PatchCombine output = new PatchCombine(l1,l2);
+        PatchCombine output = new PatchCombine(l1,l2,1,1);
         return output;
     }
 
@@ -68,8 +69,7 @@ public class PatchCombine implements Serializable {
 
     // if it is known that p1 and p2 match, then combine them to get a new patch
     public ImmutablePatch combine(ImmutablePatch p1, ImmutablePatch p2) {
-    public static ImmutablePatch createImmutablePatch(BasicTriangle[] t, BasicEdge[] e1, BasicEdge[] e2, OrientationPartition o, BytePoint[] v,EdgeBreakdown bd0,EdgeBreakdown bd1,EdgeBreakdown bd2) {
-        return patches.vertexSet().size();
+        return p1;
     }
 
     // equals method.

@@ -536,9 +536,9 @@ public class PatchEnsemble implements Serializable {
 
         List<TriangleResults> resultsList = new LinkedList<>();
         String[] files = new String[Preinitializer.PROTOTILES.size()];
-        files[0] = "results/seven-tile0-1plusa.chk";
-        files[1] = "results/seven-tile1-1plusa.chk";
-        files[2] = "results/seven-tile2-1plusa.chk";
+        files[0] = "results/seven-tile0-aplusb.chk";
+        files[1] = "results/seven-tile1-aplusb.chk";
+        files[2] = "results/seven-tile2-aplusb.chk";
 //        files[0] = "results/tile0-105.chk";
 //        files[1] = "results/tile1-105.chk";
 //        files[2] = "results/tile2-105.chk";
@@ -577,29 +577,29 @@ public class PatchEnsemble implements Serializable {
 
         // write TriangleResult files with a selection of vertices that remain
 
-        for (int i = 0; i < Preinitializer.PROTOTILES.size(); i++) { // for loop
-            for (PatchAndIndex pp : testo.patches.vertexSet()) {
-                if (pp.getIndex()==i) { // choose the first one with this index
-                    List<ImmutablePatch> completedPatches = new ArrayList<>(1);
-                    completedPatches.add(pp.getPatch());
-                    try
-                        {
-                            TriangleResults triangleResults = new TriangleResults(completedPatches);
-                            FileOutputStream fileOut = new FileOutputStream("vertex-test" + i + ".chk");
-                            ObjectOutputStream out = new ObjectOutputStream(fileOut);
-                            out.writeObject(triangleResults);
-                            out.close();
-                            fileOut.close();
-                            System.out.println("wrote " + completedPatches.size() + " results to " + "vertex-test" + i + ".chk.");
-                        }
-                    catch (Exception e)
-                        {
-                            e.printStackTrace();
-                        }
-
-                } // here ends if statement
-            } // here ends loop through vertices
-        } // here ends big for loop
+//        for (int i = 0; i < Preinitializer.PROTOTILES.size(); i++) { // for loop
+//            for (PatchAndIndex pp : testo.patches.vertexSet()) {
+//                if (pp.getIndex()==i) { // choose the first one with this index
+//                    List<ImmutablePatch> completedPatches = new ArrayList<>(1);
+//                    completedPatches.add(pp.getPatch());
+//                    try
+//                        {
+//                            TriangleResults triangleResults = new TriangleResults(completedPatches);
+//                            FileOutputStream fileOut = new FileOutputStream("vertex-test" + i + ".chk");
+//                            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+//                            out.writeObject(triangleResults);
+//                            out.close();
+//                            fileOut.close();
+//                            System.out.println("wrote " + completedPatches.size() + " results to " + "vertex-test" + i + ".chk.");
+//                        }
+//                    catch (Exception e)
+//                        {
+//                            e.printStackTrace();
+//                        }
+//
+//                } // here ends if statement
+//            } // here ends loop through vertices
+//        } // here ends big for loop
 
         System.exit(0);
 
