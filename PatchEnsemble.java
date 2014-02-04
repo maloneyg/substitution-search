@@ -231,8 +231,10 @@ public class PatchEnsemble implements Serializable {
             i_loop:
             for (int i=i_start; i < patchList.size(); i++)
                 {
-                    for (int j=j_start; j < patchList.size(); j++)
+                    for (int j=i+1; j < patchList.size(); j++)
                         {
+                            if ( count == 0 )
+                                j = j_start;
                             count++;
                             if ( count > BATCH_SIZE )
                                 break i_loop;
@@ -243,7 +245,6 @@ public class PatchEnsemble implements Serializable {
                                 compatible.put(i,j);
                         }
                 }
-            
             PatchEnsembleResult result = new PatchEnsembleResult(compatible);
             return result;
         }
