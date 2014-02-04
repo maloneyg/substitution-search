@@ -10,13 +10,10 @@
 
 import com.google.common.collect.ImmutableList;
 import org.jgrapht.graph.*;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.List;
 import java.io.PrintWriter;
 import java.io.*;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 
@@ -213,80 +210,55 @@ public class PatchEnsemble implements Serializable {
     // each prototile that contains an edge of the corresponding size
     private EdgeBreakdownTree breakdown;
 
-    private class PatchAndIndexPair
-    {
-        private final PatchAndIndex p1;
-        private final PatchAndIndex p2;
-
-        public PatchAndIndexPair(PatchAndIndex p1, PatchAndIndex p2)
-        {
-            this.p1 = p1;
-            this.p2 = p2;
-        }
-
-        public PatchAndIndex p1()
-        {
-            return p1;
-        }
-
-        public PatchAndIndex p2()
-        {
-            return p2;
-        }
-    }
-
     private class PatchEnsembleWorkUnit implements WorkUnit
     {
-        public static final int BATCH_SIZE = 1000; // how many IndexPairs can go into one of these
-        private LinkedList<PatchAndIndexPair> listOfPairs = new LinkedList<>();
-        private AtomicBoolean started = new AtomicBoolean(false); // prevents more stuff from being added once the work unit has started
+        public static final int BATCH_SIZE = 10000; // how many IndexPairs can go into one of these
+        private int i_start;
+        private int j_start;
+        private List<PatchAndIndex> patchList;
+        private HashMap<Integer,Integer> compatible = new HashMap<Integer,Integer>();
 
-        public PatchEnsembleWorkUnit()
+        public PatchEnsembleWorkUnit(int i_start, int j_start, List<PatchAndIndex> patchList)
         {
+            this.i_start = i_start;
+            this.j_start = j_start;
+            this.patchList = patchList;
         }
 
         public PatchEnsembleResult call()
         {
-            started.set(true);
-            LinkedList<PatchAndIndexPair> compatible = new LinkedList<PatchAndIndexPair>();
-            for ( PatchAndIndexPair thisPair : listOfPairs )
+            int count = 0;
+            i_loop:
+            for (int i=i_start; i < patchList.size(); i++)
                 {
-                    PatchAndIndex p1 = thisPair.p1();
-                    PatchAndIndex p2 = thisPair.p2();
-                    if ( p1.compatible(p2) )
-                        compatible.add(thisPair);
+                    for (int j=j_start; j < patchList.size(); j++)
+                        {
+                            count++;
+                            if ( count > BATCH_SIZE )
+                                break i_loop;
+                            //System.out.println(count + " : " + i + ", " + j);
+                            PatchAndIndex p1 = patchList.get(i);
+                            PatchAndIndex p2 = patchList.get(j);
+                            if ( p1.compatible(p2) )
+                                compatible.put(i,j);
+                        }
                 }
+            
             PatchEnsembleResult result = new PatchEnsembleResult(compatible);
             return result;
-        }
-
-        public void addPair(PatchAndIndexPair somePair)
-        {
-            if ( started.get() )
-                throw new IllegalStateException("cannot add IndexPairs to a PatchEnsembleWorkUnit that has already started!");
-            else if ( full() )
-                throw new IllegalStateException("this PatchEnsembleWorkUnit is full");
-            listOfPairs.add(somePair);
-        }
-
-        public boolean full()
-        {
-            if ( listOfPairs.size() > BATCH_SIZE )
-                return true;
-            return false;
         }
     }
 
     private class PatchEnsembleResult implements Result
     {
-        private LinkedList<PatchAndIndexPair> compatible; // only compatible pairs will be stored
+        private Map<Integer,Integer> compatible; // only compatible pairs will be stored
 
-        public PatchEnsembleResult(List<PatchAndIndexPair> compatible)
+        public PatchEnsembleResult(Map<Integer,Integer> compatible)
         {
-            this.compatible = new LinkedList<PatchAndIndexPair>(compatible);
+            this.compatible = compatible;
         }
 
-        public List<PatchAndIndexPair> getCompatible()
+        public Map<Integer,Integer> getCompatible()
         {
             return compatible;
         }
@@ -320,22 +292,28 @@ public class PatchEnsemble implements Serializable {
         // create work units
         System.out.print("Populating work units...");
         LinkedList<PatchEnsembleWorkUnit> listOfUnits = new LinkedList<PatchEnsembleWorkUnit>();
-        PatchEnsembleWorkUnit thisUnit = new PatchEnsembleWorkUnit();
+        int i_start = 0;
+        int j_start = 0;
+        int currentTotal = 0;
+        listOfUnits.add(new PatchEnsembleWorkUnit(0, 1, patchList));
         for (int i=0; i < patchList.size(); i++)
             {
                 for (int j=i+1; j < patchList.size(); j++)
                     {
-                        // if this work unit is full, make a new one
-                        if ( thisUnit.full() )
+                        currentTotal++;
+                        //System.out.println(currentTotal + " : " + i + " " + j);
+                        if ( currentTotal > PatchEnsembleWorkUnit.BATCH_SIZE ||
+                             ( i == patchList.size()-2 && j == patchList.size()-1 ) )
                             {
+                                i_start = i;
+                                j_start = j;
+                                //System.out.println(String.format("unit #%d   i: %d j: %d", listOfUnits.size()+1, i_start, j_start));
+                                PatchEnsembleWorkUnit thisUnit = new PatchEnsembleWorkUnit(i_start, j_start, patchList);
                                 listOfUnits.add(thisUnit);
-                                thisUnit = new PatchEnsembleWorkUnit();
+                                currentTotal = 0;
                             }
-                        PatchAndIndexPair thisPair = new PatchAndIndexPair(patchList.get(i),patchList.get(j));
-                        thisUnit.addPair(thisPair);
                     }
             }
-        listOfUnits.add(thisUnit);
         System.out.print(listOfUnits.size() + " units created...submitting...");
 
         // submit jobs
@@ -372,13 +350,13 @@ public class PatchEnsemble implements Serializable {
         System.out.println();
 
         // concatenate all results
-        LinkedList<PatchAndIndexPair> allCompatible = new LinkedList<>();
+        Map<Integer,Integer> allCompatible = new HashMap<Integer,Integer>();
         for (Future<Result> thisFuture : listOfFutures)
             {
                 try
                     {
                         PatchEnsembleResult thisResult = (PatchEnsembleResult)thisFuture.get();
-                        allCompatible.addAll(thisResult.getCompatible());
+                        allCompatible.putAll(thisResult.getCompatible());
                     }
                 catch (Exception e)
                     {
@@ -388,10 +366,11 @@ public class PatchEnsemble implements Serializable {
 
         // add the new edges to the graph
         System.out.print("Adding " + allCompatible.size() + " edges to graph...");
-        for (PatchAndIndexPair p : allCompatible)
+        for (Integer i : allCompatible.keySet())
             {
-                PatchAndIndex p1 = p.p1();
-                PatchAndIndex p2 = p.p2();
+                Integer j = allCompatible.get(i);
+                PatchAndIndex p1 = patchList.get(i);
+                PatchAndIndex p2 = patchList.get(j);
                 IndexPair indexPair = new IndexPair(p1.getIndex(),p2.getIndex());
                 patches.addEdge(p1,p2,indexPair);
             }
