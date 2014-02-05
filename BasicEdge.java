@@ -66,6 +66,19 @@ public final class BasicEdge implements AbstractEdge<BasicAngle, BytePoint, Basi
         return new BasicEdge(length, orientation, ends);
     }
 
+    // return a transformed version of this edge.
+    public BasicEdge move(boolean ref, BasicAngle rot, BytePoint shift) {
+        BytePoint v0 = ends[0];
+        BytePoint v1 = ends[1];
+        if (ref) {
+            v0 = v0.reflect();
+            v1 = v1.reflect();
+        }
+        v0 = v0.rotate(rot).add(shift);
+        v1 = v1.rotate(rot).add(shift);
+        return new BasicEdge(length, (ref) ? orientation.getOpposite() : orientation, (ref) ? new BytePoint[] {v1,v0} : new BytePoint[] {v0,v1});
+    }
+
     public BasicEdgeLength getLength() {
         return length;
     }

@@ -51,6 +51,46 @@ public class ImmutablePatch implements Serializable {
         return new ImmutablePatch(t,e1,e2,o,v,bd0,bd1,bd2);
     }
 
+    // return a transformed copy of this patch
+    // bonus: remove the first closed edge, if it was a starter
+    public ImmutablePatch move(boolean ref, BasicAngle rot, BytePoint shift) {
+        BasicTriangle[] newTriangles = new BasicTriangle[triangles.length];
+        for (int i = 0; i < triangles.length; i++) newTriangles[i] = triangles[i].move(ref,rot,shift);
+        BasicEdge[] newOpen = new BasicEdge[openEdges.length];
+        for (int i = 0; i < openEdges.length; i++) newOpen[i] = openEdges[i].move(ref,rot,shift);
+
+        // we get rid of the first closed edge, if it was a starter edge
+        MutableOrientationPartition partway = partition.dumpMutableOrientationPartition();
+        Orientation possibleExtra = closedEdges[0].getOrientation();
+        boolean remove = false; // set to true if we should remove the edge
+        try {
+            // we should remove the first edge if its Orientation isn't here
+            partway.identify(possibleExtra,possibleExtra);
+        } catch (IllegalArgumentException e) {
+            remove = true;
+        }
+        BasicEdge[] newClosed = new BasicEdge[closedEdges.length - ((remove) ? 1 : 0)];
+        for (int i = 0; i < newClosed.length; i++) newClosed[i] = closedEdges[i+((remove) ? 1 : 0)].move(ref,rot,shift);
+        OrientationPartition newPartition = partway.dumpOrientationPartition();
+
+        BytePoint v0 = bigVertices[0];
+        BytePoint v1 = bigVertices[1];
+        BytePoint v2 = bigVertices[2];
+        if (ref) {
+            v0 = v0.reflect();
+            v1 = v1.reflect();
+            v2 = v2.reflect();
+        }
+        v0 = v0.rotate(rot).add(shift);
+        v1 = v1.rotate(rot).add(shift);
+        v2 = v2.rotate(rot).add(shift);
+        BytePoint[] newVertices = new BytePoint[] {(ref) ? v2 : v0, v1, (ref) ? v0 : v2};
+        EdgeBreakdown newE0 = (ref) ? edge2.reverse() : edge0;
+        EdgeBreakdown newE1 = (ref) ? edge1.reverse() : edge1;
+        EdgeBreakdown newE2 = (ref) ? edge0.reverse() : edge2;
+        return new ImmutablePatch(newTriangles,newOpen,newClosed,newPartition,newVertices,newE0,newE1,newE2);
+    } // here ends the move method
+
     // getters
     public EdgeBreakdown getEdge0() {
         return edge0;

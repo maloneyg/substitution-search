@@ -1,16 +1,14 @@
 import java.io.*;
 import java.util.*;
 
-public class TriangleResultsDisplay
+public class TriangleResultsMove
 {
     @SuppressWarnings("unchecked")
     public static void main(String[] args)
         {
             // deserialize data
             String filename = //"results/tile0-bc.chk";//
-                              //"result.chk";
-                              //"interim/tile0-final.chk";
-                                "results/tile4-00000000-interim.chk";
+                                "results/tile0-104.chk";
             List<ImmutablePatch> patches = null;
             if ( ! new File(filename).isFile() )
                 {
@@ -32,9 +30,14 @@ public class TriangleResultsDisplay
                 }
 
             // display data
+            List<ImmutablePatch> movedPatches = new LinkedList<>();;
+            boolean ref = false;
+            BasicAngle rot = BasicAngle.createBasicAngle(2);
+            BytePoint shift = BasicEdgeLength.createBasicEdgeLength(1).getAsVector(rot);
+            for (int i = 0; i < patches.size(); i++) movedPatches.add(patches.get(i).move(ref,rot,shift));
             try
                 {
-                    PointsDisplay display = new PointsDisplay(patches,filename);
+                    PointsDisplay display = new PointsDisplay(movedPatches,filename);
                 }
             catch ( java.awt.HeadlessException e )
                 {
