@@ -15,6 +15,8 @@ import java.util.List;
 
 public class EdgeBreakdown implements Serializable {
 
+    static final long serialVersionUID = 2939710449067677120L;
+
     private BasicEdgeLength[] lengths;
     private Orientation[] orientations;
 
@@ -83,6 +85,15 @@ public class EdgeBreakdown implements Serializable {
         for (int i = 0; i < this.lengths.length; i++) {
             if (!this.lengths[i].equals(l.lengths[i])) return false;
             if (!this.orientations[i].equals(l.orientations[i])) return false;
+        }
+        return true;
+    }
+
+    // return true if these two breakdowns have the same length sequences
+    public boolean compatible(EdgeBreakdown l) {
+        if (this.lengths.length!=l.lengths.length) return false;
+        for (int i = 0; i < this.lengths.length; i++) {
+            if (!this.lengths[i].equals(l.lengths[i])) return false;
         }
         return true;
     }

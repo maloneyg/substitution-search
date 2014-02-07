@@ -64,9 +64,9 @@ public final class BasicTriangle implements AbstractTriangle<BasicAngle, BytePoi
         // for this we need to know new flip, rotate, and shift values
         BytePoint newShift = vertices[1];
         if (ref) newShift = newShift.reflect();
-        newShift = newShift.rotate(rot);
+        newShift = newShift.rotate(rot).add(shift);
         BasicAngle newAngle = (ref) ? rot.minus(angle()) : rot.plus(angle());
-        return prototile.place(newShift,newAngle,(flip==ref));
+        return prototile.place(newShift,newAngle,(flip!=ref));
     }
 
     public BasicPrototile getPrototile() {

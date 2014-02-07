@@ -91,6 +91,47 @@ public class ImmutablePatch implements Serializable {
         return new ImmutablePatch(newTriangles,newOpen,newClosed,newPartition,newVertices,newE0,newE1,newE2);
     } // here ends the move method
 
+    // return a new patch obtained by combining this with other by
+    // matching them along edges with indices i and j
+    // flip says if the other tile should be flipped or not
+    public ImmutablePatch combine(ImmutablePatch other, int i, int j, boolean flip) {
+        BytePoint v0 = this.bigVertices[(i+1)%3];
+        BytePoint v1 = this.bigVertices[(i+2)%3];
+        // w0 will be placed against v0; w1 will be placed against v1
+        BytePoint w0 = other.bigVertices[(j+((flip) ? 1 : 2))%3];
+        BytePoint w1 = other.bigVertices[(j+((flip) ? 2 : 1))%3];
+        if (flip) {
+            w0 = w0.reflect();
+            w1 = w1.reflect();
+        }
+        // direction vectors for the edges that we want to match
+        BytePoint directionV = v1.subtract(v0);
+        BytePoint directionW = w1.subtract(w0);
+
+        // now find the angle by which we must rotate other to match the edges
+        BasicAngle rot = null;
+        for (int k = 0; k < 2*Preinitializer.N; k++) {
+            BasicAngle maybe = BasicAngle.createBasicAngle(k);
+            if (directionW.rotate(maybe).equals(directionV)) rot = maybe;
+        }
+        if (rot==null) throw new IllegalArgumentException("Trying to combine two patches along edges that don't match.");
+
+        // the vector by which we must shift other
+        BytePoint shift = v0.subtract(w0.rotate(rot));
+
+        BasicTriangle[] newTriangles = new BasicTriangle[triangles.length+other.triangles.length];
+        for (int k = 0; k < this.triangles.length; k++) newTriangles[k] = this.triangles[k];
+        for (int k = 0; k < other.triangles.length; k++) newTriangles[k+this.triangles.length] = other.triangles[k].move(flip,rot,shift);
+        BasicEdge[] newOpen = new BasicEdge[this.openEdges.length+other.openEdges.length];
+        for (int k = 0; k < this.openEdges.length; k++) newOpen[k] = this.openEdges[k];
+        for (int k = 0; k < other.openEdges.length; k++) newOpen[k+this.openEdges.length] = other.openEdges[k].move(flip,rot,shift);
+        BasicEdge[] newClosed = new BasicEdge[this.closedEdges.length+other.closedEdges.length];
+        for (int k = 0; k < this.closedEdges.length; k++) newClosed[k] = this.closedEdges[k];
+        for (int k = 0; k < other.closedEdges.length; k++) newClosed[k+this.closedEdges.length] = other.closedEdges[k].move(flip,rot,shift);
+
+        return new ImmutablePatch(newTriangles,newOpen,newClosed,partition,bigVertices,edge0,edge1,edge2);
+    } // here ends combine method
+
     // getters
     public EdgeBreakdown getEdge0() {
         return edge0;
