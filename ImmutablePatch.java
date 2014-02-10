@@ -266,6 +266,39 @@ public class ImmutablePatch implements Serializable {
         return output;
     }
 
+    // test if this patch satisfies the isosceles condition
+    // we pass in a parameter to say which prototile this patch represents
+    public boolean isosceles(BasicPrototile p) {
+        BasicEdgeLength[] l = p.getLengths();
+        int i = -1;
+        int j = -1;
+        if (l[0].equals(l[1])) {
+            i = 0;
+            j = 1;
+        }
+        if (l[2].equals(l[1])) {
+            i = 2;
+            j = 1;
+        }
+        if (l[1].equals(l[2])) {
+            i = 1;
+            j = 2;
+        }
+        if (i==-1) throw new IllegalArgumentException(p + " is not isosceles.");
+        MutableOrientationPartition part1 = partition.dumpMutableOrientationPartition();
+        MutableOrientationPartition part2 = part1.deepCopy();
+        Orientation[] o = p.getOrientations();
+        Orientation o1 = o[i];
+        Orientation o2 = o[j];
+        EdgeBreakdown bd1 = (i==0) ? edge0 : ((i==1) ? edge1 : edge2);
+        EdgeBreakdown bd2 = (j==0) ? edge0 : ((j==1) ? edge1 : edge2);
+        part1.identify(o1,o2);
+        part2.identify(o1,o2.getOpposite());
+        if (bd1.compatible(bd2)&&part1.valid()) return true;
+        if (bd1.compatible(bd2.reverse())&&part2.valid()) return true;
+        return false;
+    }
+
     // getter method for OrientationPartition
     public OrientationPartition getOrientationPartition() {
         return partition;

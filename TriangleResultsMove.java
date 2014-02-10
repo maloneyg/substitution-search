@@ -7,9 +7,9 @@ public class TriangleResultsMove
     public static void main(String[] args)
         {
             // deserialize data
-            String filename = //"results/tile0-bc.chk";//
-                                "results/tile0-106.chk";
-            String otherfilename = "results/tile1-109.chk";
+            String filename =   "results/tile1-117.chk";//
+                              //"results/tile0-106.chk";
+            String otherfilename = "results/tile1-1plusa.chk";
             List<ImmutablePatch> patches = null;
             if ( ! new File(filename).isFile() )
                 {
@@ -50,16 +50,18 @@ public class TriangleResultsMove
 
             // display data
             List<ImmutablePatch> movedPatches = new LinkedList<>();;
+            BasicPrototile P = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(1));
             boolean ref = true;
             BasicAngle rot = BasicAngle.createBasicAngle(2);
             BasicAngle a = BasicAngle.createBasicAngle(3);
             BytePoint shift = BasicEdgeLength.createBasicEdgeLength(1).getAsVector(a);
             for (int i = 0; i < patches.size(); i++) {
                 ImmutablePatch p1 = patches.get(i);
-                for (int j = 0; j < otherpatches.size(); j++) {
-                    if (j==0) System.out.println(i);
-                    if (p1.getEdge1().compatible(otherpatches.get(j).getEdge2().reverse())) movedPatches.add(p1.combine(otherpatches.get(j),1,2,false));
-                }
+                if (p1.isosceles(P)) movedPatches.add(p1);
+//                for (int j = 0; j < otherpatches.size(); j++) {
+//                    if (j==0) System.out.println(i);
+//                    if (p1.getEdge1().compatible(otherpatches.get(j).getEdge2().reverse())) movedPatches.add(p1.combine(otherpatches.get(j),1,2,false));
+//                }
             }
             try
                 {
