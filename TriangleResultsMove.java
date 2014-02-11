@@ -7,7 +7,7 @@ public class TriangleResultsMove
     public static void main(String[] args)
         {
             // deserialize data
-            String filename =   "results/tile1-105.chk";//
+            String filename =   "results/tile1-117.chk";//
                               //"results/tile0-106.chk";
             String otherfilename = "results/tile1-1plusa.chk";
             List<ImmutablePatch> patches = null;
