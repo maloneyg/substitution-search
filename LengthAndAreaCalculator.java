@@ -320,14 +320,14 @@ final public class LengthAndAreaCalculator {
     }
 
     public static void main(String[] args) {
-        System.out.println("SIN_LIST:");
-        for (int i = 0; i < SIN_LIST.size(); i++) System.out.println(SIN_LIST.get(i));
-        System.out.println("COS_LIST:");
-        for (int i = 0; i < COS_LIST.size(); i++) System.out.println(COS_LIST.get(i));
+//        System.out.println("SIN_LIST:");
+//        for (int i = 0; i < SIN_LIST.size(); i++) System.out.println(SIN_LIST.get(i));
+//        System.out.println("COS_LIST:");
+//        for (int i = 0; i < COS_LIST.size(); i++) System.out.println(COS_LIST.get(i));
 //        System.out.println("INFL:");
 //        System.out.println((ShortPolynomial.createShortPolynomial(Preinitializer.INFL)));
-//        System.out.println("MIN_POLY:");
-//        System.out.println(MIN_POLY);
+        System.out.println("MIN_POLY:");
+        System.out.println(MIN_POLY);
 //        System.out.println("c * d / a:");
 //        System.out.println(getLengthPolynomial(3).times(getLengthPolynomial(4)).quotient(getLengthPolynomial(1)).mod(MIN_POLY));
 //        System.out.println("a:");
@@ -339,7 +339,9 @@ final public class LengthAndAreaCalculator {
 //        System.out.println(getLengthPolynomial(4).times(dinv).mod(MIN_POLY));
         System.out.println("\nGood stuff:\n");
         ShortPolynomial dinv = ShortPolynomial.createShortPolynomial(new short[] {(short)1,(short)2,(short)-3,(short)-1,(short)1});
-        System.out.println((ShortPolynomial.createShortPolynomial(Preinitializer.INFL).times(getLengthPolynomial(3))).times(dinv).mod(MIN_POLY));
+        ShortPolynomial ainv = ShortPolynomial.createShortPolynomial(new short[] {(short)3,(short)3,(short)-4,(short)-1,(short)1});
+        //System.out.println((ShortPolynomial.createShortPolynomial(Preinitializer.INFL).times(getLengthPolynomial(2))).times(dinv).mod(MIN_POLY));
+        System.out.println((ShortPolynomial.createShortPolynomial(Preinitializer.INFL).times(getLengthPolynomial(4))).times(ainv).mod(MIN_POLY));
     }
 
 } // end of class LengthAndAreaCalculator
