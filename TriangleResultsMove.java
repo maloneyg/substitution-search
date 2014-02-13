@@ -7,7 +7,7 @@ public class TriangleResultsMove
     public static void main(String[] args)
         {
             // deserialize data
-            String filename =   "results/tile1-abc.chk";//
+            String filename =   "results/tile1-2plusc.chk";//
                               //"results/tile0-106.chk";
             String otherfilename = "results/tile0-104.chk";
             List<ImmutablePatch> patches = null;
@@ -50,7 +50,7 @@ public class TriangleResultsMove
 
             // display data
             List<ImmutablePatch> movedPatches = new LinkedList<>();;
-            BasicPrototile P = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(4));
+            BasicPrototile P = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(1));
             boolean ref = true;
             BasicAngle rot = BasicAngle.createBasicAngle(2);
             BasicAngle a = BasicAngle.createBasicAngle(3);

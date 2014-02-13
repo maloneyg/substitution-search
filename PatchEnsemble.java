@@ -377,7 +377,74 @@ public class PatchEnsemble implements Serializable {
         System.out.println("done!");
 
         System.out.println("All done.  Built " + patches.edgeSet().size() + " edges.");
-    }
+    } // private constructor ends here
+
+    // private constructor
+    // fileNames is an array of names of files containing the TriangleResults
+    // we assume the files are listed in the same order
+    // as the prototiles to which they correspond
+    private PatchEnsemble(String[] fileNames, EdgeBreakdownTree bd) {
+        // first make sure we've got the right number of prototiles
+        int M = Preinitializer.PROTOTILES.size();
+        if (M!=fileNames.length) throw new IllegalArgumentException("Trying to load " + fileNames.length + " prototiles, but we should have " + M + " prototiles.");
+
+        System.out.println("Building PatchEnsemble.");
+        breakdown = bd;
+        patches = new SimpleGraph<>(IndexPair.class);
+
+        for (int i = 0; i < M; i++) { // iterate through all input files
+            System.out.print("Loading " + i + "-vertices ... ");
+            int count = 0;
+
+            // deserialize data
+            if ( ! new File(fileNames[i]).isFile() )
+                {
+                    System.out.println(fileNames[i] + " not found!");
+                    System.exit(1);
+                }
+            try
+                {
+                    FileInputStream fileIn = new FileInputStream(fileName[i]);
+                    ObjectInputStream in = new ObjectInputStream(fileIn);
+                    for (ImmutablePatch p : bd.cull(i,(TriangleResults)in.readObject())) {
+                        patches.addVertex(new PatchAndIndex(p,i));
+                        count++;
+                    }
+                    System.out.println(filename + " has been read. ");
+                }
+            catch (Exception e)
+                {
+                    e.printStackTrace();
+                    System.exit(1);
+                }
+            System.out.println("done loading " + i + "-vertices. Loaded " + count + " vertices.");
+
+        // add the new edges to the graph
+        System.out.print("Adding edges to graph...");
+        for (PatchAndIndex pi : patches.vertexSet()) {
+            if (pi.getIndex()==i) {
+                ImmutablePatch ptest = pi.getPatch();
+                for (PatchAndIndex qi : patches.vertexSet()) {
+                    if ((pi.getIndex()!=qi.getIndex())&&(ptest.compatible(qi.getPatch()))) {
+                    }
+                }
+            }
+        }
+
+        } // here ends iteration through input files
+
+        for (IndexPair p : allCompatible)
+            {
+                int[] pair = p.getIndices();
+                PatchAndIndex p1 = patchList.get(pair[0]);
+                PatchAndIndex p2 = patchList.get(pair[1]);
+                IndexPair indexPair = new IndexPair(p1.getIndex(),p2.getIndex());
+                patches.addEdge(p1,p2,indexPair);
+            }
+        System.out.println("done!");
+
+        System.out.println("All done.  Built " + patches.edgeSet().size() + " edges.");
+    } // private constructor ends here
 
     // public static factory method
     public static PatchEnsemble createPatchEnsemble(List<TriangleResults> inList, EdgeBreakdownTree bd) {

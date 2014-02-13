@@ -10,7 +10,7 @@ public class TriangleResultsCombine {
         String outName = args[1];
         int i = 0;
         int oldSize = 0;
-        String filename = "interim/" + inPrefix + String.format("-%08d-interim.chk",i);
+        String filename = inPrefix + String.format("-%08d-interim.chk",i);
         List<ImmutablePatch> patches = new LinkedList<>();
 
         while (new File(filename).isFile()) { // here begins deserialization
@@ -29,10 +29,10 @@ public class TriangleResultsCombine {
                 }
 
             i++;
-            filename = "interim/" + inPrefix + String.format("-%08d-interim.chk",i);
+            filename = inPrefix + String.format("-%08d-interim.chk",i);
         } // here ends deserialization of interim files
 
-        filename = "interim/" + inPrefix + "-final.chk";
+        filename = inPrefix + "-final.chk";
         if (new File(filename).isFile()) { // here begins deserialization
             try
                 {
