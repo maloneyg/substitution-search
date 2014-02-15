@@ -404,13 +404,13 @@ public class PatchEnsemble implements Serializable {
                 }
             try
                 {
-                    FileInputStream fileIn = new FileInputStream(fileName[i]);
+                    FileInputStream fileIn = new FileInputStream(fileNames[i]);
                     ObjectInputStream in = new ObjectInputStream(fileIn);
                     for (ImmutablePatch p : bd.cull(i,(TriangleResults)in.readObject())) {
                         patches.addVertex(new PatchAndIndex(p,i));
                         count++;
                     }
-                    System.out.println(filename + " has been read. ");
+                    System.out.println(fileNames[i]+ " has been read. ");
                 }
             catch (Exception e)
                 {
@@ -423,9 +423,8 @@ public class PatchEnsemble implements Serializable {
         System.out.print("Adding edges to graph...");
         for (PatchAndIndex pi : patches.vertexSet()) {
             if (pi.getIndex()==i) {
-                ImmutablePatch ptest = pi.getPatch();
                 for (PatchAndIndex qi : patches.vertexSet()) {
-                    if ((pi.getIndex()!=qi.getIndex())&&(ptest.compatible(qi.getPatch()))) {
+                    if ((pi.getIndex()!=qi.getIndex())&&(pi.compatible(qi))) {
                     }
                 }
             }
@@ -433,17 +432,6 @@ public class PatchEnsemble implements Serializable {
 
         } // here ends iteration through input files
 
-        for (IndexPair p : allCompatible)
-            {
-                int[] pair = p.getIndices();
-                PatchAndIndex p1 = patchList.get(pair[0]);
-                PatchAndIndex p2 = patchList.get(pair[1]);
-                IndexPair indexPair = new IndexPair(p1.getIndex(),p2.getIndex());
-                patches.addEdge(p1,p2,indexPair);
-            }
-        System.out.println("done!");
-
-        System.out.println("All done.  Built " + patches.edgeSet().size() + " edges.");
     } // private constructor ends here
 
     // public static factory method
