@@ -18,7 +18,7 @@ class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 1;        // the tile we're searching
+    public static final int MY_TILE = 4;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
@@ -57,8 +57,16 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, 1); // small search. turned up in some calculations, so I thought I'd try it. (1+b)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1); // really small search. might as well try it (2+a)
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(3, 1); // really small search. might as well try it (3+a)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2); // (1+2a)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 2, 1); // (1+2a+b)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-2, -1, 2, 1); // (a+2b+c)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, 1); // (3+2a+b)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, -2, 0, 1); // (2+c)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, 1); // total dud; doesn't work on tile 0 (2+b)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 2, 1); // unusual search. might as well try it (2a+b)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(-2, -2, 2, 1); // unusual search. might as well try it (2b+c)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-2, -2, 2, 1); // unusual search. might as well try it (2b+c)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, 1); // 2 + a + b 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(3, 0, -6, 0, 2); // we're really scraping the bottom of the barrel here.  (2d+1)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2, 1); // the square of the really small search (1+a)^2 won't work with tile 3 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search (104)
