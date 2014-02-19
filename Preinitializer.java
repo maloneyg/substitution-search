@@ -18,7 +18,7 @@ class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 4;        // the tile we're searching
+    public static final int MY_TILE = 2;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
@@ -57,7 +57,8 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, 1); // small search. turned up in some calculations, so I thought I'd try it. (1+b)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1); // really small search. might as well try it (2+a)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(3, 1); // really small search. might as well try it (3+a)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(3, 1); // really small search. might as well try it (3+a)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 2, 1); // (xxx)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2); // (1+2a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 2, 1); // (1+2a+b)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-2, -1, 2, 1); // (a+2b+c)
@@ -76,7 +77,7 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, 0, 1); // 1 + c (108)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -1, 0, 1); // a + c (109)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, 0, 1); // quite big search (110)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -3, 0, 1); // (114)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 0, -3, 0, 1); // huge search (115)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
