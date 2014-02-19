@@ -55,9 +55,9 @@ class Preinitializer {
     public static final String INTERIM_RESULT_BACKUP_FILENAME = "interim_backup.chk";
 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, 1); // small search. turned up in some calculations, so I thought I'd try it. (1+b)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1); // really small search. might as well try it (2+a)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(3, 1); // really small search. might as well try it (3+a)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(3, 1); // really small search. might as well try it (3+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2); // (1+2a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 2, 1); // (1+2a+b)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-2, -1, 2, 1); // (a+2b+c)
@@ -124,7 +124,7 @@ class Preinitializer {
             if ( System.getProperty("user.name").toLowerCase().equals("ekwan") )
                 HOST_NAME = "enj11.rc.fas.harvard.edu";
             else if ( System.getProperty("user.name").toLowerCase().equals("ngrm1") )
-                HOST_NAME = "corbridge";
+                HOST_NAME = "sidmouth";
             else
                 HOST_NAME = "localhost";
             if ( DEBUG_MODE == false )
