@@ -395,28 +395,33 @@ public class PatchEnsemble implements Serializable {
         for (int i = 0; i < M; i++) { // iterate through all input files
             System.out.print("Loading " + i + "-vertices ... ");
             int count = 0;
+            int j = 0;
+            String inPrefix = fileNames[i];
+            String filename = inPrefix + String.format("-%08d-interim.chk",j);
 
-            // deserialize data
-            if ( ! new File(fileNames[i]).isFile() )
-                {
-                    System.out.println(fileNames[i] + " not found!");
-                    System.exit(1);
-                }
-            try
-                {
-                    FileInputStream fileIn = new FileInputStream(fileNames[i]);
-                    ObjectInputStream in = new ObjectInputStream(fileIn);
-                    for (ImmutablePatch p : bd.cull(i,(TriangleResults)in.readObject())) {
-                        patches.addVertex(new PatchAndIndex(p,i));
-                        count++;
+            while (new File(filename).isFile()) { // here begins deserialization
+
+                // deserialize data
+                try
+                    {
+                        FileInputStream fileIn = new FileInputStream(fileNames[i]);
+                        ObjectInputStream in = new ObjectInputStream(fileIn);
+                        for (ImmutablePatch p : bd.cull(i,(TriangleResults)in.readObject())) {
+                            patches.addVertex(new PatchAndIndex(p,i));
+                            count++;
+                        }
+                        System.out.println(fileNames[i]+ " has been read. ");
                     }
-                    System.out.println(fileNames[i]+ " has been read. ");
-                }
-            catch (Exception e)
-                {
-                    e.printStackTrace();
-                    System.exit(1);
-                }
+                catch (Exception e)
+                    {
+                        e.printStackTrace();
+                        System.exit(1);
+                    }
+
+                j++;
+                filename = inPrefix + String.format("-%08d-interim.chk",j);
+            } // here ends deserialization of interim files
+
             System.out.println("done loading " + i + "-vertices. Loaded " + count + " vertices.");
 
         // add the new edges to the graph
@@ -640,3 +645,8 @@ public class PatchEnsemble implements Serializable {
     }
 
 } // end of class PatchEnsemble
+
+
+
+
+
