@@ -393,17 +393,17 @@ public class PatchEnsemble implements Serializable {
         patches = new SimpleGraph<>(IndexPair.class);
 
         for (int i = 0; i < M; i++) { // iterate through all input files
-            System.out.print("Loading " + i + "-vertices ... ");
             int vcount = 0;
             int ecount = 0;
             String inPrefix = fileNames[i];
             int j = 0;
             String filename = inPrefix + i + String.format("-%08d-interim.chk",j);
+            System.out.print("Loading " + i + "-vertices ... ");
 
             while (new File(filename).isFile()) { // here begins deserialization
                 try
                     {
-                        FileInputStream fileIn = new FileInputStream(fileNames[i]);
+                        FileInputStream fileIn = new FileInputStream(filename);
                         ObjectInputStream in = new ObjectInputStream(fileIn);
                         for (ImmutablePatch p : ((TriangleResults)in.readObject()).getPatches()) {
                             PatchAndIndex newVertex = new PatchAndIndex(p,i);
@@ -417,7 +417,7 @@ public class PatchEnsemble implements Serializable {
                                 }
                             }
                         }
-                        System.out.println(filename + " has been read. ");
+                        //System.out.println(filename + " has been read. ");
                     }
                 catch (Exception e)
                     {
@@ -434,7 +434,7 @@ public class PatchEnsemble implements Serializable {
             if (new File(filename).isFile()) { // here begins deserialization
                 try
                     {
-                        FileInputStream fileIn = new FileInputStream(fileNames[i]);
+                        FileInputStream fileIn = new FileInputStream(filename);
                         ObjectInputStream in = new ObjectInputStream(fileIn);
                         for (ImmutablePatch p : ((TriangleResults)in.readObject()).getPatches()) {
                             PatchAndIndex newVertex = new PatchAndIndex(p,i);
@@ -448,7 +448,7 @@ public class PatchEnsemble implements Serializable {
                                 }
                             }
                         }
-                        System.out.println(filename + " has been read. ");
+                        //System.out.println(filename + " has been read. ");
                     }
                 catch (Exception e)
                     {
@@ -462,7 +462,9 @@ public class PatchEnsemble implements Serializable {
 
             // drop all vertices that don't have neighbours of 
             // all indices up to i
+            System.out.print("Expunging lone vertices ... ");
             this.dropLoners(i);
+            System.out.println("done expunging lone vertices. " + patches.vertexSet().size() + " vertices remaining.");
         } // here ends iteration through input files
 
     } // private constructor ends here
@@ -524,7 +526,7 @@ public class PatchEnsemble implements Serializable {
             // now we loop through all vertices and check for loners
             for (PatchAndIndex p : patches.vertexSet()) {
                 // check boxes to see if p has neighbours of all indices
-                boolean[] check = new boolean[l-1];
+                boolean[] check = new boolean[l+1];
                 for (IndexPair i : patches.edgesOf(p)) {
                     for (int j = 0; j < 2; j ++) check[i.getIndices()[j]] = true;
                 }
@@ -638,14 +640,14 @@ public class PatchEnsemble implements Serializable {
 
         List<TriangleResults> resultsList = new LinkedList<>();
         String[] files = new String[Preinitializer.PROTOTILES.size()];
-        files[0] = "seven/tile";
-        files[1] = "seven/tile";
-        files[2] = "seven/tile";
-//        files[0] = "results/tile0-105.chk";
-//        files[1] = "results/tile1-105.chk";
-//        files[2] = "results/tile2-105.chk";
-//        files[3] = "results/tile3-105.chk";
-//        files[4] = "results/tile4-105.chk";
+//        files[0] = "seven/tile";
+//        files[1] = "seven/tile";
+//        files[2] = "seven/tile";
+        files[0] = "interim/tile";
+        files[1] = "interim/tile";
+        files[2] = "interim/tile";
+        files[3] = "interim/tile";
+        files[4] = "interim/tile";
 
         PatchEnsemble testo = createPatchEnsemble(files, PuzzleBoundary.BREAKDOWNS);
         System.out.println(testo.size());
