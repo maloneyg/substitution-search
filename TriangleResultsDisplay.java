@@ -7,10 +7,7 @@ public class TriangleResultsDisplay
     public static void main(String[] args)
         {
             // deserialize data
-            String filename = //"results/tile0-bc.chk";//
-                              //"result.chk";
-                              //"interim/tile0-final.chk";
-                                "results/tile4-2plusa.chk";
+            String filename = args[0];
             List<ImmutablePatch> patches = null;
             if ( ! new File(filename).isFile() )
                 {

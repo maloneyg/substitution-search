@@ -57,7 +57,8 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, 1); // small search. turned up in some calculations, so I thought I'd try it. (1+b)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1); // really small search. might as well try it (2+a)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(3, 1); // really small search. might as well try it (3+a)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(3, 1); // really small search. might as well try it (3+a)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 2, 1); // (xxx)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2); // (1+2a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 2, 1); // (1+2a+b)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-2, -1, 2, 1); // (a+2b+c)
@@ -71,7 +72,7 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2, 1); // the square of the really small search (1+a)^2 won't work with tile 3 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search (104)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, 0, 1); // c (107)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, 0, 1); // 1 + c (108)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -1, 0, 1); // a + c (109)

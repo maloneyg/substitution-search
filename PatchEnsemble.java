@@ -393,24 +393,31 @@ public class PatchEnsemble implements Serializable {
         patches = new SimpleGraph<>(IndexPair.class);
 
         for (int i = 0; i < M; i++) { // iterate through all input files
-            System.out.print("Loading " + i + "-vertices ... ");
-            int count = 0;
-            int j = 0;
+            int vcount = 0;
+            int ecount = 0;
             String inPrefix = fileNames[i];
-            String filename = inPrefix + String.format("-%08d-interim.chk",j);
+            int j = 0;
+            String filename = inPrefix + i + String.format("-%08d-interim.chk",j);
+            System.out.print("Loading " + i + "-vertices ... ");
 
             while (new File(filename).isFile()) { // here begins deserialization
-
-                // deserialize data
                 try
                     {
-                        FileInputStream fileIn = new FileInputStream(fileNames[i]);
+                        FileInputStream fileIn = new FileInputStream(filename);
                         ObjectInputStream in = new ObjectInputStream(fileIn);
-                        for (ImmutablePatch p : bd.cull(i,(TriangleResults)in.readObject())) {
-                            patches.addVertex(new PatchAndIndex(p,i));
-                            count++;
+                        for (ImmutablePatch p : ((TriangleResults)in.readObject()).getPatches()) {
+                            PatchAndIndex newVertex = new PatchAndIndex(p,i);
+                            patches.addVertex(newVertex);
+                            vcount++;
+                            // now add edges to all compatible vertices
+                            for (PatchAndIndex pi : patches.vertexSet()) {
+                                if (pi.getIndex()!=i&&newVertex.compatible(pi)) {
+                                    patches.addEdge(pi,newVertex,new IndexPair(i,pi.getIndex()));
+                                    ecount++;
+                                }
+                            }
                         }
-                        System.out.println(fileNames[i]+ " has been read. ");
+                        //System.out.println(filename + " has been read. ");
                     }
                 catch (Exception e)
                     {
@@ -419,33 +426,60 @@ public class PatchEnsemble implements Serializable {
                     }
 
                 j++;
-                filename = inPrefix + String.format("-%08d-interim.chk",j);
+                filename = inPrefix + i + String.format("-%08d-interim.chk",j);
             } // here ends deserialization of interim files
 
-            System.out.println("done loading " + i + "-vertices. Loaded " + count + " vertices.");
-
-        // add the new edges to the graph
-        System.out.print("Adding edges to graph...");
-        for (PatchAndIndex pi : patches.vertexSet()) {
-            if (pi.getIndex()==i) {
-                for (PatchAndIndex qi : patches.vertexSet()) {
-                    if ((pi.getIndex()!=qi.getIndex())&&(pi.compatible(qi))) {
+            // do the same for the final file for tile i
+            filename = inPrefix + i + "-final.chk";
+            if (new File(filename).isFile()) { // here begins deserialization
+                try
+                    {
+                        FileInputStream fileIn = new FileInputStream(filename);
+                        ObjectInputStream in = new ObjectInputStream(fileIn);
+                        for (ImmutablePatch p : ((TriangleResults)in.readObject()).getPatches()) {
+                            PatchAndIndex newVertex = new PatchAndIndex(p,i);
+                            patches.addVertex(newVertex);
+                            vcount++;
+                            // now add edges to all compatible vertices
+                            for (PatchAndIndex pi : patches.vertexSet()) {
+                                if (pi.getIndex()!=i&&newVertex.compatible(pi)) {
+                                    patches.addEdge(pi,newVertex,new IndexPair(i,pi.getIndex()));
+                                    ecount++;
+                                }
+                            }
+                        }
+                        //System.out.println(filename + " has been read. ");
                     }
-                }
-            }
-        }
+                catch (Exception e)
+                    {
+                        e.printStackTrace();
+                        System.exit(1);
+                    }
+            } // here ends deserialization of final file
 
+            System.out.println("done loading " + i + "-vertices. Loaded " + vcount + " vertices.");
+            System.out.println("Built " + ecount + " edges.");
+
+            // drop all vertices that don't have neighbours of 
+            // all indices up to i
+            System.out.print("Expunging lone vertices ... ");
+            this.dropLoners(i);
+            System.out.println("done expunging lone vertices. " + patches.vertexSet().size() + " vertices remaining.");
         } // here ends iteration through input files
 
     } // private constructor ends here
 
-    // public static factory method
+    // public static factory methods
     public static PatchEnsemble createPatchEnsemble(List<TriangleResults> inList, EdgeBreakdownTree bd) {
         PatchEnsemble output = new PatchEnsemble(inList,bd);
         System.out.print("Expunging lone vertices ... ");
         output.dropLoners();
         System.out.println("done expunging lone vertices.");
         return output;
+    }
+
+    public static PatchEnsemble createPatchEnsemble(String[] inList, EdgeBreakdownTree bd) {
+        return new PatchEnsemble(inList,bd);
     }
 
     // remove all vertices that don't have edges connected to all indices
@@ -462,6 +496,37 @@ public class PatchEnsemble implements Serializable {
             for (PatchAndIndex p : patches.vertexSet()) {
                 // check boxes to see if p has neighbours of all indices
                 boolean[] check = new boolean[Preinitializer.PROTOTILES.size()];
+                for (IndexPair i : patches.edgesOf(p)) {
+                    for (int j = 0; j < 2; j ++) check[i.getIndices()[j]] = true;
+                }
+                // if we missed any index, we're not done
+                for (int j = 0; j < check.length; j++) done = (done&&check[j]);
+                // drop this one and start again
+                if (!done) {
+                    drop = p;
+                    break;
+                }
+            }
+        } while (!done);
+    }
+
+    // remove all vertices that don't have edges connected to all indices
+    // up to and including index l
+    // removing one such vertex might produce another one, so loop until
+    // no more are created
+    public void dropLoners(int l) {
+        // nothing to do if l < 1
+        if (l<1) return;
+        // we have to create this outside of the loop, I think
+        PatchAndIndex drop = null;
+        boolean done = true;
+        do {
+            if (!done) patches.removeVertex(drop);
+            done = true;
+            // now we loop through all vertices and check for loners
+            for (PatchAndIndex p : patches.vertexSet()) {
+                // check boxes to see if p has neighbours of all indices
+                boolean[] check = new boolean[l+1];
                 for (IndexPair i : patches.edgesOf(p)) {
                     for (int j = 0; j < 2; j ++) check[i.getIndices()[j]] = true;
                 }
@@ -575,70 +640,22 @@ public class PatchEnsemble implements Serializable {
 
         List<TriangleResults> resultsList = new LinkedList<>();
         String[] files = new String[Preinitializer.PROTOTILES.size()];
-        files[0] = "results/seven-tile0-1plusa.chk";
-        files[1] = "results/seven-tile1-1plusa.chk";
-        files[2] = "results/seven-tile2-1plusa.chk";
-//        files[0] = "results/tile0-105.chk";
-//        files[1] = "results/tile1-105.chk";
-//        files[2] = "results/tile2-105.chk";
-//        files[3] = "results/tile3-105.chk";
-//        files[4] = "results/tile4-105.chk";
+//        files[0] = "seven/tile";
+//        files[1] = "seven/tile";
+//        files[2] = "seven/tile";
+        files[0] = "interim/tile";
+        files[1] = "interim/tile";
+        files[2] = "interim/tile";
+        files[3] = "interim/tile";
+        files[4] = "interim/tile";
 
-        for (String filename : files) {
-            // deserialize data
-            if ( ! new File(filename).isFile() )
-                {
-                    System.out.println(filename + " not found!");
-                    return;
-                }
-            try
-                {
-                    FileInputStream fileIn = new FileInputStream(filename);
-                    ObjectInputStream in = new ObjectInputStream(fileIn);
-                    resultsList.add((TriangleResults)in.readObject());
-                    System.out.println(filename + " has been read. " + resultsList.get(resultsList.size()-1).size() + " patches found.");
-                }
-            catch (Exception e)
-                {
-                    e.printStackTrace();
-                    System.exit(1);
-                }
-        }
-
-        PatchEnsemble testo = createPatchEnsemble(resultsList, PuzzleBoundary.BREAKDOWNS);
+        PatchEnsemble testo = createPatchEnsemble(files, PuzzleBoundary.BREAKDOWNS);
         System.out.println(testo.size());
         PatchAndIndex ummm = null;
         for (PatchAndIndex pp: testo.patches.vertexSet()) { if (pp.getIndex() == 0) { ummm = pp; break; }}
         testo.dropToNeighbours(ummm);
         testo.gapString("test7.g","test7");
         System.out.println(testo.size());
-
-
-        // write TriangleResult files with a selection of vertices that remain
-
-//        for (int i = 0; i < Preinitializer.PROTOTILES.size(); i++) { // for loop
-//            for (PatchAndIndex pp : testo.patches.vertexSet()) {
-//                if (pp.getIndex()==i) { // choose the first one with this index
-//                    List<ImmutablePatch> completedPatches = new ArrayList<>(1);
-//                    completedPatches.add(pp.getPatch());
-//                    try
-//                        {
-//                            TriangleResults triangleResults = new TriangleResults(completedPatches);
-//                            FileOutputStream fileOut = new FileOutputStream("vertex-test" + i + ".chk");
-//                            ObjectOutputStream out = new ObjectOutputStream(fileOut);
-//                            out.writeObject(triangleResults);
-//                            out.close();
-//                            fileOut.close();
-//                            System.out.println("wrote " + completedPatches.size() + " results to " + "vertex-test" + i + ".chk.");
-//                        }
-//                    catch (Exception e)
-//                        {
-//                            e.printStackTrace();
-//                        }
-//
-//                } // here ends if statement
-//            } // here ends loop through vertices
-//        } // here ends big for loop
 
         System.exit(0);
 
