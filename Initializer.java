@@ -49,6 +49,10 @@ class Initializer {
         E09, E10, E11, E12, E13, E14, E15, E16  //
     }
 
+    public static final Matrix AREA_MATRIX = LengthAndAreaCalculator.AREA_MATRIX;
+
+    public static final int DEG = (int)LengthAndAreaCalculator.MIN_POLY.degree();
+
     /*
     * A ByteMatrix, the (i,j)th entry of which is the number
     * of occurrences of EdgeLength i in inflated EdgeLength j.
@@ -60,6 +64,12 @@ class Initializer {
     * of occurrences of prototile i in inflated prototile j.
     */
     public static final ByteMatrix SUBSTITUTION_MATRIX;
+
+    /*
+    * A ByteMatrix giving linear relations between the core prototile
+    * areas and the extra prototile areas.
+    */
+    public static final ByteMatrix NULL_MATRIX;
 
     /*
     * A column ByteMatrix, the j-th entry of which is the number
@@ -197,8 +207,9 @@ class Initializer {
         LENGTHS = ImmutableList.copyOf(preLengths);
 
         INFLATED_LENGTHS = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.LENGTH_MATRIX.inverse()).times(otherInfl).times(LengthAndAreaCalculator.LENGTH_MATRIX));
-        SUBSTITUTION_MATRIX = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.AREA_MATRIX.inverse()).times(otherInfl).times(otherInfl).times(LengthAndAreaCalculator.AREA_MATRIX));
-        TILE_LIST = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.AREA_MATRIX.inverse()).times(otherInfl).times(otherInfl).times(LengthAndAreaCalculator.SEARCH_AREA_COLUMN));
+        SUBSTITUTION_MATRIX = LengthAndAreaCalculator.MatrixToByteMatrix((AREA_MATRIX.getMatrix(0,DEG-1,0,DEG-1).inverse()).times(otherInfl).times(otherInfl).times(AREA_MATRIX));
+        NULL_MATRIX = (AREA_MATRIX.getColumnDimension() > DEG) ? LengthAndAreaCalculator.MatrixToByteMatrix((AREA_MATRIX.getMatrix(0,DEG-1,0,DEG-1).inverse()).times(AREA_MATRIX.getMatrix(0,DEG-1,DEG,AREA_MATRIX.getColumnDimension()-1))) : null;
+        TILE_LIST = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.AREA_MATRIX.getMatrix(0,DEG-1,0,DEG-1).inverse()).times(otherInfl).times(otherInfl).times(LengthAndAreaCalculator.SEARCH_AREA_COLUMN));
 
         int total = 1;
         List<Integer> hitsYet = new ArrayList<>(3);
@@ -273,6 +284,9 @@ class Initializer {
         System.out.println(INFLATED_LENGTHS);
         System.out.println("SUBSTITUTION_MATRIX");
         System.out.println(SUBSTITUTION_MATRIX);
+        System.out.println("NULL_MATRIX");
+        System.out.println((NULL_MATRIX==null) ? "null" : NULL_MATRIX);
+        System.out.println(NULL_MATRIX.getColumnDimension() + " " + NULL_MATRIX.getRowDimension());
         System.out.println("TILE_LIST");
         System.out.println(TILE_LIST);
 

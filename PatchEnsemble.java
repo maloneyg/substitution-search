@@ -70,14 +70,6 @@ class PatchAndIndex implements Serializable {
             }
         }
 
-        // the following is for debugging
-//        System.out.println(t1); //
-//        System.out.println(t2); //
-//        System.out.println(part); //
-//        for (int i = 0; i < 3; i++) System.out.println(e1[i] + " " + o1[i]); // 
-//        for (int i = 0; i < 3; i++) System.out.println(e2[i] + " " + o2[i]); // 
-//        System.out.println(shared.size()); // 
-
         // now identify Orientations over and over until you can't identify more
         boolean done = true;
         int k = 0;
@@ -90,15 +82,8 @@ class PatchAndIndex implements Serializable {
                 i = shared.get(k).getIndices()[0];
                 j = shared.get(k).getIndices()[1];
 
-                // debugging output
-//                System.out.println("checking k");
-//                System.out.println(e1[i] + " " + o1[i] + " " + e2[j] + " " + o2[j]);
-
                 // if they're equivalent
                 if (part.equivalent(o1[i],o2[j])) {
-//                    System.out.println("checking breakdowns."); //
-//                    System.out.println(bd1[i]); //
-//                    System.out.println(bd2[j]); //
                     Orientation[] list1 = bd1[i].getOrientations();
                     Orientation[] list2 = bd2[j].getOrientations();
                     BasicEdgeLength[] lengths1 = bd1[i].getLengths();
@@ -115,9 +100,6 @@ class PatchAndIndex implements Serializable {
 
                 // if they're opposite
                 if (part.equivalent(o1[i],o2[j].getOpposite())) {
-//                    System.out.println("checking breakdowns (opposite)."); //
-//                    System.out.println(bd1[i]); //
-//                    System.out.println(bd2[j].reverse()); //
                     Orientation[] list1 = bd1[i].getOrientations();
                     Orientation[] list2 = bd2[j].reverse().getOrientations();
                     BasicEdgeLength[] lengths1 = bd1[i].getLengths();
@@ -648,6 +630,7 @@ public class PatchEnsemble implements Serializable {
         files[2] = "interim/tile";
         files[3] = "interim/tile";
         files[4] = "interim/tile";
+        files[5] = "interim/tile";
 
         PatchEnsemble testo = createPatchEnsemble(files, PuzzleBoundary.BREAKDOWNS);
         System.out.println(testo.size());

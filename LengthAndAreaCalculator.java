@@ -36,7 +36,7 @@ final public class LengthAndAreaCalculator {
     private static final ShortPolynomial X = ShortPolynomial.X;
 
     // the minimal polynomial of 2 * Cos(pi/N)
-    private static final ShortPolynomial MIN_POLY;
+    public static final ShortPolynomial MIN_POLY;
     // the companion matrix of MIN_POLY.
     // this is a representation of 2*cos(pi/N), much like
     // Initializer.A, but this representation is, or 
@@ -309,7 +309,7 @@ final public class LengthAndAreaCalculator {
             }
         } // here ends if(l==null)
 
-        SEARCH_AREA_COLUMN = ShortPolynomial.coefficientMatrix(searchArea,Preinitializer.PROTOTILES.size()-1);
+        SEARCH_AREA_COLUMN = ShortPolynomial.coefficientMatrix(searchArea,MIN_POLY.degree()-1);
 
     } // initialization of SEARCH_TILE stuff ends here
 

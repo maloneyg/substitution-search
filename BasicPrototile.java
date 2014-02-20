@@ -278,7 +278,7 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
     * should appear counts.get(i) times in this list.
     */
     public static ImmutableList<BasicPrototile> getPrototileList(ImmutableList<Integer> counts) {
-        if (counts.size() != ALL_PROTOTILES.size()) throw new IllegalArgumentException("There are " + ALL_PROTOTILES.size() + " prototiles, but we're trying to initialize a list with " + counts.size() + " of them.");
+        //if (counts.size() != ALL_PROTOTILES.size()) throw new IllegalArgumentException("There are " + ALL_PROTOTILES.size() + " prototiles, but we're trying to initialize a list with " + counts.size() + " of them.");
         ArrayList<BasicPrototile> output = new ArrayList<>(counts.get(0));
         for (int i = 0; i < counts.size(); i++) {
             for (int j = 0; j < counts.get(i); j++) output.add(ALL_PROTOTILES.get(i));
