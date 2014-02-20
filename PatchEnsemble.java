@@ -630,6 +630,7 @@ public class PatchEnsemble implements Serializable {
         files[2] = "interim/tile";
         files[3] = "interim/tile";
         files[4] = "interim/tile";
+        files[5] = "interim/tile";
 
         PatchEnsemble testo = createPatchEnsemble(files, PuzzleBoundary.BREAKDOWNS);
         System.out.println(testo.size());

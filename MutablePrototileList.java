@@ -6,14 +6,30 @@ import com.google.common.collect.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.io.Serializable;
+import java.util.List;
 
 public class MutablePrototileList implements Serializable {
 
     private int[] tileCount;
     private static final ImmutableList<BasicPrototile> ALL_PROTOTILES = BasicPrototile.ALL_PROTOTILES;
 
+    // constants to help us if we have extra prototiles
+    private static final int DEG = Initializer.DEG;
+    private static final boolean MIN = (Initializer.NULL_MATRIX==null);
+    private static final ImmutableList<ImmutableList<Integer>> NULL_VECTORS;
+
+    static { // initialize the list of null vectors
+        if (MIN) {
+            NULL_VECTORS = null;
+        } else {
+            List<ImmutableList<Integer>> preNV = new ArrayList<>();
+            for (int i = 0; i < Initializer.NULL_MATRIX.getRowDimension(); i++) preNV.add(Initializer.NULL_MATRIX.getColumn(i));
+            NULL_VECTORS = ImmutableList.copyOf(preNV);
+        }
+    } // here ends initialization of null vectors
+
     // make it Serializable
-//    static final long serialVersionUID = 1267821834624463132L;
+    static final long serialVersionUID = -6946831502508212124L;
 
     // static method to see if a prototile is allowed
     private static boolean valid(BasicPrototile p) {
@@ -22,10 +38,10 @@ public class MutablePrototileList implements Serializable {
 
     // constructor methods.
     private MutablePrototileList(ImmutableList<BasicPrototile> tiles) {
-        int[] tempCount = new int[ALL_PROTOTILES.size()];
+        int[] tempCount = new int[DEG];
         for (BasicPrototile p : tiles) {
             if (valid(p)) {
-                tempCount[ALL_PROTOTILES.indexOf(p)]++;
+                if (ALL_PROTOTILES.indexOf(p)<DEG) tempCount[ALL_PROTOTILES.indexOf(p)]++;
             } else {
                 throw new IllegalArgumentException("We aren't using prototile " + p);
             }
@@ -76,25 +92,35 @@ public class MutablePrototileList implements Serializable {
 
     // remove the prototile p
     public void remove(BasicPrototile p) {
-        int position = ALL_PROTOTILES.indexOf(p);
-        if (!valid(p))
-            throw new IllegalArgumentException("We aren't using prototile " + p);
-        if (tileCount[position]<1)
-            throw new IllegalArgumentException("Can't remove prototile " + p + "\nbecause we haven't got any left.");
-        tileCount[position]--;
+        int where = ALL_PROTOTILES.indexOf(p);
+//        if (tileCount[where]<1)
+//            throw new IllegalArgumentException("Can't remove prototile " + p + "\nbecause we haven't got any left.");
+        if (MIN||where<tileCount.length) {
+            tileCount[where]--;
+        } else {
+            for (int j = 0; j < tileCount.length; j++) tileCount[j]-=NULL_VECTORS.get(where-DEG).get(j);
+        }
     }
 
     // add the prototile p
     public void add(BasicPrototile p) {
-        int position = ALL_PROTOTILES.indexOf(p);
-        if (!valid(p))
-            throw new IllegalArgumentException("We aren't using prototile " + p);
-        tileCount[position]++;
+        int where = ALL_PROTOTILES.indexOf(p);
+        if (MIN||where<tileCount.length) {
+            tileCount[where]++;
+        } else {
+            for (int j = 0; j < tileCount.length; j++) tileCount[j]+=NULL_VECTORS.get(where-DEG).get(j);
+        }
     }
 
     public boolean contains(BasicPrototile p) {
         if (!valid(p)) return false;
-        return tileCount[ALL_PROTOTILES.indexOf(p)] > 0;
+        int where = ALL_PROTOTILES.indexOf(p);
+        if (MIN||where<tileCount.length) {
+            return tileCount[where] > 0;
+        } else {
+            for (int j = 0; j < tileCount.length; j++) if (tileCount[j]<NULL_VECTORS.get(where-DEG).get(j)) return false;
+            return true;
+        }
     }
 
     public int size() {

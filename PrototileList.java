@@ -22,7 +22,7 @@ public final class PrototileList implements Serializable {
 
     // constructor methods.
     private PrototileList(ImmutableList<BasicPrototile> tiles) {
-        int[] tempCount = new int[ALL_PROTOTILES.size()];
+        int[] tempCount = new int[Initializer.DEG];
         for (BasicPrototile p : tiles) {
             if (valid(p)) {
                 tempCount[ALL_PROTOTILES.indexOf(p)]++;
