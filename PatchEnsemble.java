@@ -149,7 +149,7 @@ class PatchAndIndex implements Serializable {
         // make sure equal edge lengths get the same breakdowns
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                if (e1[i].equals(e2[j])&&!bd1[i].equals(bd2[j])&&!bd1[i].equals(bd2[j].reverse())) return false;
+                if (e1[i].equals(e2[j])&&!bd1[i].compatible(bd2[j])&&!bd1[i].compatible(bd2[j].reverse())) return false;
             }
         }
         return true;
