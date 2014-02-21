@@ -18,7 +18,7 @@ class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 5;        // the tile we're searching
+    public static final int MY_TILE = 1;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
@@ -36,6 +36,7 @@ class Preinitializer {
     public static final long SERIALIZATION_INTERVAL = 500L;        // time in ms between serializations
     public static final String SERIALIZATION_DIRECTORY = "storage"; // directory to store checkpoints in
     public static final boolean SERIALIZATION_CLEARFIRST = true;    // clear all files in storage directory before starting
+    public static final boolean IGNORE_ORIENTATIONS = true;    // set to true if you don't want to use orientation data to reject configurations
 
     public static final boolean DEBUG_MODE;
     public static final boolean SHOW_QUANTUM_TRIANGLES = true;
@@ -98,12 +99,12 @@ class Preinitializer {
                                  ImmutableList.of( 1, 5, 5 ),  // eleven
                                  ImmutableList.of( 2, 4, 5 ),  // eleven
                                  ImmutableList.of( 2, 3, 6 ),  // eleven
-                                 ImmutableList.of( 3, 3, 5 ),  // eleven
+                                 ImmutableList.of( 3, 3, 5 )   // eleven
                                  // extra
                                  //ImmutableList.of( 1, 1, 9 ),  // eleven
                                  //ImmutableList.of( 1, 2, 8 ),  // eleven
-                                 ImmutableList.of( 1, 3, 7 )   // eleven
-                                 //ImmutableList.of( 2, 2, 7 )   // eleven
+                                 //ImmutableList.of( 1, 3, 7 ),  // eleven
+                                 //ImmutableList.of( 2, 2, 7 ),   // eleven
                                  //ImmutableList.of( 3, 4, 4 )   // eleven
                                          );
 

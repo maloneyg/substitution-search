@@ -23,6 +23,7 @@ class PatchAndIndex implements Serializable {
 
     private final ImmutablePatch patch;
     private final int index;
+    private static boolean fullCompatibility = true;
 
     // public constructor
     public PatchAndIndex(ImmutablePatch p, int i) {
@@ -39,8 +40,13 @@ class PatchAndIndex implements Serializable {
         return index;
     }
 
+    // toggle the compatibility
+    public static void setFullCompatibility(boolean tf) {
+        fullCompatibility = tf;
+    }
+
     // check if the partition and edge breakdowns are compatible
-    public boolean compatible(PatchAndIndex p) {
+    public boolean fullyCompatible(PatchAndIndex p) {
         MutableOrientationPartition part = this.patch.getOrientationPartition().dumpMutableOrientationPartition().deepCopy().refine(p.patch.getOrientationPartition().dumpMutableOrientationPartition());
         // do the easy test first: make sure their Orientations are compatible
         //return part.valid();
@@ -120,7 +126,41 @@ class PatchAndIndex implements Serializable {
 
         return part.valid();
 
-    } // compatible method ends here
+    } // here ends method fullyCompatible(p)
+
+    // check if the partition and edge breakdowns are somewhat compatible
+    // (this means that edge breakdowns corresponding to sides of the 
+    // same lengths must match, either forward or in reverse)
+    public boolean semiCompatible(PatchAndIndex p) {
+        // pull out the relevant data from the patches
+        EdgeBreakdown[] bd1 = new EdgeBreakdown[3];
+        bd1[0] = this.patch.getEdge0();
+        bd1[1] = this.patch.getEdge1();
+        bd1[2] = this.patch.getEdge2();
+        EdgeBreakdown[] bd2 = new EdgeBreakdown[3];
+        bd2[0] = p.patch.getEdge0();
+        bd2[1] = p.patch.getEdge1();
+        bd2[2] = p.patch.getEdge2();
+        BasicPrototile t1 = BasicPrototile.ALL_PROTOTILES.get(this.getIndex());
+        BasicPrototile t2 = BasicPrototile.ALL_PROTOTILES.get(p.getIndex());
+        BasicEdgeLength[] e1 = t1.getLengths();
+        BasicEdgeLength[] e2 = t2.getLengths();
+
+        // make sure equal edge lengths get the same breakdowns
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (e1[i].equals(e2[j])&&!bd1[i].equals(bd2[j])&&!bd1[i].equals(bd2[j].reverse())) return false;
+            }
+        }
+        return true;
+    } // here ends method semiCompatible(p)
+
+    // check if the partition and edge breakdowns are compatible
+    // we can toggle the definition of compatible by changing a boolean
+    public boolean compatible(PatchAndIndex p) {
+        return (fullCompatibility) ? fullyCompatible(p) : semiCompatible(p);
+    }
+
 
     // equals method.
     public boolean equals(Object obj) {
@@ -523,6 +563,32 @@ public class PatchEnsemble implements Serializable {
         } while (!done);
     }
 
+    // write the vertices to disk
+    public void dumpPatches(String outPrefix) {
+        List<ImmutablePatch> outPatches = new ArrayList<>();
+        int index = 0;
+        do {
+            outPatches.clear();
+            String outName = outPrefix + index + ".chk";
+            for (PatchAndIndex pi : patches.vertexSet()) if (pi.getIndex()==index) outPatches.add(pi.getPatch());
+            try
+                {
+                    TriangleResults triangleResults = new TriangleResults(outPatches);
+                    FileOutputStream fileOut = new FileOutputStream(outName);
+                    ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                    out.writeObject(triangleResults);
+                    out.close();
+                    fileOut.close();
+                    System.out.println(String.format("wrote %d results to %s.",outPatches.size(),outName));
+                }
+            catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            index++;
+        } while (!outPatches.isEmpty());
+    }
+
     // drop down to the set of vertices adjacent to root
     public void dropToNeighbours(PatchAndIndex root) {
         List<PatchAndIndex> neighbours = new ArrayList<>();
@@ -625,20 +691,25 @@ public class PatchEnsemble implements Serializable {
 //        files[0] = "seven/tile";
 //        files[1] = "seven/tile";
 //        files[2] = "seven/tile";
-        files[0] = "interim/tile";
-        files[1] = "interim/tile";
-        files[2] = "interim/tile";
-        files[3] = "interim/tile";
-        files[4] = "interim/tile";
-        files[5] = "interim/tile";
+//        files[0] = "interim/tile";
+//        files[1] = "interim/tile";
+//        files[2] = "interim/tile";
+//        files[3] = "interim/tile";
+//        files[4] = "interim/tile";
+//        files[5] = "interim/tile";
+        for (int k = 0; k < files.length; k++) files[k] = args[0];
+
+        PatchAndIndex.setFullCompatibility(false);
 
         PatchEnsemble testo = createPatchEnsemble(files, PuzzleBoundary.BREAKDOWNS);
-        System.out.println(testo.size());
-        PatchAndIndex ummm = null;
-        for (PatchAndIndex pp: testo.patches.vertexSet()) { if (pp.getIndex() == 0) { ummm = pp; break; }}
-        testo.dropToNeighbours(ummm);
-        testo.gapString("test7.g","test7");
-        System.out.println(testo.size());
+
+//        PatchAndIndex ummm = null;
+//        for (PatchAndIndex pp: testo.patches.vertexSet()) { if (pp.getIndex() == 0) { ummm = pp; break; }}
+//        testo.dropToNeighbours(ummm);
+//        testo.gapString("test11.g","test11");
+//        System.out.println(testo.size());
+
+        testo.dumpPatches(args[1]);
 
         System.exit(0);
 

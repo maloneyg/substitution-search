@@ -118,7 +118,7 @@ public class MutablePrototileList implements Serializable {
         if (MIN||where<tileCount.length) {
             return tileCount[where] > 0;
         } else {
-            for (int j = 0; j < tileCount.length; j++) if (tileCount[j]<NULL_VECTORS.get(where-DEG).get(j)) return false;
+            for (int j = 0; j < tileCount.length; j++) if (tileCount[j]>-1&&tileCount[j]<NULL_VECTORS.get(where-DEG).get(j)) return false;
             return true;
         }
     }

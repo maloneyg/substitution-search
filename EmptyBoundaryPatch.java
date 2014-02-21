@@ -27,6 +27,10 @@ public class EmptyBoundaryPatch implements Serializable {
     private final String resultFilename;
     private boolean serialized = false;
 
+    // if false, then we use orientation data to reject configurations
+    // otherwise, we ignore orientations
+    private static final boolean IGNORE_ORIENTATIONS = Preinitializer.IGNORE_ORIENTATIONS;
+
     // the number of completed patches this has found
     private int numCompleted = 0;
 
@@ -36,9 +40,9 @@ public class EmptyBoundaryPatch implements Serializable {
     // set to true if we're debugging
     private boolean debug = false;
 
-    // angle of pi/N.  use for comparison in valid(). 
+    // angle of pi/N.  use for comparison in compatible(). 
     private static BasicAngle ONE = BasicAngle.createBasicAngle(1);
-    // short edge length. use for comparison in valid().
+    // short edge length. use for comparison in compatible().
     private static BasicEdgeLength SHORT = BasicEdgeLength.lengthOpposite(ONE);
 
     // the completed patches that have been found
@@ -409,7 +413,7 @@ public class EmptyBoundaryPatch implements Serializable {
                 BasicTriangle t = currentPrototile.place(currentEdge,secondEdge,flip);
                 if (compatible(t)) {
                     placeTriangle(t);
-                    if (partition.valid())
+                    if (IGNORE_ORIENTATIONS||partition.valid())
                         {
                             if (die.get()) {
                                 spawnList.add(spawn());
