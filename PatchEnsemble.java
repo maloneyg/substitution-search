@@ -491,6 +491,71 @@ public class PatchEnsemble implements Serializable {
 
     } // private constructor ends here
 
+    // private constructor
+    // just take everything
+    private PatchEnsemble(String[] fileNames) {
+        // first make sure we've got the right number of prototiles
+        int M = Preinitializer.PROTOTILES.size();
+        if (M!=fileNames.length) throw new IllegalArgumentException("Trying to load " + fileNames.length + " prototiles, but we should have " + M + " prototiles.");
+
+        System.out.println("Building PatchEnsemble.");
+        breakdown = PuzzleBoundary.BREAKDOWNS;
+        patches = new SimpleGraph<>(IndexPair.class);
+
+        for (int i = 0; i < M; i++) { // iterate through all input files
+            int vcount = 0;
+            String inPrefix = fileNames[i];
+            int j = 0;
+            String filename = inPrefix + i + String.format("-%08d-interim.chk",j);
+            System.out.print("Loading " + i + "-vertices ... ");
+
+            while (new File(filename).isFile()) { // here begins deserialization
+                try
+                    {
+                        FileInputStream fileIn = new FileInputStream(filename);
+                        ObjectInputStream in = new ObjectInputStream(fileIn);
+                        for (ImmutablePatch p : ((TriangleResults)in.readObject()).getPatches()) {
+                            PatchAndIndex newVertex = new PatchAndIndex(p,i);
+                            patches.addVertex(newVertex);
+                            vcount++;
+                        }
+                        //System.out.println(filename + " has been read. ");
+                    }
+                catch (Exception e)
+                    {
+                        e.printStackTrace();
+                        System.exit(1);
+                    }
+
+                j++;
+                filename = inPrefix + i + String.format("-%08d-interim.chk",j);
+            } // here ends deserialization of interim files
+
+            // do the same for the final file for tile i
+            filename = inPrefix + i + "-final.chk";
+            if (new File(filename).isFile()) { // here begins deserialization
+                try
+                    {
+                        FileInputStream fileIn = new FileInputStream(filename);
+                        ObjectInputStream in = new ObjectInputStream(fileIn);
+                        for (ImmutablePatch p : ((TriangleResults)in.readObject()).getPatches()) {
+                            PatchAndIndex newVertex = new PatchAndIndex(p,i);
+                            patches.addVertex(newVertex);
+                            vcount++;
+                        }
+                    }
+                catch (Exception e)
+                    {
+                        e.printStackTrace();
+                        System.exit(1);
+                    }
+            } // here ends deserialization of final file
+
+            System.out.println("done loading " + i + "-vertices. Loaded " + vcount + " vertices.");
+        } // here ends iteration through input files
+
+    } // private constructor ends here
+
     // public static factory methods
     public static PatchEnsemble createPatchEnsemble(List<TriangleResults> inList, EdgeBreakdownTree bd) {
         PatchEnsemble output = new PatchEnsemble(inList,bd);
@@ -502,6 +567,10 @@ public class PatchEnsemble implements Serializable {
 
     public static PatchEnsemble createPatchEnsemble(String[] inList, EdgeBreakdownTree bd) {
         return new PatchEnsemble(inList,bd);
+    }
+
+    public static PatchEnsemble createPatchEnsemble(String[] inList) {
+        return new PatchEnsemble(inList);
     }
 
     // remove all vertices that don't have edges connected to all indices
@@ -701,15 +770,16 @@ public class PatchEnsemble implements Serializable {
 
         PatchAndIndex.setFullCompatibility(false);
 
-        PatchEnsemble testo = createPatchEnsemble(files, PuzzleBoundary.BREAKDOWNS);
+        //PatchEnsemble testo = createPatchEnsemble(files, PuzzleBoundary.BREAKDOWNS);
+        PatchEnsemble testo = createPatchEnsemble(files);
 
 //        PatchAndIndex ummm = null;
 //        for (PatchAndIndex pp: testo.patches.vertexSet()) { if (pp.getIndex() == 0) { ummm = pp; break; }}
 //        testo.dropToNeighbours(ummm);
-//        testo.gapString("test11.g","test11");
+        testo.gapString("test11.g","test11");
 //        System.out.println(testo.size());
 
-        testo.dumpPatches(args[1]);
+//        testo.dumpPatches(args[1]);
 
         System.exit(0);
 
