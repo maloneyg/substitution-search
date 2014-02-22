@@ -770,16 +770,16 @@ public class PatchEnsemble implements Serializable {
 
         PatchAndIndex.setFullCompatibility(false);
 
-        //PatchEnsemble testo = createPatchEnsemble(files, PuzzleBoundary.BREAKDOWNS);
-        PatchEnsemble testo = createPatchEnsemble(files);
+        PatchEnsemble testo = createPatchEnsemble(files, PuzzleBoundary.BREAKDOWNS);
+        //PatchEnsemble testo = createPatchEnsemble(files);
 
 //        PatchAndIndex ummm = null;
 //        for (PatchAndIndex pp: testo.patches.vertexSet()) { if (pp.getIndex() == 0) { ummm = pp; break; }}
 //        testo.dropToNeighbours(ummm);
-        testo.gapString("test11.g","test11");
+//        testo.gapString("test11.g","test11");
 //        System.out.println(testo.size());
 
-//        testo.dumpPatches(args[1]);
+        testo.dumpPatches(args[1]);
 
         System.exit(0);
 
