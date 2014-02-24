@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import com.google.common.collect.*;
 import java.util.concurrent.atomic.*;
+import java.lang.Math.*;
 
 public class Server
 {
@@ -21,6 +22,8 @@ public class Server
     public static int totalFound = 0;
     // this stores the number of puzzles that have been serialized
     public static int dumpCount = 0;
+    // this is the maximum number of puzzles we will serialize in any one file
+    public static final int MAX_DUMP = 10000;
 
     // parameters for networking
     public static final int LISTENING_PORT = Preinitializer.LISTENING_PORT;
@@ -136,23 +139,38 @@ public class Server
                 }
                 else
                     {
-                        try
+                        List<TriangleResults> interimResults = new LinkedList<>();
+                        synchronized (Server.completedPatches)
                             {
-                                TriangleResults triangleResults = new TriangleResults(completedPatches);
-                                Server.totalFound += completedPatches.size();
-                                //FileOutputStream fileOut = new FileOutputStream(Preinitializer.RESULT_FILENAME);
-                                FileOutputStream fileOut = new FileOutputStream(String.format("interim/tile%d-final.chk",Preinitializer.MY_TILE));
-                                ObjectOutputStream out = new ObjectOutputStream(fileOut);
-                                out.writeObject(triangleResults);
-                                out.close();
-                                fileOut.close();
-                                //System.out.println("wrote " + completedPatches.size() + " results to " + Preinitializer.RESULT_FILENAME + ".");
-                                System.out.println(String.format("wrote %d results to interim/tile%d-final.chk",completedPatches.size(),Preinitializer.MY_TILE));
+                                // split completedPatches into parts of size no more than MAX_DUMP
+                                // the upper bound for i here just tells us to round up
+                                for (int i = 0; i < (Server.completedPatches.size() + MAX_DUMP - 1)/MAX_DUMP; i++) {
+                                    interimResults.add(new TriangleResults(Server.completedPatches.subList(i*MAX_DUMP,Math.min((i+1)*MAX_DUMP,Server.completedPatches.size()))));
+                                }
+                                Server.totalFound += Server.completedPatches.size();
+                                Server.completedPatches.clear();
                             }
-                        catch (Exception e)
-                            {
-                                e.printStackTrace();
-                            }
+
+                        for (int i = 0; i < interimResults.size(); i++) {
+                            try
+                                {
+                                    String outputFilename = String.format("interim/tile%d-%08d-%s",Preinitializer.MY_TILE, Server.dumpCount,Preinitializer.INTERIM_RESULT_FILENAME);
+                                    FileOutputStream fileOut = new FileOutputStream(outputFilename);
+                                    Server.dumpCount++;
+                                    ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                                    out.writeObject(interimResults.get(i));
+                                    out.close();
+                                    fileOut.close();
+                                    System.out.println("\nWrote " + interimResults.get(i).size()
+                                                       + " final results to " + outputFilename + ".\n");
+                                }
+                            catch (Exception e)
+                                {
+                                    System.out.println("\nError while writing final results to " + Preinitializer.INTERIM_RESULT_FILENAME + "!");
+                                    e.printStackTrace();
+                                }
+
+                        }
                     }
             }
 
@@ -553,32 +571,38 @@ public class Server
                      && numberOfCompletedPatches > 0
                      && currentTime.getTime() - lastInterimWrite.getTime() > 30 * 1000 )
                     {
-                        TriangleResults interimResults = null;
+                        List<TriangleResults> interimResults = new LinkedList<>();
                         Server.totalFound += numberOfCompletedPatches;
                         synchronized (Server.completedPatches)
                             {
-                                interimResults = new TriangleResults(Server.completedPatches);
+                                // split completedPatches into parts of size no more than MAX_DUMP
+                                // the upper bound for i here just tells us to round up
+                                for (int i = 0; i < (Server.completedPatches.size() + MAX_DUMP - 1)/MAX_DUMP; i++) {
+                                    interimResults.add(new TriangleResults(Server.completedPatches.subList(i*MAX_DUMP,Math.min((i+1)*MAX_DUMP,Server.completedPatches.size()))));
+                                }
                                 Server.completedPatches.clear();
                             }
 
-                        try
-                            {
-                                String outputFilename = String.format("interim/tile%d-%08d-%s",Preinitializer.MY_TILE, Server.dumpCount,INTERIM_RESULT_FILENAME);
-                                FileOutputStream fileOut = new FileOutputStream(outputFilename);
-                                Server.dumpCount++;
-                                ObjectOutputStream out = new ObjectOutputStream(fileOut);
-                                out.writeObject(interimResults);
-                                out.close();
-                                fileOut.close();
-                                System.out.println("\n" + numberOfCompletedPatches + " new results, so wrote " + numberOfCompletedPatches
-                                                   + " interim results to " + outputFilename + ".\n");
-                            }
-                        catch (Exception e)
-                            {
-                                System.out.println("\nError while writing interim results to " + INTERIM_RESULT_FILENAME + "!");
-                                e.printStackTrace();
-                            }
+                        for (int i = 0; i < interimResults.size(); i++) {
+                            try
+                                {
+                                    String outputFilename = String.format("interim/tile%d-%08d-%s",Preinitializer.MY_TILE, Server.dumpCount,INTERIM_RESULT_FILENAME);
+                                    FileOutputStream fileOut = new FileOutputStream(outputFilename);
+                                    Server.dumpCount++;
+                                    ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                                    out.writeObject(interimResults.get(i));
+                                    out.close();
+                                    fileOut.close();
+                                    System.out.println("\nWrote " + interimResults.get(i).size()
+                                                       + " interim results to " + outputFilename + ".\n");
+                                }
+                            catch (Exception e)
+                                {
+                                    System.out.println("\nError while writing interim results to " + INTERIM_RESULT_FILENAME + "!");
+                                    e.printStackTrace();
+                                }
 
+                        }
                         lastNumberOfCompletedPatches = numberOfCompletedPatches;
                         lastInterimWrite = currentTime;
                     }
