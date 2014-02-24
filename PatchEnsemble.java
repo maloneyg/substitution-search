@@ -270,7 +270,42 @@ public class PatchEnsemble implements Serializable {
             PatchEnsembleResult result = new PatchEnsembleResult(compatible);
             return result;
         }
-    }
+    } // end of class PatchEnsembleWorkUnit
+
+    private class MultiStagePatchEnsembleWorkUnit implements WorkUnit
+    {
+        // the graph to which this unit will add edges
+        private SimpleGraph<PatchAndIndex,IndexPair> graph;
+        // any edge added will include the following patch and index ...
+        private int index;
+        private ImmutablePatch patch;
+        // ... and one of the following
+        private List<PatchAndIndex> patchList;
+
+        public MultiStagePatchEnsembleWorkUnit(SimpleGraph<PatchAndIndex,IndexPair> graph, int index, ImmutablePatch patch, List<PatchAndIndex> patchList)
+        {
+            this.graph = graph;
+            this.index = index;
+            this.patch = patch;
+            this.patchList = patchList;
+        }
+
+        public MultiStagePatchEnsembleResult call()
+        {
+            PatchAndIndex newVertex = new PatchAndIndex(patch,index);
+            int result = 0;
+            for (PatchAndIndex pi : patchList) {
+                if (pi.getIndex()!=index&&pi.compatible(newVertex)) {
+                    result++;
+                    synchronized (graph) {
+                        if (result==1) graph.addVertex(newVertex);
+                        graph.addEdge(newVertex,pi,new IndexPair(index,pi.getIndex()));
+                    }
+                }
+            }
+            return new MultiStagePatchEnsembleResult(result);
+        }
+    } // end of class MultiStagePatchEnsembleWorkUnit
 
     private class PatchEnsembleResult implements Result
     {
@@ -290,7 +325,27 @@ public class PatchEnsemble implements Serializable {
         {
             return compatible.size() + " pairs";
         }
-    }
+    } // end of class PatchEnsembleResult
+
+    private class MultiStagePatchEnsembleResult implements Result
+    {
+        private int edgesAdded;
+
+        public MultiStagePatchEnsembleResult(int edgesAdded)
+        {
+            this.edgesAdded = edgesAdded;
+        }
+
+        public int getEdgesAdded()
+        {
+            return edgesAdded;
+        }
+
+        public String toString()
+        {
+            return edgesAdded + " edges added";
+        }
+    } // end of class MultiStagePatchEnsembleResult
 
     // private constructor
     // we assume the TriangleResults are entered in the same order
@@ -416,30 +471,69 @@ public class PatchEnsemble implements Serializable {
 
         for (int i = 0; i < M; i++) { // iterate through all input files
             int vcount = 0;
+            int trueVcount = 0;
             int ecount = 0;
             String inPrefix = fileNames[i];
             int j = 0;
+            // convert set to list
+            List<PatchAndIndex> patchList = new LinkedList<PatchAndIndex>(patches.vertexSet());
+            // make a list of futures for the work units
+            LinkedList<Future<Result>> listOfFutures = new LinkedList<>();
+
             String filename = inPrefix + i + String.format("-%08d-interim.chk",j);
-            System.out.print("Loading " + i + "-vertices ... ");
+            System.out.println("Loading " + i + "-vertices ... ");
 
             while (new File(filename).isFile()) { // here begins deserialization
+                System.out.println("Reading from file " + filename + ".");
                 try
                     {
                         FileInputStream fileIn = new FileInputStream(filename);
                         ObjectInputStream in = new ObjectInputStream(fileIn);
                         for (ImmutablePatch p : ((TriangleResults)in.readObject()).getPatches()) {
-                            PatchAndIndex newVertex = new PatchAndIndex(p,i);
-                            patches.addVertex(newVertex);
                             vcount++;
-                            // now add edges to all compatible vertices
-                            for (PatchAndIndex pi : patches.vertexSet()) {
-                                if (pi.getIndex()!=i&&newVertex.compatible(pi)) {
-                                    patches.addEdge(pi,newVertex,new IndexPair(i,pi.getIndex()));
-                                    ecount++;
-                                }
-                            }
+                            listOfFutures.add(GeneralThreadService.INSTANCE.getExecutor().submit(new MultiStagePatchEnsembleWorkUnit(patches,i,p,patchList)));
                         }
-                        //System.out.println(filename + " has been read. ");
+
+                        // poll the futures
+                        while (true)
+                            {
+                                // poll every 250 milliseconds
+                                try
+                                    {
+                                        Thread.sleep(250L);
+                                    }
+                                catch (InterruptedException e)
+                                    {
+                                    }
+
+                                int numberComplete = 0;
+                                for (Future<Result> thisFuture : listOfFutures)
+                                    {
+                                        if ( thisFuture.isDone() )
+                                            numberComplete++;
+                                    }
+                                System.out.print(String.format("%d of %d work units complete\r", numberComplete, listOfFutures.size()));
+                                if ( numberComplete == listOfFutures.size() )
+                                    break;
+                            }
+                        System.out.println();
+
+                        // count how many edges have been added
+                        for (Future<Result> thisFuture : listOfFutures)
+                            {
+                                try
+                                    {
+                                        int numEdges = ((MultiStagePatchEnsembleResult)thisFuture.get()).getEdgesAdded();
+                                        if (numEdges>0) trueVcount++;
+                                        ecount += numEdges;
+                                    }
+                                catch (Exception e)
+                                    {
+                                        e.printStackTrace();
+                                    }
+                            }
+
+
                     }
                 catch (Exception e)
                     {
@@ -447,6 +541,7 @@ public class PatchEnsemble implements Serializable {
                         System.exit(1);
                     }
 
+                System.out.println("Done reading from file " + filename + ".");
                 j++;
                 filename = inPrefix + i + String.format("-%08d-interim.chk",j);
             } // here ends deserialization of interim files
@@ -459,27 +554,61 @@ public class PatchEnsemble implements Serializable {
                         FileInputStream fileIn = new FileInputStream(filename);
                         ObjectInputStream in = new ObjectInputStream(fileIn);
                         for (ImmutablePatch p : ((TriangleResults)in.readObject()).getPatches()) {
-                            PatchAndIndex newVertex = new PatchAndIndex(p,i);
-                            patches.addVertex(newVertex);
                             vcount++;
-                            // now add edges to all compatible vertices
-                            for (PatchAndIndex pi : patches.vertexSet()) {
-                                if (pi.getIndex()!=i&&newVertex.compatible(pi)) {
-                                    patches.addEdge(pi,newVertex,new IndexPair(i,pi.getIndex()));
-                                    ecount++;
-                                }
-                            }
+                            listOfFutures.add(GeneralThreadService.INSTANCE.getExecutor().submit(new MultiStagePatchEnsembleWorkUnit(patches,i,p,patchList)));
                         }
-                        //System.out.println(filename + " has been read. ");
+
+                        // poll the futures
+                        while (true)
+                            {
+                                // poll every 250 milliseconds
+                                try
+                                    {
+                                        Thread.sleep(250L);
+                                    }
+                                catch (InterruptedException e)
+                                    {
+                                    }
+
+                                int numberComplete = 0;
+                                for (Future<Result> thisFuture : listOfFutures)
+                                    {
+                                        if ( thisFuture.isDone() )
+                                            numberComplete++;
+                                    }
+                                System.out.print(String.format("%d of %d work units complete\r", numberComplete, listOfFutures.size()));
+                                if ( numberComplete == listOfFutures.size() )
+                                    break;
+                            }
+                        System.out.println();
+
+                        // count how many edges have been added
+                        for (Future<Result> thisFuture : listOfFutures)
+                            {
+                                try
+                                    {
+                                        int numEdges = ((MultiStagePatchEnsembleResult)thisFuture.get()).getEdgesAdded();
+                                        if (numEdges>0) trueVcount++;
+                                        ecount += numEdges;
+                                    }
+                                catch (Exception e)
+                                    {
+                                        e.printStackTrace();
+                                    }
+                            }
+
+
                     }
                 catch (Exception e)
                     {
                         e.printStackTrace();
                         System.exit(1);
                     }
+
+                System.out.println("Done reading from file " + filename + ".");
             } // here ends deserialization of final file
 
-            System.out.println("done loading " + i + "-vertices. Loaded " + vcount + " vertices.");
+            System.out.println("Done loading " + i + "-vertices. Loaded " + vcount + " vertices, of which " + trueVcount + " were included in the graph.");
             System.out.println("Built " + ecount + " edges.");
 
             // drop all vertices that don't have neighbours of 

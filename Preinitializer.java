@@ -99,13 +99,13 @@ class Preinitializer {
                                  ImmutableList.of( 1, 5, 5 ),  // eleven
                                  ImmutableList.of( 2, 4, 5 ),  // eleven
                                  ImmutableList.of( 2, 3, 6 ),  // eleven
-                                 ImmutableList.of( 3, 3, 5 ),   // eleven
+                                 ImmutableList.of( 3, 3, 5 )    // eleven
                                  // extra
                                  //ImmutableList.of( 1, 1, 9 ),  // eleven
                                  //ImmutableList.of( 1, 2, 8 ),  // eleven
-                                 ImmutableList.of( 1, 3, 7 ),  // eleven
-                                 ImmutableList.of( 2, 2, 7 ),  // eleven
-                                 ImmutableList.of( 3, 4, 4 )   // eleven
+                                 //ImmutableList.of( 1, 3, 7 ),  // eleven
+                                 //ImmutableList.of( 2, 2, 7 ),  // eleven
+                                 //ImmutableList.of( 3, 4, 4 )   // eleven
                                          );
 
     public static final ImmutableList<Integer> SEARCH_TILE = // a lot of options
