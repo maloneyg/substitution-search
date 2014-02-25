@@ -294,6 +294,11 @@ public class PatchEnsemble implements Serializable {
         {
             PatchAndIndex newVertex = new PatchAndIndex(patch,index);
             int result = 0;
+            // if we're on index 0, we add the vertex and return
+            if (index==0) {
+                graph.addVertex(newVertex);
+                return new MultiStagePatchEnsembleResult(result);
+            }
             for (PatchAndIndex pi : patchList) {
                 if (pi.getIndex()!=index&&pi.compatible(newVertex)) {
                     result++;
@@ -608,7 +613,7 @@ public class PatchEnsemble implements Serializable {
                 System.out.println("Done reading from file " + filename + ".");
             } // here ends deserialization of final file
 
-            System.out.println("Done loading " + i + "-vertices. Loaded " + vcount + " vertices, of which " + trueVcount + " were included in the graph.");
+            System.out.println("Done loading " + i + "-vertices. Loaded " + vcount + " vertices, of which " + ((i==0) ? vcount : trueVcount) + " were included in the graph.");
             System.out.println("Built " + ecount + " edges.");
 
             // drop all vertices that don't have neighbours of 
