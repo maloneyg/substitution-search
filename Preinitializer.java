@@ -55,6 +55,7 @@ class Preinitializer {
     public static final String INTERIM_RESULT_FILENAME = "interim.chk";
     public static final String INTERIM_RESULT_BACKUP_FILENAME = "interim_backup.chk";
 
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1); // a
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, 1); // small search. turned up in some calculations, so I thought I'd try it. (1+b)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1); // really small search. might as well try it (2+a)
@@ -74,12 +75,12 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search (104)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, 0, 1); // c (107)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, 0, 1); // c (107)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, 0, 1); // 1 + c (108)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -1, 0, 1); // a + c (109)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, 0, 1); // quite big search (110)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -3, 0, 1); // (114)
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -3, 0, 1); // (114)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 0, -3, 0, 1); // huge search (115)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
@@ -92,9 +93,13 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -2, 0, 1); // 1 + b + d 
 
     public static final ImmutableList<ImmutableList<Integer>> PROTOTILES = ImmutableList.of( 
+                             //  ImmutableList.of( 1, 1, 3 ),  // five
+                             //  ImmutableList.of( 1, 2, 2 )   // five
+                             //
                              //  ImmutableList.of( 1, 2, 4 ),  // seven
                              //  ImmutableList.of( 1, 3, 3 ),  // seven
                              //  ImmutableList.of( 2, 2, 3 )   // seven
+                             //
                                  ImmutableList.of( 1, 4, 6 ),  // eleven
                                  ImmutableList.of( 1, 5, 5 ),  // eleven
                                  ImmutableList.of( 2, 4, 5 ),  // eleven
@@ -103,9 +108,9 @@ class Preinitializer {
                                  // extra
                                  //ImmutableList.of( 1, 1, 9 ),  // eleven
                                  //ImmutableList.of( 1, 2, 8 ),  // eleven
-                                 ImmutableList.of( 1, 3, 7 ),  // eleven
-                                 ImmutableList.of( 2, 2, 7 ),  // eleven
-                                 ImmutableList.of( 3, 4, 4 )   // eleven
+                                   ImmutableList.of( 1, 3, 7 ),  // eleven
+                                   ImmutableList.of( 2, 2, 7 ),  // eleven
+                                   ImmutableList.of( 3, 4, 4 )   // eleven
                                          );
 
     public static final ImmutableList<Integer> SEARCH_TILE = // a lot of options

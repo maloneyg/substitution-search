@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 public class GeneralThreadService
 {
     public static final GeneralThreadService INSTANCE = new GeneralThreadService();
-    public final int NUMBER_OF_THREADS         = 1;//Preinitializer.NUMBER_OF_THREADS;
+    public final int NUMBER_OF_THREADS         = Preinitializer.NUMBER_OF_THREADS;
     public static final int JOB_CAPACITY       = 10000000;                                 // how many jobs can wait in the queue at a time
 
     private final CustomThreadPoolExecutor executorService;
