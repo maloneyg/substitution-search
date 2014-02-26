@@ -275,14 +275,22 @@ public class PatchEnsemble implements Serializable {
     private class MultiStagePatchEnsembleWorkUnit implements WorkUnit
     {
         // the graph to which this unit will add edges
-        private SimpleGraph<PatchAndIndex,IndexPair> graph;
+        private static SimpleGraph<PatchAndIndex,IndexPair> graph = null;
         // any edge added will include the following patch and index ...
         private int index;
         private ImmutablePatch patch;
         // ... and one of the following
-        private List<PatchAndIndex> patchList;
+        private static List<PatchAndIndex> patchList;
 
-        public MultiStagePatchEnsembleWorkUnit(SimpleGraph<PatchAndIndex,IndexPair> graph, int index, ImmutablePatch patch, List<PatchAndIndex> patchList)
+        public void setGraph(SimpleGraph<PatchAndIndex,IndexPair> g) {
+            graph = g;
+        }
+
+        public void setPatchList(List<PatchAndIndex> pl) {
+            patchList = pl;
+        }
+
+        public MultiStagePatchEnsembleWorkUnit(int index, ImmutablePatch patch)
         {
             this.graph = graph;
             this.index = index;
@@ -475,6 +483,7 @@ public class PatchEnsemble implements Serializable {
         System.out.println("Building PatchEnsemble.");
         breakdown = bd;
         patches = new SimpleGraph<>(IndexPair.class);
+        MultiStagePatchEnsembleWorkUnit.setGraph(patches);
 
         for (int i = 0; i < M; i++) { // iterate through all input files
             int vcount = 0;
@@ -484,6 +493,7 @@ public class PatchEnsemble implements Serializable {
             int j = 0;
             // convert set to list
             List<PatchAndIndex> patchList = ImmutableList.copyOf(new LinkedList<PatchAndIndex>(patches.vertexSet()));
+            MultiStagePatchEnsembleWorkUnit.setPatchList(patchList);
             // make a list of futures for the work units
             LinkedList<Future<Result>> listOfFutures = new LinkedList<>();
 
@@ -498,7 +508,7 @@ public class PatchEnsemble implements Serializable {
                         ObjectInputStream in = new ObjectInputStream(fileIn);
                         for (ImmutablePatch p : ((TriangleResults)in.readObject()).getPatches()) {
                             vcount++;
-                            listOfFutures.add(GeneralThreadService.INSTANCE.getExecutor().submit(new MultiStagePatchEnsembleWorkUnit(patches,i,p,patchList)));
+                            listOfFutures.add(GeneralThreadService.INSTANCE.getExecutor().submit(new MultiStagePatchEnsembleWorkUnit(i,p)));
                         }
 
                         // poll the futures
