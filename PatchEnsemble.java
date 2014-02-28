@@ -231,6 +231,8 @@ public class PatchEnsemble implements Serializable {
     // the edge breakdowns that appear in at least one substitution rule for
     // each prototile that contains an edge of the corresponding size
     private EdgeBreakdownTree breakdown;
+    // a flag that tells us whether or not to drop stuff if it doesn't have matches
+    private static boolean drop = true;
 
     private class PatchEnsembleWorkUnit implements WorkUnit
     {
@@ -299,6 +301,8 @@ public class PatchEnsemble implements Serializable {
                 synchronized (graph) {
                     graph.addVertex(newVertex);
                 }
+            }
+            if (index==0) {
                 return new MultiStagePatchEnsembleResult(result);
             }
             for (PatchAndIndex pi : patchList) {
@@ -558,11 +562,13 @@ public class PatchEnsemble implements Serializable {
             System.out.println("Done loading " + i + "-vertices. Loaded " + vcount + " vertices, of which " + ((i==0) ? patches.vertexSet().size() : trueVcount) + " were included in the graph.");
             System.out.println("Built " + ecount + " edges.");
 
-            // drop all vertices that don't have neighbours of 
-            // all indices up to i
-            System.out.print("Expunging lone vertices ... ");
-            System.out.println("Dropped " + this.dropLoners(i) + " vertices.");
-            System.out.println("done expunging lone vertices. " + patches.vertexSet().size() + " vertices remaining.");
+            if (drop) {
+                // drop all vertices that don't have neighbours of 
+                // all indices up to i
+                System.out.print("Expunging lone vertices ... ");
+                System.out.println("Dropped " + this.dropLoners(i) + " vertices.");
+                System.out.println("done expunging lone vertices. " + patches.vertexSet().size() + " vertices remaining.");
+            }
         } // here ends iteration through input files
 
     } // private constructor ends here
@@ -758,6 +764,11 @@ public class PatchEnsemble implements Serializable {
         return patches.vertexSet().size();
     }
 
+    // toggle the drop flag on and off
+    public static void setDrop(boolean tf) {
+        drop = tf;
+    }
+
     // equals method.
     // very broken. for now they're all equal.
     public boolean equals(Object obj) {
@@ -838,18 +849,10 @@ public class PatchEnsemble implements Serializable {
 
         List<TriangleResults> resultsList = new LinkedList<>();
         String[] files = new String[Preinitializer.PROTOTILES.size()];
-//        files[0] = "seven/tile";
-//        files[1] = "seven/tile";
-//        files[2] = "seven/tile";
-//        files[0] = "interim/tile";
-//        files[1] = "interim/tile";
-//        files[2] = "interim/tile";
-//        files[3] = "interim/tile";
-//        files[4] = "interim/tile";
-//        files[5] = "interim/tile";
         for (int k = 0; k < files.length; k++) files[k] = args[0];
 
-        PatchAndIndex.setFullCompatibility(true);
+        PatchAndIndex.setFullCompatibility(false);
+        PatchEnsemble.setDrop(true);
 
         PatchEnsemble testo = createPatchEnsemble(files, PuzzleBoundary.BREAKDOWNS);
         //PatchEnsemble testo = createPatchEnsemble(files);
