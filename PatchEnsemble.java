@@ -502,9 +502,9 @@ public class PatchEnsemble implements Serializable {
                         ObjectInputStream in = new ObjectInputStream(fileIn);
                         for (ImmutablePatch p : ((TriangleResults)in.readObject()).getPatches()) {
                             vcount++;
-                            synchronized (patches) {
+                            //synchronized (patches) {
                                 listOfFutures.add(GeneralThreadService.INSTANCE.getExecutor().submit(new MultiStagePatchEnsembleWorkUnit(patches,i,p,patchList)));
-                            }
+                            //}
                         }
 
                         // poll the futures

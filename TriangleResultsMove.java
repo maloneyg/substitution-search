@@ -63,6 +63,7 @@ public class TriangleResultsMove
 //                    if (p1.getEdge1().compatible(otherpatches.get(j).getEdge2().reverse())) movedPatches.add(p1.combine(otherpatches.get(j),1,2,false));
 //                }
             }
+            System.out.println(movedPatches.size() + " isosceles triangles.");
             try
                 {
                     PointsDisplay display = new PointsDisplay(movedPatches,filename);

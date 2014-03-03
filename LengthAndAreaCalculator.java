@@ -340,8 +340,10 @@ final public class LengthAndAreaCalculator {
         System.out.println("\nGood stuff:\n");
         ShortPolynomial dinv = ShortPolynomial.createShortPolynomial(new short[] {(short)1,(short)2,(short)-3,(short)-1,(short)1});
         ShortPolynomial ainv = ShortPolynomial.createShortPolynomial(new short[] {(short)3,(short)3,(short)-4,(short)-1,(short)1});
-        System.out.println((ShortPolynomial.createShortPolynomial(Preinitializer.INFL).times(getLengthPolynomial(3))).times(dinv).mod(MIN_POLY));
-        //System.out.println((ShortPolynomial.createShortPolynomial(Preinitializer.INFL).times(getLengthPolynomial(4))).times(ainv).mod(MIN_POLY));
+        //System.out.println((ShortPolynomial.createShortPolynomial(Preinitializer.INFL).times(getLengthPolynomial(3))).times(dinv).mod(MIN_POLY));
+        System.out.println("times b: " + (ShortPolynomial.createShortPolynomial(Preinitializer.INFL).times(getLengthPolynomial(2))).mod(MIN_POLY));
+        System.out.println("times c: " + (ShortPolynomial.createShortPolynomial(Preinitializer.INFL).times(getLengthPolynomial(3))).mod(MIN_POLY));
+        System.out.println("times d: " + (ShortPolynomial.createShortPolynomial(Preinitializer.INFL).times(getLengthPolynomial(4))).mod(MIN_POLY));
     }
 
 } // end of class LengthAndAreaCalculator
