@@ -18,7 +18,7 @@ class Preinitializer {
 
     public static final int N = 11;             // the order of symmetry
 
-    public static final int MY_TILE = 1;        // the tile we're searching
+    public static final int MY_TILE = 0;        // the tile we're searching
 
     public static final float EP = 0.000001f;  // threshold value
 
@@ -55,7 +55,7 @@ class Preinitializer {
     public static final String INTERIM_RESULT_FILENAME = "interim.chk";
     public static final String INTERIM_RESULT_BACKUP_FILENAME = "interim_backup.chk";
 
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, -3, 1, 1); // a+c+d 
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, -3, 1, 1); // a+c+d 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, -2, 1, 1); // b+c+d 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -2, 0, 1); // 1+b+d 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1); // a
@@ -76,7 +76,7 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(3, 0, -6, 0, 2); // we're really scraping the bottom of the barrel here.  (2d+1)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2, 1); // the square of the really small search (1+a)^2 won't work with tile 3 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search (104)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, 0, 1); // c (107)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, 0, 1); // 1 + c (108)
@@ -103,14 +103,15 @@ class Preinitializer {
                              //  ImmutableList.of( 1, 3, 3 ),  // seven
                              //  ImmutableList.of( 2, 2, 3 )   // seven
                              //
-                                 ImmutableList.of( 1, 4, 6 ),  // eleven
                                  ImmutableList.of( 1, 5, 5 ),  // eleven
+                                 ImmutableList.of( 1, 4, 6 ),  // eleven
                                  ImmutableList.of( 2, 4, 5 ),  // eleven
                                  ImmutableList.of( 2, 3, 6 ),  // eleven
                                  ImmutableList.of( 3, 3, 5 )   // eleven
                                  // extra
                                  //ImmutableList.of( 2, 3, 6 )   // eleven
-                                 //ImmutableList.of( 1, 5, 5 )   // eleven
+                                 //ImmutableList.of( 1, 5, 5 ),  // eleven
+                                 //ImmutableList.of( 3, 3, 5 )   // eleven
                                  //ImmutableList.of( 2, 4, 5 ),  // eleven
                                  //ImmutableList.of( 1, 4, 6 )   // eleven
                                  //ImmutableList.of( 1, 1, 9 ),  // eleven
@@ -118,6 +119,13 @@ class Preinitializer {
                                  //ImmutableList.of( 1, 3, 7 ),  // eleven
                                  //ImmutableList.of( 2, 2, 7 ),  // eleven
                                  //ImmutableList.of( 3, 4, 4 )   // eleven
+                             //
+                             //  ImmutableList.of( 1, 5, 7 ),  // thirteen
+                             //  ImmutableList.of( 1, 6, 6 ),  // thirteen
+                             //  ImmutableList.of( 2, 4, 7 ),  // thirteen
+                             //  ImmutableList.of( 2, 5, 6 ),  // thirteen
+                             //  ImmutableList.of( 3, 3, 7 ),  // thirteen
+                             //  ImmutableList.of( 3, 4, 6 )   // thirteen
                                          );
 
     public static final ImmutableList<Integer> SEARCH_TILE = // a lot of options

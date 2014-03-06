@@ -208,6 +208,8 @@ class Initializer {
 
         INFLATED_LENGTHS = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.LENGTH_MATRIX.inverse()).times(otherInfl).times(LengthAndAreaCalculator.LENGTH_MATRIX));
         SUBSTITUTION_MATRIX = LengthAndAreaCalculator.MatrixToByteMatrix((AREA_MATRIX.getMatrix(0,DEG-1,0,DEG-1).inverse()).times(otherInfl).times(otherInfl).times(AREA_MATRIX));
+//        System.out.println("RS = " + LengthAndAreaCalculator.MatrixToByteMatrix(otherInfl.times(otherInfl).times(AREA_MATRIX)));
+//        System.out.println("LS = " + LengthAndAreaCalculator.MatrixToByteMatrix(AREA_MATRIX));
         NULL_MATRIX = (AREA_MATRIX.getColumnDimension() > DEG) ? LengthAndAreaCalculator.MatrixToByteMatrix((AREA_MATRIX.getMatrix(0,DEG-1,0,DEG-1).inverse()).times(AREA_MATRIX.getMatrix(0,DEG-1,DEG,AREA_MATRIX.getColumnDimension()-1))) : null;
         TILE_LIST = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.AREA_MATRIX.getMatrix(0,DEG-1,0,DEG-1).inverse()).times(otherInfl).times(otherInfl).times(LengthAndAreaCalculator.SEARCH_AREA_COLUMN));
 
@@ -286,7 +288,7 @@ class Initializer {
         System.out.println(SUBSTITUTION_MATRIX);
         System.out.println("NULL_MATRIX");
         System.out.println((NULL_MATRIX==null) ? "null" : NULL_MATRIX);
-        System.out.println(NULL_MATRIX.getColumnDimension() + " " + NULL_MATRIX.getRowDimension());
+        //System.out.println(NULL_MATRIX.getColumnDimension() + " " + NULL_MATRIX.getRowDimension());
         System.out.println("TILE_LIST");
         System.out.println(TILE_LIST);
 
