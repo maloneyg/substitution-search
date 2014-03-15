@@ -22,6 +22,11 @@ class Preinitializer {
 
     public static final float EP = 0.000001f;  // threshold value
 
+    // very important flag
+    // says whether or not we are using a canonical set of isosceles 
+    // triangles as prototiles
+    public static final boolean ISOSCELES = true; //
+
     //public static final int BATCH_SIZE = 1; // number of jobs to make per set of instructions
 
     public static final String HOST_NAME; // name of host clients will use; set in static initializer
@@ -95,7 +100,30 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -1, 1, 1); // a + b + c 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -2, 0, 1); // 1 + b + d 
 
-    public static final ImmutableList<ImmutableList<Integer>> PROTOTILES = ImmutableList.of( 
+    // special isosceles prototiles
+    private static final ImmutableList<ImmutableList<Integer>> ISO;
+    // standard prototiles, the areas of which are used to compute
+    // the areas of the special isosceles prototiles
+    public static final ImmutableList<ImmutableList<Integer>> PREPROTOTILES;
+
+    static { // initialize ISO 
+
+        // note that even N will not work here
+        List<ImmutableList<Integer>> preIso = new LinkedList<>();
+        List<ImmutableList<Integer>> prePre = new LinkedList<>();
+        for (int i = 1; i <= N/2; i++) {
+            if (ByteMatrix.GCD(N,i)==1) preIso.add(ImmutableList.of(N-2*i,i,i));
+            prePre.add(ImmutableList.of((i+1)/2,N-(i+1)/2-N/2-(i%2),N/2+(i%2)));
+        }
+        ISO = ImmutableList.copyOf(preIso);
+        PREPROTOTILES = ImmutableList.copyOf(prePre);
+
+    } // end static initialization of ISO
+
+
+    public static final ImmutableList<ImmutableList<Integer>> PROTOTILES = 
+                       (ISOSCELES) ? ISO : //
+                       ImmutableList.of( //
                              //  ImmutableList.of( 1, 1, 3 ),  // five
                              //  ImmutableList.of( 1, 2, 2 )   // five
                              //

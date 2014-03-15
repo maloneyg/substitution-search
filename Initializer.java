@@ -46,7 +46,8 @@ class Initializer {
     */
     public enum EDGE_LENGTH {
         E01, E02, E03, E04, E05, E06, E07, E08, //
-        E09, E10, E11, E12, E13, E14, E15, E16  //
+        E09, E10, E11, E12, E13, E14, E15, E16, //
+        E17, E18, E19, E20, E21, E22, E23, E24  //
     }
 
     public static final Matrix AREA_MATRIX = LengthAndAreaCalculator.AREA_MATRIX;
@@ -68,6 +69,10 @@ class Initializer {
     /*
     * A ByteMatrix giving linear relations between the core prototile
     * areas and the extra prototile areas.
+    */
+    public static final ByteMatrix NULL_MATRIX;
+    /*
+    * likewise
     */
     public static final ByteMatrix NULL_MATRIX;
 
@@ -206,7 +211,9 @@ class Initializer {
         Matrix otherInfl = infl.evaluate(LengthAndAreaCalculator.AMAT);
         LENGTHS = ImmutableList.copyOf(preLengths);
 
-        INFLATED_LENGTHS = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.LENGTH_MATRIX.inverse()).times(otherInfl).times(LengthAndAreaCalculator.LENGTH_MATRIX));
+        INFLATED_LENGTHS = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.LENGTH_MATRIX.getMatrix(0,DEG-1,0,DEG-1).inverse()).times(otherInfl).times(LengthAndAreaCalculator.LENGTH_MATRIX));
+        LENGTH_NULL_MATRIX = (LENGTH_MATRIX.getColumnDimension() > DEG) ? LengthAndAreaCalculator.MatrixToByteMatrix((LENGTH_MATRIX.getMatrix(0,DEG-1,0,DEG-1).inverse()).times(LENGTH_MATRIX.getMatrix(0,DEG-1,DEG,LENGTH_MATRIX.getColumnDimension()-1))) : null;
+        INFLATED_LENGTHS = null;
         SUBSTITUTION_MATRIX = LengthAndAreaCalculator.MatrixToByteMatrix((AREA_MATRIX.getMatrix(0,DEG-1,0,DEG-1).inverse()).times(otherInfl).times(otherInfl).times(AREA_MATRIX));
 //        System.out.println("RS = " + LengthAndAreaCalculator.MatrixToByteMatrix(otherInfl.times(otherInfl).times(AREA_MATRIX)));
 //        System.out.println("LS = " + LengthAndAreaCalculator.MatrixToByteMatrix(AREA_MATRIX));
@@ -291,6 +298,20 @@ class Initializer {
         //System.out.println(NULL_MATRIX.getColumnDimension() + " " + NULL_MATRIX.getRowDimension());
         System.out.println("TILE_LIST");
         System.out.println(TILE_LIST);
+        System.out.println("PROTOTILES");
+        for (int i = 0; i < Preinitializer.PROTOTILES.size(); i++) {
+            for (int j = 0; j < 3; j++) {
+                System.out.print(Preinitializer.PROTOTILES.get(i).get(j) + " ");
+            }
+            System.out.print("\n");
+        }
+        System.out.println("PREPROTOTILES");
+        for (int i = 0; i < Preinitializer.PREPROTOTILES.size(); i++) {
+            for (int j = 0; j < 3; j++) {
+                System.out.print(Preinitializer.PREPROTOTILES.get(i).get(j) + " ");
+            }
+            System.out.print("\n");
+        }
 
     }
 

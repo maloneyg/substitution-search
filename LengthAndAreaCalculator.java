@@ -164,15 +164,19 @@ final public class LengthAndAreaCalculator {
         HALF_MIN_POLY = tempPoly.reParametrize((short)2);
 
         ShortPolynomial[] polyList = new ShortPolynomial[N/2];
+        // polynomials representing edge lengths of special isosceles triangles
+        ShortPolynomial[] otherPolyList = new ShortPolynomial[N/2+1];
         ShortPolynomial[] cosList = new ShortPolynomial[N/2+1];
         ShortPolynomial[] sinList = new ShortPolynomial[N/2];
         for (int i = 0; i < N/2; i++) {
             polyList[i] = ShortPolynomial.tschebyshev((short)i).mod(MIN_POLY);
+            otherPolyList[i] = (i==0) ? polyList[i] : polyList[i].plus(polyList[i-1]);
             cosList[i] = ShortPolynomial.T((short)i);
             sinList[i] = ShortPolynomial.U((short)i);
         }
+        otherPolyList[N/2] = polyList[N/2-1];
         cosList[N/2] = ShortPolynomial.T((short)(N/2));
-        LENGTH_MATRIX = ShortPolynomial.coefficientMatrix(polyList);
+        LENGTH_MATRIX = ShortPolynomial.coefficientMatrix((Preinitializer.ISOSCELES) ? otherPolyList : polyList);
         EDGE_LIST = ImmutableList.copyOf(polyList);
         COS_LIST = ImmutableList.copyOf(cosList);
         SIN_LIST = ImmutableList.copyOf(sinList);
