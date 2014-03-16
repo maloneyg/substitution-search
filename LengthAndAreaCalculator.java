@@ -44,8 +44,13 @@ final public class LengthAndAreaCalculator {
     public static final Matrix AMAT;
     // the coefficient matrix of the Tschebyshev polynomials up to N
     public static final Matrix LENGTH_MATRIX;
+    // adding up consecutive columns of previous matrix
+    // these are side lengths of special isosceles triangles
+    public static final Matrix ISOLENGTH_MATRIX;
     // the coefficient matrix of the area polynomials for the prototiles
     public static final Matrix AREA_MATRIX;
+    // likewise for the special isosceles prototiles
+    public static final Matrix ISOAREA_MATRIX;
     // the coefficient matrix of the area polynomial for the tile we're 
     // searching (which might not be one of the prototiles)
     // it's just a column matrix
@@ -176,7 +181,9 @@ final public class LengthAndAreaCalculator {
         }
         otherPolyList[N/2] = polyList[N/2-1];
         cosList[N/2] = ShortPolynomial.T((short)(N/2));
-        LENGTH_MATRIX = ShortPolynomial.coefficientMatrix((Preinitializer.ISOSCELES) ? otherPolyList : polyList);
+        // lengths of sides of standard, not special isosceles, prototiles
+        LENGTH_MATRIX = ShortPolynomial.coefficientMatrix(polyList);
+        ISOLENGTH_MATRIX = ShortPolynomial.coefficientMatrix(otherPolyList);
         EDGE_LIST = ImmutableList.copyOf(polyList);
         COS_LIST = ImmutableList.copyOf(cosList);
         SIN_LIST = ImmutableList.copyOf(sinList);
@@ -196,7 +203,10 @@ final public class LengthAndAreaCalculator {
         narrowAreas[0] = ShortPolynomial.ONE;
         for (int i = 1; i < N/2; i++)
             narrowAreas[i] = EDGE_LIST.get(i).times(EDGE_LIST.get(i)).minus(narrowAreas[i-1]);
-        ShortPolynomial[] prototileAreas = new ShortPolynomial[Preinitializer.PROTOTILES.size()];
+        // this has to do double duty
+        // if ISOSCELES, then it's areas of PREPROTOTILES
+        // otherwise it's areas of PROTOTILES
+        ShortPolynomial[] prototileAreas = new ShortPolynomial[(Preinitializer.ISOSCELES) ? Preinitializer.PREPROTOTILES.size() : Preinitializer.PROTOTILES.size()];
 
         // three int variables used in identifying which 
         // narrow triangle l represents
@@ -206,7 +216,7 @@ final public class LengthAndAreaCalculator {
         // the two angles in l that are less than 90 degrees
         int a0 = 0;
         int a1 = 0;
-        for (ImmutableList<Integer> l : Preinitializer.PROTOTILES) {
+        for (ImmutableList<Integer> l : ((Preinitializer.ISOSCELES) ? Preinitializer.PREPROTOTILES : Preinitializer.PROTOTILES)) {
             if (l.contains(1)) { // in this case l is a narrow triangle
                 secondMin = N; // the second-smallest angle
                 alreadyOne = 0;
@@ -245,8 +255,14 @@ final public class LengthAndAreaCalculator {
             }
         }
 
+        ShortPolynomial[] otherAreas = new ShortPolynomial[Preinitializer.PROTOTILES.size()];
+        for (int i = 0; i < otherAreas.length-1; i++) {
+            otherAreas[i] = (2*i < N/2-1) ? prototileAreas[2*i].plus(prototileAreas[2*i+1]) : prototileAreas[N-3-2*i].plus(prototileAreas[N-2*i-4]);
+        }
+        otherAreas[otherAreas.length-1] = prototileAreas[0];
 
         AREA_MATRIX = ShortPolynomial.coefficientMatrix(prototileAreas);
+        ISOAREA_MATRIX = ShortPolynomial.coefficientMatrix(otherAreas);
 
     } // initialization of area polynomials ends here
 

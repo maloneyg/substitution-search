@@ -35,6 +35,11 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
     */
     static final private ImmutableList<BytePoint> REPS;
 
+    /*
+    * Same thing, but for special isosceles triangles
+    */
+    static final private ImmutableList<BytePoint> ISOREPS;
+
     static { // initialize REPS. Use recursion.
         BytePoint[] preReps = new BytePoint[Math.max(2,LENGTHS.size())];
         preReps[0] = BytePoint.UNIT_VECTOR;
@@ -42,6 +47,13 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
         for (int i = 2; i < preReps.length; i++)
             preReps[i] = preReps[i-1].timesA().subtract(preReps[i-2]);
         REPS = ImmutableList.copyOf(preReps);
+
+        // now do ISOREPS
+        BytePoint[] preIso = new BytePoint[Preinitializer.PROTOTILES.size()-1];
+        for (int i = 0; i < preIso.length; i++) {
+            preIso[i] = preReps[i].add(preReps[i+1]);
+        }
+        ISOREPS = ImmutableList.copyOf(preIso);
 
         // initialize ALL_EDGE_LENGTHS.
         BasicEdgeLength[] preAllEdgeLengths = new BasicEdgeLength[LENGTHS.size()];
@@ -88,7 +100,7 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
         // with one end at the origin
         BytePoint[] preReps = new BytePoint[2 * N];
         BasicAngle a = BasicAngle.createBasicAngle(1);
-        preReps[0] = REPS.get(i);
+        preReps[0] = ((i<N/2) ? REPS : ISOREPS).get(i);
         for (int j = 1; j < 2*N; j++) preReps[j] = preReps[j-1].rotate(a);
         reps = ImmutableList.copyOf(preReps);
         // pick the correct length out of the main list

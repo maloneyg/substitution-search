@@ -25,7 +25,9 @@ class Preinitializer {
     // very important flag
     // says whether or not we are using a canonical set of isosceles 
     // triangles as prototiles
-    public static final boolean ISOSCELES = true; //
+    public static final boolean ISOSCELES = //
+                          //false; //
+                          true; //
 
     //public static final int BATCH_SIZE = 1; // number of jobs to make per set of instructions
 
@@ -81,14 +83,14 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(3, 0, -6, 0, 2); // we're really scraping the bottom of the barrel here.  (2d+1)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2, 1); // the square of the really small search (1+a)^2 won't work with tile 3 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search (104)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, 0, 1); // c (107)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, 0, 1); // 1 + c (108)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -1, 0, 1); // a + c (109)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, 0, 1); // quite big search (110)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -3, 0, 1); // (114)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -3, 0, 1); // (114)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 0, -3, 0, 1); // huge search (115)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
@@ -113,7 +115,7 @@ class Preinitializer {
         List<ImmutableList<Integer>> prePre = new LinkedList<>();
         for (int i = 1; i <= N/2; i++) {
             if (ByteMatrix.GCD(N,i)==1) preIso.add(ImmutableList.of(N-2*i,i,i));
-            prePre.add(ImmutableList.of((i+1)/2,N-(i+1)/2-N/2-(i%2),N/2+(i%2)));
+            prePre.add(ImmutableList.of((i+1)/2,N-(i+1)/2-N/2-((i+1)%2),N/2+((i+1)%2)));
         }
         ISO = ImmutableList.copyOf(preIso);
         PREPROTOTILES = ImmutableList.copyOf(prePre);
