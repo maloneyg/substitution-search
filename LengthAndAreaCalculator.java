@@ -179,7 +179,7 @@ final public class LengthAndAreaCalculator {
             cosList[i] = ShortPolynomial.T((short)i);
             sinList[i] = ShortPolynomial.U((short)i);
         }
-        otherPolyList[N/2] = polyList[N/2-1];
+        otherPolyList[N/2] = polyList[polyList.length-1];
         cosList[N/2] = ShortPolynomial.T((short)(N/2));
         // lengths of sides of standard, not special isosceles, prototiles
         LENGTH_MATRIX = ShortPolynomial.coefficientMatrix(polyList);

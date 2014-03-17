@@ -50,17 +50,19 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
 
         // now do ISOREPS
         BytePoint[] preIso = new BytePoint[Preinitializer.PROTOTILES.size()-1];
-        for (int i = 0; i < preIso.length; i++) {
-            preIso[i] = preReps[i].add(preReps[i+1]);
+        for (int i = 1; i < preIso.length; i++) {
+            preIso[i] = preReps[i].add(preReps[i-1]);
         }
+        preIso[0] = preReps[0];
+        preIso[preIso.length-1] = preReps[preReps.length-1];
         ISOREPS = ImmutableList.copyOf(preIso);
 
         // initialize ALL_EDGE_LENGTHS.
-        BasicEdgeLength[] preAllEdgeLengths = new BasicEdgeLength[LENGTHS.size()];
+        BasicEdgeLength[] preAllEdgeLengths = new BasicEdgeLength[((Preinitializer.ISOSCELES) ? ISOREPS.size() : 0) + LENGTHS.size()];
         for (int j = 0; j < LENGTHS.size(); j++)
             preAllEdgeLengths[j] = new BasicEdgeLength(j);
         ALL_EDGE_LENGTHS = ImmutableList.copyOf(preAllEdgeLengths);
-    }
+    } // here ends initialization of REPS and ISOREPS
 
     /*
     * The type of this edge length.
@@ -100,14 +102,16 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
         // with one end at the origin
         BytePoint[] preReps = new BytePoint[2 * N];
         BasicAngle a = BasicAngle.createBasicAngle(1);
-        preReps[0] = ((i<N/2) ? REPS : ISOREPS).get(i);
+        preReps[0] = (i<REPS.size()) ? REPS.get(i) : ISOREPS.get(i-REPS.size());
         for (int j = 1; j < 2*N; j++) preReps[j] = preReps[j-1].rotate(a);
         reps = ImmutableList.copyOf(preReps);
         // pick the correct length out of the main list
         length = LENGTHS.get(i);
+
         // get the number of each BasicEdgeLength occuring in 
         // inflated version of this.
-        ImmutableList<Integer> preList = Initializer.INFLATED_LENGTHS.getColumn(i);
+        // how we do it depends on if this is a special isosceles edge or not
+        ImmutableList<Integer> preList = (i<REPS.size()) ? Initializer.INFLATED_LENGTHS.getColumn(i) : Initializer.INFLATED_ISOLENGTHS.getColumn(i-REPS.size());
         // now turn it into a list of indices of BasicEdgeLengths.
         int numEdges = 0;
         for (Integer k : preList) numEdges += k;
@@ -122,12 +126,14 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
         breakdown = ImmutableList.copyOf(preBreakdown);
 
         // initialize orientationPool
-        ImmutableList<Integer> numOccurrences = Initializer.INFLATED_LENGTHS.getRow(i);
-        int kk = 0;
-        for (int j = 0; j < numOccurrences.size(); j++) kk += numOccurrences.get(j);
-        Orientation[] preO = new Orientation[kk];
-        for (int j = 0; j < preO.length; j++) preO[j] = Orientation.createOrientation();
-        orientationPool = ImmutableList.copyOf(preO);
+        // I think we only use one of these now
+        orientationPool = ImmutableList.of(Orientation.createOrientation());
+//        ImmutableList<Integer> numOccurrences = Initializer.INFLATED_LENGTHS.getRow(i);
+//        int kk = 0;
+//        for (int j = 0; j < numOccurrences.size(); j++) kk += numOccurrences.get(j);
+//        Orientation[] preO = new Orientation[kk];
+//        for (int j = 0; j < preO.length; j++) preO[j] = Orientation.createOrientation();
+//        orientationPool = ImmutableList.copyOf(preO);
 
         // initialize quantumTriangle
         List<BytePoint> preQT = new ArrayList<>();
