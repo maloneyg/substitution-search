@@ -137,21 +137,25 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
 
         // initialize quantumTriangle
         List<BytePoint> preQT = new ArrayList<>();
-        for (ImmutableList<Integer> L : Preinitializer.PROTOTILES) {
-            for (int j = 0; j < 3; j++) {
-                if (L.get(j)-1==i||Initializer.N-L.get(j)-1==i) {
-                    // get the next and previous angles in the list
-                    Integer ang1 = L.get((j+1)%3);
-                    Integer ang2 = L.get((j-1<0)? 2 : j-1);
-                    // get the length represented by the next angle
-                    BytePoint otherLength = REPS.get(Initializer.acute(ang1)-1);
-                    BytePoint newOne = otherLength.rotate(BasicAngle.createBasicAngle(ang2));
-                    if (!preQT.contains(newOne)) preQT.add(newOne);
-                    BytePoint newTwo = otherLength.rotate(BasicAngle.createBasicAngle(ang2).supplement()).add(REPS.get(i));
-                    if (!preQT.contains(newTwo)) preQT.add(newTwo);
+        if (i<REPS.size()) {
+            for (ImmutableList<Integer> L : (Preinitializer.ISOSCELES) ? Preinitializer.PREPROTOTILES : Preinitializer.PROTOTILES) {
+                for (int j = 0; j < 3; j++) {
+                    if (L.get(j)-1==i||Initializer.N-L.get(j)-1==i) {
+                        // get the next and previous angles in the list
+                        Integer ang1 = L.get((j+1)%3);
+                        Integer ang2 = L.get((j-1<0)? 2 : j-1);
+                        // get the length represented by the next angle
+                        BytePoint otherLength = REPS.get(Initializer.acute(ang1)-1);
+                        BytePoint newOne = otherLength.rotate(BasicAngle.createBasicAngle(ang2));
+                        if (!preQT.contains(newOne)) preQT.add(newOne);
+                        BytePoint newTwo = otherLength.rotate(BasicAngle.createBasicAngle(ang2).supplement()).add(REPS.get(i));
+                        if (!preQT.contains(newTwo)) preQT.add(newTwo);
+                    }
                 }
-            }
-        } // here ends initialization of quantumTriangle
+            } // here ends initialization of quantumTriangle
+        } else if (i-REPS.size()<ISOREPS.size()-1) {
+        } else {
+        }
         quantumTriangle = ImmutableList.copyOf(preQT);
     } // here ends constructor
 
