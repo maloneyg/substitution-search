@@ -671,30 +671,6 @@ public class EmptyBoundaryPatch implements Serializable {
                 return false;
             }
 
-            // make sure the new vertex doesn't overlap any open edges
-//            for (BasicEdge e : edges.open()) {
-//                if (e.incident(other)) {
-//                    if (debug) setMessage(t+"\n"+DebugMessage.INCIDENT_OPEN.toString());
-//                    return false;
-//                }
-//            }
-
-            // make sure the new vertex doesn't overlap any closed edges
-//            for (BasicEdge e : edges.closed()) {
-//                if (e.incident(other)) {
-//                    if (debug) setMessage(t +"\n"+ DebugMessage.INCIDENT_CLOSED.toString());
-//                    return false;
-//                }
-//            }
-
-            // make sure the new vertex isn't inside any placed triangles
-//            for (BasicTriangle tr : triangles) {
-//                if (tr.contains(other)) {
-//                    if (debug) setMessage(t +"\n"+ DebugMessage.OVERLAP.toString() +"\n"+ tr);
-//                    return false;
-//                }
-//            }
-
             // return false if the new vertex is too close to any open edge
             for (BasicEdge open : edges.open()) {
                 if (open.tooClose(other)) {
@@ -727,14 +703,6 @@ public class EmptyBoundaryPatch implements Serializable {
                 return false;
             }
 
-//            if (boundaryIncidence==1) break;
-//            for (BasicEdge open : edges.open()) {
-//                if (e.cross(open)) {
-//                    if (debug) setMessage(e +"\n"+ DebugMessage.CROSS_OPEN.toString() +"\n"+ open);
-//                    return false;
-//                }
-//            }
-
             if (boundaryIncidence==0) {
                 for (BasicEdge open : edges.open()) {
                     if (e.cross(open)) {
@@ -744,12 +712,6 @@ public class EmptyBoundaryPatch implements Serializable {
                 }
             }
 
-//            for (BasicEdge closed : edges.closed()) {
-//                if (e.cross(closed)) {
-//                    if (debug) setMessage(e +"\n"+ DebugMessage.CROSS_CLOSED.toString() +"\n"+ closed);
-//                    return false;
-//                }
-//            }
         }
 
         if (newVertex) { // start second-last edge check
@@ -769,60 +731,57 @@ public class EmptyBoundaryPatch implements Serializable {
             * further counterclockwise, because cw() and ccw()
             * were designed with reversed edges in mind.
             */
-            BasicEdge c1 = edges.getPenultimateEdge();
             BasicEdge c2 = BasicEdge.cw(newEdges[0],newEdges[1]);
 
-            /*
-            * Now there's an additional problem.  
-            * getPenultimateEdge() could return null.  This means
-            * that the ccw new edge is incident with the puzzle 
-            * boundary.  So we'll have to treat that case separately,
-            * using the puzzle boundary data, in particular, angles.
-            */
-            BasicAngle wedge = c2.angle().minus(((c1==null)? boundary.incidenceAngle(c2) : c1.angle()));//.piPlus());
+            if (!Preinitializer.ISOSCELES) {
+                BasicEdge c1 = edges.getPenultimateEdge();
+                /*
+                * Now there's an additional problem.  
+                * getPenultimateEdge() could return null.  
+                * If it does, this means
+                * that the ccw new edge is incident with the puzzle 
+                * boundary.  So we'll have to treat that case separately,
+                * using the puzzle boundary data, in particular, angles.
+                */
+                BasicAngle wedge = c2.angle().minus(((c1==null)? boundary.incidenceAngle(c2) : c1.angle()));
 
-            // if the new edge makes an angle of ONE with the 
-            // placed edges or puzzle boundary, there might
-            // be trouble.
-            if (wedge.equals(ONE)) {
-                if (c1==null) {
-                    if (!BasicPrototile.encloseAngleOne(c2)) {
-                        if (debug) setMessage("*****\n HIT " + wedge + "\n*****");
-                        //System.out.println("HIT: wedge " + wedge);
+                // if the new edge makes an angle of ONE with the 
+                // placed edges or puzzle boundary, there might
+                // be trouble.
+                if (wedge.equals(ONE)) {
+                    if (c1==null) {
+                        if (!BasicPrototile.encloseAngleOne(c2)) {
+                            if (debug) setMessage("*****\n HIT " + wedge + "\n*****");
+                            return false;
+                        } 
+                    } else {
+                        if (!BasicPrototile.encloseAngleOne(c1,c2)) {
+                            if (debug) setMessage("*****\n HIT " + wedge + "\n*****");
+                            return false;
+                        } 
+                    }
+                } // end if (wedge==ONE)
+
+                // now check to see if either edge has length 1
+                if (c1 == null) {
+                    if (SHORT.equals(c2.getLength())&&!BasicPrototile.mightTouchLengthOne(wedge)) {
+                        if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
                         return false;
-                    } 
-                } else {
-                    if (!BasicPrototile.encloseAngleOne(c1,c2)) {
-                        if (debug) setMessage("*****\n HIT " + wedge + "\n*****");
-                        //System.out.println("HIT: wedge " + wedge);
+                    }
+                } else { // c1 isn't null
+                    if (SHORT.equals(c2.getLength())&&!BasicPrototile.mightTouchLengthOne(c1.getLength(), wedge)) {
+                        if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
                         return false;
-                    } 
-                }
-            } // end if (wedge==ONE)
+                    } else if (SHORT.equals(c1.getLength())&&!BasicPrototile.mightTouchLengthOne(c2.getLength(), wedge)) {
+                        if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
+                        return false;
+                    }
 
-            // now check to see if either edge has length 1
-            if (c1 == null) {
-                if (SHORT.equals(c2.getLength())&&!BasicPrototile.mightTouchLengthOne(wedge)) {
-                    if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
-                    //System.out.println("HIT: short side");
-                    return false;
                 }
-            } else { // c1 isn't null
-                if (SHORT.equals(c2.getLength())&&!BasicPrototile.mightTouchLengthOne(c1.getLength(), wedge)) {
-                    if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
-                    //System.out.println("HIT: short side");
-                    return false;
-                } else if (SHORT.equals(c1.getLength())&&!BasicPrototile.mightTouchLengthOne(c2.getLength(), wedge)) {
-                    if (debug) setMessage("*****\n HIT " + wedge + "\nSHORT EDGE\n*****");
-                    //System.out.println("HIT: short side");
-                    return false;
-                }
-
-            }
+            } // end if (Preinitializer.ISOSCELES)
 
             if (!quantumFit(c2)) {
                 if (debug) setMessage("*****\n" + "quantum\n miss  " + "\n*****");
-                //System.out.println("QUANTUM MISS.");
                 return false;
 
             }
@@ -832,12 +791,11 @@ public class EmptyBoundaryPatch implements Serializable {
         // make sure the new triangle doesn't have any old vertices inside it
         if (coversVertex(t)) {
             if (debug) setMessage(t + DebugMessage.VERTEX_COVER.toString());
-            //System.out.println("COVERS VERTEX.");
             return false;
         }
 
         return true;
-    }
+    } // here ends compatible
 
     // check if a quantum tile might fit in here
     private boolean quantumFit(BasicEdge e) {

@@ -204,7 +204,7 @@ class Initializer {
         INFL = infl.evaluate(A);
 
         // select a subset of the edge lengths.
-        EDGE_LENGTH[] preLengths = new EDGE_LENGTH[(Preinitializer.ISOSCELES) ? N/2+N/2-1 : N/2];
+        EDGE_LENGTH[] preLengths = new EDGE_LENGTH[(Preinitializer.ISOSCELES) ? N/2+N/2+1 : N/2];
         for (int u = 0; u < preLengths.length; u++) {
             preLengths[u] = EDGE_LENGTH.values()[u];
         }

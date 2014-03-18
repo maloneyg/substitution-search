@@ -15,7 +15,11 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
     private static final int myTile = Preinitializer.MY_TILE;
 
     // the triangle we're searching
-    private static final BasicPrototile P0 = BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(myTile));
+    // if we're using special isosceles, then it's a preprototile,
+    // otherwise it's a prototile
+    private static final BasicPrototile P0 = (Preinitializer.ISOSCELES) ? //
+                    BasicPrototile.createPrePrototile(Preinitializer.PREPROTOTILES.get(myTile)) : //
+                    BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(myTile));  //
 
     // the numbers of the different prototiles that fit in INFL.P0
     private static final PrototileList tiles = PrototileList.createPrototileList(BasicPrototile.getPrototileList( //
@@ -55,10 +59,28 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
         start2 = Initializer.INFLATED_LENGTHS.getColumn(Initializer.acute(P0.getAngles()[2].getAsInt())-1);
         BasicAngle a = P0.getAngles()[1].piPlus();
         List<BasicEdge> preStarters = new ArrayList<>();
-        for (int i = 0; i < BasicEdgeLength.ALL_EDGE_LENGTHS.size(); i++) {
-            BasicEdgeLength l = BasicEdgeLength.ALL_EDGE_LENGTHS.get(i);
-            Orientation o = l.getOrientation(0);
-            if (start2.get(i) > 0) preStarters.add(BasicEdge.createBasicEdge(l,o,new BytePoint[] {bigVertices[0],bigVertices[0].add(l.getAsVector(a))}));
+        if (Preinitializer.ISOSCELES) {
+            int M = Initializer.INFLATED_LENGTHS.getColumnDimension();
+            for (int i = 0; i <= M; i++) {
+                BasicEdgeLength l = BasicEdgeLength.ALL_EDGE_LENGTHS.get(M+i);
+                Orientation o = l.getOrientation(0);
+                if (i==0) {
+                    if (start2.get(i) > 0)
+                        preStarters.add(BasicEdge.createBasicEdge(l,o,new BytePoint[] {bigVertices[0],bigVertices[0].add(l.getAsVector(a))}));
+                } else if (i==M) {
+                    if (start2.get(M-1) > 0)
+                        preStarters.add(BasicEdge.createBasicEdge(l,o,new BytePoint[] {bigVertices[0],bigVertices[0].add(l.getAsVector(a))}));
+                } else {
+                    if (start2.get(i) > 0 && start2.get(i-1) > 0)
+                        preStarters.add(BasicEdge.createBasicEdge(l,o,new BytePoint[] {bigVertices[0],bigVertices[0].add(l.getAsVector(a))}));
+                }
+            }
+        } else {
+            for (int i = 0; i < BasicEdgeLength.ALL_EDGE_LENGTHS.size(); i++) {
+                BasicEdgeLength l = BasicEdgeLength.ALL_EDGE_LENGTHS.get(i);
+                Orientation o = l.getOrientation(0);
+                if (start2.get(i) > 0) preStarters.add(BasicEdge.createBasicEdge(l,o,new BytePoint[] {bigVertices[0],bigVertices[0].add(l.getAsVector(a))}));
+            }
         }
         STARTERS = ImmutableList.copyOf(preStarters);
     } // static initialization of starters ends here

@@ -41,7 +41,7 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
     static final private ImmutableList<BytePoint> ISOREPS;
 
     static { // initialize REPS. Use recursion.
-        BytePoint[] preReps = new BytePoint[Math.max(2,LENGTHS.size())];
+        BytePoint[] preReps = new BytePoint[Math.max(2,N/2)];
         preReps[0] = BytePoint.UNIT_VECTOR;
         preReps[1] = BytePoint.UNIT_VECTOR.timesA();
         for (int i = 2; i < preReps.length; i++)
@@ -49,8 +49,8 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
         REPS = ImmutableList.copyOf(preReps);
 
         // now do ISOREPS
-        BytePoint[] preIso = new BytePoint[Preinitializer.PROTOTILES.size()-1];
-        for (int i = 1; i < preIso.length; i++) {
+        BytePoint[] preIso = new BytePoint[N/2+1];
+        for (int i = 1; i < preIso.length-1; i++) {
             preIso[i] = preReps[i].add(preReps[i-1]);
         }
         preIso[0] = preReps[0];
@@ -58,7 +58,7 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
         ISOREPS = ImmutableList.copyOf(preIso);
 
         // initialize ALL_EDGE_LENGTHS.
-        BasicEdgeLength[] preAllEdgeLengths = new BasicEdgeLength[((Preinitializer.ISOSCELES) ? ISOREPS.size() : 0) + LENGTHS.size()];
+        BasicEdgeLength[] preAllEdgeLengths = new BasicEdgeLength[LENGTHS.size()];
         for (int j = 0; j < LENGTHS.size(); j++)
             preAllEdgeLengths[j] = new BasicEdgeLength(j);
         ALL_EDGE_LENGTHS = ImmutableList.copyOf(preAllEdgeLengths);
@@ -172,7 +172,7 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
     // public static factory method
     static public BasicEdgeLength createBasicEdgeLength(int i) {
         if (i < 0 || i > ALL_EDGE_LENGTHS.size()-1)
-            throw new IllegalArgumentException("Incorrect edge length index.");
+            throw new IllegalArgumentException("Incorrect edge length index: " + i + ".");
         return ALL_EDGE_LENGTHS.get(i);
     }
 
@@ -254,6 +254,14 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
     */
     public static BasicEdgeLength rhombicLength() {
         return createBasicEdgeLength(ALL_EDGE_LENGTHS.size()-1);
+    }
+
+    /*
+    * return true if this is a rhombic edge
+    * return false if we're not using special isosceles
+    */
+    public static boolean rhombic(BasicEdgeLength e) {
+        return ((!Preinitializer.ISOSCELES)&&(ALL_EDGE_LENGTHS.get(ALL_EDGE_LENGTHS.size()-1).equals(e)));
     }
 
     public static void main(String[] args) {

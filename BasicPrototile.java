@@ -106,34 +106,41 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
     } // end initialization of ALL_PROTOTILES
 
     static { // initialize ONE_LENGTHS et. al.
-        List<ImmutableList<BasicEdgeLength>> preOneLengths = new ArrayList<>();
-        List<ImmutableList<BasicAngle>> preOneAngles = new ArrayList<>();
-        BasicEdgeLength ONE = BasicEdgeLength.createBasicEdgeLength(0);
-        BasicAngle preMinAngle = BasicAngle.createBasicAngle(Initializer.N/2);
-        for (BasicPrototile p : ALL_PROTOTILES) {
-            if (ONE.equals(p.lengths[0])||ONE.equals(p.lengths[1])||ONE.equals(p.lengths[2])) {
-                List<BasicEdgeLength> these = new ArrayList<>();
-                List<BasicAngle> those = new ArrayList<>();
-                for (int i = 0; i < 3; i++) {
-                    if (!ONE.equals(p.lengths[i])) {
-                        these.add(p.lengths[i]);
-                        those.add(p.angles[i]);
-                        preMinAngle = (preMinAngle.compareTo(p.angles[i])>-1)? p.angles[i] : preMinAngle;
+        if (Preinitializer.ISOSCELES) {
+            ONE_LENGTHS = null;
+            ONE_ANGLES = null;
+            MIN_ANGLE = null;
+            MIN_ANGLE_LENGTH = null;
+        } else {
+            List<ImmutableList<BasicEdgeLength>> preOneLengths = new ArrayList<>();
+            List<ImmutableList<BasicAngle>> preOneAngles = new ArrayList<>();
+            BasicEdgeLength ONE = BasicEdgeLength.createBasicEdgeLength(0);
+            BasicAngle preMinAngle = BasicAngle.createBasicAngle(Initializer.N/2);
+            for (BasicPrototile p : ALL_PROTOTILES) {
+                if (ONE.equals(p.lengths[0])||ONE.equals(p.lengths[1])||ONE.equals(p.lengths[2])) {
+                    List<BasicEdgeLength> these = new ArrayList<>();
+                    List<BasicAngle> those = new ArrayList<>();
+                    for (int i = 0; i < 3; i++) {
+                        if (!ONE.equals(p.lengths[i])) {
+                            these.add(p.lengths[i]);
+                            those.add(p.angles[i]);
+                            preMinAngle = (preMinAngle.compareTo(p.angles[i])>-1)? p.angles[i] : preMinAngle;
+                        }
                     }
+                    if (these.size()==1) {
+                        these.add(ONE);
+                        those.add(BasicAngle.createBasicAngle(1));
+                        preMinAngle = BasicAngle.createBasicAngle(1);
+                    }
+                    preOneLengths.add(ImmutableList.copyOf(these));
+                    preOneAngles.add(ImmutableList.copyOf(those));
                 }
-                if (these.size()==1) {
-                    these.add(ONE);
-                    those.add(BasicAngle.createBasicAngle(1));
-                    preMinAngle = BasicAngle.createBasicAngle(1);
-                }
-                preOneLengths.add(ImmutableList.copyOf(these));
-                preOneAngles.add(ImmutableList.copyOf(those));
             }
+            ONE_LENGTHS = ImmutableList.copyOf(preOneLengths);
+            ONE_ANGLES  = ImmutableList.copyOf(preOneAngles);
+            MIN_ANGLE = preMinAngle;
+            MIN_ANGLE_LENGTH = BasicEdgeLength.lengthOpposite(MIN_ANGLE.plus(BasicAngle.createBasicAngle(1)).supplement());
         }
-        ONE_LENGTHS = ImmutableList.copyOf(preOneLengths);
-        ONE_ANGLES  = ImmutableList.copyOf(preOneAngles);
-        MIN_ANGLE = preMinAngle;
-        MIN_ANGLE_LENGTH = BasicEdgeLength.lengthOpposite(MIN_ANGLE.plus(BasicAngle.createBasicAngle(1)).supplement());
     } // end initialization of ONE_LENGTHS
 
     // public static factory method
@@ -154,10 +161,34 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
     }
 
     // public static factory method
+    public static BasicPrototile createPrePrototile(int[] a) {
+        if (a.length != 3)
+            throw new IllegalArgumentException("A prototile needs 3 angles.");
+        if (a[0]+a[1]+a[2] != Initializer.N)
+            throw new IllegalArgumentException("Wrong angle sum for a prototile: "+a[0]+" + "+a[1]+" + "+a[2]+".");
+        BasicAngle a0 = BasicAngle.createBasicAngle(a[0]);
+        BasicAngle a1 = BasicAngle.createBasicAngle(a[1]);
+        BasicAngle a2 = BasicAngle.createBasicAngle(a[2]);
+        for (BasicPrototile p : ALL_PREPROTOTILES) {
+            List<BasicAngle> tempList = Arrays.asList(p.angles);
+            if (tempList.contains(a0)&&tempList.contains(a1)&&tempList.contains(a2))
+                return p;
+        }
+        throw new IllegalArgumentException("We aren't using the preprototile (" + a0+","+a1+","+a2+")");
+    }
+
+    // public static factory method
     public static BasicPrototile createBasicPrototile(ImmutableList<Integer> a) {
         if (a.size() != 3)
             throw new IllegalArgumentException("A prototile needs 3 angles.");
         return createBasicPrototile(new int[] {a.get(0),a.get(1),a.get(2)});
+    }
+
+    // public static factory method
+    public static BasicPrototile createPrePrototile(ImmutableList<Integer> a) {
+        if (a.size() != 3)
+            throw new IllegalArgumentException("A preprototile needs 3 angles.");
+        return createPrePrototile(new int[] {a.get(0),a.get(1),a.get(2)});
     }
 
     // public static factory method to return the first tile
