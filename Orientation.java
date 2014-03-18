@@ -13,6 +13,8 @@ public final class Orientation implements Serializable {
 
     // a pool of Orientations to be used on prototile edges
     private static final Orientation[] POOL;
+    // same, but for the rhombic edges of the special isosceles
+    private static final Orientation[] RHOMBIC_POOL;
     // an index to tell us where we are in the pool
     private static int poolDepth = 0;
 
@@ -28,6 +30,12 @@ public final class Orientation implements Serializable {
         for (int i = 0; i < prePool.length; i++) prePool[i] = new Orientation();
         POOL = prePool;
     } // here ends the initialization of the Orientation pool
+
+    static { // initialize the rhombic Orientation pool
+        Orientation[] prePool = new Orientation[Preinitializer.PROTOTILES.size()+1];
+        for (int i = 0; i < prePool.length; i++) prePool[i] = new Orientation();
+        RHOMBIC_POOL = prePool;
+    } // here ends the initialization of the rhombic Orientation pool
 
     // constructor methods.
     private Orientation(Orientation theOpposite) {
@@ -50,6 +58,10 @@ public final class Orientation implements Serializable {
         Orientation output = POOL[poolDepth];
         poolDepth = (poolDepth + 1)%POOL.length;
         return output;
+    }
+
+    static public Orientation getRhombicOrientation(int i) {
+        return RHOMBIC_POOL[i];
     }
 
     // implementation of equals method.  
