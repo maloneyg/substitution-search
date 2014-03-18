@@ -24,7 +24,7 @@ public final class Orientation implements Serializable {
     }
 
     static { // initialize the Orientation pool
-        Orientation[] prePool = new Orientation[3*Preinitializer.PROTOTILES.size()];
+        Orientation[] prePool = new Orientation[3*(Preinitializer.PROTOTILES.size()+((Preinitializer.ISOSCELES) ? Preinitializer.PREPROTOTILES.size() : 0))];
         for (int i = 0; i < prePool.length; i++) prePool[i] = new Orientation();
         POOL = prePool;
     } // here ends the initialization of the Orientation pool

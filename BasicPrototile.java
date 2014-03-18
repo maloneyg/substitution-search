@@ -24,6 +24,8 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
     private final Orientation[] flipOrientations;
 
     public static final ImmutableList<BasicPrototile> ALL_PROTOTILES;
+    // all the tiles that combine to make special isosceles
+    public static final ImmutableList<BasicPrototile> ALL_PREPROTOTILES;
     public static final ImmutableList<BasicEdgeLength> EDGE_LENGTHS = BasicEdgeLength.ALL_EDGE_LENGTHS;
 
     // necessary for validity testing in patch.
@@ -40,7 +42,8 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
     public static final BasicEdgeLength MIN_ANGLE_LENGTH;
 
     // private constructor
-    private BasicPrototile(ImmutableList<Integer> anglesList) {
+    // pre tells us if we're making a preprototile
+    private BasicPrototile(ImmutableList<Integer> anglesList, boolean pre) {
         angles = new BasicAngle[] { //
                              BasicAngle.createBasicAngle(anglesList.get(0)), //
                              BasicAngle.createBasicAngle(anglesList.get(1)), //
@@ -51,11 +54,18 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
                              angles[1], //
                              angles[0]  //
                                                    };  
-        lengths = new BasicEdgeLength[] { //
+        // are we loading a preprototile or a special isosceles?
+        lengths = (pre || !(Preinitializer.ISOSCELES)) ? //
+                  new BasicEdgeLength[] { //
                              BasicEdgeLength.lengthOpposite(angles[0]), //
                              BasicEdgeLength.lengthOpposite(angles[1]), //
                              BasicEdgeLength.lengthOpposite(angles[2])  //
-                                                              };  
+                                                              } : //
+                  new BasicEdgeLength[] { //
+                             BasicEdgeLength.isoLengthOpposite(angles[0]), //
+                             BasicEdgeLength.rhombicLength(), //
+                             BasicEdgeLength.rhombicLength()  //
+                                                              };  //
         flipLengths = new BasicEdgeLength[] { //
                              lengths[2], //
                              lengths[1], //
@@ -73,11 +83,24 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
                                                               };  
     }
 
+    static { // initialize ALL_PREPROTOTILES
+
+        if (Preinitializer.ISOSCELES) {
+            BasicPrototile[] tempAllPrototiles = new BasicPrototile[Preinitializer.PREPROTOTILES.size()];
+            for (int i = 0; i < Preinitializer.PREPROTOTILES.size(); i++)
+                tempAllPrototiles[i] = new BasicPrototile(Preinitializer.PREPROTOTILES.get(i),true);
+            ALL_PREPROTOTILES = ImmutableList.copyOf(tempAllPrototiles);
+        } else {
+            ALL_PREPROTOTILES = null;
+        }
+
+    } // end initialization of ALL_PROTOTILES
+
     static { // initialize ALL_PROTOTILES
 
         BasicPrototile[] tempAllPrototiles = new BasicPrototile[Initializer.PROTOTILES.size()];
         for (int i = 0; i < Initializer.PROTOTILES.size(); i++)
-            tempAllPrototiles[i] = new BasicPrototile(Initializer.PROTOTILES.get(i));
+            tempAllPrototiles[i] = new BasicPrototile(Initializer.PROTOTILES.get(i),false);
         ALL_PROTOTILES = ImmutableList.copyOf(tempAllPrototiles);
 
     } // end initialization of ALL_PROTOTILES

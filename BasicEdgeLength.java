@@ -154,7 +154,17 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
                 }
             } // here ends initialization of quantumTriangle
         } else if (i-REPS.size()<ISOREPS.size()-1) {
+            // just add one point (isosceles, vertex between equal edges)
+            preQT.add(REPS.get(REPS.size()-1).rotate(BasicAngle.createBasicAngle(N/2-i-REPS.size())));
         } else {
+            // this is the common edge length of all special isosceles
+            BytePoint theLength = REPS.get(REPS.size()-1);
+            for (int j = 0; j < N/2; j++) {
+                BytePoint newOne = theLength.rotate(BasicAngle.createBasicAngle(2*j+1));
+                BytePoint newTwo = theLength.rotate(BasicAngle.createBasicAngle(2*j+1).supplement()).add(theLength);
+                preQT.add(newOne);
+                preQT.add(newTwo);
+            }
         }
         quantumTriangle = ImmutableList.copyOf(preQT);
     } // here ends constructor
@@ -227,6 +237,23 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
         if (angleModN == 0 || angleModN == N)
             throw new IllegalArgumentException("There is no edge length opposite an angle of 0.");
         return createBasicEdgeLength(Math.min(angleModN, N - angleModN)- 1);
+    }
+
+    /*
+    * return the edge length opposite the given angle in a special isosceles.
+    */
+    public static BasicEdgeLength isoLengthOpposite(BasicAngle a) {
+        int angleModN = a.getAsInt() % N;
+        if (angleModN % 2 == 0)
+            throw new IllegalArgumentException("There is no edge length opposite an even angle.");
+        return createBasicEdgeLength(angleModN/2 + REPS.size());
+    }
+
+    /*
+    * return the edge length common to all special isosceles.
+    */
+    public static BasicEdgeLength rhombicLength() {
+        return createBasicEdgeLength(ALL_EDGE_LENGTHS.size()-1);
     }
 
     public static void main(String[] args) {
