@@ -56,12 +56,12 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
                                                    };  
         // are we loading a preprototile or a special isosceles?
         lengths = (pre || !(Preinitializer.ISOSCELES)) ? //
-                  new BasicEdgeLength[] { //
+                    new BasicEdgeLength[] { //
                              BasicEdgeLength.lengthOpposite(angles[0]), //
                              BasicEdgeLength.lengthOpposite(angles[1]), //
                              BasicEdgeLength.lengthOpposite(angles[2])  //
                                                               } : //
-                  new BasicEdgeLength[] { //
+                    new BasicEdgeLength[] { //
                              BasicEdgeLength.isoLengthOpposite(angles[0]), //
                              BasicEdgeLength.rhombicLength(), //
                              BasicEdgeLength.rhombicLength()  //
@@ -71,11 +71,19 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
                              lengths[1], //
                              lengths[0]  //
                                                               };  
-        orientations = new Orientation[] { //
-                             Orientation.getPooledOrientation(), //
-                             Orientation.getPooledOrientation(), //
-                             Orientation.getPooledOrientation()  //
-                                                              };  
+        int a1 = angles[1].getAsInt();
+        int M = Preinitializer.N/2;
+        orientations = (pre || !(Preinitializer.ISOSCELES)) ? //
+                    new Orientation[] { //
+                             Orientation.getPooledOrientation(),  //
+                             Orientation.getPooledOrientation(),  //
+                             Orientation.getPooledOrientation()   //
+                                                              } : //
+                    new Orientation[] { //
+                             Orientation.getPooledOrientation(),  //
+                             Orientation.getRhombicOrientation((2*a1<=M) ? Math.max(a1,M+1-a1) : Math.min(a1,M-a1)),  //
+                             Orientation.getRhombicOrientation((2*a1<=M) ? Math.min(a1,M-a1) : Math.max(a1,M+1-a1))   //
+                                                              };  //
         flipOrientations = new Orientation[] { //
                              orientations[2].getOpposite(), //
                              orientations[1].getOpposite(), //

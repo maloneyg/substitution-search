@@ -63,6 +63,8 @@ class Preinitializer {
     public static final String INTERIM_RESULT_BACKUP_FILENAME = "interim_backup.chk";
 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, -3, 1, 1); // a+c+d 
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -1, 1, 1); // a+b+c 
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -1, 1, 1); // 1+a+b+c 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, -2, 1, 1); // b+c+d 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -2, 0, 1); // 1+b+d 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1); // a
@@ -89,13 +91,17 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, 0, 1); // 1 + c (108)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -1, 0, 1); // a + c (109)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, 0, 1); // quite big search (110)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -2, 1, 1); // quite big search (111)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -3, 0, 1); // (114)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 0, -3, 0, 1); // huge search (115)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 0, -3, 0, 1); // 1+d (115)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(3, 0, -3, 0, 1); // 2+d (won't work at all)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 0, -6, 0, 2); // 2d
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1, -3, 0, 1); // huge search (116)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // superhuge search (117)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1, -3, 0, 1); // 1+a+d (117)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(3, 1, -3, 0, 1); // 2+a+d
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, -2, 0, 1); // b+d (118)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // even huger search (121) use this one
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, -3, 1, 1); // c+d (121)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, -2, -6, 1, 2); // c+2d
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, -2, -3, 1, 1); // even huger search (122)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, -2, 1, 1); // even huger search (124)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 2, 1); // 1 + 2a + b
