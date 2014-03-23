@@ -22,6 +22,7 @@ public class EmptyBoundaryDebugDisplay extends JPanel implements ActionListener
     private final List<String> messages;
     private String message = "";
     private ArrayList<OrderedTriple> data;
+    private ArrayList<OrderedTriple> boundarydata = PuzzleBoundary.toArray();
     private JButton next;
     private JButton previous;
     private int position;
@@ -275,6 +276,7 @@ public class EmptyBoundaryDebugDisplay extends JPanel implements ActionListener
         double minY = 0.0;
         double maxY = 0.0;
         int count = 0;
+        data.addAll(data.size()-1,boundarydata);
         for (OrderedTriple t : data)
             {
                 ArrayList<OrderedPair> points = t.getPoints();
@@ -347,7 +349,7 @@ public class EmptyBoundaryDebugDisplay extends JPanel implements ActionListener
 //            System.exit(1);
 //        }
 
-        EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay(3,"debugging");
+        EmptyBoundaryDebugDisplay display = new EmptyBoundaryDebugDisplay((args.length > 0) ? Integer.valueOf(args[0]) : 3,"debugging");
 
     }
 

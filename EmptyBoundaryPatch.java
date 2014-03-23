@@ -568,21 +568,24 @@ public class EmptyBoundaryPatch implements Serializable {
         int counter = 0;
         for (BasicTriangle t : triangles)
             output.add(new OrderedTriple(t.toArray()));
-        for (BasicEdge e : edges.open()) {
-            p0 = e.getEnds()[0];
-            p1 = e.getEnds()[1];
-            counter++;
-            if (counter == 1) {
-                edgeList.add((RealMatrix)new Array2DRowRealMatrix(p0.arrayToDraw()));
-                edgeList.add((RealMatrix)new Array2DRowRealMatrix(p1.arrayToDraw()));
-                edgeList.add((RealMatrix)new Array2DRowRealMatrix(p0.arrayToDraw()));
-            } else {
-                edgeList.set(0,(RealMatrix)new Array2DRowRealMatrix(p0.arrayToDraw()));
-                edgeList.set(1,(RealMatrix)new Array2DRowRealMatrix(p1.arrayToDraw()));
-                edgeList.set(2,(RealMatrix)new Array2DRowRealMatrix(p0.arrayToDraw()));
-            }
-            output.add(new OrderedTriple(new ArrayList<RealMatrix>(edgeList)));
-        }
+//        for (BasicEdge e : edges.open()) {
+//            p0 = e.getEnds()[0];
+//            p1 = e.getEnds()[1];
+//            counter++;
+//            if (counter == 1) {
+//                edgeList.add((RealMatrix)new Array2DRowRealMatrix(p0.arrayToDraw()));
+//                edgeList.add((RealMatrix)new Array2DRowRealMatrix(p1.arrayToDraw()));
+//                edgeList.add((RealMatrix)new Array2DRowRealMatrix(p0.arrayToDraw()));
+//            } else {
+//                edgeList.set(0,(RealMatrix)new Array2DRowRealMatrix(p0.arrayToDraw()));
+//                edgeList.set(1,(RealMatrix)new Array2DRowRealMatrix(p1.arrayToDraw()));
+//                edgeList.set(2,(RealMatrix)new Array2DRowRealMatrix(p0.arrayToDraw()));
+//            }
+//            output.add(new OrderedTriple(new ArrayList<RealMatrix>(edgeList)));
+//        }
+        for (OrderedTriple OT : boundary.toArray())
+            output.add(OT);
+        System.out.println((output.size()));
         return output;
     }
 

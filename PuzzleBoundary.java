@@ -19,6 +19,7 @@ import java.util.Stack;
 import java.io.Serializable;
 import java.io.*;
 import java.util.*;
+import org.apache.commons.math3.linear.*;
 
 class PointAndLength implements Comparable<PointAndLength>, Serializable {
 
@@ -154,7 +155,7 @@ public class PuzzleBoundary implements Serializable {
         int tileNum = Preinitializer.MY_TILE;
         List<Integer> search = Preinitializer.SEARCH_TILE;
 
-        BasicTriangle placed = (Preinitializer.ISOSCELES) ? //
+        BasicTriangle placed = (Preinitializer.ISOSCELES&&!Preinitializer.COMBINED) ? //
                         BasicPrototile.ALL_PREPROTOTILES.get(tileNum).place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false) : // 
                         BasicPrototile.ALL_PROTOTILES.get(tileNum).place(BytePoint.ZERO_VECTOR,BasicAngle.createBasicAngle(0),false); // 
 
@@ -192,7 +193,10 @@ public class PuzzleBoundary implements Serializable {
 
         // loop through the three edges
         for (int i = 0; i < 3; i++) {
-            ImmutableList<Integer> lengthList = Initializer.INFLATED_LENGTHS.getColumn(Initializer.acute(angles[i].getAsInt())-1);
+            ImmutableList<Integer> lengthList = (Preinitializer.ISOSCELES&&Preinitializer.COMBINED) ? Initializer.INFLATED_ISOLENGTHS.getColumn(angles[i].getAsInt()/2) : Initializer.INFLATED_LENGTHS.getColumn(Initializer.acute(angles[i].getAsInt())-1);
+            if (Preinitializer.ISOSCELES&&Preinitializer.COMBINED&&i>0) {
+                lengthList = Initializer.INFLATED_ISOLENGTHS.getColumn(Initializer.INFLATED_ISOLENGTHS.getRowDimension()-1);
+            }
             // this is what we iterate.
             // use it as a vector of scalar multiples for lengthList
             byte[] lengthCount = new byte[lengthList.size()];
@@ -530,6 +534,33 @@ public class PuzzleBoundary implements Serializable {
             }
         } while (notDone);
         return EdgeBreakdown.createEdgeBreakdown(l,o);
+    }
+
+    // toArray method. For drawing
+    public static ArrayList<OrderedTriple> toArray() {
+        ArrayList<OrderedTriple> o = new ArrayList<OrderedTriple>();
+        for (BytePoint p : E0) {
+            ArrayList<RealMatrix> output = new ArrayList<RealMatrix>(3);
+            output.add((RealMatrix)new Array2DRowRealMatrix(p.arrayToDraw()));
+            output.add((RealMatrix)new Array2DRowRealMatrix(p.arrayToDraw()));
+            output.add((RealMatrix)new Array2DRowRealMatrix(p.arrayToDraw()));
+            o.add(new OrderedTriple(new ArrayList<RealMatrix>(output)));
+        }
+        for (BytePoint p : E1) {
+            ArrayList<RealMatrix> output = new ArrayList<RealMatrix>(3);
+            output.add((RealMatrix)new Array2DRowRealMatrix(p.arrayToDraw()));
+            output.add((RealMatrix)new Array2DRowRealMatrix(p.arrayToDraw()));
+            output.add((RealMatrix)new Array2DRowRealMatrix(p.arrayToDraw()));
+            o.add(new OrderedTriple(new ArrayList<RealMatrix>(output)));
+        }
+        for (BytePoint p : E2) {
+            ArrayList<RealMatrix> output = new ArrayList<RealMatrix>(3);
+            output.add((RealMatrix)new Array2DRowRealMatrix(p.arrayToDraw()));
+            output.add((RealMatrix)new Array2DRowRealMatrix(p.arrayToDraw()));
+            output.add((RealMatrix)new Array2DRowRealMatrix(p.arrayToDraw()));
+            o.add(new OrderedTriple(new ArrayList<RealMatrix>(output)));
+        }
+        return o;
     }
 
     // get an edge breakdown (ImmutableList<Integer>)

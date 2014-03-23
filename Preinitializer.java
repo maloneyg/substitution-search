@@ -29,6 +29,13 @@ class Preinitializer {
                           //false; //
                           true; //
 
+    // says what shape of inflated prototile to use
+    // true means special isosceles, which are combined
+    // standard prototiles
+    public static final boolean COMBINED = //
+                          false; //
+                          //true; //
+
     //public static final int BATCH_SIZE = 1; // number of jobs to make per set of instructions
 
     public static final String HOST_NAME; // name of host clients will use; set in static initializer
@@ -64,12 +71,12 @@ class Preinitializer {
 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -1, -3, 1, 1); // a+c+d 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, -1, 1, 1); // a+b+c 
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -1, 1, 1); // 1+a+b+c 
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -1, 1, 1); // 1+a+b+c 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, -2, 1, 1); // b+c+d 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -2, 0, 1); // 1+b+d 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1); // a
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, 1); // small search. turned up in some calculations, so I thought I'd try it. (1+b)
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1); // really small search. might as well try it (2+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(3, 1); // really small search. might as well try it (3+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 2, 1); // (xxx)

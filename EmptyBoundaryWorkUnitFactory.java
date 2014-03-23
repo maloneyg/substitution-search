@@ -17,7 +17,7 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
     // the triangle we're searching
     // if we're using special isosceles, then it's a preprototile,
     // otherwise it's a prototile
-    private static final BasicPrototile P0 = (Preinitializer.ISOSCELES) ? //
+    private static final BasicPrototile P0 = (Preinitializer.ISOSCELES&&!Preinitializer.COMBINED) ? //
                     BasicPrototile.createPrePrototile(Preinitializer.PREPROTOTILES.get(myTile)) : //
                     BasicPrototile.createBasicPrototile(Preinitializer.PROTOTILES.get(myTile));  //
 
@@ -42,8 +42,6 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
     private static final BytePoint[] bigVertices = new BytePoint[] {vertices[0].inflate(),vertices[1].inflate(),vertices[2].inflate()};
 
     // the starting edge breakdowns
-    private static final ImmutableList<Integer> start0;
-    private static final ImmutableList<Integer> start1;
     private static final ImmutableList<Integer> start2;
 
     // a list of starters
@@ -54,9 +52,7 @@ public class EmptyBoundaryWorkUnitFactory implements Serializable {
     private int starter = 0;
 
     static { // initialize starters
-        start0 = Initializer.INFLATED_LENGTHS.getColumn(Initializer.acute(P0.getAngles()[0].getAsInt())-1);
-        start1 = Initializer.INFLATED_LENGTHS.getColumn(Initializer.acute(P0.getAngles()[1].getAsInt())-1);
-        start2 = Initializer.INFLATED_LENGTHS.getColumn(Initializer.acute(P0.getAngles()[2].getAsInt())-1);
+        start2 = (Preinitializer.ISOSCELES&&Preinitializer.COMBINED) ? Initializer.INFLATED_ISOLENGTHS.getColumn(Initializer.INFLATED_ISOLENGTHS.getRowDimension()-1) : Initializer.INFLATED_LENGTHS.getColumn(Initializer.acute(P0.getAngles()[2].getAsInt())-1);
         BasicAngle a = P0.getAngles()[1].piPlus();
         List<BasicEdge> preStarters = new ArrayList<>();
         if (Preinitializer.ISOSCELES) {

@@ -217,7 +217,7 @@ class Initializer {
         INFLATED_ISOLENGTHS = LengthAndAreaCalculator.MatrixToByteMatrix(LengthAndAreaCalculator.LENGTH_MATRIX.inverse().times(otherInfl).times(LengthAndAreaCalculator.ISOLENGTH_MATRIX));
         //LENGTH_NULL_MATRIX = LengthAndAreaCalculator.MatrixToByteMatrix((LengthAndAreaCalculator.ISOLENGTH_MATRIX.inverse()).times(LengthAndAreaCalculator.LENGTH_MATRIX.getMatrix(0,DEG-1,DEG-1,LengthAndAreaCalculator.LENGTH_MATRIX.getColumnDimension()-1)));
         //INFLATED_LENGTHS = null;
-        SUBSTITUTION_MATRIX = LengthAndAreaCalculator.MatrixToByteMatrix((((Preinitializer.ISOSCELES) ? LengthAndAreaCalculator.ISOAREA_MATRIX : AREA_MATRIX).inverse()).times(otherInfl).times(otherInfl).times(AREA_MATRIX));
+        SUBSTITUTION_MATRIX = LengthAndAreaCalculator.MatrixToByteMatrix((((Preinitializer.ISOSCELES) ? LengthAndAreaCalculator.ISOAREA_MATRIX : AREA_MATRIX).inverse()).times(otherInfl).times(otherInfl).times((Preinitializer.ISOSCELES&&Preinitializer.COMBINED) ? LengthAndAreaCalculator.ISOAREA_MATRIX : AREA_MATRIX));
 //        System.out.println("RS = " + LengthAndAreaCalculator.MatrixToByteMatrix(otherInfl.times(otherInfl).times(AREA_MATRIX)));
 //        System.out.println("LS = " + LengthAndAreaCalculator.MatrixToByteMatrix(AREA_MATRIX));
         NULL_MATRIX = (AREA_MATRIX.getColumnDimension() > DEG) ? LengthAndAreaCalculator.MatrixToByteMatrix((AREA_MATRIX.getMatrix(0,DEG-1,0,DEG-1).inverse()).times(AREA_MATRIX.getMatrix(0,DEG-1,DEG,AREA_MATRIX.getColumnDimension()-1))) : null;
