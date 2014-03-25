@@ -16,7 +16,7 @@ import java.nio.file.*;
 
 class Preinitializer {
 
-    public static final int N = 11;             // the order of symmetry
+    public static final int N = 7;             // the order of symmetry
 
     public static final int MY_TILE = 2;        // the tile we're searching
 
@@ -26,8 +26,8 @@ class Preinitializer {
     // says whether or not we are using a canonical set of isosceles 
     // triangles as prototiles
     public static final boolean ISOSCELES = //
-                          //false; //
-                          true; //
+                          false; //
+                          //true; //
 
     // says what shape of inflated prototile to use
     // true means special isosceles, which are combined
@@ -76,7 +76,7 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 0, -2, 0, 1); // 1+b+d 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1); // a
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 0, 1); // small search. turned up in some calculations, so I thought I'd try it. (1+b)
-    public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
+    //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 1); // really small search. Won't work at all for tile 3. (1+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(2, 1); // really small search. might as well try it (2+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(3, 1); // really small search. might as well try it (3+a)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 2, 1); // (xxx)
@@ -93,7 +93,7 @@ class Preinitializer {
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, 2, 1); // the square of the really small search (1+a)^2 won't work with tile 3 
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 0, 1); // small search (104)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(-1, 1, 1); // big search (105) 
-    //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
+    public static final ImmutableList<Integer> INFL = ImmutableList.of(0, 1, 1); // 1 + a + b (106)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -2, 0, 1); // c (107)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(1, -2, 0, 1); // 1 + c (108)
     //public static final ImmutableList<Integer> INFL = ImmutableList.of(0, -1, 0, 1); // a + c (109)
@@ -142,15 +142,15 @@ class Preinitializer {
                              //  ImmutableList.of( 1, 1, 3 ),  // five
                              //  ImmutableList.of( 1, 2, 2 )   // five
                              //
-                             //  ImmutableList.of( 1, 2, 4 ),  // seven
-                             //  ImmutableList.of( 1, 3, 3 ),  // seven
-                             //  ImmutableList.of( 2, 2, 3 )   // seven
+                                 ImmutableList.of( 1, 2, 4 ),  // seven
+                                 ImmutableList.of( 1, 3, 3 ),  // seven
+                                 ImmutableList.of( 2, 2, 3 )   // seven
                              //
-                                 ImmutableList.of( 1, 5, 5 ),  // eleven
-                                 ImmutableList.of( 1, 4, 6 ),  // eleven
-                                 ImmutableList.of( 2, 4, 5 ),  // eleven
-                                 ImmutableList.of( 2, 3, 6 ),  // eleven
-                                 ImmutableList.of( 3, 3, 5 )   // eleven
+                             //  ImmutableList.of( 1, 5, 5 ),  // eleven
+                             //  ImmutableList.of( 1, 4, 6 ),  // eleven
+                             //  ImmutableList.of( 2, 4, 5 ),  // eleven
+                             //  ImmutableList.of( 2, 3, 6 ),  // eleven
+                             //  ImmutableList.of( 3, 3, 5 )   // eleven
                                  // extra
                                  //ImmutableList.of( 2, 3, 6 )   // eleven
                                  //ImmutableList.of( 1, 5, 5 ),  // eleven
@@ -208,6 +208,8 @@ class Preinitializer {
                 System.out.println("Local host is: " + localhost);
             if ( localhost.indexOf("enj") > -1 )
                 NUMBER_OF_THREADS = 24;
+            else if ( localhost.indexOf("airy") > -1 )
+                NUMBER_OF_THREADS = 2;
             else
                 NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
             System.out.println("Using " + NUMBER_OF_THREADS + " threads.");

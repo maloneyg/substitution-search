@@ -312,26 +312,6 @@ public class PatchEnsemble implements Serializable {
         }
     } // end of class MultiStagePatchEnsembleWorkUnit
 
-//    private class PatchEnsembleResult implements Result
-//    {
-//        private List<IndexPair> compatible; // only compatible pairs will be stored
-//
-//        public PatchEnsembleResult(List<IndexPair> compatible)
-//        {
-//            this.compatible = compatible;
-//        }
-//
-//        public List<IndexPair> getCompatible()
-//        {
-//            return compatible;
-//        }
-//
-//        public String toString()
-//        {
-//            return compatible.size() + " pairs";
-//        }
-//    } // end of class PatchEnsembleResult
-
     private class MultiStagePatchEnsembleResult implements Result
     {
         private int edgesAdded;
@@ -351,115 +331,6 @@ public class PatchEnsemble implements Serializable {
             return edgesAdded + " edges added";
         }
     } // end of class MultiStagePatchEnsembleResult
-
-    // private constructor
-    // we assume the TriangleResults are entered in the same order
-    // as the prototiles to which they correspond
-//    private PatchEnsemble(List<TriangleResults> inList, EdgeBreakdownTree bd) {
-//        System.out.println("Building PatchEnsemble.");
-//        System.out.print("Loading vertices ... ");
-//        breakdown = bd;
-//        patches = new SimpleGraph<>(IndexPair.class);
-//        for (int i = 0; i < inList.size(); i++) {
-//            for (ImmutablePatch p : bd.cull(i,inList.get(i))) {
-//            //for (ImmutablePatch p : inList.get(i).getPatches()) {
-//                patches.addVertex(new PatchAndIndex(p,i));
-//            }
-//        }
-//
-//        System.out.println("done loading vertices. Loaded " + patches.vertexSet().size() + " vertices.");
-//
-//        // convert set to list and iterate the upper triangle
-//        List<PatchAndIndex> patchList = new LinkedList<PatchAndIndex>(patches.vertexSet());
-//
-//        // create work units
-//        System.out.print("Populating work units...");
-//        LinkedList<PatchEnsembleWorkUnit> listOfUnits = new LinkedList<PatchEnsembleWorkUnit>();
-//        int i_start = 0;
-//        int j_start = 0;
-//        int currentTotal = 0;
-//        listOfUnits.add(new PatchEnsembleWorkUnit(0, 1, patchList));
-//        for (int i=0; i < patchList.size(); i++)
-//            {
-//                for (int j=i+1; j < patchList.size(); j++)
-//                    {
-//                        currentTotal++;
-//                        //System.out.println(currentTotal + " : " + i + " " + j);
-//                        if ( currentTotal > PatchEnsembleWorkUnit.BATCH_SIZE )
-//                            {
-//                                i_start = i;
-//                                j_start = j;
-//                                //System.out.println(String.format("unit #%d   i: %d j: %d", listOfUnits.size()+1, i_start, j_start));
-//                                PatchEnsembleWorkUnit thisUnit = new PatchEnsembleWorkUnit(i_start, j_start, patchList);
-//                                listOfUnits.add(thisUnit);
-//                                currentTotal = 0;
-//                            }
-//                    }
-//            }
-//        System.out.print(listOfUnits.size() + " units created...submitting...");
-//
-//        // submit jobs
-//        LinkedList<Future<Result>> listOfFutures = new LinkedList<>();
-//        for (PatchEnsembleWorkUnit u : listOfUnits)
-//            {
-//                Future<Result> thisFuture = GeneralThreadService.INSTANCE.getExecutor().submit(u);
-//                listOfFutures.add(thisFuture);
-//            }
-//        System.out.println("done.");
-//
-//        // poll the futures
-//        while (true)
-//            {
-//                // poll every 250 milliseconds
-//                try
-//                    {
-//                        Thread.sleep(250L);
-//                    }
-//                catch (InterruptedException e)
-//                    {
-//                    }
-//
-//                int numberComplete = 0;
-//                for (Future<Result> thisFuture : listOfFutures)
-//                    {
-//                        if ( thisFuture.isDone() )
-//                            numberComplete++;
-//                    }
-//                System.out.print(String.format("%d of %d work units complete\r", numberComplete, listOfFutures.size()));
-//                if ( numberComplete == listOfFutures.size() )
-//                    break;
-//            }
-//        System.out.println();
-//
-//        // concatenate all results
-//        List<IndexPair> allCompatible = new LinkedList<IndexPair>();
-//        for (Future<Result> thisFuture : listOfFutures)
-//            {
-//                try
-//                    {
-//                        PatchEnsembleResult thisResult = (PatchEnsembleResult)thisFuture.get();
-//                        allCompatible.addAll(thisResult.getCompatible());
-//                    }
-//                catch (Exception e)
-//                    {
-//                        e.printStackTrace();
-//                    }
-//            }
-//
-//        // add the new edges to the graph
-//        System.out.print("Adding " + allCompatible.size() + " edges to graph...");
-//        for (IndexPair p : allCompatible)
-//            {
-//                int[] pair = p.getIndices();
-//                PatchAndIndex p1 = patchList.get(pair[0]);
-//                PatchAndIndex p2 = patchList.get(pair[1]);
-//                IndexPair indexPair = new IndexPair(p1.getIndex(),p2.getIndex());
-//                patches.addEdge(p1,p2,indexPair);
-//            }
-//        System.out.println("done!");
-//
-//        System.out.println("All done.  Built " + patches.edgeSet().size() + " edges.");
-//    } // private constructor ends here
 
     // private constructor
     // fileNames is an array of names of files containing the TriangleResults
@@ -610,15 +481,6 @@ public class PatchEnsemble implements Serializable {
 
     } // private constructor ends here
 
-    // public static factory methods
-//    public static PatchEnsemble createPatchEnsemble(List<TriangleResults> inList, EdgeBreakdownTree bd) {
-//        PatchEnsemble output = new PatchEnsemble(inList,bd);
-//        System.out.print("Expunging lone vertices ... ");
-//        output.dropLoners();
-//        System.out.println("done expunging lone vertices.");
-//        return output;
-//    }
-
     public static PatchEnsemble createPatchEnsemble(String[] inList, EdgeBreakdownTree bd) {
         return new PatchEnsemble(inList,bd);
     }
@@ -699,20 +561,6 @@ public class PatchEnsemble implements Serializable {
         } while (!outPatches.isEmpty());
     }
 
-    // drop down to the set of vertices adjacent to root
-//    public void dropToNeighbours(PatchAndIndex root) {
-//        List<PatchAndIndex> neighbours = new ArrayList<>();
-//        neighbours.add(root);
-//        for (Map.Entry<ImmutablePatch,ImmutablePatch> ip : patches.edgesOf(root)) {
-//            neighbours.add(patches.getEdgeTarget(ip));
-//            neighbours.add(patches.getEdgeSource(ip));
-//        }
-//        List<PatchAndIndex> remove = new ArrayList<>();
-//        for (PatchAndIndex pp : patches.vertexSet()) if (!neighbours.contains(pp)) remove.add(pp);
-//        System.out.println(remove.size());
-//        patches.removeAllVertices(remove);
-//    }
-
     // size of the graph
     public int size() {
         return patches.size();
@@ -740,9 +588,62 @@ public class PatchEnsemble implements Serializable {
         return result;
     }
 
+    // return a list of lists of patches
+    // patches in the same list are compatible
+    public List<List<PatchAndIndex>> splitPatches() {
+        List<List<PatchAndIndex>> output = new ArrayList<>();
+
+        for (PatchAndIndex pi : patches.dumpVertices()) {
+            if (pi.getIndex()==0) {
+                boolean brandNew = true;
+//                for (List<PatchAndIndex> l : output) {
+//                    if (pi.compatible(l.get(0))) {
+//                        l.add(pi);
+//                        brandNew = false;
+//                        break;
+//                    }
+//                }
+                if (brandNew) {
+                    List<PatchAndIndex> placeMe = new ArrayList<>();
+                    placeMe.add(pi);
+                    output.add(placeMe);
+                }
+            }
+        }
+
+        for (PatchAndIndex pi : patches.dumpVertices()) {
+            if (pi.getIndex()!=0) {
+                for (List<PatchAndIndex> l : output) {
+                    if (pi.compatible(l.get(0))) l.add(pi);
+                }
+            }
+        }
+
+        return output;
+    }
+
+    // same as below, but output a separate
+    // gap file for each connected set of vertices
+    public String gapString(String fileName) {
+        List<List<PatchAndIndex>> L = splitPatches();
+        int total = 0;
+        for (int i = 0; i < L.size(); i++) {
+            gapString(L.get(i),fileName+String.format("%02d.g",i),"test");
+            total += L.get(i).size();
+        }
+        return "Patches: " + patches.size() + ". Split patches: " + total + ".";
+    }
+
     // output a String of gap-readable code
     // name is the name of the gap record we will produce
+    // just dump all the patches
     public String gapString(String fileName, String name) {
+        return gapString(patches.dumpVertices(), fileName, name);
+    }
+
+    // output a String of gap-readable code
+    // name is the name of the gap record we will produce
+    public String gapString(List<PatchAndIndex> l, String fileName, String name) {
         PrintWriter out = null;
         try {
             out = new PrintWriter(fileName);
@@ -754,7 +655,7 @@ public class PatchEnsemble implements Serializable {
                 // dump all the right-handed substitution rules
                 boolean first = true;
                 out.write("               [\n");
-                for (PatchAndIndex pi : patches.dumpVertices()) {
+                for (PatchAndIndex pi : l) {
                     if (pi.getIndex()==i) {
                         if (!first) out.write(",\n");
                         first = false;
@@ -766,7 +667,7 @@ public class PatchEnsemble implements Serializable {
                 // dump all the left-handed substitution rules
                 first = true;
                 out.write("               [\n");
-                for (PatchAndIndex pi : patches.dumpVertices()) {
+                for (PatchAndIndex pi : l) {
                     if (pi.getIndex()==i) {
                         if (!first) out.write(",\n");
                         first = false;
@@ -805,7 +706,7 @@ public class PatchEnsemble implements Serializable {
         String[] files = new String[Preinitializer.PROTOTILES.size()];
         for (int k = 0; k < files.length; k++) files[k] = args[0];
 
-        PatchAndIndex.setFullCompatibility(false);
+        PatchAndIndex.setFullCompatibility(true);
         PatchEnsemble.setDrop(true);
 
         PatchEnsemble testo = createPatchEnsemble(files, PuzzleBoundary.BREAKDOWNS);
@@ -817,7 +718,8 @@ public class PatchEnsemble implements Serializable {
 //        testo.gapString("test5.g","test5");
 //        System.out.println(testo.size());
 
-        testo.dumpPatches(args[1]);
+        System.out.println(testo.gapString(args[1]));
+        testo.dumpPatches("seven/medium");
 
         System.exit(0);
 
