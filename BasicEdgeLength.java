@@ -155,7 +155,7 @@ final public class BasicEdgeLength implements AbstractEdgeLength<BasicAngle, Byt
             } // here ends initialization of quantumTriangle
         } else if (i-REPS.size()<ISOREPS.size()-1) {
             // just add one point (isosceles, vertex between equal edges)
-            preQT.add(REPS.get(REPS.size()-1).rotate(BasicAngle.createBasicAngle(N/2-i-REPS.size())));
+            preQT.add(REPS.get(REPS.size()-1).rotate(BasicAngle.createBasicAngle(N/2-i+REPS.size())));
         } else {
             // this is the common edge length of all special isosceles
             BytePoint theLength = REPS.get(REPS.size()-1);

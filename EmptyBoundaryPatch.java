@@ -736,7 +736,7 @@ public class EmptyBoundaryPatch implements Serializable {
             */
             BasicEdge c2 = BasicEdge.cw(newEdges[0],newEdges[1]);
 
-            if (!Preinitializer.ISOSCELES) {
+//            if (!Preinitializer.ISOSCELES) {
                 BasicEdge c1 = edges.getPenultimateEdge();
                 /*
                 * Now there's an additional problem.  
@@ -781,7 +781,7 @@ public class EmptyBoundaryPatch implements Serializable {
                     }
 
                 }
-            } // end if (Preinitializer.ISOSCELES)
+//            } // end if (Preinitializer.ISOSCELES)
 
             if (!quantumFit(c2)) {
                 if (debug) setMessage("*****\n" + "quantum\n miss  " + "\n*****");

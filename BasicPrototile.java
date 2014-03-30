@@ -115,10 +115,10 @@ public class BasicPrototile implements AbstractPrototile<BasicAngle, BytePoint, 
 
     static { // initialize ONE_LENGTHS et. al.
         if (Preinitializer.ISOSCELES) {
-            ONE_LENGTHS = null;
+            ONE_LENGTHS = ImmutableList.of(ImmutableList.of(BasicEdgeLength.rhombicLength(),BasicEdgeLength.rhombicLength()),ImmutableList.of(BasicEdgeLength.isoLengthOpposite(BasicAngle.createBasicAngle(Preinitializer.N-2)),BasicEdgeLength.rhombicLength()));
             ONE_ANGLES = null;
-            MIN_ANGLE = null;
-            MIN_ANGLE_LENGTH = null;
+            MIN_ANGLE = BasicAngle.createBasicAngle(Preinitializer.N/2);
+            MIN_ANGLE_LENGTH = BasicEdgeLength.rhombicLength();
         } else {
             List<ImmutableList<BasicEdgeLength>> preOneLengths = new ArrayList<>();
             List<ImmutableList<BasicAngle>> preOneAngles = new ArrayList<>();

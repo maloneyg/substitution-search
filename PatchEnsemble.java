@@ -719,7 +719,7 @@ public class PatchEnsemble implements Serializable {
 //        System.out.println(testo.size());
 
         System.out.println(testo.gapString(args[1]));
-        testo.dumpPatches("seven/medium");
+        //testo.dumpPatches("seven/medium");
 
         System.exit(0);
 
