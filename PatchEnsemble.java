@@ -24,6 +24,7 @@ class PatchAndIndex implements Serializable {
     private final ImmutablePatch patch;
     private final int index;
     private static boolean fullCompatibility = true;
+    private static final boolean REMOVE_SEVEN_REDUNDANCY = true;
 
     // public constructor
     public PatchAndIndex(ImmutablePatch p, int i) {
@@ -124,6 +125,7 @@ class PatchAndIndex implements Serializable {
             }
         } while (!done);
 
+        if (REMOVE_SEVEN_REDUNDANCY) return !PatchEnsemble.sevenRedundant(part);
         return part.valid();
 
     } // here ends method fullyCompatible(p)
@@ -596,13 +598,13 @@ public class PatchEnsemble implements Serializable {
         for (PatchAndIndex pi : patches.dumpVertices()) {
             if (pi.getIndex()==0) {
                 boolean brandNew = true;
-//                for (List<PatchAndIndex> l : output) {
-//                    if (pi.compatible(l.get(0))) {
-//                        l.add(pi);
-//                        brandNew = false;
-//                        break;
-//                    }
-//                }
+                for (List<PatchAndIndex> l : output) {
+                    if (pi.compatible(l.get(0))) {
+                        l.add(pi);
+                        brandNew = false;
+                        break;
+                    }
+                }
                 if (brandNew) {
                     List<PatchAndIndex> placeMe = new ArrayList<>();
                     placeMe.add(pi);
@@ -622,6 +624,45 @@ public class PatchEnsemble implements Serializable {
         return output;
     }
 
+    // normalize so that all isosceles triangles meet the
+    // scalene triangle in a fixed way
+    public int removeRedundancySeven() {
+        List<PatchAndIndex> toRemove = new ArrayList<>();
+        BasicPrototile t0 = BasicPrototile.getFirstTile();
+        BasicPrototile t1 = t0.getNextTile();
+        BasicPrototile t2 = t1.getNextTile();
+        Orientation short0 = t0.getOrientations()[0];
+        Orientation short1 = t1.getOrientations()[0];
+        Orientation long0 = t0.getOrientations()[2];
+        Orientation long1 = t2.getOrientations()[2];
+        for (PatchAndIndex pi : patches.dumpVertices()) {
+            OrientationPartition p = pi.getPatch().getOrientationPartition();
+            if (p.getEquivalenceClass(short0).contains(short1)||p.getEquivalenceClass(long0).contains(long1)) toRemove.add(pi);
+        }
+        int count = 0;
+        for (PatchAndIndex pi: toRemove) {
+            patches.removeVertex(pi);
+            count++;
+        }
+        return count;
+    }
+
+    // normalize so that all isosceles triangles meet the
+    // scalene triangle in a fixed way
+    public static boolean sevenRedundant(MutableOrientationPartition part) {
+        BasicPrototile t0 = BasicPrototile.getFirstTile();
+        BasicPrototile t1 = t0.getNextTile();
+        BasicPrototile t2 = t1.getNextTile();
+        Orientation short0 = t0.getOrientations()[0];
+        Orientation short1 = t1.getOrientations()[0];
+        Orientation long0 = t0.getOrientations()[2];
+        Orientation long1 = t2.getOrientations()[2];
+        MutableOrientationPartition p = part.deepCopy();
+        p.identify(short0,short1.getOpposite());
+        p.identify(long0,long1.getOpposite());
+        return !p.valid();
+    }
+
     // same as below, but output a separate
     // gap file for each connected set of vertices
     public String gapString(String fileName) {
@@ -631,7 +672,15 @@ public class PatchEnsemble implements Serializable {
             gapString(L.get(i),fileName+String.format("%02d.g",i),"test");
             total += L.get(i).size();
         }
-        return "Patches: " + patches.size() + ". Split patches: " + total + ".";
+        int[] vertexCount = new int[Preinitializer.PROTOTILES.size()];
+        for (PatchAndIndex pi : patches.dumpVertices()) {
+            vertexCount[pi.getIndex()]++;
+        }
+        String output = "";
+        for (int i = 0 ; i < Preinitializer.PROTOTILES.size(); i++) {
+            output += i + "-patches: " + vertexCount[i] + ".\n";
+        }
+        return output + "Split patches: " + total + ".";
     }
 
     // output a String of gap-readable code
@@ -718,16 +767,12 @@ public class PatchEnsemble implements Serializable {
 //        testo.gapString("test5.g","test5");
 //        System.out.println(testo.size());
 
+        System.out.println("Removed " + testo.removeRedundancySeven() + " redundant patches.");
         System.out.println(testo.gapString(args[1]));
-        //testo.dumpPatches("seven/medium");
+        testo.dumpPatches("seven/medium");
 
         System.exit(0);
 
     }
 
 } // end of class PatchEnsemble
-
-
-
-
-

@@ -52,8 +52,12 @@ public class DeadSimpleGraph<E> implements Serializable {
         synchronized(edges) {
             edges.removeAll(e);
             if (edges.containsValue(e)) {
+                List<E> toRemove = new ArrayList<>();
                 for (Map.Entry m : edges.entries()) {
-                    if (m.getValue().equals(e)) edges.remove(m.getKey(),e);
+                    if (m.getValue().equals(e)) toRemove.add((E)m.getKey());
+                }
+                for (E f : toRemove) {
+                    edges.remove(f,e);
                 }
             }
         }
