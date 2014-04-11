@@ -82,6 +82,13 @@ public class DeadSimpleGraph<E> implements Serializable {
         }
     }
 
+    // dump a mutable copy of the edges
+    public HashMultimap<E,E> dumpEdges() {
+        synchronized(edges) {
+            return edges;
+        }
+    }
+
     // add an edge
     // we don't check if the corresponding vertices already exist
     public void addEdge(E e1, E e2) {

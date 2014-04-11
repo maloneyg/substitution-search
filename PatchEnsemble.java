@@ -590,6 +590,17 @@ public class PatchEnsemble implements Serializable {
         return result;
     }
 
+    // return true if these two patches have the same
+    // edges incident with them
+    private boolean sameEdges(PatchAndIndex pi1, PatchAndIndex pi2) {
+        List<Map.Entry<PatchAndIndex,PatchAndIndex>> firstEdges = patches.edgesOf(pi1);
+        int firstSize = firstEdges.size();
+        for (Map.Entry<PatchAndIndex,PatchAndIndex> e : firstEdges) {
+            if (!patches.hasEdge(pi2,(e.getValue().equals(pi1)) ? e.getKey() : e.getValue())) return false;
+        }
+        return firstSize == patches.edgesOf(pi2).size();
+    }
+
     // return a list of lists of patches
     // patches in the same list are compatible
     public List<List<PatchAndIndex>> splitPatches() {
@@ -599,7 +610,7 @@ public class PatchEnsemble implements Serializable {
             if (pi.getIndex()==0) {
                 boolean brandNew = true;
                 for (List<PatchAndIndex> l : output) {
-                    if (pi.compatible(l.get(0))) {
+                    if (sameEdges(pi,l.get(0))) {
                         l.add(pi);
                         brandNew = false;
                         break;
@@ -769,7 +780,7 @@ public class PatchEnsemble implements Serializable {
 
         System.out.println("Removed " + testo.removeRedundancySeven() + " redundant patches.");
         System.out.println(testo.gapString(args[1]));
-        testo.dumpPatches("seven/medium");
+        //testo.dumpPatches("seven/medium");
 
         System.exit(0);
 

@@ -319,6 +319,8 @@ class Initializer {
             }
             System.out.print("\n");
         }
+        System.out.println("Gap-readable A:");
+        System.out.println(A.gapString());
 
     }
 
